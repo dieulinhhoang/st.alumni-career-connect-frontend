@@ -2,12 +2,10 @@ import { Children, lazy, Suspense } from 'react'
 import 'react-router-dom'
  import Chart from '../components/common/chart';
 import Statistic from '../pages/admin/Statistics';
-import AllForms from '../pages/admin/ManageScores/AllForms';
+import AllForms from '../pages/admin/Survey/Forms';
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
-import CriteriaConfig from '../pages/admin/SystemConfig/CriteriaConfig';
-import SemesterConfig from '../pages/admin/SystemConfig/SemesterConfig';
-import ApproveScores from '../pages/admin/ManageScores/ApproveScores';
+import ApproveScores from '../pages/admin/Survey/ApproveScores';
 
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard"));
@@ -69,30 +67,8 @@ const routes = [
                     </Suspense>
                 )
             },
-            {
-                path: '/admin/criteriaconfig',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <CriteriaConfig />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/semesterconfig',
-                element: (
-                    <Suspense>
-                        <SemesterConfig />
-                    </Suspense>
-                )
-            }
-            , {
-                path: '/admin/approvescore',
-                element: (
-                    <Suspense>
-                        <ApproveScores />
-                    </Suspense>
-                )
-            }
+            
+            
 
         ]
     }

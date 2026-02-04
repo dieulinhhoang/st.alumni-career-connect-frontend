@@ -1,0 +1,14 @@
+/*ẩn banner bắt trả tiền */
+.svc-creator__banner {
+    display: none !important;
+}
+
+ .sjs-license-notification {
+    display: none !important;
+}
+ 
+
+ .svc-creator {
+    height: 100vh !important;
+    width: 100vw ! ;
+}
