@@ -1,0 +1,68 @@
+:root {
+    --ink: #0f172a;
+    --bd: #e5e7eb;
+
+    --kha-bg: #e9ecdd;
+    --gioi-bg: #dbeafe;
+    --xuatsac-bg: #fee2e2;
+    --tong-bg: #f1f5f9;
+}
+
+.stat-card {
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    padding: 16px 18px;
+    background: var(--tong-bg);
+    min-width: 0;
+}
+
+.card-kha {
+    background: var(--kha-bg) !important;
+}
+
+.card-gioi {
+    background: var(--gioi-bg) !important;
+}
+
+.card-xuatsac {
+    background: var(--xs-bg) !important;
+}
+
+.stat-card .ant-card-head {
+    border-bottom: none;
+    padding: 12px 18px 0 18px;
+}
+
+.stat-card .ant-card-head-title {
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 1.1rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.stat-number {
+    display: block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 0.8;
+    color: var(--ink);
+    margin-top: 6px;
+    font-size: clamp(21px, 3vw, 20px);
+}
+
+.stat-card .ant-card-body {
+    padding: 10px 18px 18px 18px;
+}
+
+@media (max-width: 576px) {
+    .stat-card {
+        padding: 14px 14px;
+    }
+
+    .stat-card .ant-card-body {
+        padding: 8px 14px 14px 14px;
+    }
+}

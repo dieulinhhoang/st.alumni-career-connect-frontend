@@ -1,0 +1,384 @@
+/* =========================
+   Pastel Green — Premium Design
+   ========================= */
+
+/* 1) Tokens - Màu đẹp hơn nhiều */
+:root {
+    --mint: #7dd3a8;
+    --mint-strong: #5ec48d;
+    --mint-ink: #0d3625;
+
+    --bg: #fdfffe;
+    --card: #ffffff;
+    --ink-0: #0a1f16;
+    --ink-1: #1e3429;
+    --muted: #6b8078;
+    --line: #dce9e2;
+
+    --ring: 0 0 0 4px rgba(94, 196, 141, .12);
+    --r-xl: 24px;
+    --r-md: 12px;
+
+    --shadow-card:
+        0 0 0 1px rgba(10, 31, 22, .02),
+        0 2px 6px rgba(10, 31, 22, .03),
+        0 8px 24px rgba(10, 31, 22, .06),
+        0 16px 48px rgba(10, 31, 22, .08);
+}
+
+/* 2) Base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', 'Inter', sans-serif;
+    color: var(--ink-1);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3) Layout */
+.login-full-page-container {
+    display: flex;
+    align-items: stretch;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* 4) Banner trái - Hiện đại hơn */
+.login-left-panel {
+    flex: 0 0 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    background:
+        /* linear-gradient(160deg, rgba(15, 15, 15, 0.88) 0%, rgba(7, 8, 8, 0.92) 100%), */
+        url('https://file.vnua.edu.vn/data/40/images/2020/06/29/btvgdtc/gioi-thieuvnua.jpg') center/cover no-repeat;
+}
+
+.login-left-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle 900px at 20% 30%, rgba(125, 211, 168, .15), transparent 60%),
+        radial-gradient(circle 700px at 80% 70%, rgba(94, 196, 141, .1), transparent 60%);
+    pointer-events: none;
+}
+
+.login-left-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: #fff;
+    padding: 48px 32px;
+    max-width: 640px;
+}
+
+.login-logo {
+    width: 88px;
+    margin-bottom: 28px;
+    filter: brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0, 0, 0, .2));
+}
+
+.login-left-title {
+    margin: 0 0 14px !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: -.03em;
+    font-size: clamp(2rem, 1.2rem + 1.8vw, 2.75rem) !important;
+    line-height: 1.15 !important;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, .25);
+}
+
+/* 5) Cột phải */
+.login-right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 48px;
+    background: var(--bg);
+}
+
+/* 6) Card - Đẹp đỉnh */
+.login-card-dark {
+    width: min(520px, 92vw);
+    max-width: 520px;
+    background: var(--card) !important;
+    color: var(--ink-1);
+    border: none !important;
+    border-radius: var(--r-xl) !important;
+    padding: 48px 44px !important;
+    box-shadow: var(--shadow-card) !important;
+}
+
+.ant-card-head {
+    border-bottom: none !important;
+}
+
+.ant-card-body {
+    padding: 0 !important;
+}
+
+/* 7) Tiêu đề */
+.sign-in-title {
+    color: var(--ink-0) !important;
+    text-align: center;
+    margin: 0 0 8px !important;
+    font-weight: 700 !important;
+    font-size: clamp(1.65rem, 1.3rem + .9vw, 2.05rem) !important;
+    letter-spacing: -.025em;
+    line-height: 1.2;
+}
+
+.sign-in-subtitle {
+    color: var(--muted) !important;
+    text-align: center;
+    margin: 0 0 32px !important;
+    font-size: .96rem;
+    line-height: 1.5;
+    font-weight: 450;
+}
+
+/* 8) Form - Cực kỳ tinh tế */
+.login-form-custom .ant-form-item {
+    margin-bottom: 20px;
+}
+
+.login-form-custom .ant-form-item-label>label {
+    color: var(--ink-0) !important;
+    font-weight: 600;
+    font-size: .92rem;
+    margin-bottom: 8px;
+    letter-spacing: -.01em;
+}
+
+.login-form-custom .ant-input,
+.login-form-custom .ant-input-affix-wrapper,
+.login-form-custom .ant-input-password {
+    background: var(--bg) !important;
+    color: var(--ink-1) !important;
+     border-radius: var(--r-md);
+    padding: 12px 16px;
+    font-size: .96rem;
+  
+    transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-form-custom .ant-input::placeholder,
+.login-form-custom .ant-input-password input::placeholder {
+    color: var(--muted) !important;
+    opacity: .65;
+}
+
+.login-form-custom .ant-input:hover,
+.login-form-custom .ant-input-affix-wrapper:hover,
+.login-form-custom .ant-input-password:hover {
+    background: #fff !important;
+    box-shadow:
+        inset 0 0 0 1px #c5ddd1,
+        0 2px 4px rgba(10, 31, 22, .06);
+}
+
+.login-form-custom .ant-input:focus,
+.login-form-custom .ant-input-affix-wrapper.ant-input-affix-wrapper-focused,
+.login-form-custom .ant-input-password.ant-input-affix-wrapper-focused {
+    background: #fff !important;
+    border-color: var(--mint-strong) !important;
+    box-shadow:
+        var(--ring),
+        0 2px 6px rgba(94, 196, 141, .1);
+}
+
+.login-form-custom .ant-input-password .ant-input-password-icon {
+    color: var(--muted) !important;
+    transition: color .2s;
+}
+
+.login-form-custom .ant-input-password .ant-input-password-icon:hover {
+    color: var(--ink-0) !important;
+}
+
+.login-form-custom .ant-form-item-has-error .ant-input,
+.login-form-custom .ant-form-item-has-error .ant-input-affix-wrapper {
+    background: #fffcfc !important;
+    border-color: #ef4444 !important;
+    box-shadow:
+        0 0 0 4px rgba(239, 68, 68, .08),
+        0 1px 2px rgba(239, 68, 68, .1);
+}
+
+/* 9) Nút chính - Cực đẹp */
+.login-btn-primary.ant-btn-primary {
+    width: 100%;
+    height: 52px;
+    border: none !important;
+    border-radius: var(--r-md) !important;
+    background: linear-gradient(135deg, var(--mint-strong) 0%, #4db87f 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: .01em;
+    margin: 20px 0 24px;
+    box-shadow:
+        0 1px 2px rgba(94, 196, 141, .3),
+        0 4px 12px rgba(94, 196, 141, .2),
+        inset 0 1px 0 rgba(255, 255, 255, .15);
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-btn-primary.ant-btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.login-btn-primary.ant-btn-primary:hover {
+    background: linear-gradient(135deg, #4db87f 0%, #3da86e 100%) !important;
+    transform: translateY(-2px);
+    box-shadow:
+        0 2px 4px rgba(94, 196, 141, .3),
+        0 8px 24px rgba(94, 196, 141, .25),
+        inset 0 1px 0 rgba(255, 255, 255, .2);
+    color: #ffffff !important;
+}
+
+.login-btn-primary.ant-btn-primary:hover::before {
+    opacity: 1;
+}
+
+.login-btn-primary.ant-btn-primary:active {
+    transform: translateY(0);
+}
+
+/* 10) Divider & SSO */
+.login-divider.ant-divider-horizontal.ant-divider-with-text::before,
+.login-divider.ant-divider-horizontal.ant-divider-with-text::after {
+    border-top: 1.5px solid var(--line) !important;
+}
+
+.login-divider .ant-divider-inner-text {
+    color: var(--muted) !important;
+    font-size: .88rem;
+    font-weight: 500;
+    padding: 0 16px;
+}
+
+.sso-btn.ant-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: var(--r-md) !important;
+    border: 2px solid transparent !important;
+    background: var(--bg) !important;
+    color: var(--ink-1) !important;
+    font-weight: 600;
+    font-size: .96rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow:
+        inset 0 0 0 1px var(--line),
+        0 1px 2px rgba(10, 31, 22, .04);
+    transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sso-btn.ant-btn:hover {
+    background: #fff !important;
+    border-color: var(--mint) !important;
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 0 0 2px var(--mint),
+        0 4px 16px rgba(94, 196, 141, .12);
+}
+
+.sso-btn .anticon {
+    font-size: 1.25rem;
+    color: var(--mint-strong);
+}
+
+/* 11) Links & Terms */
+.login-card-dark a {
+    color: var(--mint-strong);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .2s;
+}
+
+.login-card-dark a:hover {
+    color: var(--mint-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+.terms-text {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.terms-text .ant-typography {
+    color: var(--muted) !important;
+    font-size: .86rem;
+    line-height: 1.6;
+}
+
+/* 12) Responsive */
+@media (max-width: 900px) {
+    .login-full-page-container {
+        flex-direction: column;
+    }
+
+    .login-left-panel {
+        flex: none;
+        height: 320px;
+        min-height: 320px;
+    }
+
+    .login-right-panel {
+        min-height: calc(100vh - 320px);
+        padding: 32px 24px;
+    }
+
+    .login-card-dark {
+        width: 92vw;
+        max-width: 520px;
+        padding: 40px 36px !important;
+    }
+}
+
+@media (max-width: 540px) {
+    .login-left-panel {
+        height: 260px;
+        min-height: 260px;
+    }
+
+    .login-card-dark {
+        padding: 36px 28px !important;
+    }
+
+    .login-btn-primary.ant-btn-primary,
+    .sso-btn.ant-btn {
+        height: 50px;
+        font-size: .95rem;
+    }
+}
