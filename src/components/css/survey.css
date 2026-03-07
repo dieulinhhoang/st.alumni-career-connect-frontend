@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+
+/* ═══════════════════════════════════════════════
+   THEME: ACADEMIC — Tinh chỉnh khớp mẫu 100%
+   ═══════════════════════════════════════════════ */
+
+:root {
+  --green:     #015e37;
+  --green-l:   #017a49;
+  --green-dim: #e8f2ec;
+  --gold:      #c8930a;
+  --gold-l:    #f0a500;
+  --ink:       #1a1a1a;
+  --ink-mid:   #4a4a4a;
+  --ink-dim:   #888;
+  --bg:        #faf9f6;
+  --bg-card:   #ffffff;
+  --rule:      #ddd8cc;
+  --shadow-lg: 0 8px 40px rgba(1, 94, 55, 0.12);
+}
+
+.theme-academic {
+  font-family: 'Source Serif 4', serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.7;
+}
+
+.theme-academic .fp-wrapper {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.theme-academic .fp-card {
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 48px 52px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Thanh màu gradient đặc trưng ở top card */
+.theme-academic .fp-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green) 60%, var(--gold-l) 100%);
+}
+
+/* Header & Typography */
+.theme-academic .fp-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.theme-academic .fp-academy {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: 4px 0;
+}
+
+.theme-academic .fp-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+/* Section Title với accent vàng bên trái */
+.theme-academic .fp-section-title {
+  display: flex;
+  align-items: center;
+  background: var(--green);
+  color: #fff;
+  padding: 10px 16px;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 5px;
+  margin: 32px 0 20px;
+  position: relative;
+}
+
+.theme-academic .fp-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--gold-l);
+  border-radius: 5px 0 0 5px;
+}
+
+/* Ô nhập liệu giả lập (Input) */
+.theme-academic .fp-input {
+  background: var(--green-dim) !important;
+  border: 1px solid #c5ddd0 !important;
+  border-radius: 5px !important;
+  padding: 8px 12px !important;
+  font-size: 13.5px !important;
+  margin-top: 5px;
+}
+
+/* Checkbox và Radio kiểu "đã chọn" */
+.theme-academic .ant-checkbox-wrapper-checked,
+.theme-academic .ant-radio-wrapper-checked {
+  color: var(--green) !important;
+  font-weight: 600;
+}
+
+.theme-academic .ant-checkbox-wrapper-checked::before {
+  content: "☑ ";
+  font-size: 16px;
+}
+
+/* Footer trang trọng */
+.theme-academic .fp-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+
+.theme-academic .fp-footer::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 0 auto 16px;
+}
