@@ -8,7 +8,7 @@ import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
 
 
-const DashBoard = lazy(() => import("../pages/admin/DashBoard"));
+const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))
 const routes = [
     {
