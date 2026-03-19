@@ -33,9 +33,9 @@ export function QuestionEditor({ question: q }: Props) {
         <span className="question-label">
           {q.label || 'Câu hỏi chưa có tiêu đề'}
         </span>
-        <span className="question-type-badge">{q.type}</span>
+        {/* <span className="question-type-badge">{q.type}</span> */}
         {q.required && (
-          <span className="question-required-badge">BẮT BUỘC</span>
+          <span className="question-required-badge" style={{ color: 'red' }}>*</span>
         )}
         <Button
           type="text"

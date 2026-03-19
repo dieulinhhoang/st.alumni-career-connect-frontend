@@ -5,7 +5,7 @@ import Statistic from '../pages/admin/Statistics';
 import AllForms from '../pages/admin/Survey/Forms';
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
-import ApproveScores from '../pages/admin/Survey/ApproveScores';
+import STAlumni from '../pages/client/Home/Home';
 
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard"));
@@ -15,7 +15,11 @@ const routes = [
         path: '/',
         children: [
             {
-
+                path:'',
+                element: (<Suspense fallback={<Loader />} >
+                   <STAlumni />
+                </Suspense>
+                )
             }
             ,
             {

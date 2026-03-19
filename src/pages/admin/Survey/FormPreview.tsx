@@ -8,7 +8,8 @@ interface Props {
 export default function FormPreview({ themeId = 'academic' }: Props) {
   const { survey } = useSurveyStore();
   const sortedSections = [...survey.sections].sort((a, b) => a.order - b.order);
-
+  const header = survey.defaultHeader || {};
+  const footer = survey.defaultFooter || {};
   if (sortedSections.length === 0) {
     return (
       <div className="text-center text-gray-400 py-20">
@@ -22,9 +23,22 @@ export default function FormPreview({ themeId = 'academic' }: Props) {
 
       {/* HEADER */}
       <div className="fp-header">
-        <p className="fp-ministry">{ 'BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG'}</p>
-        <p className="fp-academy">{  'HỌC VIỆN NÔNG NGHIỆP VIỆT NAM'}</p>
-        <p className="fp-address">{  'Xã Gia Lâm, Thành phố Hà Nội'}</p>
+        {header.logoUrl && (
+          <img src={header.logoUrl} alt="Logo" className="fp-logo" />
+        )}
+        {header.showDate && (
+           <p className="fp-date">
+            Ngày {new Date().getDate()} / {new Date().getMonth() + 1} / {new Date().getFullYear()}
+          </p>
+        )}
+        <p className="fp-ministry">{ header.ministry }</p>
+        <p className="fp-academy">{ header.academy }</p>
+        <p className="fp-address">{ header.address }</p>
+         {(header.phone || header.fax) && (
+        <p className="fp-contact">
+          Điện thoại: {header.phone} - Fax: {header.fax}
+        </p>
+         )}
       </div>
 
       {/* TIÊU ĐỀ */}
@@ -98,8 +112,8 @@ export default function FormPreview({ themeId = 'academic' }: Props) {
 
       {/* FOOTER */}
       <div className="fp-footer">
-        <p>Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!</p>
-        <p>Kính chúc Anh/Chị sức khỏe và thành công!</p>
+        <p>{footer.primaryText}</p>
+        <p>{footer.secondaryText}</p>
       </div>
 
     </div>
