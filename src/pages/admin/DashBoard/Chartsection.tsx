@@ -54,7 +54,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
     const currentAllColData = Object.entries(dotData).flatMap(([dot, v]) => {
       const total = v.coViec + v.chuaCoViec || 1;
       return currentCfg.getPieData(v).map(({ name, value }) => ({
-        dot, type: name, value: Math.round((value / total) * 100),
+        dot, type: name, value: value,
       }));
     });
 
@@ -74,7 +74,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
       },
       legend: { position: "bottom", flipPage: false, itemName: { style: { fontSize: 12 } } },
       statistic: {
-        title: { style: {   color: "#94a3b8", fontWeight: 600 }, content: getLatestDot(khoa, nganh) },
+        title: { style: { color: "#94a3b8", fontWeight: 600 }, content: getLatestDot(khoa, nganh) },
         content: { style: {   fontWeight: 900, color: "#0f172a" } },
       },
       interactions: [{ type: "element-active" }, { type: "pie-statistic-active" }],
@@ -96,8 +96,8 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
       }),
       maxColumnWidth: 32,
       yAxis: {
-        label: { formatter: (v: string) => v + "%", style: { fill: "#94a3b8", fontSize: 11 } },
-        max: 115,
+        label: { formatter: (v: string) => v + " SV", style: { fill: "#94a3b8", fontSize: 11 } },
+        max: undefined,
         grid: { line: { style: { stroke: "#f1f5f9", lineWidth: 1, lineDash: [4, 4] } } },
       },
       xAxis: { label: { style: { fontWeight: 700, fill: "#374151", fontSize: 12 } } },
@@ -105,9 +105,9 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
       label: {
         position: "top",
         style: { fontSize: 11, fill: "#374151", fontWeight: 600 },
-        formatter: (d: any) => d.value > 5 ? d.value + "%" : "",
+        formatter: (d: any) => d.value > 0 ? d.value + " SV" : "",
       },
-      tooltip: { formatter: (d: any) => ({ name: d.type, value: d.value + "%" }) },
+      tooltip: { formatter: (d: any) => ({ name: d.type, value: d.value + " SV" }) },
       interactions: [{ type: "element-highlight" }],
     });
     col.render();
@@ -206,7 +206,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
               const allColData = Object.entries(dotData).flatMap(([dot, v]) => {
                 const total = v.coViec + v.chuaCoViec || 1;
                 return MODE_CONFIG[chartMode].getPieData(v).map(({ name, value }) => ({
-                  dot, type: name, value: Math.round((value / total) * 100),
+                  dot, type: name, value: value,
                 }));
               });
               colInst.current?.changeData(allColData);
@@ -242,7 +242,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6366f1" }} />
                 <Text style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>
-                  Tỷ lệ % theo từng đợt khảo sát
+                    Số lượng theo từng đợt khảo sát
                   {selectedSlice && (
                     <span style={{
                       marginLeft: 8, fontSize: 10,

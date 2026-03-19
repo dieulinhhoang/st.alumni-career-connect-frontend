@@ -7,7 +7,7 @@ import { KhoaList }       from "./Khoalist";
 import { EnterpriseList } from "./Enterpriselist";
 import { ChartSection }   from "./Chartsection";
 import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
-import { getFilteredDotData, getLatestDot } from "../../../feature/dashboard/api";
+import { getFilteredDotData, getLatestDot, KHOA_LIST } from "../../../feature/dashboard/api";
 
 const { Title, Text } = Typography;
 
@@ -15,23 +15,41 @@ const { Title, Text } = Typography;
 export function DashBoard() {
   const { chartMode, setChartMode, khoa, setKhoa, nganh, setNganh } = useChartFilter();
 
-  const LATEST_DOT = getLatestDot();
-  const latest       = getFilteredDotData("all", "all")[LATEST_DOT];
-  const totalPhanhoi = latest.coViec + latest.chuaCoViec;
-  const employed     = Math.round((latest.coViec / totalPhanhoi) * 100);
-  const overGrad     = Math.round(employed * 0.92);
-  const relevant     = Math.round((latest.dungNganh + latest.lienQuan + latest.tiepTucHoc) / totalPhanhoi * 100);
+  const LATEST_DOT      = getLatestDot();
+  const dotData         = getFilteredDotData("all", "all");
+  const dotKeys         = Object.keys(dotData);
+  const latest          = dotData[LATEST_DOT];
+  const prev            = dotKeys.length >= 2 ? dotData[dotKeys[dotKeys.length - 2]] : null;
+  const tongSVTotnghiep = KHOA_LIST.reduce((s, k) => s + k.tongSV, 0);
+
+  const totalPhanhoi    = latest.coViec + latest.chuaCoViec;
+  const tyLePhanhoi     = Math.round((totalPhanhoi / tongSVTotnghiep) * 100);
+  const employed        = Math.round((latest.coViec / totalPhanhoi) * 100);
+  const overGrad        = Math.round((latest.coViec / tongSVTotnghiep) * 100);
+  const relevant        = Math.round((latest.dungNganh + latest.lienQuan + latest.tiepTucHoc) / totalPhanhoi * 100);
+
+  //  so sánh với đợt trước
+  const calcTrend = (curr: number, prevVal: number | undefined) => {
+    if (!prevVal) return undefined;
+    const diff = curr - prevVal;
+    return (diff >= 0 ? "+" : "") + diff + "%";
+  };
+  const prevPhanhoi  = prev ? prev.coViec + prev.chuaCoViec : 0;
+  const trendPhanhoi = prev ? calcTrend(tyLePhanhoi,  Math.round((prevPhanhoi / tongSVTotnghiep) * 100)) : undefined;
+  const trendViec    = prev ? calcTrend(employed,      Math.round((prev.coViec / prevPhanhoi) * 100))     : undefined;
+  const trendTN      = prev ? calcTrend(overGrad,      Math.round((prev.coViec / tongSVTotnghiep) * 100)) : undefined;
+  const trendRel     = prev ? calcTrend(relevant,      Math.round((prev.dungNganh + prev.lienQuan + prev.tiepTucHoc) / prevPhanhoi * 100)) : undefined;
 
   const STAT_CARDS = [
-    { index: 1, label: "Tỷ lệ phản hồi",      value: "92%",          sub: `${totalPhanhoi} / 0 Sinh viên`,       icon: <FileTextOutlined />, accentColor: "#6366f1", trend: "+3.2%" },
-    { index: 2, label: "Có việc / phản hồi",   value: `${employed}%`, sub: "Trên số SV đã trả lời",              icon: <SolutionOutlined />, accentColor: "#10b981", trend: "+1.8%" },
-    { index: 3, label: "Có việc / tốt nghiệp", value: `${overGrad}%`, sub: "Trên tổng số SV tốt nghiệp",         icon: <ReadOutlined />,     accentColor: "#f59e0b", trend: "+2.1%" },
-    { index: 4, label: "Việc làm phù hợp",     value: `${relevant}%`, sub: "Đúng ngành + Liên quan + Học tiếp",  icon: <StarOutlined />,     accentColor: "#ec4899", trend: "+0.9%" },
+    { index: 1, label: "Tỷ lệ phản hồi",      value: `${tyLePhanhoi}%`,  sub: `${totalPhanhoi} / ${tongSVTotnghiep} SV`,       icon: <FileTextOutlined />, accentColor: "#6366f1", trend: trendPhanhoi },
+    { index: 2, label: "Có việc / phản hồi",   value: `${employed}%`, sub: "Trên số SV đã trả lời",              icon: <SolutionOutlined />, accentColor: "#10b981", trend: trendViec },
+    { index: 3, label: "Có việc / tốt nghiệp", value: `${overGrad}%`, sub: "Trên tổng số SV tốt nghiệp",         icon: <ReadOutlined />,     accentColor: "#f59e0b", trend: trendTN },
+    { index: 4, label: "Việc làm phù hợp",     value: `${relevant}%`, sub: "Đúng ngành + Liên quan + Học tiếp",  icon: <StarOutlined />,     accentColor: "#ec4899", trend: trendRel },
   ];
 
   return (
     <AdminLayout>
-      {/* <GreetingCard /> */}
+      <GreetingCard />
 
       {/* Page header */}
       <div style={{
