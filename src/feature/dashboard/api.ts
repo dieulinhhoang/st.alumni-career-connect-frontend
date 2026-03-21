@@ -87,9 +87,9 @@ export const NGANH_BY_KHOA: Record<string, { value: string; label: string }[]> =
 
 const DETAIL_DATA: Record<string, Record<string, DotEntry>> = {
   "all|all|all": {
-    "T12/2024": { coViec: 97, chuaCoViec: 8,  dungNganh: 73, lienQuan: 14, traiNganh: 12, tiepTucHoc: 6,  tuNhan: 74, nhaNuoc: 5,  tuTaoViec: 17, nuocNgoai: 3 },
-    "T3/2025":  { coViec: 45, chuaCoViec: 12, dungNganh: 30, lienQuan: 8,  traiNganh: 7,  tiepTucHoc: 4,  tuNhan: 32, nhaNuoc: 4,  tuTaoViec: 8,  nuocNgoai: 1 },
-    "T6/2025":  { coViec: 38, chuaCoViec: 9,  dungNganh: 24, lienQuan: 6,  traiNganh: 8,  tiepTucHoc: 3,  tuNhan: 27, nhaNuoc: 3,  tuTaoViec: 6,  nuocNgoai: 2 },
+    "T12/2024": { coViec: 993, chuaCoViec: 86,  dungNganh: 720, lienQuan: 155, traiNganh: 118, tiepTucHoc: 62,  tuNhan: 740, nhaNuoc: 58,  tuTaoViec: 160, nuocNgoai: 35 },
+    "T3/2025":  { coViec: 950, chuaCoViec: 95,  dungNganh: 688, lienQuan: 148, traiNganh: 114, tiepTucHoc: 58,  tuNhan: 710, nhaNuoc: 54,  tuTaoViec: 148, nuocNgoai: 30 },
+    "T6/2025":  { coViec: 912, chuaCoViec: 98,  dungNganh: 655, lienQuan: 140, traiNganh: 117, tiepTucHoc: 55,  tuNhan: 680, nhaNuoc: 50,  tuTaoViec: 140, nuocNgoai: 28 },
   },
   "CNTT|all|all": {
     "T12/2024": { coViec: 58, chuaCoViec: 4, dungNganh: 48, lienQuan: 7, traiNganh: 3, tiepTucHoc: 4, tuNhan: 45, nhaNuoc: 2, tuTaoViec: 9, nuocNgoai: 2 },
@@ -161,6 +161,15 @@ export function getLatestDot(khoa = "all", nganh = "all"): string {
 }
 
 export const LATEST_DOT = getLatestDot();
+
+// Tính tổng SV đã phản hồi của 1 khoa từ đợt mới nhất
+export function getSoSVPhanhoi(khoaVietTat: string): number {
+  const dotData = getFilteredDotData(khoaVietTat, "all");
+  const keys = Object.keys(dotData);
+  if (!keys.length) return 0;
+  const latest = dotData[keys[keys.length - 1]];
+  return latest.coViec + latest.chuaCoViec;
+}
 
 export function getFilteredDotData(khoa: string, nganh: string): Record<string, DotEntry> {
   const key = `${khoa}|${nganh}|all`;

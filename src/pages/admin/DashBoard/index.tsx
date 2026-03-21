@@ -20,7 +20,7 @@ export function DashBoard() {
   const dotKeys         = Object.keys(dotData);
   const latest          = dotData[LATEST_DOT];
   const prev            = dotKeys.length >= 2 ? dotData[dotKeys[dotKeys.length - 2]] : null;
-  const tongSVTotnghiep = KHOA_LIST.reduce((s, k) => s + k.tongSV, 0);
+  const tongSVTotnghiep = KHOA_LIST.filter(k => k.daNop).reduce((s, k) => s + k.tongSV, 0);
 
   const totalPhanhoi    = latest.coViec + latest.chuaCoViec;
   const tyLePhanhoi     = Math.round((totalPhanhoi / tongSVTotnghiep) * 100);
@@ -28,7 +28,7 @@ export function DashBoard() {
   const overGrad        = Math.round((latest.coViec / tongSVTotnghiep) * 100);
   const relevant        = Math.round((latest.dungNganh + latest.lienQuan + latest.tiepTucHoc) / totalPhanhoi * 100);
 
-  //  so sánh với đợt trước
+  //so sánh với đợt trước
   const calcTrend = (curr: number, prevVal: number | undefined) => {
     if (!prevVal) return undefined;
     const diff = curr - prevVal;
@@ -49,7 +49,7 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-      <GreetingCard />
+      {/* <GreetingCard /> */}
 
       {/* Page header */}
       <div style={{

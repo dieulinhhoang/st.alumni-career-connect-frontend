@@ -82,6 +82,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
     });
     pie.render();
     pieInst.current = pie;
+    const maxVal = Math.max(...currentAllColData.map(d => d.value));
 
     // Column
     const col = new G2Column(colRef.current, {
@@ -99,6 +100,8 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
         label: { formatter: (v: string) => v + " SV", style: { fill: "#94a3b8", fontSize: 11 } },
         max: undefined,
         grid: { line: { style: { stroke: "#f1f5f9", lineWidth: 1, lineDash: [4, 4] } } },
+        max: Math.ceil(maxVal * 1.15),
+        
       },
       xAxis: { label: { style: { fontWeight: 700, fill: "#374151", fontSize: 12 } } },
       legend: { position: "bottom", flipPage: false, itemName: { style: { fontSize: 12 } } },
