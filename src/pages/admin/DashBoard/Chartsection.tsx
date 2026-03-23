@@ -98,7 +98,6 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
       maxColumnWidth: 32,
       yAxis: {
         label: { formatter: (v: string) => v + " SV", style: { fill: "#94a3b8", fontSize: 11 } },
-        max: undefined,
         grid: { line: { style: { stroke: "#f1f5f9", lineWidth: 1, lineDash: [4, 4] } } },
         max: Math.ceil(maxVal * 1.15),
         

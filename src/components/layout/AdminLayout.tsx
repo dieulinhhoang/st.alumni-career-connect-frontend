@@ -34,9 +34,9 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
             label: <Link to="/admin/stafflist">Nhân viên</Link>,
         },
         {
-            key: 'org',
+            key: '/admin/enterprises',
             icon: <BankOutlined />,
-            label: 'Doanh nghiệp',
+            label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>,
         },
         {
             key: '/admin/studentlist',

@@ -6,7 +6,8 @@ import AllForms from '../pages/admin/Survey/Forms';
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
-
+import Enterprise from '../pages/admin/Enterprise/index';
+import { EnterpriseDetail } from '../pages/admin/Enterprise/EnterpriseDetail';
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))
@@ -71,8 +72,22 @@ const routes = [
                     </Suspense>
                 )
             },
-            
-            
+            {
+                path: '/admin/enterprises',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <Enterprise />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/enterprises/:slug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <EnterpriseDetail />
+                    </Suspense>
+                )
+            }
 
         ]
     }
