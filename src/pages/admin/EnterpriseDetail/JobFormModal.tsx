@@ -94,7 +94,7 @@ export function JobFormModal({ open, job, entColor, entFaculties, onClose, onSav
             value={tagInput}
             onChange={e => setTagInput(e.target.value)}
             onSearch={addTag}
-            onPressEnter={e => { e.preventDefault(); addTag(); }}
+            onPressEnter={e => { e.preventDefault(); }}
             placeholder="Nhập kỹ năng rồi nhấn Enter hoặc +"
             enterButton="+"
             style={{ maxWidth: 300 }}
