@@ -1,6 +1,7 @@
 import { Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ENTERPRISE_LIST } from "../../../feature/dashboard/api";
+import { toSlug } from "../../../components/common/utils";
 
 const { Text } = Typography;
 
@@ -23,7 +24,7 @@ export function EnterpriseList() {
             <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Doanh nghiệp đối tác</span>
           </div>
           <button
-            onClick={() => navigate("/admin/enterprise")}
+            onClick={() => navigate("/admin/enterprises")}
             style={{
               background: "none", border: "1.5px solid #e2e8f0", borderRadius: 8,
               padding: "4px 12px", cursor: "pointer", fontSize: 12,
@@ -41,7 +42,7 @@ export function EnterpriseList() {
       <div style={{ maxHeight: 380, overflowY: "auto", padding: "4px 0" }}>
         {ENTERPRISE_LIST.map((e, i) => (
           <div key={e.name}
-            onClick={() => navigate(`/admin/enterprise/${e.name.toLowerCase().replace(/\s+/g, "-")}`)}
+            onClick={() => navigate(`/admin/enterprises/${toSlug(e.name)}`)}
             style={{
               display: "flex", alignItems: "center", gap: 12, padding: "9px 20px",
               background: i % 2 === 0 ? "#fff" : "#fafbfc",

@@ -7,7 +7,7 @@ import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
 import Enterprise from '../pages/admin/Enterprise/index';
-import { EnterpriseDetail } from '../pages/admin/Enterprise/EnterpriseDetail';
+import  EnterpriseDetail  from '../pages/admin/EnterpriseDetail/index';
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))

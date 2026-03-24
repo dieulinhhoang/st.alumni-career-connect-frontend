@@ -186,9 +186,9 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
                 </Header>
 
                 <Content style={{ margin: '24px' }}>
-                    <div style={{ padding: '24px', background: '#fff', borderRadius: '16px', minHeight: 'calc(100vh - 170px)' }}>
+                    {/* <div style={{ padding: '24px', background: 'rgba(239, 239, 239, 0.63)', borderRadius: '16px', minHeight: 'calc(100vh - 170px)' }}> */}
                         {children}
-                    </div>
+                    {/* </div> */}
                 </Content>
             </Layout>
         </Layout>
