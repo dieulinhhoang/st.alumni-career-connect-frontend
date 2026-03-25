@@ -83,7 +83,6 @@ export const NGANH_BY_KHOA: Record<string, { value: string; label: string }[]> =
 };
 
 // ─── Survey dot data ─────────────────────────────────────────────────────────
-// key: "khoa|nganh|all"
 
 const DETAIL_DATA: Record<string, Record<string, DotEntry>> = {
   "all|all|all": {
@@ -151,9 +150,9 @@ const DETAIL_DATA: Record<string, Record<string, DotEntry>> = {
     "T3/2025":  { coViec: 7,  chuaCoViec: 2, dungNganh: 4, lienQuan: 2, traiNganh: 1, tiepTucHoc: 1, tuNhan: 5,  nhaNuoc: 1, tuTaoViec: 1, nuocNgoai: 0 },
     "T6/2025":  { coViec: 6,  chuaCoViec: 2, dungNganh: 3, lienQuan: 2, traiNganh: 1, tiepTucHoc: 1, tuNhan: 4,  nhaNuoc: 1, tuTaoViec: 1, nuocNgoai: 0 },
   },
+  // Khoa  -> không có data -> getSoSVPhanhoi trả 0
 };
 
-// Tự động lấy đợt mới nhất từ data (key cuối cùng)
 export function getLatestDot(khoa = "all", nganh = "all"): string {
   const data = getFilteredDotData(khoa, nganh);
   const keys = Object.keys(data);
@@ -161,10 +160,11 @@ export function getLatestDot(khoa = "all", nganh = "all"): string {
 }
 
 export const LATEST_DOT = getLatestDot();
-
-// Tính tổng SV đã phản hồi của 1 khoa từ đợt mới nhất
+ 
 export function getSoSVPhanhoi(khoaVietTat: string): number {
-  const dotData = getFilteredDotData(khoaVietTat, "all");
+  const key = `${khoaVietTat}|all|all`;
+  const dotData = DETAIL_DATA[key];
+  if (!dotData) return 0;
   const keys = Object.keys(dotData);
   if (!keys.length) return 0;
   const latest = dotData[keys[keys.length - 1]];

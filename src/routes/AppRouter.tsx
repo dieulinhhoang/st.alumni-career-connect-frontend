@@ -8,11 +8,15 @@ import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
 import Enterprise from '../pages/admin/Enterprise/index';
 import  EnterpriseDetail  from '../pages/admin/EnterpriseDetail/index';
+import Faculties from '../pages/admin/Faculty';
+import MajorDetail from '../pages/admin/Faculty/MajorDetail';
+import FacultyDetail from '../pages/admin/Faculty/FacultyDetail';
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))
 const routes = [
     {
+
         path: '/',
         children: [
             {
@@ -87,7 +91,31 @@ const routes = [
                         <EnterpriseDetail />
                     </Suspense>
                 )
-            }
+            },
+            {
+                 path: '/admin/faculties',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <Faculties />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/faculties/:facultySlug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <FacultyDetail />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/faculties/:facultySlug/:majorSlug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <MajorDetail />
+                    </Suspense>
+                )
+            },
 
         ]
     }

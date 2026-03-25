@@ -3,7 +3,7 @@ import { FileTextOutlined, SolutionOutlined, ReadOutlined, StarOutlined } from "
 import AdminLayout from "../../../components/layout/AdminLayout";
 import GreetingCard from "../../../components/common/greetingcard";
 import { StatCard }       from "./Statcard";
-import { KhoaList }       from "./Khoalist";
+import { FacultyCard }       from "./FacultyCard";
 import { EnterpriseList } from "./Enterpriselist";
 import { ChartSection }   from "./Chartsection";
 import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
@@ -94,7 +94,7 @@ export function DashBoard() {
       {/* Lists */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="top">
         <Col xs={24} lg={14}>
-          <KhoaList />
+          <FacultyCard />
         </Col>
         <Col xs={24} lg={10}>
           <EnterpriseList />

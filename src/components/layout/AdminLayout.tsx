@@ -11,66 +11,148 @@ import {
     FileTextOutlined,
     SafetyCertificateOutlined,
     BankOutlined,
-    SettingOutlined
+    BarChartOutlined,
+    FileSearchOutlined,
+    SolutionOutlined,
+    IdcardOutlined,
+    UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Space } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Sider, Content } = Layout;
 
-const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = ({ children, onCollapse }) => {
+const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = ({ children, onCollapse }) => {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
 
     const menuItems = [
+        //  QUẢN LÍ CHUNG 
         {
-            key: '/admin/dashboard',
-            icon: <DashboardOutlined />,
-            label: <Link to="/admin/dashboard">Bảng điều khiển</Link>,
-        },
-        {
-            key: '/admin/stafflist',
-            icon: <TeamOutlined />,
-            label: <Link to="/admin/stafflist">Nhân viên</Link>,
-        },
-        {
-            key: '/admin/enterprises',
-            icon: <BankOutlined />,
-            label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>,
-        },
-        {
-            key: '/admin/studentlist',
-            icon: <UserOutlined />,
-            label: <Link to="/admin/studentlist">Sinh viên</Link>,
-        },
-        {
-            key: '/admin/allforms',
-            icon: <FileTextOutlined />,
-            label: <Link to="/admin/allforms">Form câu hỏi tự động</Link>,
-        },
-        { type: 'divider' },
-        { 
-            key: 'settings-grp', 
-            label: 'CÀI ĐẶT', 
+            key: 'general-grp',
+            label: 'QUẢN LÍ CHUNG',
             type: 'group',
             children: [
                 {
-                    key: 'categories',
-                    icon: <AppstoreOutlined />,
-                    label: 'Danh mục',
-                    children: [
-                        { key: '/admin/stats', label: <Link to="/admin/statistics">Thống kê</Link> },
-                    ]
-                }
-            ]
+                    key: '/admin/dashboard',
+                    icon: <DashboardOutlined />,
+                    label: <Link to="/admin/dashboard">Bảng điều khiển</Link>,
+                },
+                // {
+                //     key: '/admin/stafflist',
+                //     icon: <TeamOutlined />,
+                //     label: <Link to="/admin/stafflist">Bộ môn</Link>,
+                // },
+                {
+                    key: '/admin/faculties',
+                    icon: <TeamOutlined />,
+                    label: <Link to="/admin/faculties">Khoa</Link>,
+                },
+                // {
+                //     key: '/admin/studentlist',
+                //     icon: <UserOutlined />,
+                //     label: <Link to="/admin/studentlist">Lớp học</Link>,
+                // },
+            ],
         },
+
+        { type: 'divider' },
+
+        //  TỐT NGHIỆP 
         {
-            key: 'permissions',
-            icon: <SafetyCertificateOutlined />,
-            label: 'Phân quyền',
+            key: 'enterprise-grp',
+            label: 'DOANH NGHIỆP',
+            type: 'group',
             children: [
-                { key: '/admin/approvescore', label: <Link to="/admin/approvescore">Phê duyệt điểm</Link> },
-            ]
+                {
+                    key: '/admin/enterprises',
+                    icon: <BankOutlined />,
+                    label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>,
+                },
+            ],
+        },
+        { type: 'divider' },
+
+        //  TỐT NGHIỆP 
+        {
+            key: 'graduation-grp',
+            label: 'TỐT NGHIỆP',
+            type: 'group',
+            children: [
+                {
+                    key: '/admin/graduation',
+                    icon: <SolutionOutlined />,
+                    label: <Link to="/admin/graduation">Đợt tốt nghiệp</Link>,
+                },
+            ],
+        },
+
+        { type: 'divider' },
+
+        //  KHẢO SÁT 
+        {
+            key: 'survey-grp',
+            label: 'KHẢO SÁT',
+            type: 'group',
+            children: [
+                {
+                    key: '/admin/allforms',
+                    icon: <FileTextOutlined />,
+                    label: <Link to="/admin/allforms">Cấu hình Form </Link>,
+                },
+                {
+                    key: '/admin/alumni',
+                    icon: <IdcardOutlined />,
+                    label: <Link to="/admin/alumni">Khảo sát việc làm</Link>,
+                },
+            ],
+        },
+
+        { type: 'divider' },
+
+        //  BÁO CÁO - THỐNG KÊ 
+        {
+            key: 'report-grp',
+            label: 'BÁO CÁO - THỐNG KÊ',
+            type: 'group',
+            children: [
+                {
+                    key: '/admin/statistics',
+                    icon: <BarChartOutlined />,
+                    label: <Link to="/admin/statistics">Biểu đồ thống kê</Link>,
+                },
+                {
+                    key: '/admin/reports',
+                    icon: <FileSearchOutlined />,
+                    label: <Link to="/admin/reports">Báo cáo tổng hợp</Link>,
+                },
+            ],
+        },
+
+        { type: 'divider' },
+
+        //  HỆ THỐNG 
+        {
+            key: 'system-grp',
+            label: 'HỆ THỐNG',
+            type: 'group',
+            children: [
+                {
+                    key: '/admin/accounts',
+                    icon: <UsergroupAddOutlined />,
+                    label: <Link to="/admin/accounts">Tài khoản</Link>,
+                },
+                {
+                    key: '/admin/roles',
+                    icon: <SafetyCertificateOutlined />,
+                    label: <Link to="/admin/roles">Vai trò</Link>,
+                },
+                {
+                    key: '/admin/users',
+                    icon: <AppstoreOutlined />,
+                    label: <Link to="/admin/users">Người dùng</Link>,
+                },
+            ],
         },
     ];
 
@@ -78,33 +160,32 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
         <Layout style={{ minHeight: '100vh', background: '#f8fafc' }}>
             <style>
                 {`
-                     .ant-menu-item, .ant-menu-submenu-title {
+                    .ant-menu-item, .ant-menu-submenu-title {
                         display: flex !important;
                         align-items: center !important;
                         margin: 4px 12px !important;
                         width: calc(100% - 24px) !important;
                         border-radius: 10px !important;
-                        padding-left: 16px !important; /* Đẩy vào cho cân */
+                        padding-left: 16px !important;
                     }
 
                     .ant-menu-item .anticon, .ant-menu-submenu-title .anticon {
                         font-size: 18px !important;
-                        margin-right: 12px !important; /* Khoảng cách icon và chữ */
+                        margin-right: 12px !important;
                     }
 
-                    /* Hiệu ứng Active tím lịm tìm sim */
                     .ant-menu-light .ant-menu-item-selected {
                         background: linear-gradient(90deg, #9f7aea 0%, #7f5af0 100%) !important;
                         color: #ffffff !important;
                         box-shadow: 0 4px 12px rgba(127, 90, 240, 0.3);
                     }
 
-                    .ant-menu-light .ant-menu-item-selected .anticon, 
+                    .ant-menu-light .ant-menu-item-selected .anticon,
                     .ant-menu-light .ant-menu-item-selected a {
                         color: #ffffff !important;
                     }
 
-                     .ant-menu-item-group-title {
+                    .ant-menu-item-group-title {
                         padding-left: 24px !important;
                         font-size: 11px !important;
                         font-weight: 700 !important;
@@ -116,10 +197,10 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
                 `}
             </style>
 
-            <Sider 
-                trigger={null} 
-                collapsible 
-                collapsed={collapsed} 
+            <Sider
+                trigger={null}
+                collapsible
+                collapsed={collapsed}
                 width={280}
                 style={{
                     background: '#fff',
@@ -128,11 +209,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
                     height: '100vh',
                     left: 0,
                     top: 0,
-                    zIndex: 100
+                    zIndex: 100,
+                    overflowY: 'auto',
                 }}
             >
                 <div style={{ height: '80px', display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-                    <Avatar shape="square" size="large" src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" />
+                    <Avatar shape="square"   src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" />
                     {!collapsed && (
                         <span style={{ marginLeft: '12px', fontWeight: 800, fontSize: '16px', color: '#1a202c' }}>
                             VNUA SURVEY
@@ -149,17 +231,17 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
             </Sider>
 
             <Layout style={{ marginLeft: collapsed ? 80 : 280, transition: 'all 0.2s' }}>
-                <Header style={{ 
-                    padding: '0 24px', 
-                    background: '#fff', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Header style={{
+                    padding: '0 24px',
+                    background: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     height: '72px',
                     borderBottom: '1px solid #edf2f7',
                     position: 'sticky',
                     top: 0,
-                    zIndex: 10
+                    zIndex: 10,
                 }}>
                     <Button
                         type="text"
@@ -171,10 +253,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
                         style={{ fontSize: '18px', width: 40, height: 40 }}
                     />
 
-                    <Dropdown trigger={['click']} menu={{ items: [
-                        { key: '1', icon: <UserOutlined />, label: 'Thông tin' },
-                        { key: 'logout', icon: <LogoutOutlined />, label: 'Thoát', danger: true }
-                    ]}}>
+                    <Dropdown trigger={['click']} menu={{
+                        items: [
+                            { key: '1', icon: <UserOutlined />, label: 'Thông tin' },
+                            { key: 'logout', icon: <LogoutOutlined />, label: 'Thoát', danger: true },
+                        ],
+                    }}>
                         <Button type="text" style={{ height: '48px' }}>
                             <Space>
                                 <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
@@ -186,9 +270,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode, onCollapse?: any }> = 
                 </Header>
 
                 <Content style={{ margin: '24px' }}>
-                    {/* <div style={{ padding: '24px', background: 'rgba(239, 239, 239, 0.63)', borderRadius: '16px', minHeight: 'calc(100vh - 170px)' }}> */}
-                        {children}
-                    {/* </div> */}
+                    {children}
                 </Content>
             </Layout>
         </Layout>

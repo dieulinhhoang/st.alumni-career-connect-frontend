@@ -66,7 +66,7 @@ export default function EnterpriseDetailPage() {
   const handleTogglePartner = () => {
     if (ent.partnerStatus === "active") {
       Modal.confirm({
-        title: "Hủy kích hoạt đối tác?",
+        title: "Ngừng hợp tácđối tác?",
         content: `"${ent.name}" sẽ bị hủy kích hoạt. Tin tuyển dụng sẽ bị ẩn với sinh viên.`,
         okText: "Hủy kích hoạt", okType: "danger", cancelText: "Quay lại",
         onOk: () => togglePartnerStatus("inactive" as PartnerStatus),

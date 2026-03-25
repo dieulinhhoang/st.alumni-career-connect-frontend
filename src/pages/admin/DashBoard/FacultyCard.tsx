@@ -24,7 +24,7 @@ const FILTER_TABS: { key: KhoaFilter; label: string; color: string; activeBg: st
   { key: "chuaNop", label: "Chưa nộp", color: "#ef4444", activeBg: "#ef4444", count: l => l.filter(k => !k.daNop).length },
 ];
 
-export function KhoaList() {
+export function FacultyCard() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<KhoaFilter>("all");
 

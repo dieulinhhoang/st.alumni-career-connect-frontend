@@ -1,7 +1,3 @@
-/**
- * pages/admin/Enterprise/index.tsx
- */
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,7 +33,7 @@ function Avatar({ abbr, color, size = 36 }: { abbr: string; color: string; size?
   );
 }
 
-export default function EnterprisePage() {
+export default function Enterprise() {
   const navigate     = useNavigate();
   const { getColor } = useFacultyColors();
 
@@ -83,7 +79,7 @@ export default function EnterprisePage() {
     const newStatus: PartnerStatus = checked ? "active" : "inactive";
     if (!checked) {
       Modal.confirm({
-        title: "Hủy kích hoạt đối tác?",
+        title: "Ngừng hợp tácđối tác?",
         content: `"${ent.name}" sẽ bị hủy kích hoạt. Tin tuyển dụng sẽ bị ẩn với sinh viên.`,
         okText: "Hủy kích hoạt", okType: "danger", cancelText: "Quay lại",
         onOk: () => togglePartnerStatus(id, newStatus),
@@ -100,7 +96,7 @@ export default function EnterprisePage() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: r.partnerStatus === "inactive" ? 0.45 : 1 }}>
           <Avatar abbr={r.abbr} color={r.color} />
           <div>
-            <div style={{ fontWeight: 600, fontSize: 13, color: "#7c3aed", display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
               {r.name}
               {r.verified && <CheckCircleOutlined style={{ color: "#059669", fontSize: 12 }} />}
             </div>
@@ -204,7 +200,7 @@ export default function EnterprisePage() {
         <Card style={{ borderRadius: 12, border: "1px solid #ede9fe" }}>
           <Row gutter={[12, 12]} align="middle">
             <Col xs={24} sm={10} md={7}>
-              <Input placeholder="Tìm theo tên, email..." value={search} onChange={e => setSearch(e.target.value)}  />
+              <Input placeholder="Tìm kiếm ..." value={search} onChange={e => setSearch(e.target.value)}  />
             </Col>
             <Col xs={24} sm={7} md={5}>
               <Select value={industry} onChange={setIndustry} style={{ width: "100%" }}>

@@ -14,3 +14,4 @@ export function findBySlug<T extends { name: string }>(list: T[], slug: string):
   return list.find(e => toSlug(e.name) === slug);
 }
 
+ 
