@@ -174,7 +174,7 @@ export default function Enterprise() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
           <div>
             <Title level={4} style={{ margin: 0 }}>Doanh nghiệp đối tác</Title>
-            <Text type="secondary" style={{ fontSize: 13 }}>{filtered.length} / {enterprises.length} doanh nghiệp</Text>
+            {/* <Text type="secondary" style={{ fontSize: 13 }}>{filtered.length} / {enterprises.length} doanh nghiệp</Text> */}
           </div>
           <Button type="primary" icon={<PlusOutlined />}
             style={{ background: "linear-gradient(135deg,#7c3aed,#4f46e5)", border: "none", borderRadius: 8 }}

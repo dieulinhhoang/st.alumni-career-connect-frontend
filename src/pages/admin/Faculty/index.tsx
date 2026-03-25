@@ -25,7 +25,7 @@ export default function FacultyListPage() {
       <div>
         <div style={{ marginBottom: 24 }}>
           <Title level={4} style={{ margin: 0 }}>Khoa</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>{filtered.length} / {faculties.length} khoa</Text>
+          {/* <Text type="secondary" style={{ fontSize: 13 }}>{filtered.length} / {faculties.length} khoa</Text> */}
         </div>
 
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>

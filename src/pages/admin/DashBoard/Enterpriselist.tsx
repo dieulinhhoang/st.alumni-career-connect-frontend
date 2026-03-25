@@ -51,15 +51,15 @@ export function EnterpriseList() {
             onMouseEnter={ev => { (ev.currentTarget as HTMLDivElement).style.background = e.mau + "10"; }}
             onMouseLeave={ev => { (ev.currentTarget as HTMLDivElement).style.background = i % 2 === 0 ? "#fff" : "#fafbfc"; }}
           >
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: e.mau + "15", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {/* <div style={{ width: 36, height: 36, borderRadius: 10, background: e.mau + "15", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: 9, fontWeight: 800, color: e.mau }}>{e.viet_tat}</span>
-            </div>
+            </div> */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Text style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }} ellipsis={{ tooltip: e.name }}>{e.name}</Text>
                 {e.verified && (
                   <span style={{ fontSize: 9, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "1px 6px", borderRadius: 100, fontWeight: 700, flexShrink: 0 }}>
-                    ✓ Xác thực
+                    ✓ 
                   </span>
                 )}
               </div>

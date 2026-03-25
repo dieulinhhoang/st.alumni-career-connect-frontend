@@ -11,6 +11,10 @@ import  EnterpriseDetail  from '../pages/admin/EnterpriseDetail/index';
 import Faculties from '../pages/admin/Faculty';
 import MajorDetail from '../pages/admin/Faculty/MajorDetail';
 import FacultyDetail from '../pages/admin/Faculty/FacultyDetail';
+import GraduationStudents from '../pages/admin/Graduation/GraduationStudents';
+import GraduationList    from '../pages/admin/Graduation/index';
+import StudentDetail from '../pages/admin/Graduation/Studentdetail';
+
 
 const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))
@@ -116,6 +120,31 @@ const routes = [
                     </Suspense>
                 )
             },
+            {
+                path: '/admin/graduation',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <GraduationList />
+                    </Suspense>
+                )
+            },
+            {
+                 path: '/admin/graduation/:id/:slug/students',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <GraduationStudents />
+                    </Suspense>
+                )
+            },
+            {
+                 path: "/admin/graduation/:id/:slug/students/:studentId/:studentSlug",
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <StudentDetail />
+                    </Suspense>
+                )
+             }
+
 
         ]
     }

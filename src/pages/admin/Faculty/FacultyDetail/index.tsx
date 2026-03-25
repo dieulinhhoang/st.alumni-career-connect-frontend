@@ -180,7 +180,6 @@ export default function FacultyDetailPage() {
           locale={{
             emptyText: (
               <div style={{ padding: "40px 0", color: "#9ca3af" }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>📚</div>
                 <div>Không có ngành nào trong khóa này</div>
               </div>
             ),
