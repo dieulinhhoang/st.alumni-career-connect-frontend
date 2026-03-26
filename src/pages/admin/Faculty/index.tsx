@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Row, Col, Input, Typography, Badge } from "antd";
-import { SearchOutlined, RightOutlined, BookOutlined, TeamOutlined } from "@ant-design/icons";
+import { Row, Col, Input, Typography } from "antd";
+import { RightOutlined, BookOutlined, TeamOutlined } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export default function FacultyListPage() {
   const navigate = useNavigate();
@@ -25,32 +25,32 @@ export default function FacultyListPage() {
       <div>
         <div style={{ marginBottom: 24 }}>
           <Title level={4} style={{ margin: 0 }}>Khoa</Title>
-          {/* <Text type="secondary" style={{ fontSize: 13 }}>{filtered.length} / {faculties.length} khoa</Text> */}
         </div>
 
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           {[
-            { label: "Tổng số khoa",   value: faculties.length,               color: "#7c3aed", bg: "linear-gradient(135deg,#ede9fe,#ddd6fe)" },
-            { label: "Ngành đào tạo",  value: totalMajors,                    color: "#0ea5e9", bg: "linear-gradient(135deg,#e0f2fe,#bae6fd)" },
-            { label: "Tổng sinh viên", value: totalStudents.toLocaleString(),  color: "#f59e0b", bg: "linear-gradient(135deg,#fef9c3,#fde68a)" },
+            { label: "Tổng số khoa",   value: faculties.length,               color: "#7c3aed", bg: "#f5f3ff", border: "#ede9fe" },
+            { label: "Ngành đào tạo",  value: totalMajors,                    color: "#0ea5e9", bg: "#f0f9ff", border: "#e0f2fe" },
+            { label: "Tổng sinh viên", value: totalStudents.toLocaleString(),  color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
           ].map(s => (
             <Col key={s.label} xs={12} md={8}>
-              <Card variant="borderless" style={{ borderRadius: 12, background: s.bg, border: "none" }}>
-                <div style={{ fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: s.color, opacity: 0.8, marginTop: 4 }}>{s.label}</div>
-              </Card>
+              <div style={{
+                background: s.bg, borderRadius: 12, padding: "14px 18px",
+                border: `1.5px solid ${s.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              }}>
+                <div style={{ fontSize: 26, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: s.color, opacity: 0.7, marginTop: 4, fontWeight: 500 }}>{s.label}</div>
+              </div>
             </Col>
           ))}
         </Row>
 
         <div style={{ marginBottom: 16 }}>
           <Input
-            // prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
             placeholder="Tìm kiếm ..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ maxWidth: 380, borderRadius: 10 }}
-            // allowClear
           />
         </div>
 
@@ -81,7 +81,7 @@ export default function FacultyListPage() {
                     el.style.borderColor = "#f0f0f0";
                   }}
                 >
-                  <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%",borderRadius: "16px 0 0 16px" }} />
+                  <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "16px 0 0 16px" }} />
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                       <div style={{ width: 48, height: 48, borderRadius: 12, background: f.color + "15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

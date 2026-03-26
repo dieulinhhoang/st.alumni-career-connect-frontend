@@ -48,7 +48,7 @@ export function DashBoard() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout >
       {/* <GreetingCard /> */}
 
       {/* Page header */}
@@ -117,6 +117,7 @@ export function DashBoard() {
         ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
       `}</style>
     </AdminLayout>
+ 
   );
 }
 
