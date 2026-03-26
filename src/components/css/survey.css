@@ -1,0 +1,185 @@
+/* ═══════════════════════════════════════════════
+   THEME: ACADEMIC — Giống PDF Học Viện
+═══════════════════════════════════════════════ */
+
+.theme-academic {
+  font-family: "Times New Roman", Times, serif;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+/* ── HEADER ─────────────────────────────────── */
+.theme-academic .fp-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.theme-academic .fp-ministry {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+  color: #333;
+}
+.theme-academic .fp-academy {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 4px 0;
+  color: #1a1a1a;
+}
+.theme-academic .fp-address {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+/* ── TIÊU ĐỀ ────────────────────────────────── */
+.theme-academic .fp-title-block {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+.theme-academic .fp-title {
+  font-size: clamp(15px, 2vw, 18px);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+  font-family: "Times New Roman", serif;
+}
+.theme-academic .fp-description {
+  font-size: 13px;
+  font-style: italic;
+  color: #555;
+  margin: 0;
+  line-height: 1.8;
+  text-align: justify;
+}
+.theme-academic .fp-divider {
+  border: none;
+  border-top: 1px solid #d9d9d9;
+  margin: 16px 0 24px;
+}
+
+/* ── SECTIONS ───────────────────────────────── */
+.theme-academic .fp-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.theme-academic .fp-section-title {
+  background: #015e37;
+  color: #ffffff;
+  border-left: 4px solid #f0a500;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-family: "Times New Roman", serif;
+}
+
+/* ── QUESTIONS ──────────────────────────────── */
+.theme-academic .fp-form {
+  padding: 0 4px;
+}
+.theme-academic .fp-form-item {
+  margin-bottom: 18px !important;
+}
+.theme-academic .fp-form-item .ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+.theme-academic .fp-question-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: "Times New Roman", serif;
+  line-height: 1.5;
+}
+.theme-academic .fp-required {
+  color: #ff4d4f;
+}
+.theme-academic .fp-empty {
+  text-align: center;
+  color: #bfbfbf;
+  font-size: 12px;
+  padding: 8px 0;
+}
+
+/* ── INPUTS ─────────────────────────────────── */
+.theme-academic .fp-input.ant-input[disabled] {
+  background: #fafafa !important;
+  border-color: #d9d9d9 !important;
+  color: #333 !important;
+  border-radius: 4px !important;
+  font-family: "Times New Roman", serif !important;
+  font-size: 13px !important;
+}
+.theme-academic .fp-radio,
+.theme-academic .fp-checkbox {
+  font-size: 13px !important;
+  font-family: "Times New Roman", serif !important;
+  color: #1a1a1a !important;
+}
+.theme-academic .fp-radio .ant-radio-inner {
+  border-color: #015e37 !important;
+}
+.theme-academic .fp-checkbox .ant-checkbox-inner {
+  border-color: #015e37 !important;
+  border-radius: 2px !important;
+}
+
+/* ── FOOTER ─────────────────────────────────── */
+.theme-academic .fp-footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #d9d9d9;
+  text-align: center;
+  font-style: italic;
+  font-size: 13px;
+  color: #555;
+  line-height: 2;
+  font-family: "Times New Roman", serif;
+}
+.theme-academic .fp-footer p { margin: 0; }
+
+/* ── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 768px) {
+  .theme-academic .fp-title { font-size: 14px; }
+  .theme-academic .fp-section-title { font-size: 12px; }
+  .theme-academic .fp-question-label { font-size: 12px; }
+}
+
+/* ── FIX LOGO TO HƠN ─────────────────────────── */
+.theme-academic .fp-logo {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+/* Fix input disabled hiển thị */
+.theme-academic .ant-input[disabled] {
+    display: block !important;
+    opacity: 1 !important;
+    color: #333 !important;
+    background: #fafafa !important;
+    border: 1px solid #d9d9d9 !important;
+}
+
+.theme-academic .ant-radio-wrapper-disabled,
+.theme-academic .ant-checkbox-wrapper-disabled {
+    opacity: 1 !important;
+    color: #333 !important;
+}
+
+.theme-academic .ant-radio-disabled .ant-radio-inner,
+.theme-academic .ant-checkbox-disabled .ant-checkbox-inner {
+    border-color: #d9d9d9 !important;
+    background: #fff !important;
+}
+.theme-academic .fp-section {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #f0f0f0;
+} 

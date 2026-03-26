@@ -1,0 +1,816 @@
+/* ============================================================
+   FORMS.CSS — Survey Builder UI
+   Phong cách: Refined Professional · Soft Rounded · Airy
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+/*   CSS Variables ─ */
+:root {
+  --bg-canvas:        #ffffff;
+  --bg-surface:       #ffffff;
+  --bg-surface-2:     #f7f8fc;
+  --bg-surface-hover: #eef0f8;
+
+  --primary:          #16a34a;
+  --primary-light:    #f0fdf4;
+  --primary-dark:     #15803d;
+  --primary-glow:     rgba(22, 163, 74, 0.16);
+
+  --accent:           #0d9488;
+  --success:          #16a34a;
+  --danger:           #e11d48;
+
+  --text-primary:     #1a1d2e;
+  --text-secondary:   #5a607a;
+  --text-muted:       #9ba3bf;
+  --text-label:       #3d4463;
+
+  --border:           #e2e5f0;
+  --border-focus:     #16a34a;
+
+  --shadow-xs:        0 1px 3px rgba(26, 29, 46, 0.06);
+  --shadow-sm:        0 2px 8px rgba(26, 29, 46, 0.08), 0 1px 2px rgba(26, 29, 46, 0.04);
+  --shadow-md:        0 8px 24px rgba(26, 29, 46, 0.10), 0 2px 6px rgba(26, 29, 46, 0.06);
+  --shadow-lg:        0 16px 48px rgba(26, 29, 46, 0.12), 0 4px 12px rgba(26, 29, 46, 0.08);
+  --shadow-primary:   0 4px 16px rgba(22, 163, 74, 0.28);
+
+  --radius-sm:        8px;
+  --radius-md:        12px;
+  --radius-lg:        16px;
+  --radius-xl:        20px;
+  --radius-2xl:       28px;
+  --radius-full:      9999px;
+
+  --font-ui:          'Be Vietnam Pro', sans-serif;
+  --font-display:     'Instrument Serif', serif;
+
+  --transition:       all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/*   Base Reset    */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*   Layout: 3-Column Builder                  */
+.survey-builder-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 260px;
+  gap: 20px;
+  min-height: calc(100vh - 80px);
+  padding: 24px;
+  align-items: start;
+  background: var(--bg-canvas);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/*   Sidebar Blocks  */
+.sidebar-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.sidebar-block:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/*   Editor Sidebar  */
+.editor-sidebar .sidebar-block {
+  border-radius: var(--radius-xl);
+}
+
+/*   Ant Design Collapse Override                */
+.editor-collapse.ant-collapse {
+  background: transparent !important;
+  border: none !important;
+}
+
+.editor-collapse .ant-collapse-item {
+  border: none !important;
+  margin-bottom: 4px;
+}
+
+.editor-collapse .ant-collapse-header {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  color: var(--text-primary) !important;
+  letter-spacing: 0.02em;
+  padding: 10px 4px !important;
+  border-radius: var(--radius-md) !important;
+  transition: var(--transition);
+}
+
+.editor-collapse .ant-collapse-header:hover {
+  color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  padding-left: 10px !important;
+}
+
+.editor-collapse .ant-collapse-content {
+  background: transparent !important;
+  border: none !important;
+}
+
+.editor-collapse .ant-collapse-content-box {
+  padding: 4px 0 12px !important;
+}
+
+/*   Field Groups   */
+.field-group {
+  margin-bottom: 14px;
+}
+
+.field-label {
+  font-size: 11.5px !important;
+  font-weight: 600;
+  color: var(--text-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px !important;
+  margin-top: 0 !important;
+}
+
+.field-divider {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 18px 0 14px;
+  padding: 6px 10px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+}
+
+/*   Ant Design Input Override                ─ */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-textarea textarea {
+  font-family: var(--font-ui) !important;
+  font-size: 13px !important;
+  color: var(--text-primary) !important;
+  background: var(--bg-surface-2) !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 7px 11px !important;
+  transition: var(--transition) !important;
+  box-shadow: none !important;
+}
+
+.ant-input:hover,
+.ant-input-affix-wrapper:hover {
+  border-color: var(--primary) !important;
+  background: var(--bg-surface) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: var(--border-focus) !important;
+  background: var(--bg-surface) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+.ant-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/*   Add Section Area */
+.add-section-area {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1.5px dashed var(--border);
+}
+
+.add-section-area .ant-input {
+  border-radius: var(--radius-full) !important;
+  font-size: 12.5px !important;
+}
+
+.add-section-btn {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+  border-radius: var(--radius-full) !important;
+  height: 34px !important;
+  padding: 0 16px !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  box-shadow: var(--shadow-primary) !important;
+  transition: var(--transition-bounce) !important;
+}
+
+.add-section-btn:hover {
+  background: var(--primary-dark) !important;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.35) !important;
+}
+
+.add-section-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/*   Save Button  ─ */
+.ant-btn-primary[size="large"] {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.04em;
+  height: 46px !important;
+  border-radius: var(--radius-full) !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  border: none !important;
+  box-shadow: var(--shadow-primary) !important;
+  transition: var(--transition-bounce) !important;
+}
+
+.ant-btn-primary[size="large"]:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(22, 163, 74, 0.40) !important;
+  filter: brightness(1.06);
+}
+
+.ant-btn-primary[size="large"]:active {
+  transform: scale(0.98) !important;
+}
+
+/*   Upload Button ─ */
+.ant-upload .ant-btn {
+  font-family: var(--font-ui) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1.5px dashed var(--primary) !important;
+  color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  transition: var(--transition) !important;
+}
+
+.ant-upload .ant-btn:hover {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-style: solid !important;
+}
+
+/*   Preview Center  */
+.preview-center {
+  position: sticky;
+  top: 24px;
+}
+
+.preview-paper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  padding: 32px 28px;
+  min-height: 600px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+
+
+/*   Theme Sidebar ─ */
+.theme-sidebar .sidebar-block {
+  position: sticky;
+  top: 24px;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.theme-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition-bounce);
+  background: var(--bg-surface-2);
+}
+
+.theme-card:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary) !important;
+}
+
+.theme-card.selected {
+  box-shadow: 0 0 0 3px var(--primary-glow), var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.theme-thumbnail {
+  width: 100%;
+  overflow: hidden;
+}
+
+.theme-thumbnail > div:first-child {
+  height: 48px !important;
+}
+
+.theme-card-name {
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-align: center;
+  padding: 7px 4px 9px;
+  margin: 0 !important;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*   Section Panel (target TSX gốc)             ─ */
+
+/* Root card */
+.border.border-gray-200.rounded-xl {
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.border.border-gray-200.rounded-xl:hover {
+  border-color: #86efac !important;
+  box-shadow: var(--shadow-md);
+}
+
+/* Header — thay green-800 bằng gradient xanh nhẹ */
+.bg-green-800 {
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%) !important;
+  padding: 10px 14px !important;
+}
+
+/* Tên section */
+.bg-green-800 span.flex-1 {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Badge "N câu" */
+.bg-green-800 .text-white\/50.text-xs {
+  font-size: 11px !important;
+  font-weight: 600;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius-full);
+  padding: 1px 9px;
+  margin-left: 0 !important;
+  white-space: nowrap;
+}
+
+/* Nút xoá section trong header */
+.bg-green-800 .ant-btn.ant-btn-text {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: unset !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(255,255,255,0.45) !important;
+  transition: var(--transition) !important;
+}
+
+.bg-green-800 .ant-btn.ant-btn-text:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fca5a5 !important; /* red-300 */
+}
+
+/* Body */
+.p-4.space-y-3.bg-white {
+  padding: 12px !important;
+  background: var(--bg-surface) !important;
+}
+
+/* Empty state */
+.text-center.text-gray-300.text-sm.py-2 {
+  font-size: 12.5px !important;
+  color: var(--text-muted) !important;
+  font-style: italic;
+  padding: 14px 0 8px !important;
+}
+
+/* Add question buttons bar */
+.flex.flex-wrap.gap-2.pt-2 {
+  padding-top: 10px !important;
+  border-top: 1.5px dashed #bbf7d0;
+  margin-top: 4px;
+  gap: 6px !important;
+}
+
+/* Mỗi nút + Câu hỏi văn bản / lựa chọn / ngày tháng */
+.flex.flex-wrap.gap-2.pt-2 .ant-btn {
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  height: 30px !important;
+  padding: 0 13px !important;
+  border-radius: var(--radius-full) !important;
+  border: 1.5px solid #bbf7d0 !important;
+  background: #f0fdf4 !important;
+  color: var(--primary) !important;
+  box-shadow: none !important;
+  transition: var(--transition-bounce) !important;
+}
+
+.flex.flex-wrap.gap-2.pt-2 .ant-btn:hover {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28) !important;
+}
+/* QuestionEditor wrapper — cách nhau rõ ràng */
+.space-y-3 > * + * {
+  margin-top: 8px !important;
+}
+
+/* Ant Switch xanh lá */
+.ant-switch { background-color: #d1d5db !important; }
+.ant-switch-checked { background-color: var(--primary) !important; }
+
+/* Ant Select trong editor */
+.ant-select .ant-select-selector {
+  font-family: var(--font-ui) !important;
+  font-size: 12.5px !important;
+  border-radius: var(--radius-md) !important;
+  border-color: var(--border) !important;
+  background: var(--bg-surface) !important;
+}
+.ant-select:hover .ant-select-selector   { border-color: var(--primary) !important; }
+.ant-select-focused .ant-select-selector { border-color: var(--primary) !important; box-shadow: 0 0 0 3px var(--primary-glow) !important; }
+
+
+/*   Rules Block */
+.rules-block {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.rules-block:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.rules-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  cursor: pointer;
+   transition: var(--transition);
+}
+
+.rules-block-header:hover {
+  background: var(--primary-light);
+}
+
+.rules-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rules-block-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.rules-block-body {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Mỗi rule item */
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.rule-item:hover {
+  border-color: var(--primary);
+  background: var(--bg-surface-hover);
+}
+
+.rule-item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.rule-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rule-item-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rule-item-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.rule-item-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.rule-item-delete:hover {
+  background: #fff0f3;
+  color: var(--danger);
+}
+
+.add-rule-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--border);
+  background: transparent;
+  font-family: var(--font-ui) !important;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.add-rule-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/*   Responsive Block */
+.responsive-block {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.responsive-block:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.responsive-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  cursor: pointer;
+   transition: var(--transition);
+}
+
+.responsive-block-header:hover {
+  background: var(--primary-light);
+}
+
+.responsive-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.responsive-block-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  color: var(--success);
+  font-size: 13px;
+}
+
+.responsive-block-body {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Thiết bị toggle row */
+.device-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.device-row:hover {
+  border-color: var(--primary);
+}
+
+.device-row-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  font-size: 14px;
+}
+
+.device-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.device-sublabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Breakpoint input row */
+.breakpoint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.breakpoint-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-label);
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.breakpoint-input {
+  flex: 1;
+}
+
+.breakpoint-unit {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+
+/*   Ant Design Message   */
+.ant-message .ant-message-notice-content {
+  font-family: var(--font-ui) !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: 8px 20px !important;
+  font-size: 13px !important;
+}
+
+/*   Typography Overrides  */
+.ant-typography {
+  font-family: var(--font-ui) !important;
+}
+
+/*   Scrollbar    */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+  transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/*   Animations    */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.survey-builder-layout {
+  animation: fadeSlideIn 0.35s ease both;
+}
+
+.sidebar-block {
+  animation: fadeSlideIn 0.4s ease both;
+}
+
+/*   Responsive    */
+@media (max-width: 1100px) {
+  .survey-builder-layout {
+    grid-template-columns: 280px 1fr;
+  }
+  .theme-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .survey-builder-layout {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+  .preview-center {
+    position: static;
+  }
+}

@@ -5,17 +5,30 @@ import Statistic from '../pages/admin/Statistics';
 import AllForms from '../pages/admin/Survey/Forms';
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
-import ApproveScores from '../pages/admin/Survey/ApproveScores';
+import STAlumni from '../pages/client/Home/Home';
+import Enterprise from '../pages/admin/Enterprise/index';
+import  EnterpriseDetail  from '../pages/admin/EnterpriseDetail/index';
+import Faculties from '../pages/admin/Faculty';
+import MajorDetail from '../pages/admin/Faculty/MajorDetail';
+import FacultyDetail from '../pages/admin/Faculty/FacultyDetail';
+import GraduationStudents from '../pages/admin/Graduation/GraduationStudents';
+import GraduationList    from '../pages/admin/Graduation/index';
+import StudentDetail from '../pages/admin/Graduation/Studentdetail';
 
 
-const DashBoard = lazy(() => import("../pages/admin/DashBoard"));
+const DashBoard = lazy(() => import("../pages/admin/DashBoard/index"));
 const Loader = lazy(() => import('../components/common/loader'))
 const routes = [
     {
+
         path: '/',
         children: [
             {
-
+                path:'',
+                element: (<Suspense fallback={<Loader />} >
+                   <STAlumni />
+                </Suspense>
+                )
             }
             ,
             {
@@ -67,8 +80,71 @@ const routes = [
                     </Suspense>
                 )
             },
-            
-            
+            {
+                path: '/admin/enterprises',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <Enterprise />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/enterprises/:slug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <EnterpriseDetail />
+                    </Suspense>
+                )
+            },
+            {
+                 path: '/admin/faculties',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <Faculties />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/faculties/:facultySlug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <FacultyDetail />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/faculties/:facultySlug/:majorSlug',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <MajorDetail />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/graduation',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <GraduationList />
+                    </Suspense>
+                )
+            },
+            {
+                 path: '/admin/graduation/:id/:slug/students',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <GraduationStudents />
+                    </Suspense>
+                )
+            },
+            {
+                 path: "/admin/graduation/:id/:slug/students/:studentId/:studentSlug",
+                element: (
+                    <Suspense fallback={<Loader />}>
+                    <StudentDetail />
+                    </Suspense>
+                )
+             }
+
 
         ]
     }
