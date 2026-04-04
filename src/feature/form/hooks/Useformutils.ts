@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Form, Question, QuestionOption } from "../types";
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+//  HELPERS 
 export const genId = (): string => Math.random().toString(36).slice(2, 8);
 
 export const newQuestion = (): Question => ({
@@ -14,7 +14,7 @@ export const newQuestion = (): Question => ({
 
 export const newOption = (): QuestionOption => ({ id: genId(), label: "" });
 
-// ─── useFormList ──────────────────────────────────────────────────────────────
+//  useFormList 
 export function useFormList(initial: Form[]) {
   const [forms, setForms] = useState<Form[]>(initial);
 
@@ -49,7 +49,7 @@ export function useFormList(initial: Form[]) {
   return { forms, saveForm, deleteForm, dupForm, saveTheme };
 }
 
-// ─── useQuestionEditor ────────────────────────────────────────────────────────
+//  useQuestionEditor 
 export function useQuestionEditor(initial: Question[]) {
   const [questions, setQs] = useState<Question[]>(
     initial.length ? initial : [newQuestion()]
@@ -107,7 +107,7 @@ export function useQuestionEditor(initial: Question[]) {
       return n;
     });
 
-  // ── Option helpers ──
+  //  Option helpers 
   const addOpt = (qid: string) =>
     setQs((qs) =>
       qs.map((q) =>

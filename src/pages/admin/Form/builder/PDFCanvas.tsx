@@ -88,7 +88,9 @@ export function PDFCanvas({
 
       {/* Thông tin đơn vị */}
       <div style={{ padding: "16px 28px 14px", borderBottom: "1px solid #eee", display: "flex", gap: 14, alignItems: "flex-start" }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", border: `2px solid ${accent}30`, background: accent + "10", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 22 }}>🌾</div>
+        <div style={{ width: 52, height: 52, borderRadius: "50%", border: `2px solid ${accent}30`, background: accent + "10", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 22 }}>
+          <img src="public/logovua.png" alt="Logo" style={{ width: 28, height: 28, objectFit: "contain" }} />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           {editable ? (
             <>

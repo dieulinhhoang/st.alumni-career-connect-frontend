@@ -97,7 +97,7 @@ export function Canvas({
           q={question}
           idx={index}
           total={total}
-          updateQ={onUpdate}
+          updateQ={(id, patch) => onUpdate(patch)}
           dupQ={onDuplicate}
           removeQ={onRemove}
           moveUp={onMoveUp}
