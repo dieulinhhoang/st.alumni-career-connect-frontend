@@ -65,19 +65,27 @@ export function Canvas({
               dd/mm/yyyy
             </div>
           )}
-          {question.type === "rating" && (
-            <div style={{ display: "flex", gap: 8 }}>
-              {[1, 2, 3, 4, 5].map(n => (
-                <div key={n} style={{
-                  width: 28, height: 28,
-                  borderRadius: "50%",
-                  border: "1.5px solid #e5e7eb",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 16, color: "#d1d5db"
-                }}>★</div>
-              ))}
-            </div>
-          )}
+           {
+            question.type ==="email" && (
+              <div style={{ borderBottom: "1.5px solid #e5e7eb", paddingBottom: 4, fontSize: 13, color: "#9ca3af" }}>
+                Câu trả lời ...
+              </div>
+            )
+           }
+           {
+            question.type ==="tel" && (
+              <div style={{ borderBottom: "1.5px solid #e5e7eb", paddingBottom: 4, fontSize: 13, color: "#9ca3af" }}>
+                Câu trả lời ...
+              </div>
+            )
+           }
+           {
+            question.type ==="address" && (
+              <div style={{ borderBottom: "1.5px solid #e5e7eb", paddingBottom: 4, fontSize: 13, color: "#9ca3af" }}>
+                Câu trả lời ...
+              </div>
+            )
+           }
           {(question.type === "radio" || question.type === "checkbox") && (question.options ?? []).map(o => (
             <div key={o.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}>
               <div style={{

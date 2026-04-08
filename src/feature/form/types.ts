@@ -1,5 +1,6 @@
 //  QUESTION TYPES 
-export type QuestionType = "short" | "long" | "radio" | "checkbox" | "rating" | "date";
+export type QuestionType = "short" | "long" | "radio" | "checkbox" | "email" | "date" | "tel" |
+"address" | "dropdown" ;
 
 export interface QuestionOption {
   id: string;

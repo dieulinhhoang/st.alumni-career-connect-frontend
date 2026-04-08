@@ -7,8 +7,12 @@ export const Q_TYPES: QuestionTypeOption[] = [
   { value: "long",     label: "Văn bản dài",     icon: "" },
   { value: "radio",    label: "Một lựa chọn",   icon: "" },
   { value: "checkbox", label: "Nhiều lựa chọn", icon: "" },
-  { value: "rating",   label: "Thang điểm",     icon: "" },
-  { value: "date",     label: "Ngày tháng",      icon: "" },
+   { value: "date",     label: "Ngày tháng",      icon: "" },
+  { value: "email",    label: "Email",           icon: "" },
+  { value: "tel",      label: "Số điện thoại",   icon: "" },
+  { value: "address",  label: "Địa chỉ",         icon: "" },
+  { value: "dropdown", label: "Danh sách thả xuống", icon: "" },
+  
 ];
 
 //  THEMES 
@@ -53,7 +57,7 @@ export const SUGGESTIONS = [
   "Khảo sát nhu cầu học bổng sinh viên khó khăn",
 ];
 
-//  MOCK DATA — Prefilled from PDF 655185_Ngô_Xuân_Sáng 
+//  MOCK DATA  
 export const MOCK_FORMS: Form[] = [
   {
     id: 1,
@@ -190,8 +194,7 @@ export const MOCK_FORMS: Form[] = [
     created_at: "2025-08-20",
     questions: [
       { id:"q1", type:"short",  title:"Mã sinh viên",         required:true,  options:[] },
-      { id:"q2", type:"rating", title:"Chất lượng giảng viên", required:true,  options:[] },
-    ],
+     ],
   },
   {
     id: 3,
@@ -201,7 +204,6 @@ export const MOCK_FORMS: Form[] = [
     created_at: "2025-09-01",
     questions: [
       { id:"q1", type:"short",  title:"Tên doanh nghiệp",    required:true,  options:[] },
-      { id:"q2", type:"rating", title:"Chất lượng sinh viên", required:true,  options:[] },
-    ],
+     ],
   },
 ];

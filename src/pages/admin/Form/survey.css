@@ -753,8 +753,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
-  animation: fadeOverlay .2s ease;
+   animation: fadeOverlay .2s ease;
 }
 @keyframes fadeOverlay {
   from { opacity: 0; }
@@ -1062,4 +1061,320 @@ body {
 
 .builder-right {
   flex-shrink: 0;
+}
+
+/* ============================================================
+   PDF-STYLE PREVIEW (giống file khảo sát việc làm)
+   ============================================================ */
+
+/* Font chính như PDF */
+.pdf-preview, .pdf-preview * {
+  font-family: 'Times New Roman', Georgia, 'Times New Roman', serif;
+}
+
+/* Header chính */
+.pdf-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+.pdf-header-stripe {
+  display: none;
+}
+.pdf-date {
+  text-align: right;
+  font-size: 13px;
+  font-style: italic;
+  color: #374151;
+  padding: 10px 32px 4px;
+}
+.pdf-org-info {
+  padding: 20px 32px 16px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f3f4f6;
+}
+.pdf-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pdf-logo img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+.pdf-ministry {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+.pdf-academy {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 3px 0;
+  text-align: right;
+}
+.pdf-address {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.7;
+  font-style: italic;
+  text-align: right;
+}
+
+/* Tiêu đề form */
+.pdf-form-title {
+  text-align: center;
+  padding: 28px 32px 16px;
+}
+.pdf-form-title h2 {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: #111827;
+}
+.pdf-description {
+  padding: 14px 32px 20px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: #374151;
+  line-height: 1.8;
+  text-align: justify;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Phần (I, II) */
+.pdf-section {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #111827;
+  padding: 20px 32px 4px;
+  margin: 0;
+}
+
+/* Câu hỏi */
+.pdf-question {
+  padding: 16px 32px 20px;
+  border-bottom: none;
+  background: #fff;
+}
+.pdf-question-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.required-star {
+  color: #dc2626;
+  margin-left: 3px;
+}
+
+/* Các loại input kiểu bo tròn nền xanh nhạt (giống ảnh) */
+.pdf-input {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 14px;
+  outline: none;
+  background: #eef1f6;
+  font-family: inherit;
+  color: #111827;
+  transition: background .15s, box-shadow .15s;
+  display: block;
+}
+.pdf-input:focus {
+  background: #e4ecf7;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.18);
+}
+.pdf-input::placeholder { color: #9ca3af; }
+
+.pdf-textarea {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 14px;
+  outline: none;
+  background: #eef1f6;
+  font-family: inherit;
+  color: #111827;
+  resize: vertical;
+  min-height: 80px;
+  transition: background .15s, box-shadow .15s;
+}
+.pdf-textarea:focus {
+  background: #e4ecf7;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.18);
+}
+.pdf-textarea::placeholder { color: #9ca3af; }
+
+/* Radio và checkbox kiểu PDF */
+.pdf-radio-group, .pdf-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.pdf-radio-option, .pdf-checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #eef1f6;
+  transition: background .12s;
+}
+.pdf-radio-option:hover, .pdf-checkbox-option:hover { background: #e4ecf7; }
+.pdf-radio-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.pdf-radio-custom.selected {
+  border-color: var(--primary, #2563eb);
+}
+.pdf-radio-custom.selected::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary, #2563eb);
+}
+.pdf-checkbox-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 2px solid #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+}
+.pdf-checkbox-custom.selected {
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
+  color: #fff;
+}
+.pdf-checkbox-custom.selected::after {
+  content: "✓";
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* Rating stars giữ nguyên nhưng có thể tùy chỉnh */
+.pdf-rating {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pdf-star {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #9ca3af;
+  transition: all 0.12s;
+}
+.pdf-star.active {
+  border-color: var(--primary, #2563eb);
+  background: rgba(37,99,235,0.1);
+  color: var(--primary, #2563eb);
+}
+
+/* Nút gửi */
+.pdf-submit-btn {
+  background: var(--primary, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.12s;
+}
+.pdf-submit-btn:hover {
+  opacity: 0.88;
+}
+.pdf-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary, #2563eb);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px 16px;
+}
+
+/* Footer cảm ơn */
+.pdf-footer {
+  text-align: center;
+  font-size: 12.5px;
+  font-style: italic;
+  color: #9ca3af;
+  padding: 20px 24px;
+  line-height: 2;
+  border-top: 1px solid #f5f5f5;
+}
+
+/* Bảng lựa chọn nhiều dòng (dạng cột) */
+.pdf-multi-column {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+.pdf-multi-column .pdf-checkbox-option {
+  width: calc(33% - 16px);
+  min-width: 160px;
+}
+
+/* Điều chỉnh responsive */
+@media (max-width: 640px) {
+  .pdf-org-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .pdf-date {
+    text-align: center;
+  }
+  .pdf-multi-column .pdf-checkbox-option {
+    width: 100%;
+  }
 }
