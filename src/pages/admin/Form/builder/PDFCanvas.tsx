@@ -1,78 +1,148 @@
 import { useState } from "react";
-import type { Question } from "../../../../feature/form/types";
+import type { Question, Section, SurveyFooter, SurveyHeader } from "../../../../feature/form/types";
 import { AddressInput } from "./AddressInput";
 
-interface HeaderFields {
-  orgUnit: string;
-  orgName: string;
-  address: string;
-  phone: string;
-}
-
 interface PDFCanvasProps {
-  name: string;
-  desc: string;
+  surveyTitle: string;
+  descriptionParagraphs?: string[];
+  sections: Section[];
   questions: Question[];
   accent: string;
+  header: SurveyHeader;
+  footer: SurveyFooter;
   interactive?: boolean;
   headerOnly?: boolean;
-  header?: HeaderFields;
-  onHeaderChange?: (fields: HeaderFields) => void;
-  onNameChange?: (v: string) => void;
-  onDescChange?: (v: string) => void;
+  onHeaderChange?: (header: SurveyHeader) => void;
+  onFooterChange?: (footer: SurveyFooter) => void;
+  onTitleChange?: (title: string) => void;
+  onDescriptionParagraphsChange?: (paragraphs: string[]) => void;
+  logoUrl?: string;
+  logoSize?: number;
 }
 
-function InlineInput({ value, onChange, style, multiline, placeholder }: {
-  value: string; onChange: (v: string) => void;
-  style?: React.CSSProperties; multiline?: boolean; placeholder?: string;
+function InlineInput({
+  value, onChange, style, multiline, placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  style?: React.CSSProperties;
+  multiline?: boolean;
+  placeholder?: string;
 }) {
   const [hover, setHover] = useState(false);
   const base: React.CSSProperties = {
-    background: "transparent", border: "none", outline: "none",
+    background: "transparent",
+    border: "none",
+    outline: "none",
     borderBottom: hover ? "1.5px dashed #ccc" : "1.5px solid transparent",
-    width: "100%", fontFamily: "inherit", resize: "none",
-    cursor: "text", transition: "border-color .15s", ...style,
+    width: "100%",
+    fontFamily: "inherit",
+    resize: "none",
+    cursor: "text",
+    transition: "border-color .15s",
+    ...style,
   };
-  return multiline
-    ? <textarea rows={2} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)}
-        onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-        style={{ ...base, display: "block" }} />
-    : <input value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)}
-        onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-        style={base} />;
+  return multiline ? (
+    <textarea
+      rows={2}
+      value={value}
+      placeholder={placeholder}
+      onChange={e => onChange(e.target.value)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ ...base, display: "block" }}
+    />
+  ) : (
+    <input
+      value={value}
+      placeholder={placeholder}
+      onChange={e => onChange(e.target.value)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={base}
+    />
+  );
 }
 
-const DEFAULT_HEADER: HeaderFields = {
-  orgUnit: "Bộ Nông nghiệp và Môi trường",
-  orgName: "Học viện Nông nghiệp Việt Nam",
-  address: "Xã Gia Lâm, Thành phố Hà Nội",
-  phone: "Điện thoại: 024.62617586 — Fax: 024.62617586",
+// Input chỉ gạch dưới, không nền, chữ đen, kích thước chữ 15px
+const underlineInputStyle: React.CSSProperties = {
+  width: "100%",
+  border: "none",
+  borderBottom: "1.5px solid #cbd5e1",
+  padding: "8px 4px 6px",
+  fontSize: 15,
+  fontFamily: "'Times New Roman', Georgia, serif",
+  outline: "none",
+  background: "transparent",
+  color: "#000000",
+  transition: "border-color 0.2s",
+};
+
+const underlineTextareaStyle: React.CSSProperties = {
+  ...underlineInputStyle,
+  resize: "vertical",
+  minHeight: "80px",
+};
+
+const radioCheckboxBaseStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  padding: "6px 0",
+  fontSize: 15,
+  color: "#000000",
+  cursor: "pointer",
+  fontFamily: "'Times New Roman', Georgia, serif",
 };
 
 export function PDFCanvas({
-  name, desc, questions, accent,
-  interactive = true, headerOnly = false,
-  header = DEFAULT_HEADER,
-  onHeaderChange, onNameChange, onDescChange,
+  surveyTitle,
+  descriptionParagraphs = [],
+  sections = [],
+  questions,
+  accent,
+  header = {
+    ministry: "Bộ Giáo dục và Đào tạo",
+    academy: "",
+    address: "",
+    phone: "",
+    fax: "",
+    showDate: true,
+  },
+  footer,
+  interactive = true,
+  headerOnly = false,
+  onHeaderChange,
+  onFooterChange,
+  onTitleChange,
+  onDescriptionParagraphsChange,
+  logoUrl,
+  logoSize = 200,
 }: PDFCanvasProps) {
-  const [stars, setStars] = useState<Record<string, number>>({});
   const [radios, setRadios] = useState<Record<string, string>>({});
   const [cbs, setCbs] = useState<Record<string, Record<string, boolean>>>({});
   const [textVals, setTextVals] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
-  const today = new Date().toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
-  const h = header ?? DEFAULT_HEADER;
-  const setH = (key: keyof HeaderFields) => (val: string) =>
-    onHeaderChange?.({ ...h, [key]: val });
+  const today = new Date().toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
   const editable = headerOnly && !!onHeaderChange;
 
-  // Hàm xử lý gửi form (validate)
+  const updateHeader = (key: keyof SurveyHeader, value: any) => {
+    if (onHeaderChange) onHeaderChange({ ...header, [key]: value });
+  };
+
+  const updateFooter = (key: keyof SurveyFooter, value: string) => {
+    if (onFooterChange) onFooterChange({ ...footer, [key]: value });
+  };
+
   const handleSubmit = () => {
-    // Tìm tất cả các input, select có required
-    const elements = document.querySelectorAll('input[required], select[required]');
-    for (let el of elements) {
+    const elements = document.querySelectorAll("input[required], select[required]");
+    for (const el of elements) {
       const element = el as HTMLInputElement | HTMLSelectElement;
       if (!element.checkValidity()) {
         element.reportValidity();
@@ -84,182 +154,544 @@ export function PDFCanvas({
 
   if (done && interactive) {
     return (
-      <div style={{ background: "#fff", textAlign: "center", padding: "48px 20px", fontFamily: "'Times New Roman', serif" }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: accent + "20", color: accent, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 22 }}>✓</div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 8 }}>Phản hồi đã được ghi lại!</div>
-        <button onClick={() => { setDone(false); setStars({}); setRadios({}); setCbs({}); setTextVals({}); }}
-          style={{ height: 32, padding: "0 20px", borderRadius: 4, border: "none", background: accent, color: "#fff", fontSize: 13, cursor: "pointer" }}>
+      <div
+        style={{
+          background: "#fff",
+          textAlign: "center",
+          padding: "60px 20px",
+          fontFamily: "'Times New Roman', serif",
+        }}
+      >
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: accent + "20",
+            color: accent,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 18px",
+            fontSize: 28,
+          }}
+        >
+          ✓
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
+          Phản hồi đã được ghi lại!
+        </div>
+        <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 24 }}>
+          Cảm ơn bạn đã tham gia khảo sát.
+        </div>
+        <button
+          onClick={() => { setDone(false); setRadios({}); setCbs({}); setTextVals({}); }}
+          style={{
+            height: 40,
+            padding: "0 28px",
+            borderRadius: 6,
+            border: "none",
+            background: accent,
+            color: "#fff",
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
           Xem lại
         </button>
       </div>
     );
   }
 
-   // Trong PDFCanvas.tsx, thay đổi phần return JSX
-return (
-  <div className="pdf-preview" style={{ background: "#fff" }}>
-    {/* Header stripe */}
-    <div className="pdf-header-stripe" style={{ background: accent }} />
-    
-    {/* Date */}
-    <div className="pdf-date">
-      Ngày {today.replace(/\//g, " / ")}
-    </div>
+  // Group questions by section
+  const questionsBySection = sections
+    .map(section => ({
+      ...section,
+      questions: questions
+        .filter(q => q.sectionId === section.id)
+        .sort((a, b) => a.order - b.order),
+    }))
+    .filter(sec => sec.questions.length > 0);
 
-    {/* Thông tin đơn vị */}
-    <div className="pdf-org-info">
-      <div className="pdf-logo">
-        <img src="public/logovua.png" alt="Logo" style={{ width: 28, height: 28 }} />
-      </div>
-      <div style={{ flex: 1 }}>
-        {editable ? (
-          <>
-            <InlineInput value={h.orgUnit} onChange={setH("orgUnit")} />
-            <InlineInput value={h.orgName} onChange={setH("orgName")} />
-            <InlineInput value={h.address} onChange={setH("address")} />
-            <InlineInput value={h.phone} onChange={setH("phone")} />
-          </>
-        ) : (
-          <>
-            <div className="pdf-ministry">{h.orgUnit}</div>
-            <div className="pdf-academy">{h.orgName}</div>
-            <div className="pdf-address">{h.address}<br />{h.phone}</div>
-          </>
+  let globalIndex = 0;
+
+  const renderQuestion = (q: Question) => {
+    globalIndex++;
+    const idx = globalIndex;
+
+    return (
+      <div
+        key={q.id}
+        style={{
+          padding: "18px 36px 20px",
+          borderBottom: "none",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#000000",
+            marginBottom: 12,
+            lineHeight: 1.5,
+            fontFamily: "'Times New Roman', Georgia, serif",
+          }}
+        >
+          {idx}. {q.title}
+          {q.required && <span style={{ color: "#c53030", marginLeft: 4 }}>*</span>}
+        </div>
+
+        {(q.type === "short" || q.type === "text") && (
+          <input
+            type="text"
+            placeholder={q.placeholder || "Câu trả lời của bạn"}
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={underlineInputStyle}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          />
         )}
-      </div>
-    </div>
 
-    {/* Tiêu đề form */}
-    <div className="pdf-form-title">
-      {editable && onNameChange ? (
-        <InlineInput value={name} onChange={onNameChange} placeholder="TÊN FORM KHẢO SÁT" style={{ fontSize: 15, fontWeight: 700, textAlign: "center", textTransform: "uppercase" }} />
-      ) : (
-        <h2>{name || "TÊN FORM KHẢO SÁT"}</h2>
-      )}
-    </div>
-
-    {/* Mô tả */}
-    {(desc || (editable && onDescChange)) && (
-      <div className="pdf-description"  >
-        {editable && onDescChange ? (
-          <InlineInput value={desc} onChange={onDescChange} placeholder="Mô tả form (tuỳ chọn)..." multiline style={{ fontStyle: "italic", textAlign: "justify" }} />
-        ) : (
-          desc
+        {q.type === "long" && (
+          <textarea
+            placeholder={q.placeholder || "Câu trả lời của bạn"}
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={underlineTextareaStyle}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          />
         )}
-      </div>
-    )}
 
-     {!headerOnly && (
-      <>
-        {questions.length === 0 ? (
-          <div style={{ padding: "48px 24px", textAlign: "center", color: "#9ca3af" }}>Chưa có câu hỏi nào</div>
-        ) : (
-          questions.map((q, i) => {
-             const isSectionStart = q.title.match(/^1\./) || q.title.match(/^11\./);
-            const sectionTitle = q.title.match(/^1\./) ? "Phần I. Thông tin cá nhân" : (q.title.match(/^11\./) ? "Phần II. Nội dung khảo sát" : null);
-            return (
-              <div key={q.id}>
-                {sectionTitle && <div className="pdf-section" style={{ borderLeftColor: accent, color: accent }}>{sectionTitle}</div>}
-                <div className="pdf-question">
-                  <div className="pdf-question-title">
-                    {i + 1}. {q.title.replace(/^\d+\.\s*/, "")}
-                    {q.required && <span className="required-star">*</span>}
+        {q.type === "email" && (
+          <input
+            type="email"
+            placeholder={q.placeholder || "Nhập email"}
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={underlineInputStyle}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          />
+        )}
+
+        {q.type === "tel" && (
+          <input
+            type="tel"
+            placeholder={q.placeholder || "Nhập số điện thoại"}
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={underlineInputStyle}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          />
+        )}
+
+        {q.type === "date" && (
+          <input
+            type="date"
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={{ ...underlineInputStyle, width: "auto", minWidth: 200 }}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          />
+        )}
+
+        {q.type === "address" && (
+          <AddressInput
+            value={textVals[q.id] || ""}
+            onChange={v => setTextVals(t => ({ ...t, [q.id]: v }))}
+          />
+        )}
+
+        {q.type === "radio" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {(q.options ?? []).map(opt => {
+              const val = typeof opt === "string" ? opt : opt.label;
+              const key = typeof opt === "string" ? opt : opt.id;
+              const selected = radios[q.id] === val;
+              return (
+                <div
+                  key={key}
+                  onClick={() => interactive && setRadios(v => ({ ...v, [q.id]: val }))}
+                  style={radioCheckboxBaseStyle}
+                >
+                  <div
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      border: `2px solid ${selected ? accent : "#94a3b8"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      background: "#fff",
+                    }}
+                  >
+                    {selected && <div style={{ width: 10, height: 10, borderRadius: "50%", background: accent }} />}
                   </div>
-                  {/* Các loại câu hỏi - sử dụng class mới */}
-                  {q.type === "short" && (
-                    <input
-                      type="text"
-                      className="pdf-input"
-                      placeholder="Câu trả lời của bạn"
-                      value={textVals[q.id] || ""}
-                      onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
-                    />
-                  )}
-                  {q.type === "long" && (
-                    <textarea
-                      className="pdf-textarea"
-                      rows={3}
-                      placeholder="Câu trả lời của bạn..."
-                      value={textVals[q.id] || ""}
-                      onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
-                    />
-                  )}
-                  {q.type === "date" && (
-                    <input type="date" className="pdf-input" style={{ width: "auto", minWidth: 160 }} />
-                  )}
-                  {q.type === "email" && (
-                    <input
-                      type="email"
-                      className="pdf-input"
-                      required={q.required}
-                      placeholder="Nhập email của bạn"
-                      value={textVals[q.id] || ""}
-                      onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
-                    />
-                  )}
-                  {q.type === "tel" && (
-                    <input
-                      type="tel"
-                      className="pdf-input"
-                      required={q.required}
-                      pattern="(02[0-9]{8})|(0[3-9][0-9]{8})"
-                      placeholder="Nhập số điện thoại"
-                      value={textVals[q.id] || ""}
-                      onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
-                    />
-                  )}
-                  {q.type === "radio" && (
-                    <div className="pdf-radio-group">
-                      {(q.options ?? []).map(o => {
-                        const selected = radios[q.id] === o.id;
-                        return (
-                          <div key={o.id} className="pdf-radio-option" onClick={() => setRadios(v => ({ ...v, [q.id]: o.id }))}>
-                            <div className={`pdf-radio-custom ${selected ? "selected" : ""}`} />
-                            <span>{o.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {q.type === "checkbox" && (
-                    <div className="pdf-checkbox-group">
-                      {(q.options ?? []).map(o => {
-                        const checked = cbs[q.id]?.[o.id] || false;
-                        return (
-                          <div key={o.id} className="pdf-checkbox-option" onClick={() => setCbs(v => ({ ...v, [q.id]: { ...(v[q.id] || {}), [o.id]: !checked } }))}>
-                            <div className={`pdf-checkbox-custom ${checked ? "selected" : ""}`} />
-                            <span>{o.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                   
-                  {q.type === "dropdown" && (
-                    <select className="pdf-input" value={textVals[q.id] || ""} onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}>
-                      <option value="" disabled>Chọn một phương án</option>
-                      {(q.options ?? []).map(o => <option key={o.id} value={o.label}>{o.label}</option>)}
-                    </select>
-                  )}
-                  {q.type === "address" && (
-                    <AddressInput value={textVals[q.id] || ""} onChange={v => setTextVals(t => ({ ...t, [q.id]: v }))} />
-                  )}
+                  <span>{val}</span>
                 </div>
-              </div>
-            );
-          })
-        )}
-        {questions.length > 0 && interactive && (
-          <div style={{ padding: "16px 24px", display: "flex", gap: 12, borderTop: "1px solid #f3f4f6" }}>
-            <button className="pdf-submit-btn" onClick={handleSubmit} style={{ background: accent }}>Gửi</button>
+              );
+            })}
           </div>
         )}
-        <div className="pdf-footer">
-          Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!<br />
-          Kính chúc Anh/Chị sức khỏe và thành công!
+
+        {q.type === "checkbox" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {(q.options ?? []).map(opt => {
+              const val = typeof opt === "string" ? opt : opt.label;
+              const key = typeof opt === "string" ? opt : opt.id;
+              const checked = cbs[q.id]?.[val] || false;
+              return (
+                <div
+                  key={key}
+                  onClick={() =>
+                    interactive &&
+                    setCbs(v => ({
+                      ...v,
+                      [q.id]: { ...(v[q.id] || {}), [val]: !checked },
+                    }))
+                  }
+                  style={radioCheckboxBaseStyle}
+                >
+                  <div
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      border: `2px solid ${checked ? accent : "#94a3b8"}`,
+                      background: checked ? accent : "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      fontSize: 12,
+                      fontWeight: "bold",
+                      color: "#fff",
+                    }}
+                  >
+                    {checked && "✓"}
+                  </div>
+                  <span>{val}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {q.type === "multiple-choice" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {q.options?.map(opt => {
+              const val = typeof opt === "string" ? opt : opt;
+              const selected = radios[q.id] === val;
+              return (
+                <div
+                  key={val}
+                  onClick={() => interactive && setRadios(v => ({ ...v, [q.id]: val }))}
+                  style={radioCheckboxBaseStyle}
+                >
+                  <div
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      border: `2px solid ${selected ? accent : "#94a3b8"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      background: "#fff",
+                    }}
+                  >
+                    {selected && <div style={{ width: 10, height: 10, borderRadius: "50%", background: accent }} />}
+                  </div>
+                  <span>{val}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {q.type === "select" && (
+          <select
+            value={textVals[q.id] || ""}
+            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            required={q.required}
+            disabled={!interactive}
+            style={{
+              ...underlineInputStyle,
+              appearance: "auto",
+              cursor: interactive ? "pointer" : "default",
+              color: "#000000",
+            }}
+            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+          >
+            <option value="" disabled>Chọn một phương án</option>
+            {q.options?.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        background: "#fff",
+        fontFamily: "'Times New Roman', Georgia, serif",
+        color: "#000000",
+      }}
+    >
+      {/* Top accent stripe */}
+      <div style={{ height: 6, background: accent }} />
+
+      {/* Ngày tháng */}
+      {header.showDate !== false && (
+        <div
+          style={{
+            textAlign: "right",
+            fontSize: 14,
+            fontStyle: "italic",
+            color: "#000000",
+            padding: "16px 36px 8px",
+          }}
+        >
+          Ngày {today.replace(/\//g, " / ")}
         </div>
-      </>
-    )}
-  </div>
-);
+      )}
+
+      {/* Logo + thông tin đơn vị */}
+      <div
+        style={{
+          padding: "20px 36px 24px",
+          display: "flex",
+          alignItems: "center",
+          gap: 24,
+        }}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <img
+              src={logoUrl || header.logoUrl || "public/logovua.png"}
+              alt="Logo"
+              style={{ width: logoSize, height: logoSize, objectFit: "contain", borderRadius: "50%", border: "1px solid #e2e8f0" }}
+            />
+        </div>
+        <div style={{ flex: 1 }}>
+          {editable ? (
+            <>
+              <InlineInput
+                value={header.ministry || ""}
+                onChange={v => updateHeader("ministry", v)}
+                placeholder="Bộ/ngành"
+                style={{ fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right", color: "#000000" }}
+              />
+              <InlineInput
+                value={header.academy || ""}
+                onChange={v => updateHeader("academy", v)}
+                placeholder="Học viện / Trường"
+                style={{ fontSize: 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: "right", color: "#000000" }}
+              />
+              <InlineInput
+                value={header.address || ""}
+                onChange={v => updateHeader("address", v)}
+                placeholder="Địa chỉ"
+                style={{ fontSize: 13, textAlign: "right", color: "#000000" }}
+              />
+              <InlineInput
+                value={header.phone || ""}
+                onChange={v => updateHeader("phone", v)}
+                placeholder="Điện thoại"
+                style={{ fontSize: 13, textAlign: "right", color: "#000000" }}
+              />
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right" }}>
+                {header.ministry}
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: "right" }}>
+                {header.academy}
+              </div>
+              <div style={{ fontSize: 13, color: "#000000", lineHeight: 1.5, textAlign: "right" }}>
+                {header.address}
+                {header.phone && <><br />{header.phone}{header.fax ? ` — Fax: ${header.fax}` : ""}</>}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Tiêu đề form - in hoa, đậm, không gạch chân */}
+      <div style={{ textAlign: "center", padding: "30px 36px 18px" }}>
+        {editable && onTitleChange ? (
+          <InlineInput
+            value={surveyTitle}
+            onChange={onTitleChange}
+            placeholder="TÊN FORM KHẢO SÁT"
+            style={{
+              fontSize: 20,
+              fontWeight: 800,
+              textAlign: "center",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              color: "#000000",
+            }}
+          />
+        ) : (
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 20,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              color: "#000000",
+            }}
+          >
+            {surveyTitle || "TÊN FORM KHẢO SÁT"}
+          </h2>
+        )}
+      </div>
+
+      {/* Mô tả - in nghiêng, căn đều */}
+      {descriptionParagraphs.length > 0 && (
+        <div style={{ padding: "0 36px 24px" }}>
+          {descriptionParagraphs.map((para, idx) => (
+            <div key={idx} style={{ marginBottom: idx === descriptionParagraphs.length - 1 ? 0 : 14 }}>
+              {editable && onDescriptionParagraphsChange ? (
+                <InlineInput
+                  value={para}
+                  onChange={val => {
+                    const updated = [...descriptionParagraphs];
+                    updated[idx] = val;
+                    onDescriptionParagraphsChange(updated);
+                  }}
+                  placeholder={`Đoạn ${idx + 1}`}
+                  multiline
+                  style={{ fontStyle: "italic", textAlign: "justify", fontSize: 14, color: "#000000" }}
+                />
+              ) : (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 14,
+                    fontStyle: "italic",
+                    color: "#000000",
+                    lineHeight: 1.7,
+                    textAlign: "justify",
+                  }}
+                >
+                  {para}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Nội dung câu hỏi */}
+      {!headerOnly && (
+        <>
+          {questionsBySection.length === 0 ? (
+            <div
+              style={{
+                padding: "60px 24px",
+                textAlign: "center",
+                color: "#9ca3af",
+                fontStyle: "italic",
+                fontSize: 14,
+              }}
+            >
+              Chưa có câu hỏi nào
+            </div>
+          ) : (
+            questionsBySection.map(section => (
+              <div key={section.id}>
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: "#000000",
+                    padding: "22px 36px 8px",
+                    margin: 0,
+                  }}
+                >
+                  {section.title}
+                </div>
+                {section.questions.map(q => renderQuestion(q))}
+              </div>
+            ))
+          )}
+
+          {questions.length > 0 && interactive && (
+            <div style={{ padding: "24px 36px", display: "flex", gap: 12, alignItems: "center" }}>
+              <button
+                onClick={handleSubmit}
+                style={{
+                  background: accent,
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 4,
+                  padding: "10px 32px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                Gửi
+              </button>
+            </div>
+          )}
+
+          <div style={{ textAlign: "center", padding: "32px 36px 48px" }}>
+            <div style={{ fontWeight: 700, marginBottom: 10, fontSize: 14, color: "#000000" }}>
+              {editable && onFooterChange ? (
+                <InlineInput
+                  value={footer?.primaryText || ""}
+                  onChange={v => updateFooter("primaryText", v)}
+                  placeholder="Dòng cảm ơn"
+                  style={{ textAlign: "center", fontWeight: "bold", color: "#000000" }}
+                />
+              ) : (
+                footer?.primaryText
+              )}
+            </div>
+            <div style={{ fontStyle: "italic", color: "#000000", fontSize: 13.5 }}>
+              {editable && onFooterChange ? (
+                <InlineInput
+                  value={footer?.secondaryText || ""}
+                  onChange={v => updateFooter("secondaryText", v)}
+                  placeholder="Lời chúc"
+                  style={{ textAlign: "center", fontStyle: "italic", color: "#000000" }}
+                />
+              ) : (
+                footer?.secondaryText
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

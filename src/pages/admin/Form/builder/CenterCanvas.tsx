@@ -79,12 +79,24 @@ export function CenterCanvas({
 
   return (
     <div
-      style={{ minWidth: 0, height: "100%", background: "#f0f0f0", overflowY: "auto", padding: "24px" }}
+      style={{
+        height: "100%",
+        background: "#eff1f5",
+        overflowY: "auto",
+        padding: "24px 20px",
+      }}
       onDragOver={e => e.preventDefault()}
     >
-      <div style={{ maxWidth: 700, margin: "0 auto" }}>
-        {/* Header editable */}
-        <div style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,.1)", marginBottom: 24 }}>
+      <div style={{ maxWidth: 680, margin: "0 auto" }}>
+
+        {/* PDF Header */}
+        <div style={{
+          background: "#fff",
+          borderRadius: 10,
+          boxShadow: "0 2px 12px rgba(0,0,0,.07)",
+          marginBottom: 16,
+          overflow: "hidden",
+        }}>
           <PDFCanvas
             name={name} desc={desc} questions={questions} accent={accent}
             interactive={false} headerOnly
@@ -93,15 +105,36 @@ export function CenterCanvas({
           />
         </div>
 
-        {/* Danh sách câu hỏi editable */}
-        <div style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,.1)" }}>
+        {/* Questions */}
+        <div style={{
+          background: "#fff",
+          borderRadius: 10,
+          boxShadow: "0 2px 12px rgba(0,0,0,.07)",
+          overflow: "hidden",
+        }}>
           {questions.length === 0 ? (
             <div
-              style={{ padding: "48px 28px", textAlign: "center", color: "#bbb", fontSize: 13, fontStyle: "italic" }}
+              style={{
+                padding: "52px 28px",
+                textAlign: "center",
+                color: "#c4c9d4",
+                fontSize: 13,
+              }}
               onDragOver={e => e.preventDefault()}
               onDrop={e => handleDrop(e, 0)}
             >
-              Kéo câu hỏi từ bên trái vào đây để bắt đầu
+              <div style={{
+                width: 48, height: 48, borderRadius: 12,
+                background: "#f0f2f5",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 12px", fontSize: 20,
+              }}>
+                ✦
+              </div>
+              <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4 }}>
+                Chưa có câu hỏi nào
+              </div>
+              <div style={{ fontSize: 12.5 }}>Kéo câu hỏi từ bên trái vào đây để bắt đầu</div>
             </div>
           ) : (
             questions.map((q, idx) => (
@@ -113,9 +146,10 @@ export function CenterCanvas({
                 onDrop={e => handleDrop(e, idx)}
                 onDragEnd={handleDragEnd}
                 style={{
-                  borderTop: dragOverIndex === idx ? `2px dashed ${accent}` : "none",
-                  borderBottom: dragOverIndex === idx + 1 ? `2px dashed ${accent}` : "none",
-                  cursor: "grab", transition: "border 0.1s"
+                  borderTop: dragOverIndex === idx ? `2px solid ${accent}` : "none",
+                  borderBottom: dragOverIndex === idx + 1 ? `2px solid ${accent}` : "none",
+                  cursor: "grab",
+                  transition: "border .08s",
                 }}
               >
                 <Canvas
@@ -135,6 +169,16 @@ export function CenterCanvas({
             ))
           )}
         </div>
+
+        {/* Question count footer */}
+        {questions.length > 0 && (
+          <div style={{
+            textAlign: "center", marginTop: 16,
+            fontSize: 11.5, color: "#9ca3af", fontWeight: 500,
+          }}>
+            {questions.length} câu hỏi · Kéo để sắp xếp
+          </div>
+        )}
       </div>
     </div>
   );

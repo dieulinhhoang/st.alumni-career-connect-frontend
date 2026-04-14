@@ -19,15 +19,15 @@ export function DeleteModal({ form, onConfirm, onCancel }: Props) {
     <div className="modal-overlay">
       <div className="delete-modal">
         <div style={{
-          width: 44, height: 44, borderRadius: 12,
+          width: 48, height: 48, borderRadius: 12,
           background: "#fef2f2", border: "1px solid #fca5a5",
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#dc2626", marginBottom: 16,
+          color: "#dc2626", marginBottom: 18,
         }}>
           <IcAlertTriangle />
         </div>
 
-        <div style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
+        <div style={{ fontSize: 17, fontWeight: 800, color: "#0d1117", marginBottom: 8, letterSpacing: "-.02em" }}>
           Xóa form này?
         </div>
         <div style={{ fontSize: 13.5, color: "#6b7280", lineHeight: 1.65, marginBottom: 24 }}>
@@ -39,7 +39,11 @@ export function DeleteModal({ form, onConfirm, onCancel }: Props) {
           <button className="btn" onClick={onCancel}>Hủy</button>
           <button
             className="btn"
-            style={{ background: "#dc2626", color: "#fff", border: "none", boxShadow: "0 1px 3px rgba(220,38,38,.3)" }}
+            style={{
+              background: "#dc2626", color: "#fff",
+              border: "none",
+              boxShadow: "0 1px 4px rgba(220,38,38,.25)",
+            }}
             onClick={onConfirm}
           >
             Xóa vĩnh viễn

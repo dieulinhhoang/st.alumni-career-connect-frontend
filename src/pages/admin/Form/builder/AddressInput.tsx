@@ -1,123 +1,99 @@
-import React, { useCallback, useEffect } from "react";
-
-interface AddressSuggestion {
-    lat : string; // vĩ độ
-    lng : string; // kinh độ
-    label : string;
-}
+import React, { useRef, useEffect } from 'react';
+import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
+import '@geoapify/geocoder-autocomplete/styles/minimal.css';
 
 interface AddressInputProps {
-    value : string
-    onChange:(value : string) => void;
+    value: string;
+    onChange: (value: string) => void;
     placeholder?: string;
-  }
+}
 
- export const AddressInput : React.FC<AddressInputProps>=({
+export const AddressInput: React.FC<AddressInputProps> = ({
     value,
     onChange,
     placeholder = "Nhập địa chỉ của bạn",
- }) => {
-    const [suggestions, setSuggestions] = React.useState<AddressSuggestion[]>([]);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [showSuggestions, setShowSuggestions] = React.useState(false);
-    const wrapperRef = React.useRef<HTMLDivElement>(null);
-    // an khi click ra ngoài
+}) => {
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const [inputValue, setInputValue] = React.useState(value);
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    // Đồng bộ value từ prop khi nó thay đổi từ bên ngoài
     useEffect(() => {
-        const handleClickOutside = (event : MouseEvent) =>{
-           if (wrapperRef.current && ! wrapperRef.current.contains(event.target as Node) )
-           {
-             setShowSuggestions(false) 
-        
-           }
+        setInputValue(value);
+    }, [value]);
+
+    // Xử lý khi chọn một địa chỉ từ gợi ý
+    const handlePlaceSelect = (selectedPlace: any) => {
+        console.log("Selected place properties:", selectedPlace?.properties); // Debug: xem cấu trúc
+
+        if (selectedPlace && selectedPlace.properties) {
+            const props = selectedPlace.properties;
+            
+            // Lấy phường/xã: ưu tiên suburb, nếu không thì city_district hoặc district
+            const phuongXa = props.suburb || props.city_district || props.district || '';
+            // Lấy tỉnh/thành phố: ưu tiên state, nếu không thì city
+            const tinhTp = props.state || props.city || '';
+            
+            let customLabel = '';
+            if (phuongXa && tinhTp) {
+                customLabel = `${phuongXa}, ${tinhTp}`;
+            } else {
+                // Fallback: dùng formatted nếu thiếu thông tin
+                customLabel = props.formatted || '';
+            }
+            
+            setInputValue(customLabel);
+            onChange(customLabel);
+            setIsOpen(false);
+        }
+    };
+
+    // Xử lý khi input thay đổi (người dùng gõ)
+    const handleInputChange = (newValue: string) => {
+        setInputValue(newValue);
+        setIsOpen(true);
+        // Không gọi onChange ở đây vì chưa chọn địa chỉ chính thức
+    };
+
+    // Xử lý khi blur khỏi input
+    const handleBlur = () => {
+        setTimeout(() => {
+            if (!wrapperRef.current?.contains(document.activeElement)) {
+                setIsOpen(false);
+                if (!inputValue.trim()) {
+                    setInputValue(value);
+                }
+            }
+        }, 150);
+    };
+
+    // Xử lý click ra ngoài component để đóng dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-        }
-
-},[]);
-    //  tránh gọi api nhiều 
-    // func là hàm gọi api , delay là timeout 
-    const debounce = (func : (...args :any[]) => void, delay : number) => {
-        let timeoutId: ReturnType<typeof setTimeout>;
-        return (...args : any[]) => { // khi có bất kỳ thay đổi nào trong input thì sẽ clear timeout cũ và tạo timeout mới , nếu trong khoảng delay mà có thay đổi mới thì sẽ không gọi api cũ nữa mà sẽ gọi api mới sau delay
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                func(...args);
-            }, delay);
         };
-    };
+    }, []);
 
-    // call api 
-    const fetchSuggestions = useCallback(
-        debounce(async (query : string) => {
-            if (!query) {
-                setSuggestions([]);
-                setShowSuggestions(false);
-                return;
-            }
-            setIsLoading(true);
-            try {
-                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=vi`;
-                const response = await  fetch(url);
-                if (!response.ok) {
-                    throw new Error(`API Error ${response.status}`);
-                }
-                const data = await response.json();
-                if (data && data.features) {
-                    const formattedSuggestions = data.features.map((feature : any) => ({
-                        lat: feature.geometry.coordinates[1],
-                        lng: feature.geometry.coordinates[0],
-                        label: feature.properties.name || feature.properties.street || 
-                          `${feature.properties.city || ''} ${feature.properties.country || ''}`.trim(),
-                    }));
-                    setSuggestions(formattedSuggestions);
-                    setShowSuggestions(true);
-                } else {
-                    setSuggestions([]);
-                    setShowSuggestions(false);
-                }
-            } catch (error) {
-                console.error("Error fetching suggestions:", error);
-                setSuggestions([]);
-                setShowSuggestions(false);
-            } finally {
-                setIsLoading(false);
-            }
-        }, 500),  []
-    );
-    const handleInputChange = (e : React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        onChange(newValue);
-        fetchSuggestions(newValue);
-    };
-
-    const handleSuggestionClick = (suggestion : AddressSuggestion) => {
-        onChange(suggestion.label);
-        setShowSuggestions(false);
-    };
     return (
-        <div ref={wrapperRef} style={{ position: "relative" }}>
-            <input
-                type="text"
-                value={value}
-                onChange={handleInputChange}
-                placeholder={placeholder}
-            />
-            {isLoading && <div>Đang tải...</div>}
-            {showSuggestions && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "white", border: "1px solid #ccc", zIndex: 1000 }}>
-                    {suggestions.map((suggestion, index) => (
-                        <div
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            style={{ padding: "10px", cursor: "pointer" }}
-                        >
-                            {suggestion.label}
-                        </div>
-                    ))}
-                </div>
-            )}
+        <div ref={wrapperRef} style={{ position: 'relative', width: '100%' }}>
+            <GeoapifyContext apiKey="65eab6584b85425eb2a2bcd30489064e">
+                <GeoapifyGeocoderAutocomplete
+                    value={inputValue}
+                    placeholder={placeholder}
+                    lang="vi"
+                    filterByCountryCode={['vn']}
+                    limit={7}
+                    placeSelect={handlePlaceSelect}
+                    onInputChange={handleInputChange}
+                    onBlur={handleBlur}
+                />
+            </GeoapifyContext>
         </div>
     );
-    };
+};

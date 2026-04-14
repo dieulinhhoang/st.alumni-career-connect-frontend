@@ -53,7 +53,16 @@ export function DevicePreview({ name, desc, questions, accent }: DevicePreviewPr
             {device === "mobile" && <div style={{ height: 24, background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ width: 60, height: 6, borderRadius: 3, background: "#333" }} /></div>}
             {device === "tablet" && <div style={{ height: 12, background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: "#444" }} /></div>}
             <div style={{ maxHeight: device === "desktop" ? "calc(100vh - 220px)" : 600, overflowY: "auto" }}>
-              <PDFCanvas name={name} desc={desc} questions={questions} accent={accent} interactive={false} />
+              <PDFCanvas
+                  surveyTitle={name}
+                  descriptionParagraphs={desc ? [desc] : []}
+                  sections={[]}
+                  questions={questions}
+                  accent={accent}
+                  header={{ ministry: "", academy: "", address: "", phone: "", showDate: false }}
+                  footer={{ primaryText: "", secondaryText: "" }}
+                  interactive={false}
+                />
             </div>
           </div>
         </div>
