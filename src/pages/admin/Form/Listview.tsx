@@ -64,7 +64,7 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
           ["Tổng form",      forms.length],
           ["Đang hoạt động", forms.length],
           ["Câu hỏi TB",     avgQ],
-          ["Phản hồi",       "—"],
+          // ["Phản hồi",       "—"],
         ] as [string, number | string][]).map(([label, value]) => (
           <div className="stat-card" key={label}>
             <div className="stat-num">{value}</div>
@@ -92,15 +92,7 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
 
         {/* AI Card */}
         <div className="ai-card" onClick={onAI}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: "rgba(255,255,255,.15)", borderRadius: 20,
-            padding: "3px 10px", fontSize: 10.5, fontWeight: 700,
-            color: "rgba(255,255,255,.9)", letterSpacing: ".06em",
-            textTransform: "uppercase", marginBottom: 14,
-          }}>
-            <IcBolt /> AI
-          </div>
+          
           <div className="ai-title">Tạo form thông minh<br />bằng trí tuệ nhân tạo</div>
           <div className="ai-desc">Upload PDF hoặc nhập mô tả — AI phân tích và sinh câu hỏi tự động.</div>
           <div className="ai-cta">Bắt đầu ngay →</div>

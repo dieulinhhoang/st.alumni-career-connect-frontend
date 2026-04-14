@@ -83,11 +83,14 @@ export function CenterCanvas({
         height: "100%",
         background: "#eff1f5",
         overflowY: "auto",
+        overflowX: "hidden",
         padding: "24px 20px",
+        boxSizing: "border-box",
+        width: "100%",
       }}
       onDragOver={e => e.preventDefault()}
     >
-      <div style={{ maxWidth: 680, margin: "0 auto" }}>
+      <div style={{ maxWidth: 680, margin: "0 auto", minWidth: 0, width: "100%" }}>
 
         {/* PDF Header */}
         <div style={{
@@ -96,12 +99,32 @@ export function CenterCanvas({
           boxShadow: "0 2px 12px rgba(0,0,0,.07)",
           marginBottom: 16,
           overflow: "hidden",
+          minWidth: 0,
         }}>
           <PDFCanvas
-            name={name} desc={desc} questions={questions} accent={accent}
-            interactive={false} headerOnly
-            header={header} onHeaderChange={onHeaderChange}
-            onNameChange={onNameChange} onDescChange={onDescChange}
+            surveyTitle={name}
+            descriptionParagraphs={desc ? [desc] : []}
+            sections={[]}
+            questions={questions}
+            accent={accent}
+            header={{
+              ministry: header.orgUnit,
+              academy: header.orgName,
+              address: header.address,
+              phone: header.phone,
+              showDate: true,
+            }}
+            footer={{ primaryText: "", secondaryText: "" }}
+            interactive={false}
+            headerOnly
+            onHeaderChange={(h) => onHeaderChange({
+              orgUnit: h.ministry || "",
+              orgName: h.academy || "",
+              address: h.address || "",
+              phone: h.phone || "",
+            })}
+            onTitleChange={onNameChange}
+            onDescriptionParagraphsChange={(ps) => onDescChange(ps.join("\n\n"))}
           />
         </div>
 

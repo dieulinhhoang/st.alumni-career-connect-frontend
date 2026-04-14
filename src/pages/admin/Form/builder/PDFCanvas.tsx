@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Question, Section, SurveyFooter, SurveyHeader } from "../../../../feature/form/types";
 import { AddressInput } from "./AddressInput";
 
@@ -123,6 +123,30 @@ export function PDFCanvas({
   const [cbs, setCbs] = useState<Record<string, Record<string, boolean>>>({});
   const [textVals, setTextVals] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    // Set immediately on mount
+    setContainerWidth(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // containerWidth=0 means not measured yet → treat as small (mobile-first)
+  const isSmall  = containerWidth === 0 || containerWidth < 480;
+  const isMedium = containerWidth >= 480 && containerWidth < 640;
+  const isMobile = isSmall || isMedium;
+
+  const px = isSmall ? 16 : isMedium ? 20 : 36;
+  const effectiveLogoSize = isSmall ? 72 : isMedium ? 88 : logoSize;
 
   const today = new Date().toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -223,10 +247,7 @@ export function PDFCanvas({
     return (
       <div
         key={q.id}
-        style={{
-          padding: "18px 36px 20px",
-          borderBottom: "none",
-        }}
+        style={{ padding: `14px ${px}px 16px`, borderBottom: "none" }}
       >
         <div
           style={{
@@ -454,12 +475,17 @@ export function PDFCanvas({
 
   return (
     <div
+      ref={containerRef}
       style={{
         background: "#fff",
         fontFamily: "'Times New Roman', Georgia, serif",
         color: "#000000",
+        width: "100%",
+        boxSizing: "border-box",
+        minWidth: 0,
       }}
     >
+
       {/* Top accent stripe */}
       <div style={{ height: 6, background: accent }} />
 
@@ -468,10 +494,10 @@ export function PDFCanvas({
         <div
           style={{
             textAlign: "right",
-            fontSize: 14,
+            fontSize: isSmall ? 12 : 14,
             fontStyle: "italic",
-            color: "#000000",
-            padding: "16px 36px 8px",
+            color: "#000",
+            padding: `${isSmall ? 12 : 16}px ${px}px 8px`,
           }}
         >
           Ngày {today.replace(/\//g, " / ")}
@@ -481,56 +507,63 @@ export function PDFCanvas({
       {/* Logo + thông tin đơn vị */}
       <div
         style={{
-          padding: "20px 36px 24px",
+          padding: `20px ${px}px 24px`,
           display: "flex",
-          alignItems: "center",
-          gap: 24,
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "center" : "center",
+          gap: isMobile ? 14 : 24,
         }}
       >
         <div style={{ flexShrink: 0 }}>
           <img
-              src={logoUrl || header.logoUrl || "public/logovua.png"}
-              alt="Logo"
-              style={{ width: logoSize, height: logoSize, objectFit: "contain", borderRadius: "50%", border: "1px solid #e2e8f0" }}
-            />
+            src={logoUrl || header.logoUrl || "public/logovua.png"}
+            alt="Logo"
+            style={{
+              width: effectiveLogoSize,
+              height: effectiveLogoSize,
+              objectFit: "contain",
+              borderRadius: "50%",
+              border: "1px solid #e2e8f0",
+            }}
+          />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0, width: isMobile ? "100%" : undefined }}>
           {editable ? (
             <>
               <InlineInput
                 value={header.ministry || ""}
                 onChange={v => updateHeader("ministry", v)}
                 placeholder="Bộ/ngành"
-                style={{ fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right", color: "#000000" }}
+                style={{ fontSize: isSmall ? 11 : 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", textAlign: isMobile ? "center" : "right", color: "#000000" }}
               />
               <InlineInput
                 value={header.academy || ""}
                 onChange={v => updateHeader("academy", v)}
                 placeholder="Học viện / Trường"
-                style={{ fontSize: 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: "right", color: "#000000" }}
+                style={{ fontSize: isSmall ? 13 : 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: isMobile ? "center" : "right", color: "#000000" }}
               />
               <InlineInput
                 value={header.address || ""}
                 onChange={v => updateHeader("address", v)}
                 placeholder="Địa chỉ"
-                style={{ fontSize: 13, textAlign: "right", color: "#000000" }}
+                style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#000000" }}
               />
               <InlineInput
                 value={header.phone || ""}
                 onChange={v => updateHeader("phone", v)}
                 placeholder="Điện thoại"
-                style={{ fontSize: 13, textAlign: "right", color: "#000000" }}
+                style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#000000" }}
               />
             </>
           ) : (
             <>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right" }}>
+              <div style={{ fontSize: isSmall ? 11 : 13, fontWeight: 600, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
                 {header.ministry}
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: "right" }}>
+              <div style={{ fontSize: isSmall ? 13 : 18, fontWeight: 800, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
                 {header.academy}
               </div>
-              <div style={{ fontSize: 13, color: "#000000", lineHeight: 1.5, textAlign: "right" }}>
+              <div style={{ fontSize: isSmall ? 11 : 13, color: "#000000", lineHeight: 1.5, textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
                 {header.address}
                 {header.phone && <><br />{header.phone}{header.fax ? ` — Fax: ${header.fax}` : ""}</>}
               </div>
@@ -539,8 +572,8 @@ export function PDFCanvas({
         </div>
       </div>
 
-      {/* Tiêu đề form - in hoa, đậm, không gạch chân */}
-      <div style={{ textAlign: "center", padding: "30px 36px 18px" }}>
+      {/* Tiêu đề form */}
+      <div style={{ textAlign: "center", padding: `${isSmall ? 20 : 30}px ${px}px ${isSmall ? 14 : 18}px` }}>
         {editable && onTitleChange ? (
           <InlineInput
             value={surveyTitle}
@@ -559,11 +592,14 @@ export function PDFCanvas({
           <h2
             style={{
               margin: 0,
-              fontSize: 20,
+              fontSize: isSmall ? 15 : isMedium ? 17 : 20,
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "1px",
               color: "#000000",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              whiteSpace: "normal",
             }}
           >
             {surveyTitle || "TÊN FORM KHẢO SÁT"}
@@ -573,7 +609,7 @@ export function PDFCanvas({
 
       {/* Mô tả - in nghiêng, căn đều */}
       {descriptionParagraphs.length > 0 && (
-        <div style={{ padding: "0 36px 24px" }}>
+        <div style={{ padding: `0 ${px}px 24px` }}>
           {descriptionParagraphs.map((para, idx) => (
             <div key={idx} style={{ marginBottom: idx === descriptionParagraphs.length - 1 ? 0 : 14 }}>
               {editable && onDescriptionParagraphsChange ? (
@@ -626,14 +662,7 @@ export function PDFCanvas({
             questionsBySection.map(section => (
               <div key={section.id}>
                 <div
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    color: "#000000",
-                    padding: "22px 36px 8px",
-                    margin: 0,
-                  }}
-                >
+                  style={{ fontWeight: 700, color: "#000000", margin: 0, fontSize: isSmall ? 14 : 17, padding: `${isSmall ? 16 : 22}px ${px}px 8px` }}>
                   {section.title}
                 </div>
                 {section.questions.map(q => renderQuestion(q))}
@@ -642,7 +671,7 @@ export function PDFCanvas({
           )}
 
           {questions.length > 0 && interactive && (
-            <div style={{ padding: "24px 36px", display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ padding: `18px ${px}px`, display: "flex", gap: 12, alignItems: "center" }}>
               <button
                 onClick={handleSubmit}
                 style={{
@@ -664,7 +693,7 @@ export function PDFCanvas({
             </div>
           )}
 
-          <div style={{ textAlign: "center", padding: "32px 36px 48px" }}>
+          <div style={{ textAlign: "center", padding: `28px ${px}px 40px` }}>
             <div style={{ fontWeight: 700, marginBottom: 10, fontSize: 14, color: "#000000" }}>
               {editable && onFooterChange ? (
                 <InlineInput
