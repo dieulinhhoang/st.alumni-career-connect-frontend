@@ -1,4 +1,12 @@
 import { useState, useEffect } from "react";
+import { Button, Tabs, message } from "antd";
+import {
+  ArrowLeftOutlined,
+  SaveOutlined,
+  CheckOutlined,
+  AppstoreOutlined,
+  BgColorsOutlined,
+} from "@ant-design/icons";
 import { useQuestionEditor } from "../../../feature/form/hooks/useQuestionEditor";
 import type { Form } from "../../../feature/form/types";
 import { ACCENT_COLORS } from "../../../feature/form/constants";
@@ -7,7 +15,6 @@ import { CenterCanvas } from "./builder/CenterCanvas";
 import { RightPanel } from "./builder/RightPanel";
 import { DevicePreview } from "./builder/DevicePreview";
 import { LogicTab } from "./builder/LogicTab";
-import { IcBack, IcSave, IcCheck } from "./builder/Icons";
 
 interface HeaderFields {
   orgUnit: string;
@@ -29,38 +36,17 @@ interface BuilderViewProps {
   onBack: () => void;
 }
 
-const TABS = [
-  { key: "designer", label: "Thiết kế" },
-  { key: "preview",  label: "Xem trước" },
-  { key: "logic",    label: "Logic" },
-];
-
-const IcLayers = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-    <polyline points="2 17 12 22 22 17"/>
-    <polyline points="2 12 12 17 22 12"/>
-  </svg>
-);
-const IcPalette = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/>
-    <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/>
-    <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/>
-    <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/>
-    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
-  </svg>
-);
-
 export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const [activeTab, setActiveTab] = useState<string>("designer");
-  const [name, setName]   = useState(form?.name ?? "");
-  const [desc, setDesc]   = useState(form?.description ?? "");
+  const [name, setName] = useState(form?.name ?? "");
+  const [desc, setDesc] = useState(form?.description ?? "");
   const [accent, setAccent] = useState(
-    ACCENT_COLORS.includes(form?.themeId ?? "") ? form?.themeId ?? ACCENT_COLORS[0] : ACCENT_COLORS[0]
+    ACCENT_COLORS.includes(form?.themeId ?? "")
+      ? form?.themeId ?? ACCENT_COLORS[0]
+      : ACCENT_COLORS[0]
   );
   const [header, setHeader] = useState<HeaderFields>((form as any)?.header ?? DEFAULT_HEADER);
-  const [saved, setSaved]   = useState(false);
+  const [saved, setSaved] = useState(false);
 
   // Responsive
   const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
@@ -73,17 +59,29 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const isMobile = winWidth < 768;
   const isTablet = winWidth >= 768 && winWidth < 1024;
 
-  const [leftOpen,  setLeftOpen]  = useState(!isMobile && !isTablet);
+  const [leftOpen, setLeftOpen] = useState(!isMobile && !isTablet);
   const [rightOpen, setRightOpen] = useState(!isMobile && !isTablet);
 
   useEffect(() => {
-    if (isMobile || isTablet) { setLeftOpen(false); setRightOpen(false); }
+    if (isMobile || isTablet) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    }
   }, [isMobile, isTablet]);
 
   const {
-    questions, activeId, setActiveId,
-    addQuestion, insertQuestionAt, updateQuestion, duplicateQuestion,
-    removeQuestion, moveQuestion, addOption, updateOption, removeOption,
+    questions,
+    activeId,
+    setActiveId,
+    addQuestion,
+    insertQuestionAt,
+    updateQuestion,
+    duplicateQuestion,
+    removeQuestion,
+    moveQuestion,
+    addOption,
+    updateOption,
+    removeOption,
   } = useQuestionEditor(form?.questions ?? []);
 
   const handleSave = () => {
@@ -96,28 +94,46 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   // Drawer overlay (mobile)
   const DrawerOverlay = ({
-    side, open, onClose, children,
-  }: { side: "left" | "right"; open: boolean; onClose: () => void; children: React.ReactNode }) => {
+    side,
+    open,
+    onClose,
+    children,
+  }: {
+    side: "left" | "right";
+    open: boolean;
+    onClose: () => void;
+    children: React.ReactNode;
+  }) => {
     if (!open) return null;
     return (
       <div
         style={{
-          position: "fixed", inset: 0, zIndex: 200,
+          position: "fixed",
+          inset: 0,
+          zIndex: 200,
           background: "rgba(0,0,0,.4)",
           backdropFilter: "blur(2px)",
-          display: "flex", alignItems: "stretch",
+          display: "flex",
+          alignItems: "stretch",
           justifyContent: side === "left" ? "flex-start" : "flex-end",
         }}
         onClick={onClose}
       >
         <div
           style={{
-            width: 280, maxWidth: "85vw", height: "100%",
+            width: 280,
+            maxWidth: "85vw",
+            height: "100%",
             background: "#fff",
-            boxShadow: side === "left" ? "4px 0 28px rgba(0,0,0,.15)" : "-4px 0 28px rgba(0,0,0,.15)",
-            display: "flex", flexDirection: "column", overflow: "hidden",
+            boxShadow:
+              side === "left"
+                ? "4px 0 28px rgba(0,0,0,.15)"
+                : "-4px 0 28px rgba(0,0,0,.15)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           {children}
         </div>
@@ -127,30 +143,45 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const renderDesigner = () => (
     <div style={{ display: "flex", height: "100%", overflow: "hidden", position: "relative" }}>
-
       {/* LEFT */}
       {isMobile ? (
         <DrawerOverlay side="left" open={leftOpen} onClose={() => setLeftOpen(false)}>
           <LeftToolbox
-            onAddQuestion={t => { addQuestion(t as any); setLeftOpen(false); }}
-            asDrawer onToggle={() => setLeftOpen(false)}
+            onAddQuestion={(t) => {
+              addQuestion(t as any);
+              setLeftOpen(false);
+            }}
+            asDrawer
+            onToggle={() => setLeftOpen(false)}
           />
         </DrawerOverlay>
       ) : (
         <div style={{ height: "100%", overflowY: "auto", flexShrink: 0 }}>
           <LeftToolbox
-            onAddQuestion={type => addQuestion(type as any)}
+            onAddQuestion={(type) => addQuestion(type as any)}
             open={leftOpen}
-            onToggle={() => setLeftOpen(o => !o)}
+            onToggle={() => setLeftOpen((o) => !o)}
           />
         </div>
       )}
 
       {/* CENTER */}
-      <div style={{ flex: 1, height: "100%", overflow: "hidden", minWidth: 0, paddingBottom: MOBILE_BAR_H }}>
+      <div
+        style={{
+          flex: 1,
+          height: "100%",
+          overflow: "hidden",
+          minWidth: 0,
+          paddingBottom: MOBILE_BAR_H,
+        }}
+      >
         <CenterCanvas
-          name={name} desc={desc} accent={accent}
-          questions={questions} activeId={activeId} setActiveId={setActiveId}
+          name={name}
+          desc={desc}
+          accent={accent}
+          questions={questions}
+          activeId={activeId}
+          setActiveId={setActiveId}
           onUpdateQuestion={updateQuestion}
           onDuplicate={duplicateQuestion}
           onRemove={removeQuestion}
@@ -170,54 +201,89 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       {isMobile ? (
         <DrawerOverlay side="right" open={rightOpen} onClose={() => setRightOpen(false)}>
           <RightPanel
-            onAddFromBank={q => { addQuestion((q as any).type, (q as any).title, (q as any).options); setRightOpen(false); }}
-            accent={accent} onAccentChange={setAccent}
-            asDrawer onToggle={() => setRightOpen(false)}
+            onAddFromBank={(q) => {
+              addQuestion((q as any).type, (q as any).title, (q as any).options);
+              setRightOpen(false);
+            }}
+            accent={accent}
+            onAccentChange={setAccent}
+            asDrawer
+            onToggle={() => setRightOpen(false)}
           />
         </DrawerOverlay>
       ) : (
         <div style={{ height: "100%", overflowY: "auto", flexShrink: 0 }}>
           <RightPanel
-            onAddFromBank={q => addQuestion((q as any).type, (q as any).title, (q as any).options)}
-            accent={accent} onAccentChange={setAccent}
-            open={rightOpen} onToggle={() => setRightOpen(o => !o)}
+            onAddFromBank={(q) => addQuestion((q as any).type, (q as any).title, (q as any).options)}
+            accent={accent}
+            onAccentChange={setAccent}
+            open={rightOpen}
+            onToggle={() => setRightOpen((o) => !o)}
           />
         </div>
       )}
 
       {/* MOBILE BOTTOM BAR */}
       {isMobile && (
-        <div style={{
-          position: "fixed", bottom: 0, left: 0, right: 0,
-          height: MOBILE_BAR_H,
-          background: "#fff", borderTop: "1px solid #e8eaed",
-          display: "flex", alignItems: "center",
-          zIndex: 100, boxShadow: "0 -2px 12px rgba(0,0,0,.06)",
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: MOBILE_BAR_H,
+            background: "#fff",
+            borderTop: "1px solid #e8eaed",
+            display: "flex",
+            alignItems: "center",
+            zIndex: 100,
+            boxShadow: "0 -2px 12px rgba(0,0,0,.06)",
+          }}
+        >
           <button
-            onClick={() => { setRightOpen(false); setLeftOpen(o => !o); }}
+            onClick={() => {
+              setRightOpen(false);
+              setLeftOpen((o) => !o);
+            }}
             style={{
-              flex: 1, height: "100%", border: "none",
+              flex: 1,
+              height: "100%",
+              border: "none",
               borderRight: "1px solid #f0f0f0",
               background: leftOpen ? `${accent}12` : "#fff",
               color: leftOpen ? accent : "#6b7280",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              cursor: "pointer", fontSize: 12.5, fontWeight: leftOpen ? 700 : 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              cursor: "pointer",
+              fontSize: 12.5,
+              fontWeight: leftOpen ? 700 : 500,
             }}
           >
-            <IcLayers /> Câu hỏi
+            <AppstoreOutlined /> Câu hỏi
           </button>
           <button
-            onClick={() => { setLeftOpen(false); setRightOpen(o => !o); }}
+            onClick={() => {
+              setLeftOpen(false);
+              setRightOpen((o) => !o);
+            }}
             style={{
-              flex: 1, height: "100%", border: "none",
+              flex: 1,
+              height: "100%",
+              border: "none",
               background: rightOpen ? `${accent}12` : "#fff",
               color: rightOpen ? accent : "#6b7280",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              cursor: "pointer", fontSize: 12.5, fontWeight: rightOpen ? 700 : 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              cursor: "pointer",
+              fontSize: 12.5,
+              fontWeight: rightOpen ? 700 : 500,
             }}
           >
-            <IcPalette /> Thư viện
+            <BgColorsOutlined /> Thư viện
           </button>
         </div>
       )}
@@ -226,43 +292,50 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "designer": return renderDesigner();
-      case "preview":  return <DevicePreview name={name} desc={desc} questions={questions} accent={accent} />;
-      case "logic":    return <LogicTab questions={questions} />;
-      default:         return null;
+      case "designer":
+        return renderDesigner();
+      case "preview":
+        return <DevicePreview name={name} desc={desc} questions={questions} accent={accent} />;
+      case "logic":
+        return <LogicTab questions={questions} />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)", background: "#fff" }}>
-
-      {/* TOP BAR */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        borderBottom: "1px solid #e8eaed",
-        padding: "0 12px",
-        height: 48, flexShrink: 0, gap: 4,
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 64px)",
         background: "#fff",
-      }}>
-        <button
-          onClick={onBack}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "none", border: "none", cursor: "pointer",
-            color: "#6b7280", fontSize: 13, fontWeight: 500, flexShrink: 0,
-            padding: "6px 8px", borderRadius: 6,
-            transition: "background .12s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = "#f3f4f6")}
-          onMouseLeave={e => (e.currentTarget.style.background = "none")}
-        >
-          <IcBack />
+      }}
+    >
+      {/* TOP BAR */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          borderBottom: "1px solid #e8eaed",
+          padding: "0 12px",
+          height: 48,
+          flexShrink: 0,
+          gap: 4,
+          background: "#fff",
+        }}
+      >
+        <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
           {!isMobile && <span>Quay lại</span>}
-        </button>
+        </Button>
 
         {/* Tabs */}
         <div style={{ display: "flex", flex: 1, justifyContent: "center", height: "100%", gap: 2 }}>
-          {TABS.map(t => (
+          {[
+            { key: "designer", label: "Thiết kế" },
+            { key: "preview", label: "Xem trước" },
+            { key: "logic", label: "Logic" },
+          ].map((t) => (
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
@@ -270,8 +343,10 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
                 height: "100%",
                 padding: isMobile ? "0 12px" : "0 18px",
                 border: "none",
-                borderBottom: activeTab === t.key ? `2px solid ${accent}` : "2px solid transparent",
-                background: "none", cursor: "pointer",
+                borderBottom:
+                  activeTab === t.key ? `2px solid ${accent}` : "2px solid transparent",
+                background: "none",
+                cursor: "pointer",
                 fontSize: isMobile ? 12.5 : 13.5,
                 fontWeight: activeTab === t.key ? 700 : 400,
                 color: activeTab === t.key ? accent : "#6b7280",
@@ -287,27 +362,22 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         </div>
 
         {/* Save button */}
-        <button
+        <Button
+          type={saved ? "default" : "primary"}
+          icon={saved ? <CheckOutlined /> : <SaveOutlined />}
           onClick={handleSave}
           style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: saved ? "#f0fdf4" : "none",
-            border: "none", cursor: "pointer",
-            fontSize: 13, fontWeight: 600, flexShrink: 0,
-            color: saved ? "#16a34a" : accent,
-            padding: "6px 10px", borderRadius: 6,
-            transition: "all .15s",
+            background: saved ? "#f0fdf4" : undefined,
+            color: saved ? "#16a34a" : undefined,
+            borderColor: saved ? "#bbf7d0" : undefined,
           }}
         >
-          {saved ? <IcCheck /> : <IcSave />}
           {!isMobile && <span>{saved ? "Đã lưu" : "Lưu"}</span>}
-        </button>
+        </Button>
       </div>
 
       {/* CONTENT */}
-      <div style={{ flex: 1, overflow: "hidden" }}>
-        {renderContent()}
-      </div>
+      <div style={{ flex: 1, overflow: "hidden" }}>{renderContent()}</div>
     </div>
   );
 }

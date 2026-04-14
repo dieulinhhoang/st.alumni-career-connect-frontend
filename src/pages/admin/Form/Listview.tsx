@@ -1,22 +1,35 @@
 import { useState } from "react";
+import { Button, Input, Tooltip, Table, Tag, Space, Row, Col } from "antd";
+import {
+  EyeOutlined,
+  EditOutlined,
+  CopyOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+  FileOutlined,
+  PlusOutlined,
+  ThunderboltOutlined,
+  AppstoreOutlined,
+  UnorderedListOutlined,
+  QuestionOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
 import type { Form } from "../../../feature/form/types";
+import type { ColumnsType } from "antd/es/table";
 
 const ACCENT_MAP: Record<string, string> = {
-  blue: "#2563eb", green: "#16a34a", red: "#dc2626",
-  purple: "#7c3aed", orange: "#ea580c", teal: "#0d9488",
-  brown: "#78716c", gray: "#6b7280",
+  blue: "#2563eb",
+  green: "#16a34a",
+  red: "#dc2626",
+  purple: "#7c3aed",
+  orange: "#ea580c",
+  teal: "#0d9488",
+  brown: "#78716c",
+  gray: "#6b7280",
 };
 const getAccent = (id?: string) => ACCENT_MAP[id as string] ?? "#2563eb";
 
-const IcEye    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
-const IcEdit   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
-const IcCopy   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>;
-const IcTrash  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
-const IcSearch = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-const IcFile   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>;
-const IcPlus   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-const IcBolt   = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-const IcHash   = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>;
+type ViewMode = "grid" | "table";
 
 interface Props {
   forms: Form[];
@@ -30,132 +43,379 @@ interface Props {
 }
 
 const fmt = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
+  d
+    ? new Date(d).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "—";
 
-export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete }: Props) {
+export default function ListView({
+  forms,
+  onCreate,
+  onAI,
+  onEdit,
+  onPreview,
+  onDup,
+  onDelete,
+}: Props) {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
   const filtered = forms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
 
-  const totalQ = forms.reduce((a, f) => a + f.questions.length, 0);
-  const avgQ   = forms.length > 0 ? Math.round(totalQ / forms.length) : 0;
+  const columns: ColumnsType<Form> = [
+    {
+      title: "STT",
+      key: "index",
+      width: 50,
+      render: (_, __, index) => <span style={{ color: "#9ca3af" }}>{index + 1}</span>,
+    },
+    {
+      title: "Tên form",
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              background: `${getAccent(record.themeId)}1a`,
+              color: getAccent(record.themeId),
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FileOutlined />
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, color: "#111827", marginBottom: 4 }}>{text}</div>
+            <div style={{ fontSize: 11.5, color: "#9ca3af" }}>
+              {record.description || "Chưa có mô tả"}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Số câu hỏi",
+      dataIndex: "questions",
+      key: "questions",
+      width: 100,
+      render: (questions) => (
+        <Tag>{questions.length} câu</Tag>
+      ),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "created_at",
+      key: "created_at",
+      width: 120,
+      render: (date) => (
+        <Space size={4}>
+          <CalendarOutlined />
+          <span>{fmt(date)}</span>
+        </Space>
+      ),
+    },
+    // {
+    //   title: "Theme",
+    //   dataIndex: "themeId",
+    //   key: "themeId",
+    //   width: 100,
+    //   render: (themeId) => (
+    //     <Space size={4}>
+    //       <div
+    //         style={{
+    //           width: 10,
+    //           height: 10,
+    //           borderRadius: "50%",
+    //           background: getAccent(themeId),
+    //         }}
+    //       />
+    //       <span style={{ fontSize: 11, color: "#6b7280", textTransform: "capitalize" }}>
+    //         {themeId}
+    //       </span>
+    //     </Space>
+    //   ),
+    // },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 160,
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Xem trước">
+            <Button type="text" icon={<EyeOutlined />} onClick={() => onPreview(record)} />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          </Tooltip>
+          <Tooltip title="Nhân bản">
+            <Button type="text" icon={<CopyOutlined />} onClick={() => onDup(record)} />
+          </Tooltip>
+          <Tooltip title="Xóa">
+            <Button
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => onDelete(record.id as number)}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="page">
-
       {/* TOP BAR */}
       <div className="topbar">
         <div>
-          <div className="eyebrow" style={{ marginBottom: 4 }}>Quản lý</div>
+          <div className="eyebrow" style={{ marginBottom: 4 }}>
+            Quản lý
+          </div>
           <div className="page-title">Form khảo sát</div>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn btn-gold" onClick={onAI}>
-            <IcBolt /> Tạo bằng AI
-          </button>
-          <button className="btn btn-primary" onClick={onCreate}>
-            <IcPlus /> Form mới
-          </button>
-        </div>
-      </div>
-
-      {/* STATS */}
-      <div className="stats-row">
-        {([
-          ["Tổng form",      forms.length],
-          ["Đang hoạt động", forms.length],
-          ["Câu hỏi TB",     avgQ],
-          // ["Phản hồi",       "—"],
-        ] as [string, number | string][]).map(([label, value]) => (
-          <div className="stat-card" key={label}>
-            <div className="stat-num">{value}</div>
-            <div className="stat-label">{label}</div>
-          </div>
-        ))}
+        <Space>
+          <Button icon={<ThunderboltOutlined />} onClick={onAI} className="btn-gold">
+            Tạo bằng AI
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
+            Form mới
+          </Button>
+        </Space>
       </div>
 
       {/* TOOLBAR */}
-      <div className="toolbar">
-        <div className="search-wrap">
-          <span className="search-icon"><IcSearch /></span>
-          <input
-            className="search-inp"
-            placeholder="Tìm kiếm form..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div className="toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Input
+          placeholder="Tìm kiếm form..."
+          prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ maxWidth: 380 }}
+        />
+
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <Tooltip title="Chế độ lưới">
+            <Button
+              type={viewMode === "grid" ? "primary" : "default"}
+              icon={<AppstoreOutlined />}
+              onClick={() => setViewMode("grid")}
+            />
+          </Tooltip>
+          <Tooltip title="Chế độ danh sách">
+            <Button
+              type={viewMode === "table" ? "primary" : "default"}
+              icon={<UnorderedListOutlined />}
+              onClick={() => setViewMode("table")}
+            />
+          </Tooltip>
+          <Tag color="blue">{filtered.length} form</Tag>
         </div>
-        <span className="count-badge count-green">{filtered.length} form</span>
       </div>
 
-      {/* GRID */}
-      <div className="form-grid">
-
-        {/* AI Card */}
-        <div className="ai-card" onClick={onAI}>
-          
-          <div className="ai-title">Tạo form thông minh<br />bằng trí tuệ nhân tạo</div>
-          <div className="ai-desc">Upload PDF hoặc nhập mô tả — AI phân tích và sinh câu hỏi tự động.</div>
-          <div className="ai-cta">Bắt đầu ngay →</div>
-        </div>
-
-        {/* New Form Card */}
-        <div className="new-card" onClick={onCreate}>
-          <div className="new-ring"><IcPlus /></div>
-          <span>Tạo form mới</span>
-        </div>
-
-        {/* Form Cards */}
-        {filtered.map((form) => {
-          const accent = getAccent(form.themeId as string);
-          return (
-            <div key={form.id} className="form-card" onClick={() => onPreview(form)}>
-              <div className="form-card-accent" style={{ background: accent }} />
-              <div className="form-card-body">
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
-                  <div className="form-icon" style={{ background: accent + "1a", color: accent }}>
-                    <IcFile />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="form-name">{form.name}</div>
-                    <div className="form-desc">{form.description || "Chưa có mô tả"}</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
-                  <span className="fc-tag" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <IcHash /> {form.questions.length} câu hỏi
-                  </span>
-                  <span className="fc-tag">{fmt(form.created_at)}</span>
-                </div>
+      {/* CONTENT - Grid or Table */}
+      {viewMode === "grid" ? (
+        <Row gutter={[14, 14]}>
+          {/* AI Card - Giữ nguyên như cũ */}
+          <Col xs={24} sm={12} md={8}>
+            <div className="ai-card" onClick={onAI}>
+              <div className="ai-title">
+                Tạo form thông minh
+                <br />
+                bằng trí tuệ nhân tạo
               </div>
-
-              <div className="form-card-actions" onClick={(e) => e.stopPropagation()}>
-                <button className="fa-btn" onClick={() => onPreview(form)} title="Xem trước"><IcEye /></button>
-                <span className="fa-sep" />
-                <button className="fa-btn" onClick={() => onEdit(form)} title="Chỉnh sửa"><IcEdit /></button>
-                <span className="fa-sep" />
-                <button className="fa-btn" onClick={() => onDup(form)} title="Nhân bản"><IcCopy /></button>
-                <span className="fa-sep" />
-                <button className="fa-btn danger" onClick={() => onDelete(form.id as number)} title="Xóa"><IcTrash /></button>
+              <div className="ai-desc">
+                Upload PDF hoặc nhập mô tả — AI phân tích và sinh câu hỏi tự động.
               </div>
+              <div className="ai-cta">Bắt đầu ngay →</div>
             </div>
-          );
-        })}
-      </div>
+          </Col>
 
-      {filtered.length === 0 && search && (
-        <div style={{
-          textAlign: "center", padding: "60px 20px", color: "#9ca3af",
-        }}>
-          <div style={{
-            width: 48, height: 48, margin: "0 auto 14px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "var(--bg-hover)", borderRadius: 12,
-          }}>
-            <IcSearch />
-          </div>
-          <div style={{ fontWeight: 700, marginBottom: 4, color: "var(--text-light)" }}>Không tìm thấy form nào</div>
-          <div style={{ fontSize: 13 }}>Thử từ khóa khác</div>
-        </div>
+          {/* New Form Card - Giữ nguyên như cũ */}
+          <Col xs={24} sm={12} md={8}>
+            <div className="new-card" onClick={onCreate}>
+              <div className="new-ring">
+                <PlusOutlined />
+              </div>
+              <span>Tạo form mới</span>
+            </div>
+          </Col>
+
+          {/* Form Cards - Chỉ sửa phần icon action */}
+          {filtered.map((form) => {
+            const accent = getAccent(form.themeId as string);
+            return (
+              <Col xs={24} sm={12} md={8} key={form.id}>
+                <div className="form-card" onClick={() => onPreview(form)}>
+                  <div className="form-card-accent" style={{ background: accent }} />
+                  <div className="form-card-body">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        marginBottom: 12,
+                      }}
+                    >
+                      <div
+                        className="form-icon"
+                        style={{ background: accent + "1a", color: accent }}
+                      >
+                        <FileOutlined />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="form-name">{form.name}</div>
+                        <div className="form-desc">{form.description || "Chưa có mô tả"}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                      <Tag >{form.questions.length} câu hỏi</Tag>
+                      <Tag icon={<CalendarOutlined />}>{fmt(form.created_at)}</Tag>
+                    </div>
+                  </div>
+
+                   <div className="form-card-actions" onClick={(e) => e.stopPropagation()} style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "flex-end",
+                    gap: "4px",
+                    padding: "12px 16px",
+                    borderTop: "1px solid #f0f0f0",
+                    background: "#fafafa"
+                  }}>
+                    <Tooltip title="Xem trước">
+                      <button 
+                        className="fa-btn" 
+                        onClick={() => onPreview(form)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "6px 8px",
+                          borderRadius: "6px",
+                          color: "#6b7280",
+                          fontSize: "16px",
+                          display: "inline-flex",
+                          alignItems: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#e5e7eb";
+                          e.currentTarget.style.color = "#374151";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = "#6b7280";
+                        }}
+                      >
+                        <EyeOutlined />
+                      </button>
+                    </Tooltip>
+                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <Tooltip title="Chỉnh sửa">
+                      <button 
+                        className="fa-btn" 
+                        onClick={() => onEdit(form)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "6px 8px",
+                          borderRadius: "6px",
+                          color: "#6b7280",
+                          fontSize: "16px",
+                          display: "inline-flex",
+                          alignItems: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#e5e7eb";
+                          e.currentTarget.style.color = "#374151";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = "#6b7280";
+                        }}
+                      >
+                        <EditOutlined />
+                      </button>
+                    </Tooltip>
+                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <Tooltip title="Nhân bản">
+                      <button 
+                        className="fa-btn" 
+                        onClick={() => onDup(form)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "6px 8px",
+                          borderRadius: "6px",
+                          color: "#6b7280",
+                          fontSize: "16px",
+                          display: "inline-flex",
+                          alignItems: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#e5e7eb";
+                          e.currentTarget.style.color = "#374151";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = "#6b7280";
+                        }}
+                      >
+                        <CopyOutlined />
+                      </button>
+                    </Tooltip>
+                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <Tooltip title="Xóa">
+                      <button 
+                        className="fa-btn danger" 
+                        onClick={() => onDelete(form.id as number)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "6px 8px",
+                          borderRadius: "6px",
+                          color: "#dc2626",
+                          fontSize: "16px",
+                          display: "inline-flex",
+                          alignItems: "center"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#fee2e2";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                        }}
+                      >
+                        <DeleteOutlined />
+                      </button>
+                    </Tooltip>
+                  </div>
+                </div>
+              </Col>
+            );
+          })}
+        </Row>
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={filtered}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          onRow={(record) => ({
+            onClick: () => onPreview(record),
+            style: { cursor: "pointer" },
+          })}
+        />
       )}
     </div>
   );

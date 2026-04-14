@@ -121,7 +121,6 @@ body {
 .page {
   min-height: 100vh;
   padding: 28px 36px 100px;
-  background: var(--bg);
 }
 
 .topbar {
@@ -171,7 +170,7 @@ body {
   white-space: nowrap;
   letter-spacing: -.01em;
   box-shadow: var(--shadow-xs);
-  user-select: none;
+  /* user-select: none; */
   position: relative;
   overflow: hidden;
 }
@@ -504,7 +503,7 @@ body {
   padding: 5px 14px;
   width: fit-content;
   transition: all 0.25s ease;
-  backdrop-filter: blur(4px);
+  /* backdrop-filter: blur(4px); */
   position: relative;
 }
 
@@ -1298,4 +1297,202 @@ body {
 @media (min-width: 1600px) {
   .page { padding: 32px 48px 100px; }
   .form-grid { gap: 16px; }
+}
+
+/* ============================================================
+   TABLE VIEW STYLES
+   ============================================================ */
+
+.table-view {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 640px;
+}
+
+.form-table thead tr {
+  border-bottom: 1px solid var(--border);
+  background: #fafbfc;
+}
+
+.form-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.form-row {
+  transition: background var(--t-fast);
+  cursor: pointer;
+}
+
+.form-row:hover {
+  background: var(--bg-hover);
+}
+
+.form-index {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.form-title-cell {
+  min-width: 200px;
+}
+
+.form-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-icon-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.form-name-table {
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.form-desc-table {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form-questions {
+  font-weight: 600;
+  color: var(--text-med);
+}
+
+.form-date {
+  color: var(--text-light);
+  font-size: 12px;
+}
+
+.form-theme {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.theme-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-light);
+  text-transform: capitalize;
+}
+
+.form-actions {
+  white-space: nowrap;
+}
+
+.table-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--t-fast);
+  margin: 0 2px;
+}
+
+.table-action-btn:hover {
+  background: var(--bg-hover);
+  color: var(--primary);
+}
+
+.table-action-btn.danger:hover {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  border-radius: 12px;
+}
+
+.empty-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-light);
+}
+
+.empty-desc {
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-view {
+    border-radius: var(--radius);
+  }
+  
+  .form-table th,
+  .form-table td {
+    padding: 10px 12px;
+  }
+  
+  .form-name-table {
+    font-size: 12px;
+  }
+  
+  .form-desc-table {
+    max-width: 180px;
+  }
 }

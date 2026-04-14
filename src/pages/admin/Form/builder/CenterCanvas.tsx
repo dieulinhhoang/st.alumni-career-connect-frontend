@@ -32,10 +32,24 @@ interface CenterCanvasProps {
 }
 
 export function CenterCanvas({
-  name, desc, accent, questions, activeId, setActiveId,
-  onUpdateQuestion, onDuplicate, onRemove, onMove,
-  onAddOption, onUpdateOption, onRemoveOption, onInsertQuestion,
-  header, onHeaderChange, onNameChange, onDescChange,
+  name,
+  desc,
+  accent,
+  questions,
+  activeId,
+  setActiveId,
+  onUpdateQuestion,
+  onDuplicate,
+  onRemove,
+  onMove,
+  onAddOption,
+  onUpdateOption,
+  onRemoveOption,
+  onInsertQuestion,
+  header,
+  onHeaderChange,
+  onNameChange,
+  onDescChange,
 }: CenterCanvasProps) {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragSourceIndex = useRef<number | null>(null);
@@ -65,7 +79,9 @@ export function CenterCanvas({
         const { title, type, options } = JSON.parse(bankData);
         const newId = onInsertQuestion(targetIndex, type, title, options);
         if (newId) setActiveId(newId);
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     } else if (dragSourceIndex.current !== null && dragSourceIndex.current !== targetIndex) {
       onMove(dragSourceIndex.current, targetIndex);
       dragSourceIndex.current = null;
@@ -88,19 +104,20 @@ export function CenterCanvas({
         boxSizing: "border-box",
         width: "100%",
       }}
-      onDragOver={e => e.preventDefault()}
+      onDragOver={(e) => e.preventDefault()}
     >
       <div style={{ maxWidth: 680, margin: "0 auto", minWidth: 0, width: "100%" }}>
-
         {/* PDF Header */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 10,
-          boxShadow: "0 2px 12px rgba(0,0,0,.07)",
-          marginBottom: 16,
-          overflow: "hidden",
-          minWidth: 0,
-        }}>
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 10,
+            boxShadow: "0 2px 12px rgba(0,0,0,.07)",
+            marginBottom: 16,
+            overflow: "hidden",
+            minWidth: 0,
+          }}
+        >
           <PDFCanvas
             surveyTitle={name}
             descriptionParagraphs={desc ? [desc] : []}
@@ -117,24 +134,28 @@ export function CenterCanvas({
             footer={{ primaryText: "", secondaryText: "" }}
             interactive={false}
             headerOnly
-            onHeaderChange={(h) => onHeaderChange({
-              orgUnit: h.ministry || "",
-              orgName: h.academy || "",
-              address: h.address || "",
-              phone: h.phone || "",
-            })}
+            onHeaderChange={(h) =>
+              onHeaderChange({
+                orgUnit: h.ministry || "",
+                orgName: h.academy || "",
+                address: h.address || "",
+                phone: h.phone || "",
+              })
+            }
             onTitleChange={onNameChange}
             onDescriptionParagraphsChange={(ps) => onDescChange(ps.join("\n\n"))}
           />
         </div>
 
         {/* Questions */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 10,
-          boxShadow: "0 2px 12px rgba(0,0,0,.07)",
-          overflow: "hidden",
-        }}>
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 10,
+            boxShadow: "0 2px 12px rgba(0,0,0,.07)",
+            overflow: "hidden",
+          }}
+        >
           {questions.length === 0 ? (
             <div
               style={{
@@ -143,15 +164,22 @@ export function CenterCanvas({
                 color: "#c4c9d4",
                 fontSize: 13,
               }}
-              onDragOver={e => e.preventDefault()}
-              onDrop={e => handleDrop(e, 0)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => handleDrop(e, 0)}
             >
-              <div style={{
-                width: 48, height: 48, borderRadius: 12,
-                background: "#f0f2f5",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                margin: "0 auto 12px", fontSize: 20,
-              }}>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: "#f0f2f5",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 12px",
+                  fontSize: 20,
+                }}
+              >
                 ✦
               </div>
               <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4 }}>
@@ -164,9 +192,9 @@ export function CenterCanvas({
               <div
                 key={q.id}
                 draggable
-                onDragStart={e => handleDragStart(e, idx)}
-                onDragOver={e => handleDragOver(e, idx)}
-                onDrop={e => handleDrop(e, idx)}
+                onDragStart={(e) => handleDragStart(e, idx)}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDrop={(e) => handleDrop(e, idx)}
                 onDragEnd={handleDragEnd}
                 style={{
                   borderTop: dragOverIndex === idx ? `2px solid ${accent}` : "none",
@@ -176,17 +204,20 @@ export function CenterCanvas({
                 }}
               >
                 <Canvas
-                  question={q} index={idx} total={questions.length}
-                  isActive={activeId === q.id} accent={accent}
+                  question={q}
+                  index={idx}
+                  total={questions.length}
+                  isActive={activeId === q.id}
+                  accent={accent}
                   onActivate={() => setActiveId(q.id)}
-                  onUpdate={patch => onUpdateQuestion(q.id, patch)}
+                  onUpdate={(patch) => onUpdateQuestion(q.id, patch)}
                   onDuplicate={() => onDuplicate(q.id)}
                   onRemove={() => onRemove(q.id)}
                   onMoveUp={() => idx > 0 && onMove(idx, idx - 1)}
                   onMoveDown={() => idx < questions.length - 1 && onMove(idx, idx + 1)}
                   onAddOption={() => onAddOption(q.id)}
                   onUpdateOption={(oid, label) => onUpdateOption(q.id, oid, label)}
-                  onRemoveOption={oid => onRemoveOption(q.id, oid)}
+                  onRemoveOption={(oid) => onRemoveOption(q.id, oid)}
                 />
               </div>
             ))
@@ -195,10 +226,15 @@ export function CenterCanvas({
 
         {/* Question count footer */}
         {questions.length > 0 && (
-          <div style={{
-            textAlign: "center", marginTop: 16,
-            fontSize: 11.5, color: "#9ca3af", fontWeight: 500,
-          }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 16,
+              fontSize: 11.5,
+              color: "#9ca3af",
+              fontWeight: 500,
+            }}
+          >
             {questions.length} câu hỏi · Kéo để sắp xếp
           </div>
         )}

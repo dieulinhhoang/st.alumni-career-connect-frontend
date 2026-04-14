@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Button, Input } from "antd";
 import type { Question, Section, SurveyFooter, SurveyHeader } from "../../../../feature/form/types";
 import { AddressInput } from "./AddressInput";
 
@@ -21,7 +22,11 @@ interface PDFCanvasProps {
 }
 
 function InlineInput({
-  value, onChange, style, multiline, placeholder,
+  value,
+  onChange,
+  style,
+  multiline,
+  placeholder,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -43,20 +48,20 @@ function InlineInput({
     ...style,
   };
   return multiline ? (
-    <textarea
+    <Input.TextArea
       rows={2}
       value={value}
       placeholder={placeholder}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{ ...base, display: "block" }}
     />
   ) : (
-    <input
+    <Input
       value={value}
       placeholder={placeholder}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={base}
@@ -131,7 +136,7 @@ export function PDFCanvas({
     if (!el) return;
     // Set immediately on mount
     setContainerWidth(el.getBoundingClientRect().width);
-    const ro = new ResizeObserver(entries => {
+    const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setContainerWidth(entry.contentRect.width);
       }
@@ -141,7 +146,7 @@ export function PDFCanvas({
   }, []);
 
   // containerWidth=0 means not measured yet → treat as small (mobile-first)
-  const isSmall  = containerWidth === 0 || containerWidth < 480;
+  const isSmall = containerWidth === 0 || containerWidth < 480;
   const isMedium = containerWidth >= 480 && containerWidth < 640;
   const isMobile = isSmall || isMedium;
 
@@ -208,35 +213,31 @@ export function PDFCanvas({
         <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 24 }}>
           Cảm ơn bạn đã tham gia khảo sát.
         </div>
-        <button
-          onClick={() => { setDone(false); setRadios({}); setCbs({}); setTextVals({}); }}
-          style={{
-            height: 40,
-            padding: "0 28px",
-            borderRadius: 6,
-            border: "none",
-            background: accent,
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: "pointer",
+        <Button
+          onClick={() => {
+            setDone(false);
+            setRadios({});
+            setCbs({});
+            setTextVals({});
           }}
+          style={{ background: accent }}
+          type="primary"
         >
           Xem lại
-        </button>
+        </Button>
       </div>
     );
   }
 
   // Group questions by section
   const questionsBySection = sections
-    .map(section => ({
+    .map((section) => ({
       ...section,
       questions: questions
-        .filter(q => q.sectionId === section.id)
+        .filter((q) => q.sectionId === section.id)
         .sort((a, b) => a.order - b.order),
     }))
-    .filter(sec => sec.questions.length > 0);
+    .filter((sec) => sec.questions.length > 0);
 
   let globalIndex = 0;
 
@@ -245,10 +246,7 @@ export function PDFCanvas({
     const idx = globalIndex;
 
     return (
-      <div
-        key={q.id}
-        style={{ padding: `14px ${px}px 16px`, borderBottom: "none" }}
-      >
+      <div key={q.id} style={{ padding: `14px ${px}px 16px`, borderBottom: "none" }}>
         <div
           style={{
             fontSize: 15,
@@ -268,12 +266,12 @@ export function PDFCanvas({
             type="text"
             placeholder={q.placeholder || "Câu trả lời của bạn"}
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={underlineInputStyle}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           />
         )}
 
@@ -281,12 +279,12 @@ export function PDFCanvas({
           <textarea
             placeholder={q.placeholder || "Câu trả lời của bạn"}
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={underlineTextareaStyle}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           />
         )}
 
@@ -295,12 +293,12 @@ export function PDFCanvas({
             type="email"
             placeholder={q.placeholder || "Nhập email"}
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={underlineInputStyle}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           />
         )}
 
@@ -309,12 +307,12 @@ export function PDFCanvas({
             type="tel"
             placeholder={q.placeholder || "Nhập số điện thoại"}
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={underlineInputStyle}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           />
         )}
 
@@ -322,32 +320,32 @@ export function PDFCanvas({
           <input
             type="date"
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={{ ...underlineInputStyle, width: "auto", minWidth: 200 }}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           />
         )}
 
         {q.type === "address" && (
           <AddressInput
             value={textVals[q.id] || ""}
-            onChange={v => setTextVals(t => ({ ...t, [q.id]: v }))}
+            onChange={(v) => setTextVals((t) => ({ ...t, [q.id]: v }))}
           />
         )}
 
         {q.type === "radio" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {(q.options ?? []).map(opt => {
+            {(q.options ?? []).map((opt) => {
               const val = typeof opt === "string" ? opt : opt.label;
               const key = typeof opt === "string" ? opt : opt.id;
               const selected = radios[q.id] === val;
               return (
                 <div
                   key={key}
-                  onClick={() => interactive && setRadios(v => ({ ...v, [q.id]: val }))}
+                  onClick={() => interactive && setRadios((v) => ({ ...v, [q.id]: val }))}
                   style={radioCheckboxBaseStyle}
                 >
                   <div
@@ -374,7 +372,7 @@ export function PDFCanvas({
 
         {q.type === "checkbox" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {(q.options ?? []).map(opt => {
+            {(q.options ?? []).map((opt) => {
               const val = typeof opt === "string" ? opt : opt.label;
               const key = typeof opt === "string" ? opt : opt.id;
               const checked = cbs[q.id]?.[val] || false;
@@ -383,7 +381,7 @@ export function PDFCanvas({
                   key={key}
                   onClick={() =>
                     interactive &&
-                    setCbs(v => ({
+                    setCbs((v) => ({
                       ...v,
                       [q.id]: { ...(v[q.id] || {}), [val]: !checked },
                     }))
@@ -417,13 +415,13 @@ export function PDFCanvas({
 
         {q.type === "multiple-choice" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {q.options?.map(opt => {
+            {q.options?.map((opt) => {
               const val = typeof opt === "string" ? opt : opt;
               const selected = radios[q.id] === val;
               return (
                 <div
                   key={val}
-                  onClick={() => interactive && setRadios(v => ({ ...v, [q.id]: val }))}
+                  onClick={() => interactive && setRadios((v) => ({ ...v, [q.id]: val }))}
                   style={radioCheckboxBaseStyle}
                 >
                   <div
@@ -451,7 +449,7 @@ export function PDFCanvas({
         {q.type === "select" && (
           <select
             value={textVals[q.id] || ""}
-            onChange={e => setTextVals(v => ({ ...v, [q.id]: e.target.value }))}
+            onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))}
             required={q.required}
             disabled={!interactive}
             style={{
@@ -460,12 +458,16 @@ export function PDFCanvas({
               cursor: interactive ? "pointer" : "default",
               color: "#000000",
             }}
-            onFocus={e => (e.currentTarget.style.borderBottomColor = accent)}
-            onBlur={e => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
+            onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+            onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#cbd5e1")}
           >
-            <option value="" disabled>Chọn một phương án</option>
-            {q.options?.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+            <option value="" disabled>
+              Chọn một phương án
+            </option>
+            {q.options?.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
           </select>
         )}
@@ -485,7 +487,6 @@ export function PDFCanvas({
         minWidth: 0,
       }}
     >
-
       {/* Top accent stripe */}
       <div style={{ height: 6, background: accent }} />
 
@@ -532,40 +533,104 @@ export function PDFCanvas({
             <>
               <InlineInput
                 value={header.ministry || ""}
-                onChange={v => updateHeader("ministry", v)}
+                onChange={(v) => updateHeader("ministry", v)}
                 placeholder="Bộ/ngành"
-                style={{ fontSize: isSmall ? 11 : 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", textAlign: isMobile ? "center" : "right", color: "#000000" }}
+                style={{
+                  fontSize: isSmall ? 11 : 13,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  textAlign: isMobile ? "center" : "right",
+                  color: "#000000",
+                }}
               />
               <InlineInput
                 value={header.academy || ""}
-                onChange={v => updateHeader("academy", v)}
+                onChange={(v) => updateHeader("academy", v)}
                 placeholder="Học viện / Trường"
-                style={{ fontSize: isSmall ? 13 : 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: isMobile ? "center" : "right", color: "#000000" }}
+                style={{
+                  fontSize: isSmall ? 13 : 18,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  margin: "6px 0",
+                  textAlign: isMobile ? "center" : "right",
+                  color: "#000000",
+                }}
               />
               <InlineInput
                 value={header.address || ""}
-                onChange={v => updateHeader("address", v)}
+                onChange={(v) => updateHeader("address", v)}
                 placeholder="Địa chỉ"
-                style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#000000" }}
+                style={{
+                  fontSize: isSmall ? 11 : 13,
+                  textAlign: isMobile ? "center" : "right",
+                  color: "#000000",
+                }}
               />
               <InlineInput
                 value={header.phone || ""}
-                onChange={v => updateHeader("phone", v)}
+                onChange={(v) => updateHeader("phone", v)}
                 placeholder="Điện thoại"
-                style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#000000" }}
+                style={{
+                  fontSize: isSmall ? 11 : 13,
+                  textAlign: isMobile ? "center" : "right",
+                  color: "#000000",
+                }}
               />
             </>
           ) : (
             <>
-              <div style={{ fontSize: isSmall ? 11 : 13, fontWeight: 600, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
+              <div
+                style={{
+                  fontSize: isSmall ? 11 : 13,
+                  fontWeight: 600,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
                 {header.ministry}
               </div>
-              <div style={{ fontSize: isSmall ? 13 : 18, fontWeight: 800, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", margin: "6px 0", textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
+              <div
+                style={{
+                  fontSize: isSmall ? 13 : 18,
+                  fontWeight: 800,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  margin: "6px 0",
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
                 {header.academy}
               </div>
-              <div style={{ fontSize: isSmall ? 11 : 13, color: "#000000", lineHeight: 1.5, textAlign: isMobile ? "center" : "right", wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>
+              <div
+                style={{
+                  fontSize: isSmall ? 11 : 13,
+                  color: "#000000",
+                  lineHeight: 1.5,
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
                 {header.address}
-                {header.phone && <><br />{header.phone}{header.fax ? ` — Fax: ${header.fax}` : ""}</>}
+                {header.phone && (
+                  <>
+                    <br />
+                    {header.phone}
+                    {header.fax && ` — Fax: ${header.fax}`}
+                  </>
+                )}
               </div>
             </>
           )}
@@ -573,7 +638,12 @@ export function PDFCanvas({
       </div>
 
       {/* Tiêu đề form */}
-      <div style={{ textAlign: "center", padding: `${isSmall ? 20 : 30}px ${px}px ${isSmall ? 14 : 18}px` }}>
+      <div
+        style={{
+          textAlign: "center",
+          padding: `${isSmall ? 20 : 30}px ${px}px ${isSmall ? 14 : 18}px`,
+        }}
+      >
         {editable && onTitleChange ? (
           <InlineInput
             value={surveyTitle}
@@ -615,7 +685,7 @@ export function PDFCanvas({
               {editable && onDescriptionParagraphsChange ? (
                 <InlineInput
                   value={para}
-                  onChange={val => {
+                  onChange={(val) => {
                     const updated = [...descriptionParagraphs];
                     updated[idx] = val;
                     onDescriptionParagraphsChange(updated);
@@ -659,37 +729,33 @@ export function PDFCanvas({
               Chưa có câu hỏi nào
             </div>
           ) : (
-            questionsBySection.map(section => (
+            questionsBySection.map((section) => (
               <div key={section.id}>
                 <div
-                  style={{ fontWeight: 700, color: "#000000", margin: 0, fontSize: isSmall ? 14 : 17, padding: `${isSmall ? 16 : 22}px ${px}px 8px` }}>
+                  style={{
+                    fontWeight: 700,
+                    color: "#000000",
+                    margin: 0,
+                    fontSize: isSmall ? 14 : 17,
+                    padding: `${isSmall ? 16 : 22}px ${px}px 8px`,
+                  }}
+                >
                   {section.title}
                 </div>
-                {section.questions.map(q => renderQuestion(q))}
+                {section.questions.map((q) => renderQuestion(q))}
               </div>
             ))
           )}
 
           {questions.length > 0 && interactive && (
             <div style={{ padding: `18px ${px}px`, display: "flex", gap: 12, alignItems: "center" }}>
-              <button
+              <Button
+                type="primary"
+                style={{ background: accent, borderColor: accent }}
                 onClick={handleSubmit}
-                style={{
-                  background: accent,
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 4,
-                  padding: "10px 32px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
               >
                 Gửi
-              </button>
+              </Button>
             </div>
           )}
 
@@ -698,7 +764,7 @@ export function PDFCanvas({
               {editable && onFooterChange ? (
                 <InlineInput
                   value={footer?.primaryText || ""}
-                  onChange={v => updateFooter("primaryText", v)}
+                  onChange={(v) => updateFooter("primaryText", v)}
                   placeholder="Dòng cảm ơn"
                   style={{ textAlign: "center", fontWeight: "bold", color: "#000000" }}
                 />
@@ -710,7 +776,7 @@ export function PDFCanvas({
               {editable && onFooterChange ? (
                 <InlineInput
                   value={footer?.secondaryText || ""}
-                  onChange={v => updateFooter("secondaryText", v)}
+                  onChange={(v) => updateFooter("secondaryText", v)}
                   placeholder="Lời chúc"
                   style={{ textAlign: "center", fontStyle: "italic", color: "#000000" }}
                 />
