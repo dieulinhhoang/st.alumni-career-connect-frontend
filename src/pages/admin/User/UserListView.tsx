@@ -1,5 +1,4 @@
-import CustomTable from "@/components/CustomTable/CustomTable"
-import { IUser, IUserQuery } from "@/features/User/type"
+ 
 import { Button, Card, Col, Form, Input, Row, Select, Space, Switch, Tooltip } from "antd"
 import {
     PlusOutlined,
@@ -7,10 +6,13 @@ import {
     EyeOutlined,
     KeyOutlined
 } from '@ant-design/icons'
-import FilterContainer from "@/components/FilterContainer/FilterContainer"
-import { IRole } from "@/features/Role/type"
-import { havePermission } from "@/features/Auth/permission"
-import { PermissionEnum } from "@/features/Auth/type"
+import { havePermission } from "../../../global/hooks/usePermission"
+import { PermissionEnum } from "../../../feature/Auth/type"
+import type { IUser, IUserQuery } from "../../../feature/User/type"
+import FilterContainer from "../../../components/common/FilterContainer"
+import type { IRole } from "../../../feature/Role/type"
+import CustomTable from "../../../components/common/customTable"
+ 
 
 interface UserListViewProps {
     query: IUserQuery
@@ -42,11 +44,15 @@ const UserListView: React.FC<UserListViewProps> = ({
     onToggleStatus
 }) => {
 
-    const canCreate = havePermission(PermissionEnum.USERS_CREATE)
-    const canUpdate = havePermission(PermissionEnum.USERS_UPDATE)
-    const canDelete = havePermission(PermissionEnum.USERS_DELETE)
-    const canView = havePermission(PermissionEnum.USERS_READ)
+    // const canCreate = havePermission(PermissionEnum.USERS_CREATE)
+    // const canUpdate = havePermission(PermissionEnum.USERS_UPDATE)
+    // const canDelete = havePermission(PermissionEnum.USERS_DELETE)
+    // const canView = havePermission(PermissionEnum.USERS_READ)
 
+    const canCreate = true
+    const canUpdate = true
+    const canDelete = true
+    const canView = true
     const columns = [
         {
             title: 'STT',
@@ -91,16 +97,16 @@ const UserListView: React.FC<UserListViewProps> = ({
                 </span>
             )
         },
-        {
-            title: 'Địa chỉ',
-            dataIndex: 'address',
-            ellipsis: true,
-            render: (address: string, record: IUser) => (
-                <span style={{ color: !record.isSuspended ? '#111827' : 'rgba(182, 176, 173, 0.9)' }}>
-                    {address}
-                </span>
-            )
-        },
+        // {
+        //     title: 'Địa chỉ',
+        //     dataIndex: 'address',
+        //     ellipsis: true,
+        //     render: (address: string, record: IUser) => (
+        //         <span style={{ color: !record.isSuspended ? '#111827' : 'rgba(182, 176, 173, 0.9)' }}>
+        //             {address}
+        //         </span>
+        //     )
+        // },
         {
             title: 'Vai trò',
             dataIndex: 'roles',

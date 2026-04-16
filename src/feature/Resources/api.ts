@@ -1,6 +1,6 @@
-import { api } from '@/libs/api'
-import { IResource, IResourceQuery, ICreateResource, IUpdateResource } from './type'
-
+import { api } from '../../libs/api'
+import type { ICreateResource, IResource, IResourceQuery, IUpdateResource } from './type'
+ 
 export const getListResourceAPI = async (
   query?: IResourceQuery
 ): Promise<any> => {

@@ -15,7 +15,6 @@ export default function FilterContainer({ children, onFilterChange, onResetField
   const onFilterChangeRef = useRef(onFilterChange)
   onFilterChangeRef.current = onFilterChange
 
-  // Create a debounced function that persists across renders
   const debouncedFilterChange = useMemo(
     () =>
       debounce((values: unknown) => {
@@ -25,17 +24,13 @@ export default function FilterContainer({ children, onFilterChange, onResetField
   )
 
   const handleChangeFilter = (_changedValues: unknown, allValues: unknown) => {
-    // Trim all string fields dynamically
     const processedValues = { ...(allValues as Record<string, unknown>) }
-
-    // Iterate through all values and trim string fields
     Object.keys(processedValues).forEach((key) => {
       const value = processedValues[key]
       if (typeof value === 'string') {
         processedValues[key] = value.trim()
       }
     })
-
     debouncedFilterChange(processedValues)
   }
 
@@ -47,8 +42,9 @@ export default function FilterContainer({ children, onFilterChange, onResetField
   return (
     <Card
       className='!mb-[10px] overflow-visible relative shadow-sm !rounded-xl !border-gray-200'
+        styles={{ body: { padding: '24px 16px 20px' } }}
     >
-      <div
+       <div
         style={{
           position: 'absolute',
           top: '-20px',
@@ -68,19 +64,49 @@ export default function FilterContainer({ children, onFilterChange, onResetField
         <FilterOutlined style={{ marginRight: 5 }} />
         Bộ lọc
       </div>
-      <Form form={form} layout='inline' onValuesChange={handleChangeFilter} ref={formRef}>
-        <div className='filter-form-container'>{typeof children === 'function' ? children(form) : children}</div>
-      </Form>
 
-      <div className='flex justify-end top-[-34px] right-[24px] absolute'>
-        <Button
-          className='mt-4'
-          icon={<ReloadOutlined />}
-          onClick={() => {
-            handleResetForm()
+      {/* Form filter */}
+      <Form form={form} layout='inline' onValuesChange={handleChangeFilter} ref={formRef}>
+        <div 
+          className='filter-form-container' 
+          style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '8px', 
+            alignItems: 'flex-end'
           }}
         >
-        </Button>
+          {typeof children === 'function' ? children(form) : children}
+        </div>
+      </Form>
+
+      {/* Nút reload  */}
+      <div 
+        style={{ 
+          position: 'absolute', 
+          bottom: '-12px',
+          right: '20px',
+          zIndex: 10,
+          top: '-14px',
+          
+        }}
+      >
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={handleResetForm}
+          size="small"
+          style={{
+            borderRadius: '50%',
+            height: '28px',
+            width: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            backgroundColor: 'white',
+            border: '1px solid #d9d9d9'
+          }}
+        />
       </div>
     </Card>
   )

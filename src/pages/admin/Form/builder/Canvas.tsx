@@ -6,7 +6,7 @@ import {
   CopyOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import type { Question } from "../../../../feature/form/types";
+import type { Question, Section } from "../../../../feature/form/types";
 import { QuestionProps } from "./QuestionProps";
 
 interface CanvasProps {
@@ -15,6 +15,7 @@ interface CanvasProps {
   total: number;
   isActive: boolean;
   accent: string;
+  sections?: Section[];
   onActivate: () => void;
   onUpdate: (patch: Partial<Question>) => void;
   onDuplicate: () => void;
@@ -32,6 +33,7 @@ export function Canvas({
   total,
   isActive,
   accent,
+  sections = [],
   onActivate,
   onUpdate,
   onDuplicate,
@@ -49,6 +51,7 @@ export function Canvas({
     setExpanded(true);
   };
 
+  
   const answerPreview = () => {
     const style: React.CSSProperties = {
       borderBottom: "1.5px solid #e8eaed",
@@ -187,6 +190,7 @@ export function Canvas({
             q={question}
             idx={index}
             total={total}
+            sections={sections}
             updateQ={(id, patch) => onUpdate(patch)}
             dupQ={onDuplicate}
             removeQ={onRemove}

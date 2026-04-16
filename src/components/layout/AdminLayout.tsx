@@ -69,16 +69,31 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link> },
             ],
         },
+       
+        
         { type: 'divider' },
-        {
-            key: 'system-grp', label: 'HỆ THỐNG', type: 'group',
-            children: [
-                { key: '/admin/accounts', icon: <UsergroupAddOutlined />, label: <Link to="/admin/accounts">Tài khoản</Link> },
-                { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link> },
-                { key: '/admin/users', icon: <AppstoreOutlined />, label: <Link to="/admin/users">Người dùng</Link> },
-            ],
-        },
+    {
+        key: 'system-grp', label: 'HỆ THỐNG', type: 'group',
+        children: [
+             { 
+                key: '/admin/resources', 
+                icon: <AppstoreOutlined />, 
+                label: <Link to="/admin/resources">Tài nguyên</Link> 
+            },
+             { 
+                key: '/admin/roles', 
+                icon: <SafetyCertificateOutlined />, 
+                label: <Link to="/admin/roles">Vai trò</Link> 
+            },
+             { 
+                key: '/admin/users', 
+                icon: <UsergroupAddOutlined />, 
+                label: <Link to="/admin/users">Người dùng</Link> 
+            },
+        ],
+    },
     ];
+
 
     const renderMenu = () => (
         <Menu 

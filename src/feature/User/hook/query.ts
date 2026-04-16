@@ -1,23 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-    getListUserAPI,
-    createUserAPI,
-    updateUserAPI,
-    deleteUserAPI,
-    getUserDetailAPI,
-    changeUserPasswordAPI,
-    updateUserSuspendAPI,
-} from '../api'
-import {
-    IUserListResponse,
-    IUserQuery,
-    ICreateUserBody,
-    IUser,
-    IUpdateUserBody,
-} from '../type'
+ 
 import { message } from 'antd'
-import { getListRoleAPI } from '@/features/Role/api'
-import { IRole } from '@/features/Role/type'
+import { changeUserPasswordAPI, createUserAPI, deleteUserAPI, getListUserAPI, getUserDetailAPI, updateUserAPI, updateUserSuspendAPI } from '../api'
+import type { ICreateUserBody, IUpdateUserBody, IUser, IUserListResponse, IUserQuery } from '../type'
+import { getListRoleAPI } from '../../role/api'
+import type { IRole } from '../../role/type'
+ 
 
 export const useGetListUsers = (params: IUserQuery) => {
     return useQuery<IUserListResponse>({

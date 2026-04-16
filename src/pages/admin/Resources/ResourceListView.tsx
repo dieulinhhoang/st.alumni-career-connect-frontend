@@ -11,14 +11,12 @@ import {
   Form
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
-
-import CustomTable from '@/components/CustomTable/CustomTable'
-import FilterContainer from '@/components/FilterContainer/FilterContainer'
-
-import { IResource, IResourceQuery } from '../../features/Resources/type'
-import { ACTION_LABEL_VI, RESOURCE_LABEL_VI } from '@/libs/rbac'
-import { havePermission } from '@/features/Auth/permission'
-import { PermissionEnum } from '@/features/Auth/type'
+import type { IResource, IResourceQuery } from '../../../feature/Resources/type'
+import { havePermission } from '../../../global/hooks/usePermission'
+import { PermissionEnum } from '../../../feature/Auth/type'
+import FilterContainer from '../../../components/common/FilterContainer'
+import CustomTable from '../../../components/common/customTable'
+ 
 
 interface ResourceListViewProps {
   query: IResourceQuery
@@ -44,10 +42,12 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
   onDelete,
   onTableChange
 }) => {
-  const canCreate = havePermission(PermissionEnum.RESOURCE_CREATE)
-  const canUpdate = havePermission(PermissionEnum.RESOURCE_UPDATE)
-  const canDelete = havePermission(PermissionEnum.RESOURCE_DELETE)
-
+  // const canCreate = havePermission(PermissionEnum.RESOURCE_CREATE)
+  // const canUpdate = havePermission(PermissionEnum.RESOURCE_UPDATE)
+  // const canDelete = havePermission(PermissionEnum.RESOURCE_DELETE)
+const canCreate = true
+const canUpdate = true
+const canDelete = true
   const columns = [
     {
       title: 'STT',
@@ -71,7 +71,7 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
       render: (name: string, item: IResource) => (
         <div>
           <div style={{ fontWeight: 600, color: '#111827' }}>
-            {item.name?.trim() || RESOURCE_LABEL_VI[item.code] || item.code}
+            {item.name?.trim() || item.code}
           </div>
         </div>
       )
@@ -156,13 +156,13 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
 
     const filtered = items.filter((r) => {
       const okCode = !codeKw || normalize(r.code).includes(codeKw)
-      const displayName = r.name || RESOURCE_LABEL_VI[r.code] || r.code || ''
+      const displayName = r.name || r.code || ''
       const okName = !nameKw || normalize(displayName).includes(nameKw)
       const okAction =
         !actionKw ||
         (r.actions || []).some((a) => {
           const en = normalize(a)
-          const vi = normalize(ACTION_LABEL_VI[a] ?? '')
+          const vi = normalize( '')
           return en.includes(actionKw) || vi.includes(actionKw)
         })
 

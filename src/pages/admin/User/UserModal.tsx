@@ -103,6 +103,8 @@ const UserModal: React.FC<Props> = ({
       confirmLoading={confirmLoading}
       okButtonProps={{ disabled: isView }}
       width={680}
+      okText="Lưu"       
+      cancelText="Huỷ" 
     >
     <Form  form={form} layout="vertical" disabled={isView} style={{ marginTop: 16 }}>
         <Row gutter={16}>
@@ -190,7 +192,7 @@ const UserModal: React.FC<Props> = ({
               <Input placeholder="Nhập số điện thoại" onChange={(e) => setMobile(e.target.value)} />
             </Form.Item>
           </Col>
-
+{/* 
           <Col span={12}>
             <Form.Item
               name="address"
@@ -199,7 +201,7 @@ const UserModal: React.FC<Props> = ({
             >
               <Input placeholder="Nhập địa chỉ" onChange={(e) => setAddress(e.target.value)} />
             </Form.Item>
-          </Col>
+          </Col> */}
 
           <Col span={12}>
             <Form.Item

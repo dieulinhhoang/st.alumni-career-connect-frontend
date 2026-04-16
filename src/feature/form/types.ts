@@ -11,8 +11,8 @@ export interface Question {
   order: number;               // thứ tự trong section
 }
 
- //  SURVEY HEADER / FOOTER / SECTION
- 
+// SURVEY HEADER / FOOTER / SECTION
+
 export interface SurveyHeader {
   logoUrl?: string;      // URL ảnh logo
   ministry?: string;     // "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG"
@@ -37,7 +37,7 @@ export interface Section {
 export interface Survey {
   id: string;
   title: string;
-  description: string;        // mô tả chung (có thể tách đoạn bằng \n\n)
+  description: string;        // mô tả chung (hỗ trợ HTML)
   sections: Section[];
   questions: Question[];
   defaultHeader: SurveyHeader;
@@ -52,7 +52,6 @@ export interface SurveyResponse {
   }[];
 }
 
- 
 // THEME TYPES 
 export interface Theme {
   id: string;
@@ -75,12 +74,16 @@ export interface CustomTheme {
 export interface Form {
   id: number | null;
   name: string;
-  description: string;
+  description: string;      // hỗ trợ HTML
+  sections: Section[];      // thêm sections vào form
   questions: Question[];         
   themeId: string;
   created_at?: string;
   updated_at?: string;
   _customTheme?: CustomTheme | null;
+  header?: SurveyHeader;    // thêm header tùy chỉnh
+  footer?: SurveyFooter;    // thêm footer tùy chỉnh
+  logoUrl?: string; 
 }
 
 // VIEW TYPES 
@@ -109,15 +112,21 @@ export interface RadiusOption {
 export interface CreateFormPayload {
   name: string;
   description: string;
-  questions: Question[];        // dùng Question mới
+  sections?: Section[];
+  questions: Question[];
   themeId?: string;
+  header?: SurveyHeader;
+  footer?: SurveyFooter;
 }
 
 export interface UpdateFormPayload {
   name?: string;
   description?: string;
-  questions?: Question[];       // dùng Question mới
+  sections?: Section[];
+  questions?: Question[];
   themeId?: string;
+  header?: SurveyHeader;
+  footer?: SurveyFooter;
 }
 
 export interface GetFormsParams {
@@ -136,5 +145,6 @@ export interface PaginatedResponse<T> {
 export interface AIFormResult {
   name: string;
   description: string;
-  questions: Question[];        // dùng Question mới
+  sections?: Section[];
+  questions: Question[];
 }

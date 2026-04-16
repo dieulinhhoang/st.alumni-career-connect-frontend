@@ -1,5 +1,6 @@
-import { UserActionInfo } from '@/Global/globalType'
+import type { UserActionInfo } from "../../global/globalType"
 
+ 
 export interface IRole {
   _id: string
   code: string

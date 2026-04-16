@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Tabs, message } from "antd";
+import { Button } from "antd";
 import {
   ArrowLeftOutlined,
   SaveOutlined,
@@ -8,7 +8,7 @@ import {
   BgColorsOutlined,
 } from "@ant-design/icons";
 import { useQuestionEditor } from "../../../feature/form/hooks/useQuestionEditor";
-import type { Form } from "../../../feature/form/types";
+import type { Form, Section, SurveyFooter } from "../../../feature/form/types";
 import { ACCENT_COLORS } from "../../../feature/form/constants";
 import { LeftToolbox } from "./builder/LeftToolbox";
 import { CenterCanvas } from "./builder/CenterCanvas";
@@ -21,6 +21,7 @@ interface HeaderFields {
   orgName: string;
   address: string;
   phone: string;
+  logoUrl?: string;
 }
 
 const DEFAULT_HEADER: HeaderFields = {
@@ -28,6 +29,12 @@ const DEFAULT_HEADER: HeaderFields = {
   orgName: "Học viện Nông nghiệp Việt Nam",
   address: "Xã Gia Lâm, Thành phố Hà Nội",
   phone: "Điện thoại: 024.62617586 — Fax: 024.62617586",
+  logoUrl: "",
+};
+
+const DEFAULT_FOOTER: SurveyFooter = {
+  primaryText: "Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!",
+  secondaryText: "Kính chúc Anh/Chị sức khỏe và thành công!",
 };
 
 interface BuilderViewProps {
@@ -46,7 +53,10 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       : ACCENT_COLORS[0]
   );
   const [header, setHeader] = useState<HeaderFields>((form as any)?.header ?? DEFAULT_HEADER);
+  const [footer, setFooter] = useState<SurveyFooter>((form as any)?.footer ?? DEFAULT_FOOTER);
+  const [sections, setSections] = useState<Section[]>((form as any)?.sections ?? []);
   const [saved, setSaved] = useState(false);
+  const [logoUrl, setLogoUrl] = useState((form as any)?.logoUrl ?? "");
 
   // Responsive
   const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
@@ -85,14 +95,23 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   } = useQuestionEditor(form?.questions ?? []);
 
   const handleSave = () => {
-    onSave({ ...form!, name, description: desc, questions, themeId: accent, header } as any);
+    onSave({
+      ...form!,
+      name,
+      description: desc,
+      questions,
+      themeId: accent,
+      header,
+      footer,
+      sections,
+      logoUrl,
+    } as any);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   const MOBILE_BAR_H = isMobile && activeTab === "designer" ? 52 : 0;
 
-  // Drawer overlay (mobile)
   const DrawerOverlay = ({
     side,
     open,
@@ -125,10 +144,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             maxWidth: "85vw",
             height: "100%",
             background: "#fff",
-            boxShadow:
-              side === "left"
-                ? "4px 0 28px rgba(0,0,0,.15)"
-                : "-4px 0 28px rgba(0,0,0,.15)",
+            boxShadow: side === "left" ? "4px 0 28px rgba(0,0,0,.15)" : "-4px 0 28px rgba(0,0,0,.15)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -194,6 +210,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           onHeaderChange={setHeader}
           onNameChange={setName}
           onDescChange={setDesc}
+          footer={footer}
+          onFooterChange={setFooter}
+          sections={sections}
+          onSectionsChange={setSections}
+          
         />
       </div>
 
@@ -241,10 +262,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           }}
         >
           <button
-            onClick={() => {
-              setRightOpen(false);
-              setLeftOpen((o) => !o);
-            }}
+            onClick={() => { setRightOpen(false); setLeftOpen((o) => !o); }}
             style={{
               flex: 1,
               height: "100%",
@@ -264,10 +282,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             <AppstoreOutlined /> Câu hỏi
           </button>
           <button
-            onClick={() => {
-              setLeftOpen(false);
-              setRightOpen((o) => !o);
-            }}
+            onClick={() => { setLeftOpen(false); setRightOpen((o) => !o); }}
             style={{
               flex: 1,
               height: "100%",
@@ -304,14 +319,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "calc(100vh - 64px)",
-        background: "#fff",
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)", background: "#fff" }}>
       {/* TOP BAR */}
       <div
         style={{
@@ -329,7 +337,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           {!isMobile && <span>Quay lại</span>}
         </Button>
 
-        {/* Tabs */}
         <div style={{ display: "flex", flex: 1, justifyContent: "center", height: "100%", gap: 2 }}>
           {[
             { key: "designer", label: "Thiết kế" },
@@ -343,8 +350,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
                 height: "100%",
                 padding: isMobile ? "0 12px" : "0 18px",
                 border: "none",
-                borderBottom:
-                  activeTab === t.key ? `2px solid ${accent}` : "2px solid transparent",
+                borderBottom: activeTab === t.key ? `2px solid ${accent}` : "2px solid transparent",
                 background: "none",
                 cursor: "pointer",
                 fontSize: isMobile ? 12.5 : 13.5,
@@ -361,7 +367,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           ))}
         </div>
 
-        {/* Save button */}
         <Button
           type={saved ? "default" : "primary"}
           icon={saved ? <CheckOutlined /> : <SaveOutlined />}
@@ -376,7 +381,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         </Button>
       </div>
 
-      {/* CONTENT */}
       <div style={{ flex: 1, overflow: "hidden" }}>{renderContent()}</div>
     </div>
   );

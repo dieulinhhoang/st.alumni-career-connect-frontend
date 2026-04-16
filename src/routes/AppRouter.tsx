@@ -1,20 +1,23 @@
 import { lazy, Suspense } from 'react';
-import Statistic         from '../pages/admin/Statistics';
-import StudentList        from '../pages/admin/ManageUsers/StudentList';
-import StaffList          from '../pages/admin/ManageUsers/StaffList';
-import STAlumni           from '../pages/client/Home/Home';
-import Enterprise         from '../pages/admin/Enterprise/index';
-import EnterpriseDetail   from '../pages/admin/EnterpriseDetail/index';
-import Faculties          from '../pages/admin/Faculty';
-import MajorDetail        from '../pages/admin/Faculty/MajorDetail';
-import FacultyDetail      from '../pages/admin/Faculty/FacultyDetail';
+import Statistic from '../pages/admin/Statistics';
+import StudentList from '../pages/admin/ManageUsers/StudentList';
+import StaffList from '../pages/admin/ManageUsers/StaffList';
+import STAlumni from '../pages/client/Home/Home';
+import Enterprise from '../pages/admin/Enterprise/index';
+import EnterpriseDetail from '../pages/admin/EnterpriseDetail/index';
+import Faculties from '../pages/admin/Faculty';
+import MajorDetail from '../pages/admin/Faculty/MajorDetail';
+import FacultyDetail from '../pages/admin/Faculty/FacultyDetail';
 import GraduationStudents from '../pages/admin/Graduation/GraduationStudents';
-import GraduationList     from '../pages/admin/Graduation/index';
-import StudentDetail      from '../pages/admin/Graduation/Studentdetail';
+import GraduationList from '../pages/admin/Graduation/index';
+import StudentDetail from '../pages/admin/Graduation/Studentdetail';
+import UserManagement from '../pages/admin/User/UserManagement';
+import RoleManagement from '../pages/admin/Role/RoleManagement';
+import ResourceManagement from '../pages/admin/Resources/ResourceManagement';
 
-const DashBoard   = lazy(() => import('../pages/admin/DashBoard/index'));
-const Loader      = lazy(() => import('../components/common/loader'));
- const SurveyPage  = lazy(() => import('../pages/admin/Form/index'));
+const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
+const Loader = lazy(() => import('../components/common/loader'));
+const SurveyPage = lazy(() => import('../pages/admin/Form/index'));
 
 const routes = [
     {
@@ -140,6 +143,30 @@ const routes = [
                 element: (
                     <Suspense fallback={<Loader />}>
                         <StudentDetail />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/resources',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <ResourceManagement />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/roles',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <RoleManagement />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/users',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <UserManagement />
                     </Suspense>
                 )
             },

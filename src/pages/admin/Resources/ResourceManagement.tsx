@@ -1,24 +1,15 @@
 import React, { useState } from 'react'
 import { message } from 'antd'
-import PageContentLayout from '@/components/layout/PageContentLayout'
-import { ACTION_LABEL_VI } from '@/libs/rbac'
-
-import {
-  IResource,
-  IResourceQuery,
-  ICreateResource,
-  IUpdateResource
-} from '../../features/Resources/type'
-
 import {
   useGetListResources,
   useCreateResource,
   useUpdateResource,
   useDeleteResource
-} from '../../features/Resources/hook/query'
-
+} from '../../../feature/resources/hook/query'
 import ResourceListView from './ResourceListView'
 import ResourceModal from './ResourceModal'
+import type { ICreateResource, IResource, IResourceQuery, IUpdateResource } from '../../../feature/Resources/type'
+import AdminLayout from '../../../components/layout/AdminLayout'
 
 const ResourceManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
@@ -36,13 +27,27 @@ const ResourceManagement: React.FC = () => {
   const [name, setName] = useState('')
   const [actions, setActions] = useState<string[]>([''])
 
-  const { data: listData, isLoading, refetch } = useGetListResources(query)
+  const { data: responseData, isLoading, refetch } = useGetListResources(query)
+  
+  // Transform data cho đúng format ResourceListView mong đợi
+  const listData = {
+    data: responseData?.data || [],
+    page: responseData?.page || { 
+      total_elements: 0, 
+      current_page: 0, 
+      total_pages: 0,
+      has_next: false,
+      has_previous: false
+    }
+  }
+
   const createResource = useCreateResource()
   const updateResource = useUpdateResource()
   const deleteResource = useDeleteResource()
 
   const resetForm = () => {
     setCode('')
+    setName('')
     setActions([''])
   }
 
@@ -86,8 +91,6 @@ const ResourceManagement: React.FC = () => {
 
   const handleSubmit = () => {
     const cleanCode = code.trim()
-
-    // trim + bỏ rỗng + uniq
     const cleanActions = Array.from(
       new Set(actions.map((a) => a.trim()).filter(Boolean))
     )
@@ -157,8 +160,7 @@ const ResourceManagement: React.FC = () => {
   return (
     <>
       {contextHolder}
-
-      <PageContentLayout breadcrumbs={[]} title="Resources">
+      <AdminLayout>
         <ResourceListView
           query={query}
           setQuery={setQuery}
@@ -183,7 +185,7 @@ const ResourceManagement: React.FC = () => {
           onCancel={closeModal}
           confirmLoading={createResource.isPending || updateResource.isPending}
         />
-      </PageContentLayout>
+      </AdminLayout>
     </>
   )
 }

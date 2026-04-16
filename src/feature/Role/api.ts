@@ -1,4 +1,4 @@
-import {api} from '@/libs/api'
+import {api} from '../../libs/api'
 import { IRole, IRoleListResponse, IRoleQuery,ICreateRoleBody, IResourceItem } from './type';
 
 export const getListRoleAPI = async(params:IRoleQuery): Promise<IRoleListResponse> =>{

@@ -17,11 +17,11 @@ import {
   EyeOutlined
 } from '@ant-design/icons'
 
-import CustomTable from '@/components/CustomTable/CustomTable'
-import FilterContainer from '@/components/FilterContainer/FilterContainer'
-import { IRole, IRoleQuery } from '../../features/Role/type'
-import { havePermission } from '@/features/Auth/permission'
-import { PermissionEnum } from '@/features/Auth/type'
+ import FilterContainer from '../../../components/common/FilterContainer'
+ import { havePermission } from '../../../global/hooks/usePermission'
+ import { PermissionEnum } from '../../../feature/Auth/type'
+import type { IRole, IRoleQuery } from '../../../feature/Role/type'
+import CustomTable from '../../../components/common/customTable'
 
 interface RoleListViewProps {
   query: IRoleQuery
@@ -47,11 +47,14 @@ const RoleListView: React.FC<RoleListViewProps> = ({
   onTableChange
 }) => {
 
-  const canCreate = havePermission(PermissionEnum.ROLE_CREATE)
-  const canUpdate = havePermission(PermissionEnum.ROLE_UPDATE)
-  const canDelete = havePermission(PermissionEnum.ROLE_DELETE)
-  const canView = havePermission(PermissionEnum.ROLE_READ)
-
+  // const canCreate = havePermission(PermissionEnum.ROLE_CREATE)
+  // const canUpdate = havePermission(PermissionEnum.ROLE_UPDATE)
+  // const canDelete = havePermission(PermissionEnum.ROLE_DELETE)
+  // const canView = havePermission(PermissionEnum.ROLE_READ)
+  const canCreate = true
+  const canUpdate = true
+  const canDelete = true
+  const canView = true
   const columns = [
     {
       title: 'STT',

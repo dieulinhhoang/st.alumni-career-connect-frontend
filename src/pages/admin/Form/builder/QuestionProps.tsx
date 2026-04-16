@@ -1,7 +1,7 @@
 import { Switch, Select, Tooltip, Button, Input, Space } from "antd";
 import { PlusOutlined, UpOutlined, DownOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Q_TYPES } from "../../../../feature/form/constants";
-import type { Question, QuestionType } from "../../../../feature/form/types";
+import type { Question, QuestionType, Section } from "../../../../feature/form/types";
 
 const T = "#0f766e";
 
@@ -9,6 +9,7 @@ interface QuestionPropsProps {
   q: Question;
   idx: number;
   total: number;
+  sections?: Section[];
   updateQ: (id: string, patch: Partial<Question>) => void;
   dupQ: (id: string) => void;
   removeQ: (id: string) => void;
@@ -32,6 +33,7 @@ export function QuestionProps({
   q,
   idx,
   total,
+  sections = [],
   updateQ,
   dupQ,
   removeQ,
@@ -67,6 +69,23 @@ export function QuestionProps({
           />
         </div>
       </div>
+
+      {/* Section assignment — only show when sections exist */}
+      {sections.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={LBL}>Thuộc phần</div>
+          <Select
+            size="small"
+            value={q.sectionId || ""}
+            style={{ width: "100%" }}
+            onChange={(val) => updateQ(q.id, { sectionId: val })}
+            options={[
+              { value: "", label: "— Chưa phân phần —" },
+              ...sections.map((s) => ({ value: s.id, label: s.title })),
+            ]}
+          />
+        </div>
+      )}
 
       {/* Question content */}
       <div style={{ marginBottom: 12 }}>

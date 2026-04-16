@@ -1,4 +1,4 @@
-import { api } from '@/libs/api'
+import { api } from '../../libs/api'
 import { IUser, IUserListResponse, IUserQuery, ICreateUserBody, IUpdateUserBody } from './type';
 
 export const getListUserAPI = async (params: IUserQuery): Promise<IUserListResponse> => {

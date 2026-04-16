@@ -1,19 +1,12 @@
 import React, { useState } from 'react'
-import PageContentLayout from '@/components/layout/PageContentLayout'
-import UserListView from './UserListView'
+ import UserListView from './UserListView'
 import UserModal from './UserModal'
 import { message } from 'antd'
-import {
-  useCreateUser,
-  useDeleteUser,
-  useGetListUsers,
-  useUpdateUser,
-  useGetRolesUser,
-  useChangeUserPassword,
-  useIsSuspended,
-} from '@/features/User/hook/query'
-import { IUser } from '@/features/User/type'
+ 
 import ChangePasswordModal from './ChangePasswordModal'
+import AdminLayout from '../../../components/layout/AdminLayout'
+import { useChangeUserPassword, useCreateUser, useDeleteUser, useGetListUsers, useGetRolesUser, useIsSuspended, useUpdateUser } from '../../../feature/user/hook/query'
+import type { IUser } from '../../../feature/User/type'
 
 const UserManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
@@ -175,7 +168,7 @@ const UserManagement: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <PageContentLayout breadcrumbs={[]} title="Người dùng">
+      <AdminLayout >
         <UserListView
           query={query}
           setQuery={setQuery}
@@ -225,7 +218,7 @@ const UserManagement: React.FC = () => {
           onCancel={() => setIsChangePasswordOpen(false)}
           confirmLoading={changeUserPassword.isPending}
         />
-      </PageContentLayout>
+      </AdminLayout>
     </>
   )
 }

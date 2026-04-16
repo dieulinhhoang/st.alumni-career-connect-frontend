@@ -202,7 +202,6 @@ export function AIView({ onSave, onBack }: AIViewProps) {
               gap: 10,
             }}
           >
-            <span style={{ fontSize: 12, color: "#9ca3af" }}>Ctrl + Enter để tạo nhanh</span>
             <Button
               type="primary"
               icon={<ThunderboltOutlined />}
