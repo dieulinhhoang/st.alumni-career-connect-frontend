@@ -21,6 +21,8 @@ interface PDFCanvasProps {
   onSectionsChange?: (sections: Section[]) => void;
   logoUrl?: string;
   logoSize?: number;
+  initialValues?: Record<string, any>;
+  onSubmit?: (answers: Record<string, any>) => void;
 }
 
 // ─── Rich text renderer ──────────────────────────────────────────────────────
@@ -548,10 +550,38 @@ export function PDFCanvas({
   onSectionsChange,
   logoUrl,
   logoSize = 200,
+  initialValues = {},
+  onSubmit,
 }: PDFCanvasProps) {
-  const [radios, setRadios] = useState<Record<string, string>>({});
-  const [cbs, setCbs] = useState<Record<string, Record<string, boolean>>>({});
-  const [textVals, setTextVals] = useState<Record<string, string>>({});
+  // Init state từ initialValues nếu có
+  const [radios, setRadios] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    questions.forEach(q => {
+      if ((q.type === 'radio' || q.type === 'multiple-choice') && initialValues[q.id] != null) {
+        init[q.id] = initialValues[q.id];
+      }
+    });
+    return init;
+  });
+  const [cbs, setCbs] = useState<Record<string, Record<string, boolean>>>(() => {
+    const init: Record<string, Record<string, boolean>> = {};
+    questions.forEach(q => {
+      if (q.type === 'checkbox' && initialValues[q.id] != null) {
+        const vals = Array.isArray(initialValues[q.id]) ? initialValues[q.id] : [initialValues[q.id]];
+        init[q.id] = Object.fromEntries(vals.map((v: string) => [v, true]));
+      }
+    });
+    return init;
+  });
+  const [textVals, setTextVals] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    questions.forEach(q => {
+      if (!['radio', 'multiple-choice', 'checkbox'].includes(q.type) && initialValues[q.id] != null) {
+        init[q.id] = String(initialValues[q.id]);
+      }
+    });
+    return init;
+  });
   const [done, setDone] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -583,7 +613,17 @@ export function PDFCanvas({
   };
 
   const handleSubmit = () => {
-    setDone(true);
+    // Gom toàn bộ answers lại
+    const allAnswers: Record<string, any> = { ...textVals };
+    Object.entries(radios).forEach(([k, v]) => { allAnswers[k] = v; });
+    Object.entries(cbs).forEach(([k, v]) => {
+      allAnswers[k] = Object.entries(v).filter(([, checked]) => checked).map(([val]) => val);
+    });
+    if (onSubmit) {
+      onSubmit(allAnswers);
+    } else {
+      setDone(true);
+    }
   };
 
   if (done && interactive) {
@@ -686,7 +726,7 @@ export function PDFCanvas({
   return (
     <div ref={containerRef} style={{ background: "#fff", fontFamily: "'Times New Roman', Georgia, serif", color: "#000000", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
       {/* Accent stripe */}
-      <div style={{ height: 6, background: accent }} />
+      {/* <div style={{ height: 6, background: accent }} /> */}
 
       {/* Date */}
       {header.showDate !== false && (

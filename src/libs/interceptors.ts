@@ -1,6 +1,6 @@
 import { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { getLocalStorage, setLocalStorage } from './localStorage'
-import { refreshTokenAPI } from '../feature/Auth/api'
+import { refreshTokenAPI } from '../feature/auth/api'
  
 export interface ConsoleError {
   status: number

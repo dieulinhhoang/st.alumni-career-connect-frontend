@@ -84,6 +84,7 @@ export interface Form {
   header?: SurveyHeader;    // thêm header tùy chỉnh
   footer?: SurveyFooter;    // thêm footer tùy chỉnh
   logoUrl?: string; 
+  status?: 'draft' | 'published';
 }
 
 // VIEW TYPES 

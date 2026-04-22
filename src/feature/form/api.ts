@@ -21,6 +21,7 @@ let _store: Form[] = [
     id: 1,
     themeId: "blue",
     name: "Khảo sát việc làm sau tốt nghiệp",
+    status: 'published',
     description: "Khảo sát tình trạng việc làm của sinh viên sau khi tốt nghiệp",
     questions: [
       { id: "q1", type: "short",  title: "Họ và tên",                                   required: true, options: [] },

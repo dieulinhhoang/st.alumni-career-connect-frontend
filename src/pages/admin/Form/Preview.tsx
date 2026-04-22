@@ -1,6 +1,7 @@
+// Preview.tsx
 import { useState } from "react";
 import { Button, Space } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, FileOutlined } from "@ant-design/icons"; // thêm FileOutlined
 import { THEMES } from "../../../feature/form/constants";
 import type { Form, Question as OldQuestion } from "../../../feature/form/types";
 import { PDFCanvas } from "./builder/PDFCanvas";
@@ -17,6 +18,7 @@ function mapFormToSurvey(form: Form): Survey {
   let order = 0;
 
   for (const oldQ of form.questions) {
+    // Giữ nguyên logic map như bạn đã viết
     const match = oldQ.title.match(/^(\d+)\./);
     let sectionId = currentSectionId;
     if (match) {
@@ -100,6 +102,7 @@ function mapFormToSurvey(form: Form): Survey {
 
   const defaultHeader: SurveyHeader = {
     logoUrl:
+      form.logoUrl || // ưu tiên logo từ form nếu có
       "https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png",
     ministry: "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG",
     academy: "HỌC VIỆN NÔNG NGHIỆP VIỆT NAM",
@@ -129,9 +132,11 @@ interface PreviewProps {
   form: Form | null;
   compact?: boolean;
   onBack?: () => void;
+  initialValues?: Record<string, any>;
+  onSubmit?: (answers: Record<string, any>) => void;
 }
 
-export function SurveyPreview({ form, compact = false }: PreviewProps) {
+export function SurveyPreview({ form, compact = false, initialValues, onSubmit }: PreviewProps) {
   if (!form) {
     return (
       <div
@@ -169,6 +174,8 @@ export function SurveyPreview({ form, compact = false }: PreviewProps) {
       headerOnly={false}
       logoUrl={survey.defaultHeader.logoUrl}
       logoSize={compact ? 36 : 120}
+      initialValues={initialValues}
+      onSubmit={onSubmit}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { PermissionEnum } from '../../feature/Auth/type'
+import { PermissionEnum } from '../../feature/auth/type'
 
 export const havePermission = (permission: PermissionEnum | string): boolean => {
   try {

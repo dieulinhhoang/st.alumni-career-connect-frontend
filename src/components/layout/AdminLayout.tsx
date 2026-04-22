@@ -58,7 +58,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
             key: 'survey-grp', label: 'KHẢO SÁT', type: 'group',
             children: [
                 { key: '/admin/allforms', icon: <FileTextOutlined />, label: <Link to="/admin/allforms">Cấu hình Form</Link> },
-                { key: '/admin/alumni', icon: <IdcardOutlined />, label: <Link to="/admin/alumni">Khảo sát việc làm</Link> },
+                { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link> },
             ],
         },
         { type: 'divider' },

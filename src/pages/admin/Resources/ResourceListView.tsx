@@ -13,7 +13,7 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { IResource, IResourceQuery } from '../../../feature/Resources/type'
 import { havePermission } from '../../../global/hooks/usePermission'
-import { PermissionEnum } from '../../../feature/Auth/type'
+import { PermissionEnum } from '../../../feature/auth/type'
 import FilterContainer from '../../../components/common/FilterContainer'
 import CustomTable from '../../../components/common/customTable'
  

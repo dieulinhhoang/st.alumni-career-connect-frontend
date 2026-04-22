@@ -7,7 +7,7 @@ import {
     KeyOutlined
 } from '@ant-design/icons'
 import { havePermission } from "../../../global/hooks/usePermission"
-import { PermissionEnum } from "../../../feature/Auth/type"
+import { PermissionEnum } from "../../../feature/auth/type"
 import type { IUser, IUserQuery } from "../../../feature/User/type"
 import FilterContainer from "../../../components/common/FilterContainer"
 import type { IRole } from "../../../feature/Role/type"

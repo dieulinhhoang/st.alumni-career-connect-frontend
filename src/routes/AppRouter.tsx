@@ -14,10 +14,16 @@ import StudentDetail from '../pages/admin/Graduation/Studentdetail';
 import UserManagement from '../pages/admin/User/UserManagement';
 import RoleManagement from '../pages/admin/Role/RoleManagement';
 import ResourceManagement from '../pages/admin/Resources/ResourceManagement';
+import { ResponseDetail } from '../pages/admin/Alumni/ResponseDetail';
+import { BatchResults } from '../pages/admin/Alumni/BatchResults';
+import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
+import { BatchList } from '../pages/admin/Alumni/BatchList';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
 const SurveyPage = lazy(() => import('../pages/admin/Form/index'));
+
+
 
 const routes = [
     {
@@ -59,7 +65,63 @@ const routes = [
                 )
             },
 
-            //  Users 
+             {
+                path: '/admin/alumni/batches',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <BatchList />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/alumni/batches/create',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <BatchCreate />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/alumni/batches/:id/results',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <BatchResults />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/alumni/batches/:id/responses/:responseId/edit',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <ResponseDetail />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/alumni/batches/:id/responses',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <BatchResults  />
+                    </Suspense>
+                )
+            },
+             {
+                path: '/admin/alumni/batches/:id/edit-form',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <SurveyPage />  
+                    </Suspense>
+                )
+            },
+            {
+                path: '/admin/alumni/batches/:id/responses/:responseId',
+                element: (
+                <Suspense fallback={<Loader />}>
+                    <ResponseDetail />
+                </Suspense>
+                ),
+            },
+                        //  Users 
             {
                 path: '/admin/studentlist',
                 element: (

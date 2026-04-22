@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { message } from 'antd'
 import type { DataNode } from 'antd/es/tree'
 import { usePermission } from '../../../global/hooks/usePermission'
-import { PermissionEnum } from '../../../feature/Auth/type'
+import { PermissionEnum } from '../../../feature/auth/type'
 
 import {
   useGetListRoles,
