@@ -217,7 +217,7 @@ function paginate<T>(data: T[], page: number, perPage = 10): PaginatedResponse<T
 
   const token = await getToken();
   const res = await fetch(
-    `${BASE_URL}/api/v1/external/graduation-ceremonies?page=${page}`,
+    `${BASE_URL}/api/v1/graduation-ceremonies?page=${page}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!res.ok) throw new Error("Không thể tải danh sách đợt tốt nghiệp.");
@@ -236,7 +236,7 @@ export async function fetchGraduationStudents(
 
   const token = await getToken();
   const res = await fetch(
-    `${BASE_URL}/api/v1/external/graduation-ceremonies/${graduationId}/students?page=${page}`,
+    `${BASE_URL}/api/v1/graduation-ceremonies/${graduationId}/students?page=${page}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!res.ok) throw new Error("Không thể tải danh sách sinh viên.");

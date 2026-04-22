@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Select, Button, Table, Space, Modal, Tooltip } from "antd";
-import { SearchOutlined, PlusOutlined, EditOutlined, SafetyCertificateOutlined, CheckCircleOutlined } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+import { Col, Row, Input, Select, Button, Space, Modal, Tooltip } from "antd";
+import { PlusOutlined, EditOutlined, SafetyCertificateOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { toSlug } from "../../../components/common/utils";
@@ -10,6 +9,7 @@ import { useEnterprises } from "../../../feature/enterprise/hooks/useEnterprises
 import { useFacultyColors } from "../../../feature/enterprise/hooks/useFacultyColors";
 import { INDUSTRIES, ALL_FACULTIES, FACULTY_VI_NAME, type PartnerStatus, type EnterpriseFormValues, type Enterprise } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
+import CustomTable from "../../../components/common/customTable";
 
 const pill = (bg: string, color: string): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center", gap: 4,
@@ -34,12 +34,22 @@ export default function Enterprise() {
   const [industry, setIndustry] = useState("Tất cả ngành");
   const [facultyFilter, setFacultyFilter] = useState("all");
   const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>({ open: false, enterprise: null });
+  const [query, setQuery] = useState({ page: 0, size: 8 });
 
   const filtered = enterprises.filter(e =>
     (e.name.toLowerCase().includes(search.toLowerCase()) || e.email.toLowerCase().includes(search.toLowerCase())) &&
     (industry === "Tất cả ngành" || e.industry === industry) &&
     (facultyFilter === "all" || e.faculties.includes(facultyFilter))
   );
+
+  const listData = {
+    data: filtered,
+    page: {
+      total_elements: filtered.length,
+      current_page: query.page,
+      total_pages: Math.ceil(filtered.length / query.size),
+    }
+  };
 
   const handleSave = async (values: EnterpriseFormValues) => {
     modal.enterprise ? await editEnterprise(modal.enterprise.id, values) : await addEnterprise(values);
@@ -59,17 +69,25 @@ export default function Enterprise() {
     } else togglePartnerStatus(id, newStatus);
   };
 
+  const handleTableChange = (pagination: any) => {
+    setQuery(prev => ({
+      ...prev,
+      page: (pagination.current || 1) - 1,
+      size: pagination.pageSize || prev.size,
+    }));
+  };
+
   const stats = [
-    { label: "Tổng",        value: enterprises.length,                                                                    color: "#6366f1" },
-    { label: "Hoạt động",   value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: "#10b981" },
-    { label: "Tạm dừng",   value: enterprises.filter(e => e.partnerStatus === "inactive").length,                         color: "#f43f5e" },
+    { label: "Tổng",         value: enterprises.length,                                                                    color: "#6366f1" },
+    { label: "Hoạt động",    value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: "#10b981" },
+    { label: "Tạm dừng",    value: enterprises.filter(e => e.partnerStatus === "inactive").length,                         color: "#f43f5e" },
     { label: "Vị trí tuyển", value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), color: "#f59e0b" },
   ];
 
-  const columns: ColumnsType<Enterprise> = [
+  const columns = [
     {
       title: "Doanh nghiệp", key: "name",
-      render: (_, r) => (
+      render: (_: any, r: Enterprise) => (
         <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>
           <Avatar abbr={r.abbr} color={r.color} />
           <div>
@@ -84,11 +102,11 @@ export default function Enterprise() {
     },
     {
       title: "Ngành", dataIndex: "industry", key: "industry",
-      render: (v, r) => <span style={{ ...pill("#f5f3ff", "#6d28d9"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>{v}</span>,
+      render: (v: string, r: Enterprise) => <span style={{ ...pill("#f5f3ff", "#6d28d9"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>{v}</span>,
     },
     {
       title: "Khoa đối tác", key: "faculties",
-      render: (_, r) => (
+      render: (_: any, r: Enterprise) => (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>
           {r.faculties.slice(0, 2).map(k => (
             <span key={k} style={pill(getColor(k) + "15", getColor(k))}>
@@ -104,12 +122,12 @@ export default function Enterprise() {
       ),
     },
     {
-      title: "Việc làm", dataIndex: "jobs", key: "jobs", align: "center",
-      render: (v, r) => <span style={{ fontWeight: 700, fontSize: 13, color: r.partnerStatus === "inactive" ? "#9ca3af" : "#6d28d9" }}>{v}</span>,
+      title: "Việc làm", dataIndex: "jobs", key: "jobs", align: "center" as const,
+      render: (v: number, r: Enterprise) => <span style={{ fontWeight: 700, fontSize: 13, color: r.partnerStatus === "inactive" ? "#9ca3af" : "#6d28d9" }}>{v}</span>,
     },
     {
       title: "Trạng thái", key: "status",
-      render: (_, r) => r.verified
+      render: (_: any, r: Enterprise) => r.verified
         ? <span style={{ ...pill("#ecfdf5", "#059669"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}><CheckCircleOutlined style={{ fontSize: 10 }} />Đã xác minh</span>
         : (
           <Space size={6}>
@@ -121,8 +139,8 @@ export default function Enterprise() {
         ),
     },
     {
-      title: "", key: "actions", align: "center", width: 50,
-      render: (_, r) => (
+      title: "", key: "actions", align: "center" as const, width: 50,
+      render: (_: any, r: Enterprise) => (
         <Button size="small" icon={<EditOutlined />}
           onClick={e => { e.stopPropagation(); setModal({ open: true, enterprise: r }); }}
           style={{ borderRadius: 7, border: "1.5px solid #e5e7eb" }} />
@@ -160,7 +178,7 @@ export default function Enterprise() {
         {/* Table */}
         <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
           <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)}   style={{ width: 210, borderRadius: 8, height: 34 }} />
+            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 210, borderRadius: 8, height: 34 }} />
             <Select value={industry} onChange={setIndustry} style={{ width: 165, height: 34 }}>
               <Select.Option value="Tất cả ngành">Tất cả ngành</Select.Option>
               {INDUSTRIES.map(i => <Select.Option key={i} value={i}>{i}</Select.Option>)}
@@ -172,11 +190,15 @@ export default function Enterprise() {
             <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 34, color: "#6b7280", fontSize: 12 }}>Xóa</Button>
             <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af" }}>{filtered.length}/{enterprises.length}</span>
           </div>
-          <Table
-            dataSource={filtered} columns={columns} rowKey="id" loading={loading}
-            pagination={{ pageSize: 8, showTotal: t => `${t} doanh nghiệp` }}
-            scroll={{ x: 900 }}
-            onRow={r => ({
+
+          <CustomTable
+            columns={columns}
+            data={listData}
+            filter={query}
+            loading={loading}
+            handleTableChange={handleTableChange}
+            rowKey="id"
+            onRow={(r: Enterprise) => ({
               onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`),
               style: { cursor: "pointer", opacity: r.partnerStatus === "inactive" ? 0.65 : 1, transition: "background 0.12s" },
             })}

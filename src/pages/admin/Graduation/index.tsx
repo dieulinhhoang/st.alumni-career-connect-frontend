@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Table, Typography } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import { Col, Row, Input, Typography } from "antd";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
+import CustomTable from "../../../components/common/customTable";
 
 const { Text } = Typography;
 
@@ -19,6 +19,8 @@ export default function GraduationList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [query, setQuery] = useState({ page: 0, size: 10 });
+
   const { data: graduations, meta, loading, error } = useGraduations(page);
 
   const filtered = useMemo(() => {
@@ -34,14 +36,23 @@ export default function GraduationList() {
   const totalStudents = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
 
   const stats = [
-    { label: "Tổng đợt",      value: meta.total,                     color: "#6366f1" },
-    { label: "Tổng sinh viên", value: totalStudents.toLocaleString(), color: "#10b981" },
+    { label: "Tổng đợt",       value: meta.total,                     color: "#6366f1" },
+    { label: "Tổng sinh viên",  value: totalStudents.toLocaleString(), color: "#10b981" },
   ];
 
-  const columns: ColumnsType<Graduation> = [
+  const listData = {
+    data: filtered,
+    page: {
+      total_elements: meta.total,
+      current_page: meta.current_page,
+      total_pages: meta.total_pages,
+    }
+  };
+
+  const columns = [
     {
-      title: "STT", key: "stt", width: 55, align: "center",
-      render: (_, __, i) => (
+      title: "STT", key: "stt", width: 55, align: "center" as const,
+      render: (_: any, __: Graduation, i: number) => (
         <span style={{ fontSize: 12, color: "#9ca3af" }}>
           {(meta.current_page - 1) * meta.per_page + i + 1}
         </span>
@@ -49,27 +60,27 @@ export default function GraduationList() {
     },
     {
       title: "Đợt tốt nghiệp", dataIndex: "name", key: "name",
-      render: v => <span style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>{v}</span>,
+      render: (v: string) => <span style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>{v}</span>,
     },
     {
       title: "Năm tốt nghiệp", dataIndex: "school_year", key: "school_year",
-      width: 140, align: "center",
-      render: v => <span style={pill("#f5f3ff", "#6d28d9")}>{v}</span>,
+      width: 140, align: "center" as const,
+      render: (v: any) => <span style={pill("#f5f3ff", "#6d28d9")}>{v}</span>,
     },
     {
       title: "Sinh viên", dataIndex: "student_count", key: "student_count",
-      width: 120, align: "center",
-      render: v => <span style={{ fontWeight: 700, fontSize: 13, color: "#6d28d9" }}>{v?.toLocaleString() ?? "—"}</span>,
+      width: 120, align: "center" as const,
+      render: (v: any) => <span style={{ fontWeight: 700, fontSize: 13, color: "#6d28d9" }}>{v?.toLocaleString() ?? "—"}</span>,
     },
     {
       title: "Số quyết định", dataIndex: "certification", key: "certification",
       width: 170,
-      render: v => v ? <span style={pill("#fffbeb", "#d97706")}>{v}</span> : <Text type="secondary">—</Text>,
+      render: (v: any) => v ? <span style={pill("#fffbeb", "#d97706")}>{v}</span> : <Text type="secondary">—</Text>,
     },
     {
       title: "Ngày quyết định", dataIndex: "certification_date", key: "certification_date",
-      width: 150, align: "center",
-      render: v => (
+      width: 150, align: "center" as const,
+      render: (v: any) => (
         <Text type="secondary" style={{ fontSize: 13 }}>
           {v ? new Date(v).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
         </Text>
@@ -77,14 +88,24 @@ export default function GraduationList() {
     },
     {
       title: "Ngày cập nhật", dataIndex: "updated_at", key: "updated_at",
-      width: 170, align: "center",
-      render: v => (
+      width: 170, align: "center" as const,
+      render: (v: any) => (
         <Text type="secondary" style={{ fontSize: 13 }}>
           {v ? new Date(v).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
         </Text>
       ),
     },
   ];
+
+  const handleTableChange = (pagination: any) => {
+    const newPage = pagination.current || 1;
+    setPage(newPage);
+    setQuery(prev => ({
+      ...prev,
+      page: newPage - 1,
+      size: pagination.pageSize || prev.size,
+    }));
+  };
 
   return (
     <AdminLayout>
@@ -119,20 +140,21 @@ export default function GraduationList() {
             />
             <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af" }}>{filtered.length}/{meta.total}</span>
           </div>
-          <Table
-            dataSource={filtered} columns={columns} rowKey="id" loading={loading}
-            size="middle" scroll={{ x: 900 }}
-            onRow={record => ({
+
+          <CustomTable
+            columns={columns}
+            data={listData}
+            filter={query}
+            loading={loading}
+            handleTableChange={handleTableChange}
+            rowKey="id"
+            onRow={(record: Graduation) => ({
               onClick: () => navigate(`/admin/graduation/${record.id}/${toSlug(record.name)}/students`, { state: { graduationName: record.name } }),
               style: { cursor: "pointer" },
             })}
-            pagination={{
-              current: meta.current_page, pageSize: meta.per_page, total: filtered.length,
-              onChange: setPage, showTotal: total => `${total} đợt`, size: "small",
-            }}
-            locale={{ emptyText: <div style={{ padding: "40px 0", color: "#9ca3af" }}>Không có đợt tốt nghiệp nào</div> }}
           />
         </div>
+
       </div>
     </AdminLayout>
   );
