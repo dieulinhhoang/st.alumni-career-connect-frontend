@@ -20,16 +20,29 @@ import {
   type Enterprise, type Job, type JobFormValues, type PartnerStatus,
 } from "../../../feature/enterprise/type";
 
- import { JobFormModal } from "./JobFormModal";
+import { JobFormModal } from "./JobFormModal";
 import { JobCard } from "./JobCard";
 import { EditEnterpriseModal } from "../Enterprise/EnterpriseFormModal";
+
+const IconBuilding = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+  </svg>
+);
+
+const IconClipboard = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+  </svg>
+);
 
 export default function EnterpriseDetailPage() {
   const { slug }     = useParams<{ slug: string }>();
   const navigate     = useNavigate();
   const { getColor } = useFacultyColors();
 
-  // Resolve slug
   const [entId, setEntId] = useState<string | undefined>();
   useEffect(() => {
     fetchEnterprises().then(list => {
@@ -54,7 +67,9 @@ export default function EnterpriseDetailPage() {
   if (!ent) return (
     <AdminLayout>
       <div style={{ textAlign: "center", padding: 60 }}>
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🏢</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <IconBuilding />
+        </div>
         <div>Không tìm thấy doanh nghiệp</div>
         <Button style={{ marginTop: 16 }} onClick={() => navigate("/admin/enterprises")}>Quay lại</Button>
       </div>
@@ -66,7 +81,7 @@ export default function EnterpriseDetailPage() {
   const handleTogglePartner = () => {
     if (ent.partnerStatus === "active") {
       Modal.confirm({
-        title: "Ngừng hợp tácđối tác?",
+        title: "Ngừng hợp tác đối tác?",
         content: `"${ent.name}" sẽ bị hủy kích hoạt. Tin tuyển dụng sẽ bị ẩn với sinh viên.`,
         okText: "Hủy kích hoạt", okType: "danger", cancelText: "Quay lại",
         onOk: () => togglePartnerStatus("inactive" as PartnerStatus),
@@ -152,10 +167,10 @@ export default function EnterpriseDetailPage() {
               {/* Contact */}
               <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thông tin liên hệ</span>}>
                 {[
-                  { icon: <GlobalOutlined style={{ color: ent.color }} />,      label: "Website",    value: ent.website },
-                  { icon: <MailOutlined   style={{ color: ent.color }} />,      label: "Email",      value: ent.email   },
-                  { icon: <PhoneOutlined  style={{ color: ent.color }} />,      label: "Điện thoại", value: ent.phone   },
-                  { icon: <EnvironmentOutlined style={{ color: ent.color }} />, label: "Địa chỉ",   value: ent.address },
+                  { icon: <GlobalOutlined      style={{ color: ent.color }} />, label: "Website",    value: ent.website },
+                  { icon: <MailOutlined         style={{ color: ent.color }} />, label: "Email",      value: ent.email   },
+                  { icon: <PhoneOutlined        style={{ color: ent.color }} />, label: "Điện thoại", value: ent.phone   },
+                  { icon: <EnvironmentOutlined  style={{ color: ent.color }} />, label: "Địa chỉ",   value: ent.address },
                 ].map(item => (
                   <div key={item.label} style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                     <div style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{item.icon}</div>
@@ -190,9 +205,9 @@ export default function EnterpriseDetailPage() {
               <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thống kê tuyển dụng</span>}>
                 <Row gutter={[12, 12]}>
                   {[
-                    { label: "Tổng tin",   value: jobs.length,       color: ent.color, bg: ent.color + "12" },
-                    { label: "Đang tuyển", value: activeJobs.length, color: "#059669", bg: "#d1fae5" },
-                    { label: "Đã đóng",   value: closedJobs.length,  color: "#d97706", bg: "#fef3c7" },
+                    { label: "Tổng tin",   value: jobs.length,        color: ent.color,  bg: ent.color + "12" },
+                    { label: "Đang tuyển", value: activeJobs.length,  color: "#059669",  bg: "#d1fae5" },
+                    { label: "Đã đóng",   value: closedJobs.length,   color: "#d97706",  bg: "#fef3c7" },
                   ].map(s => (
                     <Col key={s.label} span={8}>
                       <div style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: s.bg }}>
@@ -226,9 +241,9 @@ export default function EnterpriseDetailPage() {
                 extra={
                   <Space>
                     {[
-                      { key: "all",    label: "Tất cả",     count: jobs.length },
-                      { key: "active", label: "Đang tuyển", count: activeJobs.length },
-                      { key: "closed", label: "Đã đóng",    count: closedJobs.length },
+                      { key: "all",    label: "Tất cả",     count: jobs.length        },
+                      { key: "active", label: "Đang tuyển", count: activeJobs.length  },
+                      { key: "closed", label: "Đã đóng",    count: closedJobs.length  },
                     ].map(tab => (
                       <Button key={tab.key} size="small"
                         type={jobTab === tab.key ? "primary" : "default"}
@@ -243,7 +258,9 @@ export default function EnterpriseDetailPage() {
               >
                 {displayJobs.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "32px 0", color: "#9ca3af" }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+                    <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                      <IconClipboard />
+                    </div>
                     <div>Chưa có tin tuyển dụng</div>
                     <Button type="primary" icon={<PlusOutlined />}
                       style={{ marginTop: 12, background: ent.color, border: "none" }}
