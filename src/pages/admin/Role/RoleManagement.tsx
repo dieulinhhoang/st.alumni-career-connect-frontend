@@ -11,7 +11,7 @@ import {
   useDeleteRole,
   useGetRoleDetail,
   useGetResourceList,
-} from '../../../feature/role/hooks/query'
+} from '../../../feature/role/hook/query'
 
 import RoleListView from './RoleListView'
 import RoleFormView from './RoleFormView'
