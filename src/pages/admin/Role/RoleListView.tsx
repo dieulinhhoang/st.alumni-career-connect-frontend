@@ -20,7 +20,7 @@ import {
  import FilterContainer from '../../../components/common/FilterContainer'
  import { havePermission } from '../../../global/hooks/usePermission'
  import { PermissionEnum } from '../../../feature/auth/type'
-import type { IRole, IRoleQuery } from '../../../feature/Role/type'
+import type { IRole, IRoleQuery } from '../../../feature/role/type'
 import CustomTable from '../../../components/common/customTable'
 
 interface RoleListViewProps {

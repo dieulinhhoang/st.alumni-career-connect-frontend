@@ -8,9 +8,9 @@ import {
 } from '@ant-design/icons'
 import { havePermission } from "../../../global/hooks/usePermission"
 import { PermissionEnum } from "../../../feature/auth/type"
-import type { IUser, IUserQuery } from "../../../feature/User/type"
+import type { IUser, IUserQuery } from "../../../feature/user/type"
 import FilterContainer from "../../../components/common/FilterContainer"
-import type { IRole } from "../../../feature/Role/type"
+import type { IRole } from "../../../feature/role/type"
 import CustomTable from "../../../components/common/customTable"
  
 

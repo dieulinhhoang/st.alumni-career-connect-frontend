@@ -16,7 +16,7 @@ import {
 import RoleListView from './RoleListView'
 import RoleFormView from './RoleFormView'
 import AdminLayout from '../../../components/layout/AdminLayout'
-import type { ICreateRoleBody, IPermissionInput, IRole, IRoleQuery } from '../../../feature/Role/type'
+import type { ICreateRoleBody, IPermissionInput, IRole, IRoleQuery } from '../../../feature/role/type'
 
 export type ViewMode = 'list' | 'create' | 'edit' | 'view'
 

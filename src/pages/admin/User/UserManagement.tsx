@@ -5,8 +5,8 @@ import { message } from 'antd'
  
 import ChangePasswordModal from './ChangePasswordModal'
 import AdminLayout from '../../../components/layout/AdminLayout'
+ import type { IUser } from '../../../feature/user/type'
 import { useChangeUserPassword, useCreateUser, useDeleteUser, useGetListUsers, useGetRolesUser, useIsSuspended, useUpdateUser } from '../../../feature/user/hook/query'
-import type { IUser } from '../../../feature/User/type'
 
 const UserManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()

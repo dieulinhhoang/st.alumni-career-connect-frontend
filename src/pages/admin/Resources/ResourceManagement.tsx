@@ -8,7 +8,7 @@ import {
 } from '../../../feature/resources/hook/query'
 import ResourceListView from './ResourceListView'
 import ResourceModal from './ResourceModal'
-import type { ICreateResource, IResource, IResourceQuery, IUpdateResource } from '../../../feature/Resources/type'
+import type { ICreateResource, IResource, IResourceQuery, IUpdateResource } from '../../../feature/resources/type'
 import AdminLayout from '../../../components/layout/AdminLayout'
 
 const ResourceManagement: React.FC = () => {

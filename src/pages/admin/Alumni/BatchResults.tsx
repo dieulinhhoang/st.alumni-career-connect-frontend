@@ -16,7 +16,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById } from '../../../feature/alumni/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import CustomTable from '../../../components/common/CustomTable';
+import CustomTable from '../../../components/common/customTable';
 import type { ColumnsType } from 'antd/es/table';
 import { StatCard } from './components/StatCard';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
