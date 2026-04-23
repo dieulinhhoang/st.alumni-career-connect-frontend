@@ -140,7 +140,7 @@ export function HeroSection({ stats }: { stats: SurveyStats }) {
                 {["#ef4444", "#f59e0b", "#22c55e"].map((c) => <div key={c} style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />)}
               </div>
               <div style={{ flex: 1, background: "white", borderRadius: 6, padding: "4px 12px", fontSize: 12, color: "#9ca3af", fontFamily: "monospace", border: "1px solid #e5e7eb" }}>
-                    https://st-dse.vnua.edu.vn
+                    https://st-dse.vnua.edu.vn:6870
               </div>
             </div>
             {/* Content */}

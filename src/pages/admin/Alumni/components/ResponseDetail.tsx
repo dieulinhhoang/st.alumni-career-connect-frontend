@@ -6,7 +6,8 @@ import {
 import {
   SearchOutlined, InfoCircleOutlined, BarChartOutlined,
   ExclamationCircleOutlined, CheckCircleOutlined,
-  ClockCircleOutlined, CalendarOutlined,
+  ClockCircleOutlined, CalendarOutlined, MessageOutlined,
+  UserOutlined, StarOutlined, BankOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById } from '../../../feature/alumni/api';
@@ -18,6 +19,14 @@ import { KHOA_OPTIONS, NGANH_OPTIONS } from './constants';
 import { StatCard } from './components/StatCard';
 
 const { Text, Title } = Typography;
+
+// ── Inline SVG icons for StatCard ─────────────────────────────────────────────
+const IcBriefcase  = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
+const IcXCircle    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
+const IcGradCap    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>;
+const IcCheckCirc  = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+const IcStar       = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+const IcBuilding   = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>;
 
 export const ResponseDetail: React.FC = () => {
   const { id } = useParams();
@@ -165,24 +174,30 @@ export const ResponseDetail: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600, color: '#1D9E75', fontSize: 14 }}>
                 <InfoCircleOutlined /> Thông tin khảo sát
               </div>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 13.5 }}>
                 <CalendarOutlined style={{ color: '#1D9E75' }} />
                 <Text type="secondary">Năm khảo sát:</Text>
                 <Text strong style={{ color: '#1D9E75' }}>{batch.year}</Text>
               </div>
+
               <div style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, marginBottom: 4 }}>
-                  <span>🎓</span><Text type="secondary">Đợt tốt nghiệp:</Text>
+                  <UserOutlined style={{ color: '#1D9E75' }} />
+                  <Text type="secondary">Đợt tốt nghiệp:</Text>
                 </div>
                 <div style={{ paddingLeft: 24 }}>
                   <Text style={{ color: '#1D9E75', fontSize: 13 }}>› {batch.graduationPeriod}</Text>
                 </div>
               </div>
+
               <Divider style={{ margin: '8px 0' }} />
 
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text strong style={{ color: '#065f46', fontSize: 13 }}>💬 Số lượt phản hồi:</Text>
+                  <Text strong style={{ color: '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <MessageOutlined /> Số lượt phản hồi:
+                  </Text>
                   <Text strong style={{ fontSize: 16, color: '#065f46' }}>{submitted.length} / {batch.totalStudents}</Text>
                 </div>
                 <Progress percent={pct} size="small" strokeColor="#1D9E75" trailColor="#bbf7d0" showInfo={false} style={{ marginBottom: 4 }} />
@@ -191,7 +206,9 @@ export const ResponseDetail: React.FC = () => {
 
               <div style={{ background: isEnded ? '#fff1f2' : '#f0fdf4', border: `1px solid ${isEnded ? '#fecdd3' : '#bbf7d0'}`, borderRadius: 8, padding: '12px 14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 13 }}>⏰ Thời gian khảo sát:</Text>
+                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <ClockCircleOutlined /> Thời gian khảo sát:
+                  </Text>
                   {isEnded ? (
                     <span style={{ background: '#fee2e2', color: '#9f1239', padding: '2px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       <ExclamationCircleOutlined style={{ fontSize: 12 }} /> Đã kết thúc
@@ -203,8 +220,12 @@ export const ResponseDetail: React.FC = () => {
                   )}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 8 }}>
-                  <Text type="secondary">📅 {new Date(batch.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
-                  <Text type="secondary">📅 {new Date(batch.endDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <CalendarOutlined /> {new Date(batch.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <CalendarOutlined /> {new Date(batch.endDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </Text>
                 </div>
                 <Progress percent={isEnded ? 100 : pct} size="small" strokeColor={isEnded ? '#e11d48' : '#1D9E75'} trailColor={isEnded ? '#fecdd3' : '#bbf7d0'} showInfo={false} style={{ marginBottom: isEnded ? 4 : 0 }} />
                 {isEnded && (
@@ -224,12 +245,12 @@ export const ResponseDetail: React.FC = () => {
                 </div>
               </div>
               <Row gutter={[10, 10]}>
-                <Col span={8}><StatCard icon="💼" iconBg="#d1fae5" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"      numColor="#065f46" barColor="#1D9E75" pctBg="#a7f3d0" pctColor="#064e3b" cardBg="#f0fdf4" cardBorder="#bbf7d0" /></Col>
-                <Col span={8}><StatCard icon="✖"  iconBg="#fee2e2" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi" numColor="#9f1239" barColor="#e11d48" pctBg="#fecaca" pctColor="#7f1d1d" cardBg="#fff1f2" cardBorder="#fecdd3" /></Col>
-                <Col span={8}><StatCard icon="🎓" iconBg="#dbeafe" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"     numColor="#1e40af" barColor="#2563eb" pctBg="#bfdbfe" pctColor="#1e3a8a" cardBg="#eff6ff" cardBorder="#bfdbfe" /></Col>
-                <Col span={8}><StatCard icon="✅" iconBg="#ccfbf1" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"  numColor="#0f766e" barColor="#0d9488" pctBg="#99f6e4" pctColor="#134e4a" cardBg="#e0f5f0" cardBorder="#99e0cc" /></Col>
-                <Col span={8}><StatCard icon="⭐" iconBg="#ffedd5" numerator={relevG}   denominator={total} label="Việc làm phù hợp / TN"         numColor="#c2410c" barColor="#ea580c" pctBg="#fed7aa" pctColor="#7c2d12" cardBg="#fff7ed" cardBorder="#fed7aa" /></Col>
-                <Col span={8}><StatCard icon="🏫" iconBg="#e0e7ff" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#c7d2fe" pctColor="#312e81" cardBg="#eef2ff" cardBorder="#c7d2fe" /></Col>
+                <Col span={8}><StatCard icon={IcBriefcase} iconBg="#d1fae5" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"      numColor="#065f46" barColor="#1D9E75" pctBg="#a7f3d0" pctColor="#064e3b" cardBg="#f0fdf4" cardBorder="#bbf7d0" /></Col>
+                <Col span={8}><StatCard icon={IcXCircle}   iconBg="#fee2e2" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi" numColor="#9f1239" barColor="#e11d48" pctBg="#fecaca" pctColor="#7f1d1d" cardBg="#fff1f2" cardBorder="#fecdd3" /></Col>
+                <Col span={8}><StatCard icon={IcGradCap}   iconBg="#dbeafe" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"     numColor="#1e40af" barColor="#2563eb" pctBg="#bfdbfe" pctColor="#1e3a8a" cardBg="#eff6ff" cardBorder="#bfdbfe" /></Col>
+                <Col span={8}><StatCard icon={IcCheckCirc} iconBg="#ccfbf1" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"  numColor="#0f766e" barColor="#0d9488" pctBg="#99f6e4" pctColor="#134e4a" cardBg="#e0f5f0" cardBorder="#99e0cc" /></Col>
+                <Col span={8}><StatCard icon={IcStar}      iconBg="#ffedd5" numerator={relevG}   denominator={total} label="Việc làm phù hợp / TN"         numColor="#c2410c" barColor="#ea580c" pctBg="#fed7aa" pctColor="#7c2d12" cardBg="#fff7ed" cardBorder="#fed7aa" /></Col>
+                <Col span={8}><StatCard icon={IcBuilding}  iconBg="#e0e7ff" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#c7d2fe" pctColor="#312e81" cardBg="#eef2ff" cardBorder="#c7d2fe" /></Col>
               </Row>
             </div>
           </Col>

@@ -6,6 +6,13 @@ const COLS = [
   { title: "Hỗ trợ", items: ["Trung tâm hỗ trợ", "Liên hệ", "Điều khoản", "Chính sách bảo mật"] },
 ];
 
+const IconGradCap = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+  </svg>
+);
+
 export function Footer() {
   return (
     <footer style={{ background: "#0f0d1a", padding: "60px 5% 32px", color: "#9ca3af" }}>
@@ -24,15 +31,8 @@ export function Footer() {
           align-items: center;
         }
         @media (max-width: 768px) {
-          .footer-grid {
-            grid-template-columns: 1fr;
-            gap: 32px;
-          }
-          .footer-bottom {
-            grid-template-columns: 1fr;
-            justify-items: center;
-            gap: 8px;
-          }
+          .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+          .footer-bottom { grid-template-columns: 1fr; justify-items: center; gap: 8px; }
         }
       `}</style>
 
@@ -41,8 +41,8 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
-                🎓
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <IconGradCap />
               </div>
               <span style={{ fontFamily: font, fontWeight: 700, fontSize: 18, color: "white" }}>ST Alumni</span>
             </div>
@@ -73,10 +73,10 @@ export function Footer() {
           </div>
         </div>
 
-         <div className="footer-bottom">
+        <div className="footer-bottom">
           <div />
           <div style={{ fontFamily: font, fontSize: 13, color: "#6b7280", textAlign: "center", whiteSpace: "nowrap" }}>
-            © 2026 ST TEAM 
+            © 2026 ST TEAM
           </div>
           <div />
         </div>

@@ -6,7 +6,14 @@ const font = "'Be Vietnam Pro', sans-serif";
 const purple = "#7c3aed";
 const purpleDark = "#4f46e5";
 
-const NAV_LINKS = ["Khảo sát", "Doanh nghiệp", "Thống kê", "Cộng đồng"];
+const NAV_LINKS: string[] = [];
+
+const IconGradCap = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+  </svg>
+);
 
 export function Navbar() {
   const scrolled = useScrolled();
@@ -101,18 +108,19 @@ export function Navbar() {
           text-align: center;
         }
         @media (max-width: 768px) {
-          .nav-links    { display: none; }
-          .nav-sso      { display: none; }
+          .nav-links     { display: none; }
+          .nav-sso       { display: none; }
           .nav-hamburger { display: flex; }
           .nav-mobile[data-open="true"] { display: flex; }
         }
       `}</style>
 
-      {/* Main bar */}
       <div className="nav-inner">
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🎓</div>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <IconGradCap />
+          </div>
           <span style={{ fontFamily: font, fontWeight: 700, fontSize: 18, color: "#1e1b4b" }}>
             ST{" "}
             <span style={{ background: `linear-gradient(90deg, ${purple}, ${purpleDark})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
