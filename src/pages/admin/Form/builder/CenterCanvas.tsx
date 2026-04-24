@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { PDFCanvas } from "./PDFCanvas";
+import { PDFCanvas } from "./Form";
 import { Canvas } from "./Canvas";
 import type { Question, Section, SurveyFooter } from "../../../../feature/form/types";
 

@@ -20,6 +20,7 @@
     "address-autocomplete-react": "^1.0.3",
     "antd": "^6.2.3",
     "axios": "^1.15.0",
+    "html2canvas": "^1.4.1",
     "i18n": "^0.15.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",

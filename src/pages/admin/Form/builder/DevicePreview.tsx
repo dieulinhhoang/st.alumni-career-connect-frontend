@@ -5,7 +5,7 @@ import {
   TabletOutlined,
   MobileOutlined,
 } from "@ant-design/icons";
-import { PDFCanvas } from "./PDFCanvas";
+import { PDFCanvas } from "./Form";
 import type { Question } from "../../../../feature/form/types";
 
 type Device = "desktop" | "tablet" | "mobile";

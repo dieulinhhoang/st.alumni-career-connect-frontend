@@ -43,7 +43,7 @@ export default function MajorDetailPage() {
           style={{ marginBottom: 16, padding: "0 4px", color: "#6b7280" }}
           onClick={() => navigate(`/admin/faculties/${facultySlug}`)}
         >
-          Quay lại {faculty?.name}
+          {faculty?.name}
         </Button>
 
         {/* Hero */}

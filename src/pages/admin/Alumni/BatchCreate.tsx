@@ -65,7 +65,7 @@ export const BatchCreate: React.FC = () => {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/alumni/batches')} style={{ borderRadius: 6 }}>
-            Quay lại
+           
           </Button>
           <Title level={4} style={{ margin: 0 }}>Tạo đợt khảo sát mới</Title>
         </div>

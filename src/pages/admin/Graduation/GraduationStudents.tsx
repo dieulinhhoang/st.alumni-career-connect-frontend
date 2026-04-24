@@ -97,7 +97,7 @@ export default function GraduationStudentsPage() {
             onClick={() => navigate("/admin/graduation")}
             style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#9ca3af", fontSize: 12.5, fontWeight: 500, marginBottom: 14, padding: 0 }}
           >
-            <ArrowLeftOutlined style={{ fontSize: 11 }} /> Quay lại danh sách đợt tốt nghiệp
+            <ArrowLeftOutlined style={{ fontSize: 11 }} /> danh sách đợt tốt nghiệp
           </button>
           <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>{graduationName}</div>
           <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>

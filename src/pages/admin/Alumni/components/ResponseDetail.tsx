@@ -20,7 +20,7 @@ import { StatCard } from './components/StatCard';
 
 const { Text, Title } = Typography;
 
-// ── Inline SVG icons for StatCard ─────────────────────────────────────────────
+//  Inline SVG icons for StatCard ─
 const IcBriefcase  = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
 const IcXCircle    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
 const IcGradCap    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>;
@@ -245,18 +245,18 @@ export const ResponseDetail: React.FC = () => {
                 </div>
               </div>
               <Row gutter={[10, 10]}>
-                <Col span={8}><StatCard icon={IcBriefcase} iconBg="#d1fae5" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"      numColor="#065f46" barColor="#1D9E75" pctBg="#a7f3d0" pctColor="#064e3b" cardBg="#f0fdf4" cardBorder="#bbf7d0" /></Col>
-                <Col span={8}><StatCard icon={IcXCircle}   iconBg="#fee2e2" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi" numColor="#9f1239" barColor="#e11d48" pctBg="#fecaca" pctColor="#7f1d1d" cardBg="#fff1f2" cardBorder="#fecdd3" /></Col>
-                <Col span={8}><StatCard icon={IcGradCap}   iconBg="#dbeafe" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"     numColor="#1e40af" barColor="#2563eb" pctBg="#bfdbfe" pctColor="#1e3a8a" cardBg="#eff6ff" cardBorder="#bfdbfe" /></Col>
-                <Col span={8}><StatCard icon={IcCheckCirc} iconBg="#ccfbf1" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"  numColor="#0f766e" barColor="#0d9488" pctBg="#99f6e4" pctColor="#134e4a" cardBg="#e0f5f0" cardBorder="#99e0cc" /></Col>
-                <Col span={8}><StatCard icon={IcStar}      iconBg="#ffedd5" numerator={relevG}   denominator={total} label="Việc làm phù hợp / TN"         numColor="#c2410c" barColor="#ea580c" pctBg="#fed7aa" pctColor="#7c2d12" cardBg="#fff7ed" cardBorder="#fed7aa" /></Col>
-                <Col span={8}><StatCard icon={IcBuilding}  iconBg="#e0e7ff" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#c7d2fe" pctColor="#312e81" cardBg="#eef2ff" cardBorder="#c7d2fe" /></Col>
+                <Col span={8}><StatCard icon={IcBriefcase} iconBg="#d1fae5" iconColor="#065f46" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"      numColor="#065f46" barColor="#1D9E75" pctBg="#ffffff" pctColor="#065f46" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col span={8}><StatCard icon={IcXCircle}   iconBg="#fee2e2" iconColor="#9f1239" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi" numColor="#9f1239" barColor="#e11d48" pctBg="#fee2e2" pctColor="#9f1239" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col span={8}><StatCard icon={IcGradCap}   iconBg="#dbeafe" iconColor="#1e40af" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"     numColor="#1e40af" barColor="#2563eb" pctBg="#dbeafe" pctColor="#1e40af" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col span={8}><StatCard icon={IcCheckCirc} iconBg="#ccfbf1" iconColor="#0f766e" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"  numColor="#0f766e" barColor="#0d9488" pctBg="#ccfbf1" pctColor="#0f766e" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col span={8}><StatCard icon={IcStar}      iconBg="#ffedd5" iconColor="#c2410c" numerator={relevG}   denominator={total} label="Việc làm phù hợp / TN"         numColor="#c2410c" barColor="#ea580c" pctBg="#ffedd5" pctColor="#c2410c" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col span={8}><StatCard icon={IcBuilding}  iconBg="#e0e7ff" iconColor="#4338ca" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#e0e7ff" pctColor="#4338ca" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
               </Row>
             </div>
           </Col>
         </Row>
 
-        {/* ── Filter bar ── */}
+        {/*  Filter bar  */}
         <Space wrap style={{ marginBottom: 12 }}>
           <Input
             placeholder="Tìm tên, mã sinh viên…" allowClear

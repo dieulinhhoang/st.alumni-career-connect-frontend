@@ -23,6 +23,7 @@ interface PDFCanvasProps {
   logoSize?: number;
   initialValues?: Record<string, any>;
   onSubmit?: (answers: Record<string, any>) => void;
+  submitLabel?: string;
 }
 
 // ─── Rich text renderer ──────────────────────────────────────────────────────
@@ -552,6 +553,7 @@ export function PDFCanvas({
   logoSize = 200,
   initialValues = {},
   onSubmit,
+  submitLabel = 'Gửi',
 }: PDFCanvasProps) {
   // Init state từ initialValues nếu có
   const [radios, setRadios] = useState<Record<string, string>>(() => {
@@ -830,7 +832,7 @@ export function PDFCanvas({
 
           {questions.length > 0 && interactive && (
             <div style={{ padding: `18px ${px}px`, display: "flex", gap: 12, alignItems: "center" }}>
-              <Button type="primary" style={{ background: accent, borderColor: accent }} onClick={handleSubmit}>Gửi</Button>
+              <Button type="primary" style={{ background: accent, borderColor: accent }} onClick={handleSubmit}>{submitLabel}</Button>
             </div>
           )}
 

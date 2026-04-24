@@ -72,7 +72,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
       <div className="topbar">
         <Space size={12}>
           <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-            Quay lại
+           
           </Button>
           <div>
             <div className="eyebrow" style={{ marginBottom: 3 }}>

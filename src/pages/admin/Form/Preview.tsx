@@ -4,7 +4,7 @@ import { Button, Space } from "antd";
 import { ArrowLeftOutlined, FileOutlined } from "@ant-design/icons"; // thêm FileOutlined
 import { THEMES } from "../../../feature/form/constants";
 import type { Form, Question as OldQuestion } from "../../../feature/form/types";
-import { PDFCanvas } from "./builder/PDFCanvas";
+import { PDFCanvas } from "./builder/Form";
 import type { Survey, Question, Section, SurveyHeader, SurveyFooter } from "../../../feature/form/types";
 
 function getTheme(themeId?: string) {
@@ -205,7 +205,7 @@ export default function PreviewView({ form, onBack }: StandaloneProps) {
       >
         <Space size={12}>
           <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
-            Quay lại
+           
           </Button>
           <div style={{ width: 1, height: 18, background: "#e5e7eb" }} />
           <span

@@ -4,7 +4,7 @@ import {
   ArrowLeftOutlined, UserOutlined, MailOutlined,
   IdcardOutlined, BankOutlined, CalendarOutlined,
   CheckCircleOutlined, ClockCircleOutlined,
-  BookOutlined, EditOutlined, CloseOutlined,
+  BookOutlined, EditOutlined, CloseOutlined, FilePdfOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getBatchById } from '../../../feature/alumni/api';
@@ -12,14 +12,16 @@ import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types'
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { KHOA_OPTIONS, NGANH_OPTIONS } from '../../../feature/alumni/constants';
 import { SurveyPreview } from '../Form/Preview';
+import { PDFCanvas } from '../Form/builder/Form';
+import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
 
 const { Text, Title } = Typography;
 
 const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: React.ReactNode }> = ({ icon, label, value }) => (
-  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
+  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
     <span style={{ color: '#2563eb', fontSize: 14, marginTop: 1, flexShrink: 0 }}>{icon}</span>
-    <Text type="secondary" style={{ fontSize: 13, width: 150, flexShrink: 0 }}>{label}</Text>
-    <span style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{value ?? <span style={{ color: '#cbd5e1' }}>—</span>}</span>
+    <Text type="secondary" style={{ fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0, minWidth: 100, maxWidth: 110 }}>{label}</Text>
+    <span style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{value ?? <span style={{ color: '#cbd5e1' }}>—</span>}</span>
   </div>
 );
 
@@ -29,10 +31,15 @@ export const ResponseDetail: React.FC = () => {
   const { pathname } = useLocation();
   const isEdit = pathname.endsWith('/edit');
 
-  const [batch,   setBatch]   = useState<SurveyBatch | null>(null);
+  const [batch,    setBatch]    = useState<SurveyBatch | null>(null);
   const [response, setResponse] = useState<AlumniResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
+  const [loading,  setLoading]  = useState(true);
+  const [saving,   setSaving]   = useState(false);
+
+  const pdfFilename = batch && response
+    ? `phanhoi_${response.studentId}_${batch.title.replace(/\s+/g, '_')}.pdf`
+    : 'phanhoi.pdf';
+  const { containerRef: pdfRef, exporting, exportPDF } = useExportPDF(pdfFilename);
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
 
@@ -72,17 +79,15 @@ export const ResponseDetail: React.FC = () => {
       <div style={{ padding: 80, textAlign: 'center' }}>
         <Empty description="Không tìm thấy dữ liệu phản hồi" />
         <Button style={{ marginTop: 16 }} onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>
-          Quay lại danh sách
+          danh sách
         </Button>
       </div>
     </AdminLayout>
   );
 
-  const khoaLabel   = KHOA_OPTIONS.find(k => k.value === (response as any).khoa)?.label;
-  const nganhLabel  = (NGANH_OPTIONS[(response as any).khoa] ?? []).find((o: any) => o.value === (response as any).nganh)?.label;
-  const answers     = (response as any)?.answers ?? {};
-  const answerEntries = Object.entries(answers) as [string, any][];
-  const questions   = (batch as any).formSnapshot?.questions ?? [];
+  const khoaLabel  = KHOA_OPTIONS.find(k => k.value === (response as any).khoa)?.label;
+  const nganhLabel = (NGANH_OPTIONS[(response as any).khoa] ?? []).find((o: any) => o.value === (response as any).nganh)?.label;
+  const answers    = (response as any)?.answers ?? {};
   const formSnapshot = (batch as any).formSnapshot ?? null;
 
   const ProfileCard = (
@@ -126,7 +131,7 @@ export const ResponseDetail: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Button icon={<ArrowLeftOutlined />} size="small" style={{ borderRadius: 6 }}
             onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>
-            Quay lại
+           
           </Button>
           <div style={{ fontSize: 12, color: '#94a3b8' }}>
             <span style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>Khảo sát việc làm</span>
@@ -141,90 +146,101 @@ export const ResponseDetail: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <Title level={4} style={{ margin: 0, color: '#111827' }}>
             {isEdit
-              ? <><EditOutlined style={{ color: '#d97706', marginRight: 8 }} />Chỉnh sửa — {response.studentName}</>
-              : response.studentName}
+              ? <><EditOutlined style={{ color: '#d97706', marginRight: 8 }} />Chỉnh sửa </>
+              : ""}
           </Title>
-          {!isEdit ? (
-            <Button icon={<EditOutlined />}
-              style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
-              onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}>
-              Chỉnh sửa phản hồi
-            </Button>
-          ) : (
-            <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
-              onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
-              Hủy chỉnh sửa
-            </Button>
-          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {!isEdit && (
+              <Button
+                icon={<FilePdfOutlined />}
+                loading={exporting}
+                style={{ borderRadius: 6, borderColor: '#2563eb', color: '#2563eb' }}
+                onClick={exportPDF}
+              >
+                Xuất PDF
+              </Button>
+            )}
+            {!isEdit ? (
+              <Button icon={<EditOutlined />}
+                style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}>
+                Chỉnh sửa phản hồi
+              </Button>
+            ) : (
+              <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
+                Hủy chỉnh sửa
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* VIEW MODE */}
-        {!isEdit && (
-          <Row gutter={20}>
-            <Col span={9}>{ProfileCard}</Col>
-            <Col span={15}>
-              <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
-                <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <CheckCircleOutlined style={{ color: '#2563eb' }} /> Nội dung phản hồi
-                </div>
-                {answerEntries.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
-                    {response.status === 'submitted' ? 'Không có dữ liệu câu trả lời' : 'Sinh viên chưa phản hồi'}
-                  </div>
-                ) : answerEntries.map(([qKey, answer], idx) => {
-                  const q = questions.find((x: any) => x.id === qKey || x.key === qKey);
-                  const label = q?.label ?? q?.title ?? q?.question ?? qKey;
-                  return (
-                    <div key={qKey} style={{ padding: '12px 0', borderBottom: idx < answerEntries.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                      <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>Câu {idx + 1}</div>
-                      <div style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 6 }}>{label}</div>
-                      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '7px 12px', fontSize: 13, color: '#1e40af', fontWeight: 500, display: 'inline-block' }}>
-                        {Array.isArray(answer) ? answer.join(', ') : (answer || <span style={{ color: '#94a3b8' }}>Không có câu trả lời</span>)}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Col>
-          </Row>
-        )}
+        {/* Layout chung — cả view lẫn edit đều dùng 2 cột */}
+        <Row gutter={20}>
+          {/* Cột trái: profile */}
+          <Col span={isEdit ? 7 : 9}>
+            <div style={{ position: 'sticky', top: 24 }}>
+              {ProfileCard}
+            </div>
+          </Col>
 
-        {/* EDIT MODE */}
-        {isEdit && (
-          <Row gutter={20}>
-            <Col span={7}>
-              <div style={{ position: 'sticky', top: 24 }}>
-                {ProfileCard}
-              </div>
-            </Col>
-            <Col span={17}>
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px 10px 0 0', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ fontWeight: 600, color: '#92400e', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <EditOutlined /> Đang chỉnh sửa — nhấn <b>Gửi</b> trong form để lưu
-                </div>
-                <Button size="small" icon={<CloseOutlined />} style={{ borderRadius: 6 }}
-                  onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
-                  Hủy
-                </Button>
-              </div>
-              <div style={{ border: '1px solid #fde68a', borderTop: 'none', borderRadius: '0 0 10px 10px', overflow: 'hidden', background: '#fff' }}>
-                {formSnapshot ? (
+          {/* Cột phải: form */}
+          <Col span={isEdit ? 17 : 15}>
+            {/* Form */}
+            <div style={{
+              border: isEdit ? '1px solid #fde68a' : '1px solid #e5e7eb',
+              borderRadius: 10,
+              overflow: 'hidden',
+              background: '#fff',
+            }}>
+              {formSnapshot ? (
+                /* Khi xem: bọc pointer-events:none để không cho tương tác */
+                <div style={!isEdit ? { pointerEvents: 'none', userSelect: 'none', opacity: 0.92 } : undefined}>
                   <SurveyPreview
                     form={formSnapshot}
                     compact={false}
                     initialValues={answers}
-                    onSubmit={handleSubmit}
+                    onSubmit={isEdit ? handleSubmit : undefined}
+                    submitLabel="Lưu"
                   />
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
-                    Không có form snapshot
-                  </div>
-                )}
-              </div>
-            </Col>
-          </Row>
-        )}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
+                  Không có form snapshot
+                </div>
+              )}
+            </div>
+          </Col>
+        </Row>
       </div>
+
+      {/* Hidden div */}
+      {formSnapshot && (
+        <div
+          ref={pdfRef}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: '-9999px',
+            width: 794,
+            background: '#fff',
+            zIndex: -1,
+            pointerEvents: 'none',
+          }}
+        >
+          <PDFCanvas
+            surveyTitle={(formSnapshot as any).surveyTitle ?? batch.title}
+            descriptionParagraphs={(formSnapshot as any).descriptionParagraphs ?? []}
+            sections={(formSnapshot as any).sections ?? []}
+            questions={(formSnapshot as any).questions ?? []}
+            accent={(formSnapshot as any).accent ?? '#2563eb'}
+            header={(formSnapshot as any).header ?? {}}
+            footer={(formSnapshot as any).footer ?? {}}
+            interactive={false}
+            initialValues={answers}
+          />
+        </div>
+      )}
     </AdminLayout>
   );
 };

@@ -37,7 +37,7 @@ export function ThemeView({ form, onSave, onBack }: ThemeViewProps) {
       <div className="topbar">
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-            Quay lại
+           
           </Button>
           <div>
             <div className="eyebrow">Cấu hình giao diện</div>
