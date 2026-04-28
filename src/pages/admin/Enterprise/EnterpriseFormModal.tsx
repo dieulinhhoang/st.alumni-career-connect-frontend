@@ -32,7 +32,7 @@ export  function EditEnterpriseModal({ open, ent, onClose, onSave }: Props) {
 
   return (
     <Modal
-      title="✏️ Chỉnh sửa doanh nghiệp" open={open}
+      title=" Chỉnh sửa doanh nghiệp" open={open}
       onOk={handleOk} onCancel={onClose}
       okText="Lưu thay đổi" cancelText="Hủy" width={580}
       confirmLoading={saving}

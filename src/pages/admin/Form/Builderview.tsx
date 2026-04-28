@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
-import { Button } from "antd";
+import { Button, Input, Modal } from "antd";
 import {
   ArrowLeftOutlined,
   SaveOutlined,
   CheckOutlined,
-  AppstoreOutlined,
   BgColorsOutlined,
 } from "@ant-design/icons";
-import { useQuestionEditor } from "../../../feature/form/hooks/useQuestionEditor";
+import { useQuestionEditor, genId } from "../../../feature/form/hooks/useQuestionEditor";
 import type { Form, Section, SurveyFooter } from "../../../feature/form/types";
 import { ACCENT_COLORS } from "../../../feature/form/constants";
-import { LeftToolbox } from "./builder/LeftToolbox";
 import { CenterCanvas } from "./builder/CenterCanvas";
 import { RightPanel } from "./builder/RightPanel";
-import { DevicePreview } from "./builder/DevicePreview";
-import { LogicTab } from "./builder/LogicTab";
 
 interface HeaderFields {
   orgUnit: string;
@@ -44,19 +40,24 @@ interface BuilderViewProps {
 }
 
 export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
-  const [activeTab, setActiveTab] = useState<string>("designer");
   const [name, setName] = useState(form?.name ?? "");
   const [desc, setDesc] = useState(form?.description ?? "");
   const [accent, setAccent] = useState(
-    ACCENT_COLORS.includes(form?.themeId ?? "")
-      ? form?.themeId ?? ACCENT_COLORS[0]
-      : ACCENT_COLORS[0]
+    ACCENT_COLORS.includes(form?.themeId ?? "") ? form?.themeId ?? ACCENT_COLORS[0] : ACCENT_COLORS[0]
   );
   const [header, setHeader] = useState<HeaderFields>((form as any)?.header ?? DEFAULT_HEADER);
   const [footer, setFooter] = useState<SurveyFooter>((form as any)?.footer ?? DEFAULT_FOOTER);
   const [sections, setSections] = useState<Section[]>((form as any)?.sections ?? []);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(
+    (form as any)?.sections?.[0]?.id ?? null
+  );
   const [saved, setSaved] = useState(false);
   const [logoUrl, setLogoUrl] = useState((form as any)?.logoUrl ?? "");
+
+  // Modal tạo section
+  const [sectionModalOpen, setSectionModalOpen] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [sectionNameError, setSectionNameError] = useState(false);
 
   // Responsive
   const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
@@ -68,41 +69,61 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const isMobile = winWidth < 768;
   const isTablet = winWidth >= 768 && winWidth < 1024;
-
-  const [leftOpen, setLeftOpen] = useState(!isMobile && !isTablet);
-  const [rightOpen, setRightOpen] = useState(!isMobile && !isTablet);
-
-  useEffect(() => {
-    if (isMobile || isTablet) {
-      setLeftOpen(false);
-      setRightOpen(false);
-    }
-  }, [isMobile, isTablet]);
+  const [rightOpen, setRightOpen] = useState(false);
 
   const {
-    questions,
-    activeId,
-    setActiveId,
-    addQuestion,
-    insertQuestionAt,
-    updateQuestion,
-    duplicateQuestion,
-    removeQuestion,
-    moveQuestion,
-    addOption,
-    updateOption,
-    removeOption,
+    questions, activeId, setActiveId,
+    addQuestion, insertQuestionAt,
+    updateQuestion, duplicateQuestion, removeQuestion, moveQuestion,
+    addOption, updateOption, removeOption,
   } = useQuestionEditor(form?.questions ?? []);
+
+  // ── Section handlers ──────────────────────────────────────────────
+
+  const openCreateSection = () => {
+    setNewSectionName("");
+    setSectionNameError(false);
+    setSectionModalOpen(true);
+  };
+
+  const handleCreateSection = () => {
+    if (!newSectionName.trim()) { setSectionNameError(true); return; }
+    const id = genId();
+    const sec: Section = { id, title: newSectionName.trim(), order: sections.length };
+    setSections((prev) => [...prev, sec]);
+    setActiveSectionId(id);
+    setSectionModalOpen(false);
+  };
+
+  const handleDeleteSection = (secId: string) => {
+    const qsInSection = questions.filter((q) => q.sectionId === secId);
+    qsInSection.forEach((q) => removeQuestion(q.id));
+    setSections((prev) => prev.filter((s) => s.id !== secId));
+    if (activeSectionId === secId) {
+      const remaining = sections.filter((s) => s.id !== secId);
+      setActiveSectionId(remaining[0]?.id ?? null);
+    }
+  };
+
+  const handleAddQuestion = (type: string) => {
+    if (!activeSectionId) return;
+    addQuestion(activeSectionId, type as any);
+  };
+
+  const handleInsertQuestion = (index: number, type?: string, title?: string, options?: any[]) => {
+    if (!activeSectionId) return "";
+    return insertQuestionAt(index, activeSectionId, type as any, title, options);
+  };
+
+  // ── Save ──────────────────────────────────────────────────────────
 
   const handleSave = () => {
     onSave({
       ...form!,
-      name,
-      description: desc,
+      name, description: desc,
       questions,
       themeId: accent,
-      header,
-      footer,
+      header, footer,
       sections,
       logoUrl,
     } as any);
@@ -110,278 +131,178 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const MOBILE_BAR_H = isMobile && activeTab === "designer" ? 52 : 0;
-
-  const DrawerOverlay = ({
-    side,
-    open,
-    onClose,
-    children,
-  }: {
-    side: "left" | "right";
-    open: boolean;
-    onClose: () => void;
-    children: React.ReactNode;
-  }) => {
-    if (!open) return null;
+  // Mobile right drawer
+  const RightDrawer = () => {
+    if (!isMobile || !rightOpen) return null;
     return (
       <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 200,
-          background: "rgba(0,0,0,.4)",
-          backdropFilter: "blur(2px)",
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: side === "left" ? "flex-start" : "flex-end",
-        }}
-        onClick={onClose}
+        style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,.4)", backdropFilter: "blur(2px)", display: "flex", alignItems: "stretch", justifyContent: "flex-end" }}
+        onClick={() => setRightOpen(false)}
       >
         <div
-          style={{
-            width: 280,
-            maxWidth: "85vw",
-            height: "100%",
-            background: "#fff",
-            boxShadow: side === "left" ? "4px 0 28px rgba(0,0,0,.15)" : "-4px 0 28px rgba(0,0,0,.15)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
+          style={{ width: 280, maxWidth: "85vw", height: "100%", background: "#fff", boxShadow: "-4px 0 28px rgba(0,0,0,.15)", display: "flex", flexDirection: "column", overflow: "hidden" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {children}
+          <RightPanel
+            onAddFromBank={(q) => { handleAddQuestion((q as any).type); setRightOpen(false); }}
+            accent={accent}
+            onAccentChange={setAccent}
+            questions={questions}
+            asDrawer
+            onToggle={() => setRightOpen(false)}
+          />
         </div>
       </div>
     );
   };
 
-  const renderDesigner = () => (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden", position: "relative" }}>
-      {/* LEFT */}
-      {isMobile ? (
-        <DrawerOverlay side="left" open={leftOpen} onClose={() => setLeftOpen(false)}>
-          <LeftToolbox
-            onAddQuestion={(t) => {
-              addQuestion(t as any);
-              setLeftOpen(false);
-            }}
-            asDrawer
-            onToggle={() => setLeftOpen(false)}
-          />
-        </DrawerOverlay>
-      ) : (
-        <div style={{ height: "100%", overflowY: "auto", flexShrink: 0 }}>
-          <LeftToolbox
-            onAddQuestion={(type) => addQuestion(type as any)}
-            open={leftOpen}
-            onToggle={() => setLeftOpen((o) => !o)}
-          />
-        </div>
-      )}
-
-      {/* CENTER */}
-      <div
-        style={{
-          flex: 1,
-          height: "100%",
-          overflow: "hidden",
-          minWidth: 0,
-          paddingBottom: MOBILE_BAR_H,
-        }}
-      >
-        <CenterCanvas
-          name={name}
-          desc={desc}
-          accent={accent}
-          questions={questions}
-          activeId={activeId}
-          setActiveId={setActiveId}
-          onUpdateQuestion={updateQuestion}
-          onDuplicate={duplicateQuestion}
-          onRemove={removeQuestion}
-          onMove={moveQuestion}
-          onAddOption={addOption}
-          onUpdateOption={updateOption}
-          onRemoveOption={removeOption}
-          onInsertQuestion={insertQuestionAt as any}
-          header={header}
-          onHeaderChange={setHeader}
-          onNameChange={setName}
-          onDescChange={setDesc}
-          footer={footer}
-          onFooterChange={setFooter}
-          sections={sections}
-          onSectionsChange={setSections}
-          
-        />
-      </div>
-
-      {/* RIGHT */}
-      {isMobile ? (
-        <DrawerOverlay side="right" open={rightOpen} onClose={() => setRightOpen(false)}>
-          <RightPanel
-            onAddFromBank={(q) => {
-              addQuestion((q as any).type, (q as any).title, (q as any).options);
-              setRightOpen(false);
-            }}
-            accent={accent}
-            onAccentChange={setAccent}
-            asDrawer
-            onToggle={() => setRightOpen(false)}
-          />
-        </DrawerOverlay>
-      ) : (
-        <div style={{ height: "100%", overflowY: "auto", flexShrink: 0 }}>
-          <RightPanel
-            onAddFromBank={(q) => addQuestion((q as any).type, (q as any).title, (q as any).options)}
-            accent={accent}
-            onAccentChange={setAccent}
-            open={rightOpen}
-            onToggle={() => setRightOpen((o) => !o)}
-          />
-        </div>
-      )}
-
-      {/* MOBILE BOTTOM BAR */}
-      {isMobile && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: MOBILE_BAR_H,
-            background: "#fff",
-            borderTop: "1px solid #e8eaed",
-            display: "flex",
-            alignItems: "center",
-            zIndex: 100,
-            boxShadow: "0 -2px 12px rgba(0,0,0,.06)",
-          }}
-        >
-          <button
-            onClick={() => { setRightOpen(false); setLeftOpen((o) => !o); }}
-            style={{
-              flex: 1,
-              height: "100%",
-              border: "none",
-              borderRight: "1px solid #f0f0f0",
-              background: leftOpen ? `${accent}12` : "#fff",
-              color: leftOpen ? accent : "#6b7280",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              cursor: "pointer",
-              fontSize: 12.5,
-              fontWeight: leftOpen ? 700 : 500,
-            }}
-          >
-            <AppstoreOutlined /> Câu hỏi
-          </button>
-          <button
-            onClick={() => { setLeftOpen(false); setRightOpen((o) => !o); }}
-            style={{
-              flex: 1,
-              height: "100%",
-              border: "none",
-              background: rightOpen ? `${accent}12` : "#fff",
-              color: rightOpen ? accent : "#6b7280",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              cursor: "pointer",
-              fontSize: 12.5,
-              fontWeight: rightOpen ? 700 : 500,
-            }}
-          >
-            <BgColorsOutlined /> Thư viện
-          </button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "designer":
-        return renderDesigner();
-      case "preview":
-        return <DevicePreview name={name} desc={desc} questions={questions} accent={accent} />;
-      case "logic":
-        return <LogicTab questions={questions} />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)", background: "#fff" }}>
-      {/* TOP BAR */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          borderBottom: "1px solid #e8eaed",
-          padding: "0 12px",
-          height: 48,
-          flexShrink: 0,
-          gap: 4,
-          background: "#fff",
-        }}
-      >
+      {/* TOP BAR — simplified: just back + form name + save */}
+      <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #e8eaed", padding: "0 12px", height: 48, flexShrink: 0, gap: 8, background: "#fff" }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
           {!isMobile && <span>Quay lại</span>}
         </Button>
 
-        <div style={{ display: "flex", flex: 1, justifyContent: "center", height: "100%", gap: 2 }}>
-          {[
-            { key: "designer", label: "Thiết kế" },
-            { key: "preview", label: "Xem trước" },
-            { key: "logic", label: "Logic" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              style={{
-                height: "100%",
-                padding: isMobile ? "0 12px" : "0 18px",
-                border: "none",
-                borderBottom: activeTab === t.key ? `2px solid ${accent}` : "2px solid transparent",
-                background: "none",
-                cursor: "pointer",
-                fontSize: isMobile ? 12.5 : 13.5,
-                fontWeight: activeTab === t.key ? 700 : 400,
-                color: activeTab === t.key ? accent : "#6b7280",
-                transition: "all .12s",
-                whiteSpace: "nowrap",
-                fontFamily: "inherit",
-                letterSpacing: "-.01em",
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <div style={{ width: 1, height: 18, background: "#e8eaed", flexShrink: 0 }} />
+
+        {/* Form name — editable inline */}
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Tên form..."
+          style={{
+            flex: 1,
+            border: "none",
+            outline: "none",
+            fontSize: isMobile ? 13 : 14,
+            fontWeight: 600,
+            color: "#111827",
+            fontFamily: "inherit",
+            background: "transparent",
+            minWidth: 0,
+            padding: "4px 6px",
+            borderRadius: 6,
+          }}
+          onFocus={(e) => { e.currentTarget.style.background = "#f9fafb"; }}
+          onBlur={(e) => { e.currentTarget.style.background = "transparent"; }}
+        />
+
+        {/* Accent dot indicator */}
+        {!isMobile && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: `${accent}12`, border: `1px solid ${accent}30`, flexShrink: 0 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: accent }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: accent, fontFamily: "monospace" }}>{accent}</span>
+          </div>
+        )}
 
         <Button
           type={saved ? "default" : "primary"}
           icon={saved ? <CheckOutlined /> : <SaveOutlined />}
           onClick={handleSave}
-          style={{
-            background: saved ? "#f0fdf4" : undefined,
-            color: saved ? "#16a34a" : undefined,
-            borderColor: saved ? "#bbf7d0" : undefined,
-          }}
+          style={{ background: saved ? "#f0fdf4" : undefined, color: saved ? "#16a34a" : undefined, borderColor: saved ? "#bbf7d0" : undefined, flexShrink: 0 }}
         >
           {!isMobile && <span>{saved ? "Đã lưu" : "Lưu"}</span>}
         </Button>
       </div>
 
-      <div style={{ flex: 1, overflow: "hidden" }}>{renderContent()}</div>
+      {/* CONTENT AREA */}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", position: "relative" }}>
+        {/* Canvas — takes full remaining width (the icon strip is now separate) */}
+        <div style={{ flex: 1, height: "100%", overflow: "hidden", minWidth: 0 }}>
+          <CenterCanvas
+            name={name}
+            desc={desc}
+            accent={accent}
+            questions={questions}
+            activeId={activeId}
+            setActiveId={setActiveId}
+            onUpdateQuestion={updateQuestion}
+            onDuplicate={duplicateQuestion}
+            onRemove={removeQuestion}
+            onMove={moveQuestion}
+            onAddOption={addOption}
+            onUpdateOption={updateOption}
+            onRemoveOption={removeOption}
+            onInsertQuestion={handleInsertQuestion as any}
+            header={header}
+            onHeaderChange={setHeader}
+            onNameChange={setName}
+            onDescChange={setDesc}
+            footer={footer}
+            onFooterChange={setFooter}
+            sections={sections}
+            onSectionsChange={setSections}
+            activeSectionId={activeSectionId}
+            onActiveSectionChange={setActiveSectionId}
+            onCreateSection={openCreateSection}
+            onDeleteSection={handleDeleteSection}
+            onAddQuestionToSection={handleAddQuestion}
+          />
+        </div>
+
+        {/* Right panel — icon strip + bottom slide panel (desktop only) */}
+        {!isMobile && (
+          <RightPanel
+            onAddFromBank={(q) => handleAddQuestion((q as any).type)}
+            accent={accent}
+            onAccentChange={setAccent}
+            questions={questions}
+          />
+        )}
+
+        {/* Mobile right drawer */}
+        <RightDrawer />
+      </div>
+
+      {/* Mobile bottom bar */}
+      {isMobile && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 52, background: "#fff", borderTop: "1px solid #e8eaed", display: "flex", alignItems: "center", zIndex: 100, boxShadow: "0 -2px 12px rgba(0,0,0,.06)" }}>
+          <button
+            onClick={() => setRightOpen((o) => !o)}
+            style={{ flex: 1, height: "100%", border: "none", background: rightOpen ? `${accent}12` : "#fff", color: rightOpen ? accent : "#6b7280", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", fontSize: 12.5, fontWeight: rightOpen ? 700 : 500 }}
+          >
+            <BgColorsOutlined /> Thư viện & Giao diện
+          </button>
+        </div>
+      )}
+
+      {/* MODAL TẠO SECTION */}
+      <Modal
+        open={sectionModalOpen}
+        onCancel={() => setSectionModalOpen(false)}
+        onOk={handleCreateSection}
+        okText="Tạo phần →"
+        cancelText="Hủy"
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>📁</span>
+            <span>Tạo phần mới</span>
+          </div>
+        }
+        centered
+      >
+        <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 16, lineHeight: 1.65 }}>
+          Câu hỏi bắt buộc phải thuộc về một <strong style={{ color: "#374151" }}>phần (section)</strong>.
+          Tạo phần trước, sau đó thêm câu hỏi vào.
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>
+            Tên phần <span style={{ color: "#dc2626" }}>*</span>
+          </div>
+          <Input
+            value={newSectionName}
+            onChange={(e) => { setNewSectionName(e.target.value); setSectionNameError(false); }}
+            onPressEnter={handleCreateSection}
+            placeholder="VD: Phần I. Thông tin cá nhân"
+            status={sectionNameError ? "error" : ""}
+            autoFocus
+          />
+          {sectionNameError && (
+            <div style={{ color: "#dc2626", fontSize: 11.5, marginTop: 4 }}>Vui lòng nhập tên phần</div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

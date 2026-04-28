@@ -1496,3 +1496,187 @@ body {
     max-width: 180px;
   }
 }
+/* ============================================================
+   THEME PICKER — grid layout + card styles
+   Add these rules to survey.css (after the existing .themes-grid rule)
+   ============================================================ */
+
+/* Override grid for the full picker page (more columns) */
+.theme-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-width: 720px;
+}
+
+@media (max-width: 860px) {
+  .theme-picker-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 500px) {
+  .theme-picker-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Card button wrapper */
+.theme-pick-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: all var(--t-fast) var(--ease);
+  box-shadow: var(--shadow-xs);
+  font-family: inherit;
+  text-align: left;
+}
+
+.theme-pick-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-pick-card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-dim), var(--shadow-md);
+}
+
+/* ── Swatch visual area ── */
+.theme-swatch {
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.theme-swatch-bar {
+  height: 6px;
+  flex-shrink: 0;
+}
+
+.theme-swatch-body {
+  flex: 1;
+  padding: 10px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.theme-swatch-line {
+  height: 8px;
+  border-radius: 4px;
+  opacity: 0.35;
+}
+.theme-swatch-line.wide  { width: 70%; }
+.theme-swatch-line.narrow { width: 45%; }
+
+.theme-swatch-btn {
+  height: 18px;
+  width: 44px;
+  border-radius: 9px;
+  margin: 0 12px 10px;
+  flex-shrink: 0;
+}
+
+/* ── Label row ── */
+.theme-pick-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.theme-pick-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-med);
+  letter-spacing: -.01em;
+}
+
+.theme-pick-check {
+  font-size: 12px;
+  color: var(--primary);
+}
+
+/* ============================================================
+   THEME COLOR DEFINITIONS
+   Each class sets: --th-bar, --th-bg, --th-line, --th-btn
+   ============================================================ */
+
+/* Academic — purple (matches existing brand) */
+.theme-academic {
+  --th-bar:  #8b5cf6;
+  --th-bg:   #faf9fc;
+  --th-line: #8b5cf6;
+  --th-btn:  #8b5cf6;
+  background: var(--th-bg);
+}
+
+/* Modern — blue */
+.theme-modern {
+  --th-bar:  #2563eb;
+  --th-bg:   #f0f4ff;
+  --th-line: #2563eb;
+  --th-btn:  #2563eb;
+  background: var(--th-bg);
+}
+
+/* Nature — green */
+.theme-nature {
+  --th-bar:  #16a34a;
+  --th-bg:   #f0fdf4;
+  --th-line: #16a34a;
+  --th-btn:  #16a34a;
+  background: var(--th-bg);
+}
+
+/* Sunset — orange-red */
+.theme-sunset {
+  --th-bar:  #ea580c;
+  --th-bg:   #fff7ed;
+  --th-line: #ea580c;
+  --th-btn:  #ea580c;
+  background: var(--th-bg);
+}
+
+/* Ocean — teal */
+.theme-ocean {
+  --th-bar:  #0d9488;
+  --th-bg:   #f0fdfa;
+  --th-line: #0d9488;
+  --th-btn:  #0d9488;
+  background: var(--th-bg);
+}
+
+/* Rose — pink */
+.theme-rose {
+  --th-bar:  #e11d48;
+  --th-bg:   #fff1f2;
+  --th-line: #e11d48;
+  --th-btn:  #e11d48;
+  background: var(--th-bg);
+}
+
+/* Slate — neutral gray */
+.theme-slate {
+  --th-bar:  #475569;
+  --th-bg:   #f8fafc;
+  --th-line: #475569;
+  --th-btn:  #475569;
+  background: var(--th-bg);
+}
+
+/* Midnight — deep indigo */
+.theme-midnight {
+  --th-bar:  #4338ca;
+  --th-bg:   #eef2ff;
+  --th-line: #4338ca;
+  --th-btn:  #4338ca;
+  background: var(--th-bg);
+}
+
+/* Apply CSS vars to swatch child elements */
+.theme-swatch .theme-swatch-bar  { background: var(--th-bar); }
+.theme-swatch .theme-swatch-line { background: var(--th-line); }
+.theme-swatch .theme-swatch-btn  { background: var(--th-btn); }
