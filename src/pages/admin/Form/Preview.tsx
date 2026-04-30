@@ -1,9 +1,7 @@
-// Preview.tsx
-import { useState } from "react";
 import { Button, Space } from "antd";
-import { ArrowLeftOutlined, FileOutlined } from "@ant-design/icons"; // thêm FileOutlined
+import { ArrowLeftOutlined, FileOutlined } from "@ant-design/icons";
 import { THEMES } from "../../../feature/form/constants";
-import type { Form, Question as OldQuestion } from "../../../feature/form/types";
+import type { Form } from "../../../feature/form/types";
 import { PDFCanvas } from "./builder/Form";
 import type { Survey, Question, Section, SurveyHeader, SurveyFooter } from "../../../feature/form/types";
 
@@ -11,110 +9,65 @@ function getTheme(themeId?: string) {
   return THEMES.find((t) => t.id === themeId) ?? THEMES[0];
 }
 
+
 function mapFormToSurvey(form: Form): Survey {
-  const sections: Section[] = [];
-  const questions: Question[] = [];
-  let currentSectionId = "";
+  // Dùng sections từ form nếu có, fallback tạo 1 section mặc định
+  const sections: Section[] =
+    (form as any).sections?.length > 0
+      ? (form as any).sections
+      : [{ id: "default_section", title: "Nội dung khảo sát", order: 0 }];
+
+  const defaultSectionId = sections[0].id;
   let order = 0;
 
-  for (const oldQ of form.questions) {
-    // Giữ nguyên logic map như bạn đã viết
-    const match = oldQ.title.match(/^(\d+)\./);
-    let sectionId = currentSectionId;
-    if (match) {
-      const num = parseInt(match[1]);
-      if (num === 1) {
-        const newSection: Section = {
-          id: `section_${Date.now()}_${sections.length}`,
-          title: "Phần I. Thông tin cá nhân",
-          order: sections.length,
-        };
-        sections.push(newSection);
-        currentSectionId = newSection.id;
-        sectionId = newSection.id;
-      } else if (num === 11) {
-        const newSection: Section = {
-          id: `section_${Date.now()}_${sections.length}`,
-          title: "Phần II. Nội dung khảo sát",
-          order: sections.length,
-        };
-        sections.push(newSection);
-        currentSectionId = newSection.id;
-        sectionId = newSection.id;
-      }
-    }
-    if (!sectionId && sections.length === 0) {
-      const defaultSection: Section = {
-        id: "default_section",
-        title: "Chung",
-        order: 0,
-      };
-      sections.push(defaultSection);
-      sectionId = defaultSection.id;
-      currentSectionId = sectionId;
-    } else if (!sectionId) {
-      sectionId = currentSectionId;
-    }
-
+  const questions: Question[] = form.questions.map((oldQ) => {
     let newType: Question["type"] = "text";
     switch (oldQ.type) {
-      case "short":
-        newType = "text";
-        break;
-      case "long":
-        newType = "text";
-        break;
-      case "radio":
-        newType = "multiple-choice";
-        break;
-      case "checkbox":
-        newType = "checkbox";
-        break;
-      case "dropdown":
-        newType = "select";
-        break;
-      case "date":
-        newType = "date";
-        break;
-      case "address":
-        newType = "address";
-        break;
-      default:
-        newType = "text";
+      case "short":   newType = "text";           break;
+      case "long":    newType = "text";           break;
+      case "radio":   newType = "multiple-choice"; break;
+      case "checkbox": newType = "checkbox";      break;
+      case "dropdown": newType = "select";        break;
+      case "select":  newType = "select";         break;
+      case "date":    newType = "date";           break;
+      case "address": newType = "address";        break;
+      case "email":   newType = "text";           break;
+      case "tel":     newType = "text";           break;
+      // case "rating":  newType = "rating" as any;  break;
+      default:        newType = "text";
     }
 
     const newOptions = oldQ.options
       ? oldQ.options.map((opt: any) => (typeof opt === "string" ? opt : opt.label))
       : undefined;
 
-    const newQuestion: Question = {
+    return {
       id: oldQ.id,
       type: newType,
-      title: oldQ.title.replace(/^\d+\.\s*/, ""),
+      title: oldQ.title,
       placeholder: newType === "text" ? "Câu trả lời của bạn" : undefined,
       options: newOptions,
       required: oldQ.required,
-      sectionId: sectionId,
+      sectionId: oldQ.sectionId || defaultSectionId,
       order: order++,
     };
-    questions.push(newQuestion);
-  }
+  });
 
   const defaultHeader: SurveyHeader = {
     logoUrl:
-      form.logoUrl || // ưu tiên logo từ form nếu có
+      (form as any).logoUrl ||
       "https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png",
-    ministry: "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG",
-    academy: "HỌC VIỆN NÔNG NGHIỆP VIỆT NAM",
-    address: "Xã Gia Lâm, Thành phố Hà Nội",
-    phone: "024.62617586",
-    fax: "024.62617586",
+    ministry: (form as any).header?.ministry ?? "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG",
+    academy:  (form as any).header?.academy  ?? "HỌC VIỆN NÔNG NGHIỆP VIỆT NAM",
+    address:  (form as any).header?.address  ?? "Xã Gia Lâm, Thành phố Hà Nội",
+    phone:    (form as any).header?.phone    ?? "024.62617586",
+    fax:      (form as any).header?.fax      ?? "024.62617586",
     showDate: true,
   };
 
   const defaultFooter: SurveyFooter = {
-    primaryText: "Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!",
-    secondaryText: "Kính chúc Anh/Chị sức khỏe và thành công!",
+    primaryText:   (form as any).footer?.primaryText   ?? "Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!",
+    secondaryText: (form as any).footer?.secondaryText ?? "Kính chúc Anh/Chị sức khỏe và thành công!",
   };
 
   return {
@@ -160,7 +113,9 @@ export function SurveyPreview({ form, compact = false, initialValues, onSubmit }
   const th = getTheme(form.themeId);
   const survey = mapFormToSurvey(form);
   const descParagraphs = survey.description ? survey.description.split(/\n\s*\n/) : [];
+  // ✅ FIX: Pass logicRules xuống PDFCanvas để render đúng logic điều kiện
   const logicRules = (form as any).logicRules ?? [];
+
   return (
     <PDFCanvas
       surveyTitle={survey.title}
@@ -205,29 +160,13 @@ export default function PreviewView({ form, onBack }: StandaloneProps) {
         }}
       >
         <Space size={12}>
-          <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
-           
-          </Button>
+          <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} aria-label="Quay lại" />
           <div style={{ width: 1, height: 18, background: "#e5e7eb" }} />
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#9ca3af",
-              textTransform: "uppercase",
-            }}
-          >
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase" }}>
             Xem trước
           </span>
         </Space>
-        <div
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: th.accent,
-          }}
-        />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: th.accent }} />
       </div>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
         <SurveyPreview form={form} compact={false} />
