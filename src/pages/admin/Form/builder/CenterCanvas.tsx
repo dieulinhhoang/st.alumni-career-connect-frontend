@@ -43,7 +43,7 @@ interface CenterCanvasProps {
   onAddQuestionToSection?: (type: string) => void;
 }
 
-// ── SectionBar: tab bar for switching/creating/deleting sections ──────────────
+//  SectionBar: tab bar for switching/creating/deleting sections 
 function SectionBar({
   sections,
   activeSectionId,
@@ -85,6 +85,7 @@ function SectionBar({
         gap: 4,
         padding: "8px 8px 0",
         flexWrap: "wrap",
+         minWidth: 0,
       }}
     >
       {sections.map((s) => {
@@ -110,6 +111,8 @@ function SectionBar({
               position: "relative",
               userSelect: "none",
               marginBottom: isActive ? -1 : 0,
+              whiteSpace: "nowrap",
+              flexShrink: 0,  
             }}
           >
             {editingId === s.id ? (
@@ -204,7 +207,7 @@ function SectionBar({
   );
 }
 
-// ── Footer display block ──────────────────────────────────────────────────────
+//  Footer display block 
 function FooterBlock({
   footer,
   accent,
@@ -278,7 +281,7 @@ function FooterBlock({
   );
 }
 
-// ── FooterEditPopup ────────────────────────────────────────────────────────────
+//  FooterEditPopup 
 function FooterEditPopup({
   footer,
   accent,
@@ -382,7 +385,7 @@ function FooterEditPopup({
   );
 }
 
-// ── Main CenterCanvas ─────────────────────────────────────────────────────────
+//  Main CenterCanvas ─
 export function CenterCanvas({
   name, desc, accent, questions, activeId, setActiveId,
   onUpdateQuestion, onDuplicate, onRemove, onMove,
@@ -427,7 +430,7 @@ export function CenterCanvas({
     return () => window.removeEventListener("resize", measureToolbar);
   }, [measureToolbar]);
 
-  // ── drag ──────────────────────────────────────────────────────────
+  //  drag 
   const handleDragStart = (e: React.DragEvent, idx: number) => {
     dragSourceIndex.current = idx;
     e.dataTransfer.setData("text/plain", idx.toString());
@@ -467,13 +470,13 @@ export function CenterCanvas({
     }
   };
 
-  // ── Section rename ────────────────────────────────────────────────
+  //  Section rename 
   const handleRenameSection = (id: string, title: string) => {
     if (!onSectionsChange) return;
     onSectionsChange(sections.map((s) => s.id === id ? { ...s, title } : s));
   };
 
-  // ── Questions filtered by active section (or all if no sections) ──
+  //  Questions filtered by active section (or all if no sections) 
   const visibleQuestions = sections.length === 0
     ? questions
     : activeSectionId
@@ -483,23 +486,23 @@ export function CenterCanvas({
   // Global indices for move/toolbar
   const getGlobalIdx = (q: Question) => questions.findIndex((x) => x.id === q.id);
 
-  // ── render questions ──────────────────────────────────────────────
+  //  render questions 
   const renderQuestions = () => {
-    if (visibleQuestions.length === 0) {
-      return (
-        <div
-          style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", padding: "52px 28px", textAlign: "center" }}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => handleDrop(e, questions.length)}
-        >
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 20 }}>✦</div>
-          <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4, fontSize: 13 }}>Chưa có câu hỏi nào</div>
-          <div style={{ fontSize: 12.5, color: "#c4c9d4" }}>
-            Dùng nút <strong>+</strong> bên phải để thêm câu hỏi
-          </div>
-        </div>
-      );
-    }
+    // if (visibleQuestions.length === 0) {
+    //   return (
+    //     <div
+    //       style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", padding: "52px 28px", textAlign: "center" }}
+    //       onDragOver={(e) => e.preventDefault()}
+    //       onDrop={(e) => handleDrop(e, questions.length)}
+    //     >
+    //       <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 20 }}>✦</div>
+    //       <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4, fontSize: 13 }}>Chưa có câu hỏi nào</div>
+    //       <div style={{ fontSize: 12.5, color: "#c4c9d4" }}>
+    //         Dùng nút <strong>+</strong> bên phải để thêm câu hỏi
+    //       </div>
+    //     </div>
+    //   );
+    // }
 
     return (
       <>
@@ -556,9 +559,9 @@ export function CenterCanvas({
         onScroll={measureToolbar}
       >
         <div style={{ padding: "20px 20px 32px" }}>
-          <div ref={colRef} style={{ maxWidth: 640, margin: "0 auto", width: "100%", position: "relative" }}>
+          <div ref={colRef} style={{ maxWidth: 640, margin: "0 auto", width: "100%", position: "relative", overflowX: "auto" }}>
 
-            {/* ── Header / title / description (no footer here) ── */}
+            {/*  Header / title / description (no footer here)  */}
             <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", marginBottom: 16, overflow: "hidden" }}>
               <PDFCanvas
                 surveyTitle={name}
@@ -577,7 +580,7 @@ export function CenterCanvas({
               />
             </div>
 
-            {/* ── Section tabs ── */}
+            {/*  Section tabs  */}
             {sections.length > 0 && (
               <div style={{ marginBottom: 0 }}>
                 <SectionBar
@@ -594,7 +597,7 @@ export function CenterCanvas({
               </div>
             )}
 
-            {/* ── No sections yet: prompt to add ── */}
+            {/*  No sections yet: prompt to add  */}
             {sections.length === 0 && (
               <div
                 style={{
@@ -614,16 +617,16 @@ export function CenterCanvas({
                 <span style={{ fontSize: 12.5, color: accent, fontWeight: 600 }}>
                   Thêm phần (section) để tổ chức câu hỏi
                 </span>
-                <span style={{ fontSize: 11, color: `${accent}80`, marginLeft: "auto" }}>
+                {/* <span style={{ fontSize: 11, color: `${accent}80`, marginLeft: "auto" }}>
                   Không bắt buộc
-                </span>
+                </span> */}
               </div>
             )}
 
-            {/* ── Questions ── */}
+            {/*  Questions  */}
             {renderQuestions()}
 
-            {/* ── Footer block — always at the bottom ── */}
+            {/*  Footer block — always at the bottom  */}
             <div style={{ marginTop: 16 }}>
               <FooterBlock
                 footer={footer}

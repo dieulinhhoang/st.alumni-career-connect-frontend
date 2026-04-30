@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MOCK_FORMS, THEMES } from "../../../feature/form/constants";
-import type { Form, Theme } from "../../../feature/form/types";
+import type { Form, Question, Section, Theme } from "../../../feature/form/types";
 import { BuilderView } from "./Builderview";
 import PreviewView from "./Preview";
 import ListView from "./Listview";
@@ -9,7 +9,7 @@ import { AIView } from "./Aiview";
 import "./survey.css";
 import AdminLayout from "../../../components/layout/AdminLayout";
 
-/* ─── Theme Picker Modal ─── */
+/*  Theme Picker Modal  */
 
 interface ThemePickerProps {
   formName: string;
@@ -140,7 +140,7 @@ function ThemePicker({ formName, currentThemeId, onSelect, onSkip }: ThemePicker
   );
 }
 
-/* ─── Survey Page ─── */
+/*  Survey Page  */
 
 export default function SurveyPage() {
   const [forms, setForms] = useState<Form[]>(MOCK_FORMS);
@@ -208,14 +208,43 @@ export default function SurveyPage() {
     };
     setForms((prev) => [copy, ...prev]);
   };
+const defaultSection: Section = {
+  id: `section_${Date.now()}`,
+  title: "Phần 1",
+  order: 0,
+};
 
-  const newBlankForm: Form = {
-    id: null,
-    name: "",
-    description: "",
-    questions: [],
-    themeId: "blue",
-  };
+// Tạo câu hỏi mặc định thuộc section đó
+const defaultQuestion: Question = {
+  id: `q_${Date.now()}`,
+  type: "short",
+  title: "Câu hỏi 1",
+  placeholder: "Câu trả lời của bạn",
+  required: false,
+  sectionId: defaultSection.id,
+  order: 0,
+  options: [],   // theo đúng type Question
+};
+
+const newBlankForm: Form = {
+  id: null,
+  name: "",
+  description: "",
+  sections: [defaultSection],
+  questions: [defaultQuestion],
+  themeId: "blue",
+  header: {
+    ministry: "Bộ Nông nghiệp và Môi trường",
+    academy: "Học viện Nông nghiệp Việt Nam",
+    address: "Xã Gia Lâm, Thành phố Hà Nội",
+    phone: "024.62617586",
+    showDate: true,
+  },
+  footer: {
+    primaryText: "Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!",
+    secondaryText: "Kính chúc Anh/Chị sức khỏe và thành công!",
+  },
+} as any;
 
   if (view === "builder") {
     return (

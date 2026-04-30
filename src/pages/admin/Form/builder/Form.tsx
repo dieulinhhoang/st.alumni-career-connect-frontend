@@ -12,6 +12,16 @@ import type { Question, Section, SurveyFooter, SurveyHeader } from "../../../../
 import { AddressInput } from "./AddressInput";
 import { RichTextEditor } from "./RichTextEditor";
 
+// Mirrors LogicRule from RightPanel — kept local to avoid circular import
+interface LogicRule {
+  id: string;
+  sourceQuestionId: string;
+  operator: "equals" | "not_equals" | "contains";
+  value: string;
+  action: "show" | "hide" | "skip" | "require";
+  targetQuestionId: string;
+}
+
 interface PDFCanvasProps {
   surveyTitle: string;
   descriptionParagraphs?: string[];
@@ -32,9 +42,10 @@ interface PDFCanvasProps {
   initialValues?: Record<string, any>;
   onSubmit?: (answers: Record<string, any>) => void;
   submitLabel?: string;
+  logicRules?: LogicRule[];
 }
 
-// ─── RichTextDisplay ──────────────────────────────────────────────────────────
+// ─ RichTextDisplay 
 
 function RichTextDisplay({ text, style }: { text: string; style?: React.CSSProperties }) {
   return (
@@ -49,7 +60,7 @@ function RichTextDisplay({ text, style }: { text: string; style?: React.CSSPrope
   );
 }
 
-// ─── FloatingEditPopup ────────────────────────────────────────────────────────
+// ─ FloatingEditPopup 
 // Generic floating popup anchored to a trigger element
 
 interface FloatingEditPopupProps {
@@ -222,7 +233,7 @@ function FloatingEditPopup({
   );
 }
 
-// ─── ClickToEditBlock ─────────────────────────────────────────────────────────
+// ─ ClickToEditBlock ─
 // A display block that shows a pencil hint on hover and opens popup on click
 
 interface ClickToEditBlockProps {
@@ -310,7 +321,7 @@ function ClickToEditBlock({
   );
 }
 
-// ─── Logo Upload ──────────────────────────────────────────────────────────────
+// ─ Logo Upload 
 
 function LogoUpload({
   src,
@@ -363,7 +374,7 @@ function LogoUpload({
   );
 }
 
-// ─── InlineInput ──────────────────────────────────────────────────────────────
+// ─ InlineInput 
 
 function InlineInput({ value, onChange, style, multiline, placeholder }: {
   value: string; onChange: (v: string) => void; style?: React.CSSProperties; multiline?: boolean; placeholder?: string;
@@ -377,7 +388,7 @@ function InlineInput({ value, onChange, style, multiline, placeholder }: {
   );
 }
 
-// ─── Section Manager ──────────────────────────────────────────────────────────
+// ─ Section Manager 
 
 function SectionManager({ sections, accent, onSectionsChange }: { sections: Section[]; accent: string; onSectionsChange: (s: Section[]) => void; }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -431,13 +442,13 @@ function ibs(color?: string): React.CSSProperties {
   return { border: "none", background: "transparent", cursor: "pointer", padding: "3px 6px", borderRadius: 5, fontSize: 13, color: color ?? "#6b7280", display: "inline-flex", alignItems: "center", fontFamily: "inherit" };
 }
 
-// ─── question input styles ────────────────────────────────────────────────────
+// ─ question input styles 
 
 const underlineInputStyle: React.CSSProperties = { width: "100%", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", background: "#fff", color: "#1e293b", transition: "border-color 0.2s, box-shadow 0.2s" };
 const underlineTextareaStyle: React.CSSProperties = { ...underlineInputStyle, resize: "vertical", minHeight: "96px", lineHeight: 1.65 };
 const radioCheckboxBaseStyle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "9px 12px", fontSize: 14, color: "#334155", cursor: "pointer", fontFamily: "inherit", border: "1px solid #e2e8f0", borderRadius: 8, background: "#fff", transition: "all 0.15s" };
 
-// ─── Main PDFCanvas ───────────────────────────────────────────────────────────
+// ─ Main PDFCanvas ─
 
 export function PDFCanvas({
   surveyTitle,
@@ -455,10 +466,11 @@ export function PDFCanvas({
   onDescriptionParagraphsChange,
   onSectionsChange,
   logoUrl,
-  logoSize = 200,
+  logoSize = 120,
   initialValues = {},
   onSubmit,
   submitLabel = "Gửi",
+  logicRules = [],
 }: PDFCanvasProps) {
   const [radios, setRadios] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
@@ -479,7 +491,7 @@ export function PDFCanvas({
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // ── popup state ────────────────────────────────────────────────────
+  //  popup state 
   const [descPopupOpen, setDescPopupOpen] = useState(false);
   const [footerPopupOpen, setFooterPopupOpen] = useState(false);
   const descBlockRef = useRef<HTMLDivElement>(null);
@@ -532,9 +544,62 @@ export function PDFCanvas({
 
   const questionsBySection = sections.map((section) => ({ ...section, questions: questions.filter((q) => q.sectionId === section.id).sort((a, b) => a.order - b.order) })).filter((sec) => sec.questions.length > 0);
   const unsectionedQuestions = questions.filter((q) => !sections.find((s) => s.id === q.sectionId));
+
+  //  Evaluate logic rules against current answers 
+  const hiddenQuestionIds = new Set<string>();
+  const requiredOverrides = new Set<string>();
+
+  if (interactive && logicRules.length > 0) {
+    // Helper: get current answer for a question
+    const getAnswer = (qId: string, qType: string) => {
+      if (qType === "radio" || qType === "multiple-choice") return radios[qId] ?? "";
+      if (qType === "checkbox")
+        return Object.entries(cbs[qId] ?? {}).filter(([, c]) => c).map(([v]) => v).join(",");
+      return textVals[qId] ?? "";
+    };
+
+    const checkCondition = (rule: LogicRule) => {
+      const srcQ = questions.find((q) => q.id === rule.sourceQuestionId);
+      if (!srcQ) return false;
+      const ans = getAnswer(rule.sourceQuestionId, srcQ.type);
+      switch (rule.operator) {
+        case "equals": return ans === rule.value;
+        case "not_equals": return ans !== rule.value;
+        case "contains": return ans.includes(rule.value);
+        default: return false;
+      }
+    };
+
+    // Pass 1: pre-hide all targets of "show" rules 
+    for (const rule of logicRules) {
+      if (rule.action === "show") hiddenQuestionIds.add(rule.targetQuestionId);
+    }
+
+    // Pass 2: evaluate each rule and apply action
+    for (const rule of logicRules) {
+      if (!checkCondition(rule)) continue;
+      switch (rule.action) {
+        case "hide": hiddenQuestionIds.add(rule.targetQuestionId); break;
+        case "show": hiddenQuestionIds.delete(rule.targetQuestionId); break;
+        case "require": requiredOverrides.add(rule.targetQuestionId); break;
+        case "skip": {
+          const srcIdx = questions.findIndex(q => q.id === rule.sourceQuestionId);
+          const tgtIdx = questions.findIndex(q => q.id === rule.targetQuestionId);
+          if (srcIdx !== -1 && tgtIdx !== -1 && tgtIdx > srcIdx) {
+            for (let i = srcIdx + 1; i < tgtIdx; i++) {
+              hiddenQuestionIds.add(questions[i].id);
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+  // 
   let globalIndex = 0;
 
   const renderQuestion = (q: Question) => {
+    const isRequired = q.required || requiredOverrides.has(q.id);
     globalIndex++;
     const idx = globalIndex;
     return (
@@ -589,7 +654,7 @@ export function PDFCanvas({
   return (
     <div ref={containerRef} style={{ background: "#f8fafc", fontFamily: "'Inter', 'Geist', system-ui, sans-serif", color: "#1e293b", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
 
-      {/* ── Header card ──────────────────────────────────────────────── */}
+      {/*  Header card  */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: `${isSmall ? 16 : 24}px ${px}px ${isSmall ? 14 : 20}px` }}>
         {header.showDate !== false && (
           <div style={{ textAlign: "right", fontSize: 12, color: "#94a3b8", marginBottom: 14, fontStyle: "italic", letterSpacing: ".01em" }}>
@@ -601,43 +666,136 @@ export function PDFCanvas({
           <div style={{ flex: 1, minWidth: 0, width: isMobile ? "100%" : undefined }}>
             {editable ? (
               <>
-                <InlineInput value={header.ministry || ""} onChange={(v) => updateHeader("ministry", v)} placeholder="Bộ/ngành" style={{ fontSize: isSmall ? 10 : 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", textAlign: isMobile ? "center" : "right", color: "#64748b" }} />
-                <InlineInput value={header.academy || ""} onChange={(v) => updateHeader("academy", v)} placeholder="Học viện / Trường" style={{ fontSize: isSmall ? 14 : 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", margin: "5px 0", textAlign: isMobile ? "center" : "right", color: "#0f172a" }} />
-                <InlineInput value={header.address || ""} onChange={(v) => updateHeader("address", v)} placeholder="Địa chỉ" style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#64748b" }} />
-                <InlineInput value={header.phone || ""} onChange={(v) => updateHeader("phone", v)} placeholder="Điện thoại" style={{ fontSize: isSmall ? 11 : 13, textAlign: isMobile ? "center" : "right", color: "#64748b" }} />
+                <InlineInput
+                  value={header.ministry || ""}
+                  onChange={(v) => updateHeader("ministry", v)}
+                  placeholder="Bộ/ngành"
+                  style={{
+                    fontSize: isSmall ? 11 : 12,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    textAlign: isMobile ? "center" : "right",
+                    color: "#64748b",
+                    lineHeight: 1.4
+                  }}
+                />
+                <InlineInput
+                  value={header.academy || ""}
+                  onChange={(v) => updateHeader("academy", v)}
+                  placeholder="Học viện / Trường"
+                  style={{
+                    fontSize: isSmall ? 14 : 16,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    margin: "4px 0",
+                    textAlign: isMobile ? "center" : "right",
+                    color: "#0f172a",
+                    lineHeight: 1.3
+                  }}
+                />
+                <InlineInput
+                  value={header.address || ""}
+                  onChange={(v) => updateHeader("address", v)}
+                  placeholder="Địa chỉ"
+                  style={{
+                    fontSize: isSmall ? 11 : 12,
+                    textAlign: isMobile ? "center" : "right",
+                    color: "#64748b",
+                    lineHeight: 1.5
+                  }}
+                />
+                <InlineInput
+                  value={header.phone || ""}
+                  onChange={(v) => updateHeader("phone", v)}
+                  placeholder="Điện thoại"
+                  style={{
+                    fontSize: isSmall ? 11 : 12,
+                    textAlign: isMobile ? "center" : "right",
+                    color: "#64748b",
+                    lineHeight: 1.5
+                  }}
+                />
               </>
             ) : (
               <>
-                <div style={{ fontSize: isSmall ? 10 : 12, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", textAlign: isMobile ? "center" : "right", wordBreak: "break-word" }}>{header.ministry}</div>
-                <div style={{ fontSize: isSmall ? 14 : 18, fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.04em", margin: "5px 0", textAlign: isMobile ? "center" : "right", wordBreak: "break-word" }}>{header.academy}</div>
-                <div style={{ fontSize: isSmall ? 11 : 13, color: "#64748b", lineHeight: 1.6, textAlign: isMobile ? "center" : "right", wordBreak: "break-word", fontStyle: "italic" }}>{header.address}{header.phone && (<><br />{header.phone}{header.fax && ` — Fax: ${header.fax}`}</>)}</div>
+                <div style={{
+                  fontSize: isSmall ? 11 : 12,
+                  fontWeight: 600,
+                  color: "#64748b",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  lineHeight: 1.4
+                }}>
+                  {header.ministry}
+                </div>
+                <div style={{
+                  fontSize: isSmall ? 14 : 16,
+                  fontWeight: 800,
+                  color: "#0f172a",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                  margin: "4px 0",
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  lineHeight: 1.3
+                }}>
+                  {header.academy}
+                </div>
+                <div style={{
+                  fontSize: isSmall ? 11 : 12,
+                  color: "#64748b",
+                  lineHeight: 1.5,
+                  textAlign: isMobile ? "center" : "right",
+                  wordBreak: "break-word",
+                  fontStyle: "italic"
+                }}>
+                  {header.address}
+                  {header.phone && (
+                    <>
+                      <br />
+                      {header.phone}
+                      {header.fax && ` — Fax: ${header.fax}`}
+                    </>
+                  )}
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── Section manager ───────────────────────────────────────────── */}
+      {/*  Section manager ─ */}
       {editable && onSectionsChange && (
         <div style={{ padding: `16px ${px}px`, background: "#fff", borderBottom: "1px solid #e2e8f0" }}>
           <SectionManager sections={sections} accent={accent} onSectionsChange={onSectionsChange} />
         </div>
       )}
 
-      {/* ── Title + Description ───────────────────────────────────────── */}
+      {/*  Title + Description ─ */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: `${isSmall ? 24 : 36}px ${px}px ${isSmall ? 20 : 28}px`, textAlign: "center" }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: accent, margin: "0 auto 20px" }} />
 
         {/* Title */}
         {editable && onTitleChange ? (
-          <InlineInput value={surveyTitle} onChange={onTitleChange} placeholder="TÊN FORM KHẢO SÁT" style={{ fontSize: isSmall ? 18 : 24, fontWeight: 800, textAlign: "center", letterSpacing: "0.02em", color: "#0f172a" }} />
+          <InlineInput value={surveyTitle} onChange={onTitleChange} placeholder="TÊN FORM KHẢO SÁT" style={{ fontSize: isSmall ? 16 : 20, fontWeight: 700, textAlign: "center", letterSpacing: "0.02em", color: "#0f172a" }} />
         ) : (
-          <h2 style={{ margin: 0, fontSize: isSmall ? 18 : isMedium ? 20 : 24, fontWeight: 800, letterSpacing: "0.02em", color: "#0f172a", wordBreak: "break-word" }}>
+          <h2 style={{
+            margin: 0,
+            fontSize: isSmall ? 18 : isMedium ? 20 : 22,
+            fontWeight: 800,
+            letterSpacing: "0.01em",
+            color: "#0f172a",
+            wordBreak: "break-word"
+          }}>
             {surveyTitle || "TÊN FORM KHẢO SÁT"}
           </h2>
         )}
 
-        {/* ── Description — click-to-edit popup ────────────────────── */}
+        {/*  Description — click-to-edit popup  */}
         {(descriptionParagraphs.length > 0 || (editable && onDescriptionParagraphsChange)) && (
           <div style={{ marginTop: 16, textAlign: "left", maxWidth: 680, margin: "16px auto 0" }}>
             {editable && onDescriptionParagraphsChange ? (
@@ -655,8 +813,8 @@ export function PDFCanvas({
                     }}
                   >
                     {descriptionParagraphs.map((para, idx) => (
-                      <div key={idx} style={{ marginBottom: idx === descriptionParagraphs.length - 1 ? 0 : 10, padding: "12px 14px", background: `${accent}08`, borderLeft: `3px solid ${accent}`, borderRadius: "0 8px 8px 0" }}>
-                        <div style={{ fontSize: 13.5, color: "#334155", lineHeight: 1.75, textAlign: "justify" }}>
+                      <div key={idx} style={{ marginBottom: idx === descriptionParagraphs.length - 1 ? 0 : 12 }}>
+                        <div style={{ fontSize: 14, color: "#334155", lineHeight: 1.65, textAlign: "justify" }}>
                           <RichTextDisplay text={para} />
                         </div>
                       </div>
@@ -677,7 +835,7 @@ export function PDFCanvas({
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 8 }}>
                     Nội dung mô tả
                   </div>
-                  <textarea
+                  {/* <textarea
                     value={descDraft}
                     onChange={(e) => setDescDraft(e.target.value)}
                     placeholder="Nhập mô tả hoặc lời dẫn cho khảo sát..."
@@ -685,6 +843,12 @@ export function PDFCanvas({
                     style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", resize: "vertical", lineHeight: 1.65, color: "#1e293b", background: "#fafafa", boxSizing: "border-box" }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = "#fff"; }}
                     onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#fafafa"; }}
+                  /> */}
+                  <RichTextEditor
+                    value={descDraft}
+                    onChange={setDescDraft}
+                    placeholder="Nhập mô tả hoặc lời dẫn cho khảo sát..."
+                    minHeight={180}
                   />
                   {/* Popup footer actions */}
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
@@ -719,7 +883,7 @@ export function PDFCanvas({
         )}
       </div>
 
-      {/* ── Questions ─────────────────────────────────────────────────── */}
+      {/*  Questions ─ */}
       {!headerOnly && (
         <>
           {questionsBySection.length === 0 && unsectionedQuestions.length === 0 ? (
@@ -733,11 +897,17 @@ export function PDFCanvas({
                     <div style={{ fontSize: isSmall ? 14 : 16, fontWeight: 700, color: "#0f172a", flex: 1 }}>{section.title}</div>
                     <div style={{ height: 1, flex: 1, background: "#e2e8f0", maxWidth: 80 }} />
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{section.questions.map((q) => renderQuestion(q))}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}> {section.questions
+                    .filter((q) => !hiddenQuestionIds.has(q.id))
+                    .map((q) => renderQuestion(q))}
+                  </div>
                 </div>
               ))}
               {unsectionedQuestions.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{unsectionedQuestions.map((q) => renderQuestion(q))}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{unsectionedQuestions
+                  .filter((q) => !hiddenQuestionIds.has(q.id))
+                  .map((q) => renderQuestion(q))
+                }</div>
               )}
             </div>
           )}
@@ -748,7 +918,7 @@ export function PDFCanvas({
             </div>
           )}
 
-          {/* ── Footer — click-to-edit popup ─────────────────────────── */}
+          {/*  Footer — click-to-edit popup ─ */}
           <div style={{ background: "#fff", borderTop: "1px solid #e2e8f0", padding: `28px ${px}px 40px` }}>
             {editable && onFooterChange ? (
               <>
@@ -794,7 +964,7 @@ export function PDFCanvas({
                       <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
                         Dòng cảm ơn (in đậm)
                       </div>
-                      <textarea
+                      {/* <textarea
                         value={footerPrimaryDraft}
                         onChange={(e) => setFooterPrimaryDraft(e.target.value)}
                         placeholder="Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!"
@@ -802,6 +972,12 @@ export function PDFCanvas({
                         style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", resize: "none", lineHeight: 1.6, color: "#1e293b", background: "#fafafa", boxSizing: "border-box" }}
                         onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = "#fff"; }}
                         onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#fafafa"; }}
+                      /> */}
+                      <RichTextEditor
+                        value={footerSecondaryDraft}
+                        onChange={setFooterSecondaryDraft}
+                        placeholder="Kính chúc Anh/Chị sức khỏe và thành công!"
+                        minHeight={100}
                       />
                     </div>
                     <div>

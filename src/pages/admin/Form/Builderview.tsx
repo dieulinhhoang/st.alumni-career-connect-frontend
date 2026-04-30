@@ -10,7 +10,7 @@ import { useQuestionEditor, genId } from "../../../feature/form/hooks/useQuestio
 import type { Form, Section, SurveyFooter } from "../../../feature/form/types";
 import { ACCENT_COLORS } from "../../../feature/form/constants";
 import { CenterCanvas } from "./builder/CenterCanvas";
-import { RightPanel } from "./builder/RightPanel";
+import { RightPanel, type LogicRule } from "./builder/RightPanel";
 
 interface HeaderFields {
   orgUnit: string;
@@ -53,6 +53,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   );
   const [saved, setSaved] = useState(false);
   const [logoUrl, setLogoUrl] = useState((form as any)?.logoUrl ?? "");
+  const [logicRules, setLogicRules] = useState<LogicRule[]>((form as any)?.logicRules ?? []);
 
   // Modal tạo section
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
@@ -78,7 +79,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addOption, updateOption, removeOption,
   } = useQuestionEditor(form?.questions ?? []);
 
-  // ── Section handlers ──────────────────────────────────────────────
+  //  Section handlers 
 
   const openCreateSection = () => {
     setNewSectionName("");
@@ -86,12 +87,19 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     setSectionModalOpen(true);
   };
 
+
   const handleCreateSection = () => {
     if (!newSectionName.trim()) { setSectionNameError(true); return; }
     const id = genId();
-    const sec: Section = { id, title: newSectionName.trim(), order: sections.length };
-    setSections((prev) => [...prev, sec]);
+    const newSection: Section = { id, title: newSectionName.trim(), order: sections.length };
+
+    // 1. Thêm section mới
+    setSections((prev) => [...prev, newSection]);
     setActiveSectionId(id);
+
+    // 2. Tự động thêm 1 câu hỏi mặc định vào section mới
+    addQuestion(id, "short");  // addQuestion có sẵn từ useQuestionEditor
+
     setSectionModalOpen(false);
   };
 
@@ -115,7 +123,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     return insertQuestionAt(index, activeSectionId, type as any, title, options);
   };
 
-  // ── Save ──────────────────────────────────────────────────────────
+  //  Save 
 
   const handleSave = () => {
     onSave({
@@ -126,6 +134,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       header, footer,
       sections,
       logoUrl,
+      logicRules,
     } as any);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -150,6 +159,8 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             questions={questions}
             asDrawer
             onToggle={() => setRightOpen(false)}
+            logicRules={logicRules}
+            onLogicRulesChange={setLogicRules}
           />
         </div>
       </div>
@@ -248,6 +259,8 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             accent={accent}
             onAccentChange={setAccent}
             questions={questions}
+            logicRules={logicRules}
+            onLogicRulesChange={setLogicRules}
           />
         )}
 
@@ -276,7 +289,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         cancelText="Hủy"
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18 }}>📁</span>
+            <span style={{ fontSize: 18 }}></span>
             <span>Tạo phần mới</span>
           </div>
         }

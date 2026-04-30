@@ -160,7 +160,7 @@ export function SurveyPreview({ form, compact = false, initialValues, onSubmit }
   const th = getTheme(form.themeId);
   const survey = mapFormToSurvey(form);
   const descParagraphs = survey.description ? survey.description.split(/\n\s*\n/) : [];
-
+  const logicRules = (form as any).logicRules ?? [];
   return (
     <PDFCanvas
       surveyTitle={survey.title}
@@ -176,6 +176,7 @@ export function SurveyPreview({ form, compact = false, initialValues, onSubmit }
       logoSize={compact ? 36 : 120}
       initialValues={initialValues}
       onSubmit={onSubmit}
+      logicRules={logicRules}
     />
   );
 }
