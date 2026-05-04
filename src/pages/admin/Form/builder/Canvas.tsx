@@ -1,18 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Button, Switch, Select, Input, Tooltip } from "antd";
+import { Switch, Select, Input, Tooltip } from "antd";
 import {
-  UpOutlined,
-  DownOutlined,
-  CopyOutlined,
-  DeleteOutlined,
-  PlusOutlined,
   CloseOutlined,
+  PlusOutlined,
   HolderOutlined,
 } from "@ant-design/icons";
 import type { Question, QuestionType, Section } from "../../../../feature/form/types";
 import { Q_TYPES } from "../../../../feature/form/constants";
 
-/* ─── types ─────────────────────────────────────────────────────── */
 interface CanvasProps {
   question: Question;
   index: number;
@@ -32,13 +27,13 @@ interface CanvasProps {
   onRemoveOption: (oid: string) => void;
 }
 
-/* ─── answer preview (collapsed card) ──────────────────────────── */
 function AnswerPreview({ question }: { question: Question }) {
   const base: React.CSSProperties = {
     borderBottom: "1.5px solid #e8eaed",
     height: 28,
-    fontSize: 12.5,
-    color: "#b0b8c1",
+
+    fontSize: 13,
+    color: "#9ca3af",
     fontStyle: "italic",
     display: "flex",
     alignItems: "center",
@@ -56,7 +51,7 @@ function AnswerPreview({ question }: { question: Question }) {
     case "long":
       return <div style={{ ...base, height: "auto", paddingBottom: 24 }}>Câu trả lời...</div>;
     case "date":
-      return <div style={{ ...base, fontStyle: "normal", fontSize: 12, color: "#c4c9d4" }}>dd / mm / yyyy</div>;
+      return <div style={{ ...base, fontStyle: "normal", fontSize: 12, color: "#9ca3af" }}>dd / mm / yyyy</div>;
     case "radio":
     case "checkbox":
       return (
@@ -72,11 +67,12 @@ function AnswerPreview({ question }: { question: Question }) {
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 12, color: "#9ca3af" }}>{o.label}</span>
+              {}
+              <span style={{ fontSize: 12, color: "#6b7280" }}>{o.label}</span>
             </div>
           ))}
           {(question.options?.length ?? 0) > 3 && (
-            <div style={{ fontSize: 11, color: "#c4c9d4", paddingLeft: 23 }}>
+            <div style={{ fontSize: 12, color: "#9ca3af", paddingLeft: 23 }}>
               +{(question.options?.length ?? 0) - 3} lựa chọn khác
             </div>
           )}
@@ -90,52 +86,43 @@ function AnswerPreview({ question }: { question: Question }) {
           ))}
         </div>
       );
+    case "select":
+      return <div style={{ ...base, fontStyle: "normal" }}>▾ Chọn một phương án</div>;
     default:
       return null;
   }
 }
 
-/* ─── floating popup panel ──────────────────────────────────────── */
+const LBL: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 700,
+  color: "#6b7280",
+  textTransform: "uppercase",
+  letterSpacing: ".06em",
+  marginBottom: 5,
+};
+
 interface PopupProps {
   question: Question;
   index: number;
-  total: number;
   accent: string;
   sections: Section[];
   anchorEl: HTMLDivElement | null;
   onClose: () => void;
   onUpdate: (patch: Partial<Question>) => void;
-  onDuplicate: () => void;
-  onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
   onAddOption: () => void;
   onUpdateOption: (oid: string, label: string) => void;
   onRemoveOption: (oid: string) => void;
 }
 
-const LBL: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 700,
-  color: "#94a3b8",
-  textTransform: "uppercase",
-  letterSpacing: ".08em",
-  marginBottom: 5,
-};
-
 function FloatingPopup({
   question,
   index,
-  total,
   accent,
   sections,
   anchorEl,
   onClose,
   onUpdate,
-  onDuplicate,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
   onAddOption,
   onUpdateOption,
   onRemoveOption,
@@ -145,7 +132,6 @@ function FloatingPopup({
   const [visible, setVisible] = useState(false);
   const hasOpts = question.type === "radio" || question.type === "checkbox" || question.type === "select";
 
-  /* position calculation */
   const calcPos = useCallback(() => {
     if (!anchorEl || !popupRef.current) return;
     const card = anchorEl.getBoundingClientRect();
@@ -153,23 +139,18 @@ function FloatingPopup({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    /* try RIGHT of card first */
     let left = card.right + 10;
     let top = card.top;
 
-    /* if overflows right → try LEFT */
     if (left + popup.width > vw - 12) {
       left = card.left - popup.width - 10;
     }
-    /* clamp vertical */
     top = Math.max(12, Math.min(top, vh - popup.height - 12));
-
     setPos({ top, left });
     setVisible(true);
   }, [anchorEl]);
 
   useEffect(() => {
-    /* small delay so popupRef has dimensions */
     const t = setTimeout(calcPos, 10);
     return () => clearTimeout(t);
   }, [calcPos]);
@@ -179,7 +160,12 @@ function FloatingPopup({
     return () => window.removeEventListener("resize", calcPos);
   }, [calcPos]);
 
-  /* click-outside to close */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -198,6 +184,9 @@ function FloatingPopup({
   return (
     <div
       ref={popupRef}
+      role="dialog"
+      aria-modal="false"
+      aria-label="Chỉnh sửa câu hỏi"
       style={{
         position: "fixed",
         top: pos.top,
@@ -214,7 +203,7 @@ function FloatingPopup({
         overflow: "hidden",
       }}
     >
-      {/* popup header */}
+      {}
       <div
         style={{
           display: "flex",
@@ -233,7 +222,7 @@ function FloatingPopup({
               borderRadius: 6,
               background: accent,
               color: "#fff",
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 800,
               display: "flex",
               alignItems: "center",
@@ -242,12 +231,13 @@ function FloatingPopup({
           >
             {index + 1}
           </div>
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: "#1e293b" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>
             Chỉnh sửa câu hỏi
           </span>
         </div>
         <button
           onClick={onClose}
+          aria-label="Đóng"
           style={{
             width: 24,
             height: 24,
@@ -262,20 +252,14 @@ function FloatingPopup({
             fontSize: 12,
             transition: "all .12s",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#fee2e2";
-            e.currentTarget.style.color = "#dc2626";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#94a3b8";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.color = "#dc2626"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#94a3b8"; }}
         >
           <CloseOutlined />
         </button>
       </div>
 
-      {/* popup body */}
+      {}
       <div
         style={{
           padding: "12px 14px",
@@ -286,7 +270,7 @@ function FloatingPopup({
           gap: 12,
         }}
       >
-        {/* Type + Required row */}
+        {}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "end" }}>
           <div>
             <div style={LBL}>Loại câu hỏi</div>
@@ -299,7 +283,7 @@ function FloatingPopup({
             />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 2 }}>
-            <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 500 }}>Bắt buộc</span>
+            <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Bắt buộc</span>
             <Switch
               size="small"
               checked={question.required}
@@ -309,7 +293,7 @@ function FloatingPopup({
           </div>
         </div>
 
-        {/* Section */}
+        {}
         {sections.length > 0 && (
           <div>
             <div style={LBL}>Thuộc phần</div>
@@ -326,7 +310,7 @@ function FloatingPopup({
           </div>
         )}
 
-        {/* Title */}
+        {}
         <div>
           <div style={LBL}>Nội dung câu hỏi</div>
           <Input.TextArea
@@ -338,7 +322,7 @@ function FloatingPopup({
           />
         </div>
 
-        {/* Options */}
+        {}
         {hasOpts && (
           <div>
             <div style={LBL}>Lựa chọn</div>
@@ -359,10 +343,11 @@ function FloatingPopup({
                     onChange={(e) => onUpdateOption(o.id, e.target.value)}
                     placeholder={`Lựa chọn ${oi + 1}`}
                     size="small"
-                    style={{ flex: 1, fontSize: 12 }}
+                    style={{ flex: 1, fontSize: 13 }}
                   />
                   <button
                     onClick={() => onRemoveOption(o.id)}
+                    aria-label={`Xóa lựa chọn ${oi + 1}`}
                     style={{
                       border: "none",
                       background: "transparent",
@@ -378,14 +363,8 @@ function FloatingPopup({
                       padding: 0,
                       transition: "all .12s",
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = "#dc2626";
-                      e.currentTarget.style.background = "#fee2e2";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = "#d1d5db";
-                      e.currentTarget.style.background = "transparent";
-                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#dc2626"; e.currentTarget.style.background = "#fee2e2"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#d1d5db"; e.currentTarget.style.background = "transparent"; }}
                   >
                     <CloseOutlined />
                   </button>
@@ -394,6 +373,7 @@ function FloatingPopup({
             </div>
             <button
               onClick={onAddOption}
+              aria-label="Thêm lựa chọn"
               style={{
                 marginTop: 6,
                 width: "100%",
@@ -402,7 +382,7 @@ function FloatingPopup({
                 borderRadius: 6,
                 background: "transparent",
                 cursor: "pointer",
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: 600,
                 color: "#94a3b8",
                 display: "flex",
@@ -412,16 +392,8 @@ function FloatingPopup({
                 transition: "all .12s",
                 fontFamily: "inherit",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = accent;
-                e.currentTarget.style.color = accent;
-                e.currentTarget.style.background = `${accent}08`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#e2e8f0";
-                e.currentTarget.style.color = "#94a3b8";
-                e.currentTarget.style.background = "transparent";
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; e.currentTarget.style.background = `${accent}08`; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.background = "transparent"; }}
             >
               <PlusOutlined style={{ fontSize: 10 }} />
               Thêm lựa chọn
@@ -429,89 +401,11 @@ function FloatingPopup({
           </div>
         )}
       </div>
-
-      {/* popup footer actions */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "8px 14px",
-          borderTop: "1px solid #f0f2f5",
-          background: "#fafbfc",
-        }}
-      >
-        <div style={{ display: "flex", gap: 2 }}>
-          <Tooltip title="Xóa câu hỏi" placement="top">
-            <button
-              onClick={() => { onRemove(); onClose(); }}
-              style={{
-                width: 28, height: 28, border: "none", background: "transparent",
-                borderRadius: 6, cursor: "pointer", color: "#9ca3af", fontSize: 13,
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all .12s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.color = "#dc2626"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
-            >
-              <DeleteOutlined />
-            </button>
-          </Tooltip>
-          <Tooltip title="Nhân bản" placement="top">
-            <button
-              onClick={() => { onDuplicate(); onClose(); }}
-              style={{
-                width: 28, height: 28, border: "none", background: "transparent",
-                borderRadius: 6, cursor: "pointer", color: "#9ca3af", fontSize: 13,
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all .12s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; e.currentTarget.style.color = "#0284c7"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
-            >
-              <CopyOutlined />
-            </button>
-          </Tooltip>
-        </div>
-
-        <div style={{ display: "flex", gap: 2 }}>
-          <Tooltip title="Lên" placement="top">
-            <button
-              onClick={onMoveUp}
-              disabled={index === 0}
-              style={{
-                width: 28, height: 28, border: "none", background: "transparent",
-                borderRadius: 6, cursor: index === 0 ? "not-allowed" : "pointer",
-                color: index === 0 ? "#e2e8f0" : "#9ca3af", fontSize: 13,
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all .12s",
-              }}
-              onMouseEnter={(e) => { if (index > 0) { e.currentTarget.style.background = "#f0f9ff"; e.currentTarget.style.color = "#0284c7"; }}}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = index === 0 ? "#e2e8f0" : "#9ca3af"; }}
-            >
-              <UpOutlined />
-            </button>
-          </Tooltip>
-          <Tooltip title="Xuống" placement="top">
-            <button
-              onClick={onMoveDown}
-              disabled={index === total - 1}
-              style={{
-                width: 28, height: 28, border: "none", background: "transparent",
-                borderRadius: 6, cursor: index === total - 1 ? "not-allowed" : "pointer",
-                color: index === total - 1 ? "#e2e8f0" : "#9ca3af", fontSize: 13,
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all .12s",
-              }}
-              onMouseEnter={(e) => { if (index < total - 1) { e.currentTarget.style.background = "#f0f9ff"; e.currentTarget.style.color = "#0284c7"; }}}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = index === total - 1 ? "#e2e8f0" : "#9ca3af"; }}
-            >
-              <DownOutlined />
-            </button>
-          </Tooltip>
-        </div>
-      </div>
+      {}
     </div>
   );
 }
 
-/* ─── main Canvas card ──────────────────────────────────────────── */
 export function Canvas({
   question,
   index,
@@ -548,20 +442,22 @@ export function Canvas({
       <div
         ref={cardRef}
         onClick={handleCardClick}
+        role="button"
+        aria-label={`Câu hỏi ${index + 1}: ${question.title || "Chưa có nội dung"}`}
+        aria-pressed={isActive}
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(); }}
         style={{
           marginBottom: 10,
           borderRadius: 12,
           background: "#fff",
-          border: isActive
-            ? `1.5px solid ${accent}`
-            : "1px solid #eaecf0",
-          boxShadow: isActive
-            ? `0 4px 16px ${accent}18`
-            : "0 1px 3px rgba(0,0,0,.04)",
+          border: isActive ? `1.5px solid ${accent}` : "1px solid #eaecf0",
+          boxShadow: isActive ? `0 4px 16px ${accent}18` : "0 1px 3px rgba(0,0,0,.04)",
           transition: "all .18s cubic-bezier(.16,1,.3,1)",
           cursor: "pointer",
           position: "relative",
           overflow: "hidden",
+          outline: "none",
         }}
         onMouseEnter={(e) => {
           if (!isActive) {
@@ -576,7 +472,7 @@ export function Canvas({
           }
         }}
       >
-        {/* accent left bar */}
+        {}
         <div
           style={{
             position: "absolute",
@@ -598,20 +494,16 @@ export function Canvas({
             alignItems: "flex-start",
           }}
         >
-          {/* drag handle + number */}
+          {}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
-            <div
-              style={{
-                color: "#d1d5db",
-                fontSize: 13,
-                cursor: "grab",
-                lineHeight: 1,
-                padding: "2px 1px",
-              }}
-              title="Kéo để sắp xếp"
-            >
-              <HolderOutlined />
-            </div>
+            <Tooltip title="Kéo để sắp xếp" placement="left">
+              <div
+                style={{ color: "#d1d5db", fontSize: 13, cursor: "grab", lineHeight: 1, padding: "2px 1px" }}
+                aria-hidden="true"
+              >
+                <HolderOutlined />
+              </div>
+            </Tooltip>
             <div
               style={{
                 width: 26,
@@ -619,7 +511,7 @@ export function Canvas({
                 borderRadius: 7,
                 background: isActive ? accent : "#f1f5f9",
                 color: isActive ? "#fff" : "#64748b",
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: 700,
                 display: "flex",
                 alignItems: "center",
@@ -631,10 +523,11 @@ export function Canvas({
             </div>
           </div>
 
-          {/* content */}
+          {}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
+
                 fontSize: 13.5,
                 fontWeight: 600,
                 color: question.title ? "#1e293b" : "#94a3b8",
@@ -643,13 +536,13 @@ export function Canvas({
             >
               {question.title || "Chưa có nội dung..."}
               {question.required && (
-                <span style={{ color: "#dc2626", marginLeft: 3 }}>*</span>
+                <span style={{ color: "#dc2626", marginLeft: 3 }} aria-label="bắt buộc">*</span>
               )}
             </div>
             <AnswerPreview question={question} />
           </div>
 
-          {/* quick action hint */}
+          {}
           <div
             style={{
               flexShrink: 0,
@@ -659,10 +552,11 @@ export function Canvas({
               opacity: isActive ? 1 : 0,
               transition: "opacity .12s",
             }}
+            aria-hidden="true"
           >
             <div
               style={{
-                fontSize: 9.5,
+                fontSize: 12,
                 color: accent,
                 fontWeight: 700,
                 letterSpacing: ".05em",
@@ -678,21 +572,16 @@ export function Canvas({
         </div>
       </div>
 
-      {/* floating popup portal */}
+      {}
       {isActive && popupOpen && (
         <FloatingPopup
           question={question}
           index={index}
-          total={total}
           accent={accent}
           sections={sections}
           anchorEl={cardRef.current}
           onClose={handleClose}
           onUpdate={onUpdate}
-          onDuplicate={onDuplicate}
-          onRemove={onRemove}
-          onMoveUp={onMoveUp}
-          onMoveDown={onMoveDown}
           onAddOption={onAddOption}
           onUpdateOption={onUpdateOption}
           onRemoveOption={onRemoveOption}

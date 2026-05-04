@@ -19,11 +19,10 @@ import {
   DownOutlined,
 } from "@ant-design/icons";
 
-/* ─── types ─────────────────────────────────────────────────────── */
 interface QuestionToolbarProps {
-  /** viewport-relative top — null means no active card */
+
   anchorTop: number | null;
-  /** viewport-relative left (right edge of canvas column + gap) */
+
   anchorLeft: number | null;
   accent: string;
   onAddQuestion: (type: string) => void;
@@ -35,7 +34,6 @@ interface QuestionToolbarProps {
   canMoveDown?: boolean;
 }
 
-/* ─── question type definitions ─────────────────────────────────── */
 const Q_TYPES = [
   { type: "short",    icon: <LineOutlined />,           label: "Câu ngắn" },
   { type: "long",     icon: <UnorderedListOutlined />,  label: "Đoạn văn dài" },
@@ -49,7 +47,6 @@ const Q_TYPES = [
   { type: "rating",   icon: <StarOutlined />,           label: "Đánh giá sao" },
 ];
 
-/* ─── single icon button ─────────────────────────────────────────── */
 function TBtn({
   icon, label, onClick, danger = false, disabled = false, accent,
 }: {
@@ -92,7 +89,6 @@ function TBtn({
   );
 }
 
-/* ─── add-type popover ───────────────────────────────────────────── */
 function AddTypeMenu({
   open, accent, onSelect, onClose,
 }: {
@@ -157,7 +153,6 @@ function AddTypeMenu({
   );
 }
 
-/* ─── main floating toolbar ──────────────────────────────────────── */
 export function QuestionToolbar({
   anchorTop,
   anchorLeft,
@@ -173,7 +168,6 @@ export function QuestionToolbar({
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const visible = anchorTop !== null && anchorLeft !== null;
 
-  // Close add menu when toolbar hides
   useEffect(() => {
     if (!visible) setAddMenuOpen(false);
   }, [visible]);
@@ -181,7 +175,7 @@ export function QuestionToolbar({
   return (
     <div
       style={{
-        // Fixed to viewport → always follows the user as they scroll
+
         position: "fixed",
         top: anchorTop ?? 0,
         left: anchorLeft ?? 0,
@@ -205,7 +199,7 @@ export function QuestionToolbar({
           position: "relative",
         }}
       >
-        {/* Add question button — opens type menu */}
+        {}
         <div style={{ position: "relative" }}>
           <Tooltip title="Thêm câu hỏi" placement="right" mouseEnterDelay={0.3}>
             <button
@@ -233,7 +227,7 @@ export function QuestionToolbar({
           />
         </div>
 
-        {/* Drag handle hint */}
+        {}
         <Tooltip title="Kéo để sắp xếp" placement="right" mouseEnterDelay={0.5}>
           <div
             style={{
@@ -246,20 +240,20 @@ export function QuestionToolbar({
           </div>
         </Tooltip>
 
-        {/* Divider */}
+        {}
         <div style={{ width: 20, height: 1, background: "#f0f0f0", margin: "2px 0" }} />
 
-        {/* Move up */}
+        {}
         <TBtn icon={<UpOutlined />} label="Lên" onClick={onMoveUp ?? (() => {})} disabled={!canMoveUp} accent={accent} />
-        {/* Move down */}
+        {}
         <TBtn icon={<DownOutlined />} label="Xuống" onClick={onMoveDown ?? (() => {})} disabled={!canMoveDown} accent={accent} />
 
-        {/* Divider */}
+        {}
         <div style={{ width: 20, height: 1, background: "#f0f0f0", margin: "2px 0" }} />
 
-        {/* Duplicate */}
+        {}
         <TBtn icon={<CopyOutlined />} label="Nhân bản" onClick={onDuplicate ?? (() => {})} accent={accent} />
-        {/* Delete */}
+        {}
         <TBtn icon={<DeleteOutlined />} label="Xóa" onClick={onDelete ?? (() => {})} danger accent={accent} />
       </div>
     </div>

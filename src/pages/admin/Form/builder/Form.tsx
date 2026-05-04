@@ -12,7 +12,6 @@ import type { Question, Section, SurveyFooter, SurveyHeader } from "../../../../
 import { AddressInput } from "./AddressInput";
 import { RichTextEditor } from "./RichTextEditor";
 
-// Mirrors LogicRule from RightPanel — kept local to avoid circular import
 interface LogicRule {
   id: string;
   sourceQuestionId: string;
@@ -45,8 +44,6 @@ interface PDFCanvasProps {
   logicRules?: LogicRule[];
 }
 
-// ─ RichTextDisplay 
-
 function RichTextDisplay({ text, style }: { text: string; style?: React.CSSProperties }) {
   return (
     <span
@@ -59,9 +56,6 @@ function RichTextDisplay({ text, style }: { text: string; style?: React.CSSPrope
     />
   );
 }
-
-// ─ FloatingEditPopup 
-// Generic floating popup anchored to a trigger element
 
 interface FloatingEditPopupProps {
   open: boolean;
@@ -95,13 +89,11 @@ function FloatingEditPopup({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // prefer below anchor, centered
     let top = anchor.bottom + 8;
     let left = anchor.left + anchor.width / 2 - width / 2;
 
-    // clamp horizontal
     left = Math.max(12, Math.min(left, vw - width - 12));
-    // if overflows bottom → show above
+
     if (top + popup.height > vh - 12) top = anchor.top - popup.height - 8;
     top = Math.max(12, top);
 
@@ -121,7 +113,6 @@ function FloatingEditPopup({
     return () => window.removeEventListener("resize", calcPos);
   }, [open, calcPos]);
 
-  // click outside
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -134,7 +125,7 @@ function FloatingEditPopup({
         onClose();
       }
     };
-    // slight delay so the open-click doesn't immediately close
+
     const t = setTimeout(() => document.addEventListener("mousedown", handler), 80);
     return () => {
       clearTimeout(t);
@@ -166,7 +157,7 @@ function FloatingEditPopup({
         overflow: "hidden",
       }}
     >
-      {/* Header */}
+      {}
       <div
         style={{
           display: "flex",
@@ -225,16 +216,13 @@ function FloatingEditPopup({
         </button>
       </div>
 
-      {/* Body */}
+      {}
       <div style={{ padding: "14px 14px 16px", maxHeight: "65vh", overflowY: "auto" }}>
         {children}
       </div>
     </div>
   );
 }
-
-// ─ ClickToEditBlock ─
-// A display block that shows a pencil hint on hover and opens popup on click
 
 interface ClickToEditBlockProps {
   accent: string;
@@ -294,7 +282,7 @@ function ClickToEditBlock({
         children
       )}
 
-      {/* hover badge */}
+      {}
       {hover && (
         <div
           style={{
@@ -320,8 +308,6 @@ function ClickToEditBlock({
     </div>
   );
 }
-
-// ─ Logo Upload 
 
 function LogoUpload({
   src,
@@ -374,8 +360,6 @@ function LogoUpload({
   );
 }
 
-// ─ InlineInput 
-
 function InlineInput({ value, onChange, style, multiline, placeholder }: {
   value: string; onChange: (v: string) => void; style?: React.CSSProperties; multiline?: boolean; placeholder?: string;
 }) {
@@ -387,8 +371,6 @@ function InlineInput({ value, onChange, style, multiline, placeholder }: {
     <Input value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} style={base} />
   );
 }
-
-// ─ Section Manager 
 
 function SectionManager({ sections, accent, onSectionsChange }: { sections: Section[]; accent: string; onSectionsChange: (s: Section[]) => void; }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -442,13 +424,9 @@ function ibs(color?: string): React.CSSProperties {
   return { border: "none", background: "transparent", cursor: "pointer", padding: "3px 6px", borderRadius: 5, fontSize: 13, color: color ?? "#6b7280", display: "inline-flex", alignItems: "center", fontFamily: "inherit" };
 }
 
-// ─ question input styles 
-
 const underlineInputStyle: React.CSSProperties = { width: "100%", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 14, fontFamily: "inherit", outline: "none", background: "#fff", color: "#1e293b", transition: "border-color 0.2s, box-shadow 0.2s" };
 const underlineTextareaStyle: React.CSSProperties = { ...underlineInputStyle, resize: "vertical", minHeight: "96px", lineHeight: 1.65 };
 const radioCheckboxBaseStyle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "9px 12px", fontSize: 14, color: "#334155", cursor: "pointer", fontFamily: "inherit", border: "1px solid #e2e8f0", borderRadius: 8, background: "#fff", transition: "all 0.15s" };
-
-// ─ Main PDFCanvas ─
 
 export function PDFCanvas({
   surveyTitle,
@@ -491,18 +469,15 @@ export function PDFCanvas({
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  //  popup state 
   const [descPopupOpen, setDescPopupOpen] = useState(false);
   const [footerPopupOpen, setFooterPopupOpen] = useState(false);
   const descBlockRef = useRef<HTMLDivElement>(null);
   const footerBlockRef = useRef<HTMLDivElement>(null);
 
-  // draft states — only commit on "Lưu"
   const [descDraft, setDescDraft] = useState(descriptionParagraphs.join("\n\n"));
   const [footerPrimaryDraft, setFooterPrimaryDraft] = useState(footer?.primaryText ?? "");
   const [footerSecondaryDraft, setFooterSecondaryDraft] = useState(footer?.secondaryText ?? "");
 
-  // sync drafts when props change (e.g. load from server)
   useEffect(() => { setDescDraft(descriptionParagraphs.join("\n\n")); }, [descriptionParagraphs.join("\n\n")]);
   useEffect(() => { setFooterPrimaryDraft(footer?.primaryText ?? ""); setFooterSecondaryDraft(footer?.secondaryText ?? ""); }, [footer?.primaryText, footer?.secondaryText]);
 
@@ -545,12 +520,11 @@ export function PDFCanvas({
   const questionsBySection = sections.map((section) => ({ ...section, questions: questions.filter((q) => q.sectionId === section.id).sort((a, b) => a.order - b.order) })).filter((sec) => sec.questions.length > 0);
   const unsectionedQuestions = questions.filter((q) => !sections.find((s) => s.id === q.sectionId));
 
-  //  Evaluate logic rules against current answers 
   const hiddenQuestionIds = new Set<string>();
   const requiredOverrides = new Set<string>();
 
   if (interactive && logicRules.length > 0) {
-    // Helper: get current answer for a question
+
     const getAnswer = (qId: string, qType: string) => {
       if (qType === "radio" || qType === "multiple-choice") return radios[qId] ?? "";
       if (qType === "checkbox")
@@ -570,12 +544,10 @@ export function PDFCanvas({
       }
     };
 
-    // Pass 1: pre-hide all targets of "show" rules 
     for (const rule of logicRules) {
       if (rule.action === "show") hiddenQuestionIds.add(rule.targetQuestionId);
     }
 
-    // Pass 2: evaluate each rule and apply action
     for (const rule of logicRules) {
       if (!checkCondition(rule)) continue;
       switch (rule.action) {
@@ -595,7 +567,7 @@ export function PDFCanvas({
       }
     }
   }
-  // 
+
   let globalIndex = 0;
 
   const renderQuestion = (q: Question) => {
@@ -608,14 +580,14 @@ export function PDFCanvas({
           <span style={{ width: 24, height: 24, borderRadius: 6, background: accent + "18", color: accent, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{idx}</span>
           <span style={{ flex: 1 }}>
             <RichTextDisplay text={q.title} style={{ display: "inline" }} />
-            {q.required && <span style={{ color: "#ef4444", marginLeft: 4, fontSize: 15 }}>*</span>}
+            {isRequired && <span style={{ color: "#ef4444" }}>*</span>}
           </span>
         </div>
-        {(q.type === "short" || q.type === "text") && (<input type="text" placeholder={q.placeholder || "Câu trả lời của bạn"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
-        {q.type === "long" && (<textarea placeholder={q.placeholder || "Câu trả lời của bạn"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={underlineTextareaStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
-        {q.type === "email" && (<input type="email" placeholder={q.placeholder || "Nhập email"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
-        {q.type === "tel" && (<input type="tel" placeholder={q.placeholder || "Nhập số điện thoại"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
-        {q.type === "date" && (<input type="date" value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={{ ...underlineInputStyle, width: "auto", minWidth: 200 }} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
+        {(q.type === "short" || q.type === "text") && (<input type="text" placeholder={q.placeholder || "Câu trả lời của bạn"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
+        {q.type === "long" && (<textarea placeholder={q.placeholder || "Câu trả lời của bạn"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={underlineTextareaStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
+        {q.type === "email" && (<input type="email" placeholder={q.placeholder || "Nhập email"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
+        {q.type === "tel" && (<input type="tel" placeholder={q.placeholder || "Nhập số điện thoại"} value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={underlineInputStyle} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
+        {q.type === "date" && (<input type="date" value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={{ ...underlineInputStyle, width: "auto", minWidth: 200 }} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }} />)}
         {q.type === "address" && (<AddressInput value={textVals[q.id] || ""} onChange={(v) => setTextVals((t) => ({ ...t, [q.id]: v }))} />)}
         {(q.type === "radio" || q.type === "multiple-choice") && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -638,7 +610,7 @@ export function PDFCanvas({
           </div>
         )}
         {q.type === "select" && (
-          <select value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={q.required} disabled={!interactive} style={{ ...underlineInputStyle, appearance: "auto", cursor: interactive ? "pointer" : "default" }} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }}>
+          <select value={textVals[q.id] || ""} onChange={(e) => setTextVals((v) => ({ ...v, [q.id]: e.target.value }))} required={isRequired} disabled={!interactive} style={{ ...underlineInputStyle, appearance: "auto", cursor: interactive ? "pointer" : "default" }} onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${accent}18`; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.boxShadow = "none"; }}>
             <option value="" disabled>Chọn một phương án</option>
             {q.options?.map((opt) => <option key={opt as any} value={opt as any}>{opt as any}</option>)}
           </select>
@@ -654,11 +626,11 @@ export function PDFCanvas({
   return (
     <div ref={containerRef} style={{ background: "#f8fafc", fontFamily: "'Inter', 'Geist', system-ui, sans-serif", color: "#1e293b", width: "100%", boxSizing: "border-box", minWidth: 0 }}>
 
-      {/*  Header card  */}
+      {}
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: `${isSmall ? 16 : 24}px ${px}px ${isSmall ? 14 : 20}px` }}>
         {header.showDate !== false && (
           <div style={{ textAlign: "right", fontSize: 12, color: "#94a3b8", marginBottom: 14, fontStyle: "italic", letterSpacing: ".01em" }}>
-            Ngày {today.replace(/\//g, " / ")}
+            Ngày {today.replace(/\//g, " tháng ")} năm {today.split("/")[2]}
           </div>
         )}
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", gap: isMobile ? 14 : 20 }}>
@@ -768,18 +740,18 @@ export function PDFCanvas({
         </div>
       </div>
 
-      {/*  Section manager ─ */}
+      {}
       {editable && onSectionsChange && (
         <div style={{ padding: `16px ${px}px`, background: "#fff", borderBottom: "1px solid #e2e8f0" }}>
           <SectionManager sections={sections} accent={accent} onSectionsChange={onSectionsChange} />
         </div>
       )}
 
-      {/*  Title + Description ─ */}
+      {}
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: `${isSmall ? 24 : 36}px ${px}px ${isSmall ? 20 : 28}px`, textAlign: "center" }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: accent, margin: "0 auto 20px" }} />
 
-        {/* Title */}
+        {}
         {editable && onTitleChange ? (
           <InlineInput value={surveyTitle} onChange={onTitleChange} placeholder="TÊN FORM KHẢO SÁT" style={{ fontSize: isSmall ? 16 : 20, fontWeight: 700, textAlign: "center", letterSpacing: "0.02em", color: "#0f172a" }} />
         ) : (
@@ -795,12 +767,12 @@ export function PDFCanvas({
           </h2>
         )}
 
-        {/*  Description — click-to-edit popup  */}
+        {}
         {(descriptionParagraphs.length > 0 || (editable && onDescriptionParagraphsChange)) && (
           <div style={{ marginTop: 16, textAlign: "left", maxWidth: 680, margin: "16px auto 0" }}>
             {editable && onDescriptionParagraphsChange ? (
               <>
-                {/* Clickable display block */}
+                {}
                 <div ref={descBlockRef}>
                   <ClickToEditBlock
                     accent={accent}
@@ -822,7 +794,7 @@ export function PDFCanvas({
                   </ClickToEditBlock>
                 </div>
 
-                {/* Description popup */}
+                {}
                 <FloatingEditPopup
                   open={descPopupOpen}
                   anchorEl={descBlockRef.current}
@@ -835,22 +807,14 @@ export function PDFCanvas({
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 8 }}>
                     Nội dung mô tả
                   </div>
-                  {/* <textarea
-                    value={descDraft}
-                    onChange={(e) => setDescDraft(e.target.value)}
-                    placeholder="Nhập mô tả hoặc lời dẫn cho khảo sát..."
-                    rows={6}
-                    style={{ width: "100%", padding: "10px 12px", border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", resize: "vertical", lineHeight: 1.65, color: "#1e293b", background: "#fafafa", boxSizing: "border-box" }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = "#fff"; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#fafafa"; }}
-                  /> */}
+                  {}
                   <RichTextEditor
                     value={descDraft}
                     onChange={setDescDraft}
                     placeholder="Nhập mô tả hoặc lời dẫn cho khảo sát..."
                     minHeight={180}
                   />
-                  {/* Popup footer actions */}
+                  {}
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
                     <button
                       onClick={() => setDescPopupOpen(false)}
@@ -883,7 +847,7 @@ export function PDFCanvas({
         )}
       </div>
 
-      {/*  Questions ─ */}
+      {}
       {!headerOnly && (
         <>
           {questionsBySection.length === 0 && unsectionedQuestions.length === 0 ? (
@@ -918,7 +882,7 @@ export function PDFCanvas({
             </div>
           )}
 
-          {/*  Footer — click-to-edit popup ─ */}
+          {}
           <div style={{ background: "#fff", borderTop: "1px solid #e2e8f0", padding: `28px ${px}px 40px` }}>
             {editable && onFooterChange ? (
               <>
@@ -949,7 +913,7 @@ export function PDFCanvas({
                   </ClickToEditBlock>
                 </div>
 
-                {/* Footer popup */}
+                {}
                 <FloatingEditPopup
                   open={footerPopupOpen}
                   anchorEl={footerBlockRef.current}
@@ -964,15 +928,7 @@ export function PDFCanvas({
                       <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
                         Dòng cảm ơn (in đậm)
                       </div>
-                      {/* <textarea
-                        value={footerPrimaryDraft}
-                        onChange={(e) => setFooterPrimaryDraft(e.target.value)}
-                        placeholder="Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!"
-                        rows={2}
-                        style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e2e8f0", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", resize: "none", lineHeight: 1.6, color: "#1e293b", background: "#fafafa", boxSizing: "border-box" }}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.background = "#fff"; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#fafafa"; }}
-                      /> */}
+                      {}
                       <RichTextEditor
                         value={footerSecondaryDraft}
                         onChange={setFooterSecondaryDraft}
@@ -995,7 +951,7 @@ export function PDFCanvas({
                       />
                     </div>
 
-                    {/* Preview */}
+                    {}
                     {(footerPrimaryDraft || footerSecondaryDraft) && (
                       <div style={{ padding: "10px 14px", borderRadius: 8, background: `${accent}06`, border: `1px solid ${accent}20`, textAlign: "center" }}>
                         <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 8 }}>Xem trước</div>
@@ -1004,7 +960,7 @@ export function PDFCanvas({
                       </div>
                     )}
 
-                    {/* Actions */}
+                    {}
                     <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
                       <button
                         onClick={() => setFooterPopupOpen(false)}
@@ -1026,7 +982,7 @@ export function PDFCanvas({
                 </FloatingEditPopup>
               </>
             ) : (
-              /* Read-only footer */
+
               <div style={{ textAlign: "center", padding: "8px 0" }}>
                 {footer?.primaryText && (<div style={{ fontWeight: 700, marginBottom: 6, fontSize: 14, color: "#0f172a" }}><RichTextDisplay text={footer.primaryText} /></div>)}
                 {footer?.secondaryText && (<div style={{ fontStyle: "italic", color: "#64748b", fontSize: 13.5 }}><RichTextDisplay text={footer.secondaryText} /></div>)}
@@ -1036,13 +992,13 @@ export function PDFCanvas({
         </>
       )}
 
-      {/* Footer in header-only mode */}
+      {}
       {headerOnly && editable && onFooterChange && (
         <div style={{ padding: `0 ${px}px 28px`, background: "#fff", borderTop: "1px solid #e2e8f0", marginTop: 8 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 10, paddingTop: 16 }}>
             Chân trang (Footer)
           </div>
-          {/* reuse same click-to-edit in header-only mode */}
+          {}
           <div ref={footerBlockRef}>
             <ClickToEditBlock
               accent={accent}

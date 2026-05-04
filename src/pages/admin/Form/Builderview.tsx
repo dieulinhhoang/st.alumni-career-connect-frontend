@@ -55,12 +55,10 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const [logoUrl, setLogoUrl] = useState((form as any)?.logoUrl ?? "");
   const [logicRules, setLogicRules] = useState<LogicRule[]>((form as any)?.logicRules ?? []);
 
-  // Modal tạo section
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [sectionNameError, setSectionNameError] = useState(false);
 
-  // Responsive
   const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
   useEffect(() => {
     const h = () => setWinWidth(window.innerWidth);
@@ -79,26 +77,21 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addOption, updateOption, removeOption,
   } = useQuestionEditor(form?.questions ?? []);
 
-  //  Section handlers 
-
   const openCreateSection = () => {
     setNewSectionName("");
     setSectionNameError(false);
     setSectionModalOpen(true);
   };
 
-
   const handleCreateSection = () => {
     if (!newSectionName.trim()) { setSectionNameError(true); return; }
     const id = genId();
     const newSection: Section = { id, title: newSectionName.trim(), order: sections.length };
 
-    // 1. Thêm section mới
     setSections((prev) => [...prev, newSection]);
     setActiveSectionId(id);
 
-    // 2. Tự động thêm 1 câu hỏi mặc định vào section mới
-    addQuestion(id, "short");  // addQuestion có sẵn từ useQuestionEditor
+    addQuestion(id, "short");
 
     setSectionModalOpen(false);
   };
@@ -123,8 +116,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     return insertQuestionAt(index, activeSectionId, type as any, title, options);
   };
 
-  //  Save 
-
   const handleSave = () => {
     onSave({
       ...form!,
@@ -140,7 +131,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // Mobile right drawer
   const RightDrawer = () => {
     if (!isMobile || !rightOpen) return null;
     return (
@@ -169,7 +159,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)", background: "#fff" }}>
-      {/* TOP BAR — simplified: just back + form name + save */}
+      {}
       <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #e8eaed", padding: "0 12px", height: 48, flexShrink: 0, gap: 8, background: "#fff" }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack}>
           {!isMobile && <span>Quay lại</span>}
@@ -177,7 +167,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
         <div style={{ width: 1, height: 18, background: "#e8eaed", flexShrink: 0 }} />
 
-        {/* Form name — editable inline */}
+        {}
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -199,7 +189,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           onBlur={(e) => { e.currentTarget.style.background = "transparent"; }}
         />
 
-        {/* Accent dot indicator */}
+        {}
         {!isMobile && (
           <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: `${accent}12`, border: `1px solid ${accent}30`, flexShrink: 0 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: accent }} />
@@ -217,9 +207,9 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         </Button>
       </div>
 
-      {/* CONTENT AREA */}
+      {}
       <div style={{ flex: 1, overflow: "hidden", display: "flex", position: "relative" }}>
-        {/* Canvas — takes full remaining width (the icon strip is now separate) */}
+        {}
         <div style={{ flex: 1, height: "100%", overflow: "hidden", minWidth: 0 }}>
           <CenterCanvas
             name={name}
@@ -252,7 +242,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           />
         </div>
 
-        {/* Right panel — icon strip + bottom slide panel (desktop only) */}
+        {}
         {!isMobile && (
           <RightPanel
             onAddFromBank={(q) => handleAddQuestion((q as any).type)}
@@ -264,11 +254,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           />
         )}
 
-        {/* Mobile right drawer */}
+        {}
         <RightDrawer />
       </div>
 
-      {/* Mobile bottom bar */}
+      {}
       {isMobile && (
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 52, background: "#fff", borderTop: "1px solid #e8eaed", display: "flex", alignItems: "center", zIndex: 100, boxShadow: "0 -2px 12px rgba(0,0,0,.06)" }}>
           <button
@@ -280,7 +270,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         </div>
       )}
 
-      {/* MODAL TẠO SECTION */}
+      {}
       <Modal
         open={sectionModalOpen}
         onCancel={() => setSectionModalOpen(false)}

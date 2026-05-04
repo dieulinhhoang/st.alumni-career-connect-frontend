@@ -3,7 +3,7 @@ import { PDFCanvas } from "./Form";
 import { Canvas } from "./Canvas";
 import { QuestionToolbar } from "./QuestionToolbar";
 import type { Question, Section, SurveyFooter } from "../../../../feature/form/types";
-import { PlusOutlined, DeleteOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 interface HeaderFields {
   orgUnit: string;
@@ -43,7 +43,6 @@ interface CenterCanvasProps {
   onAddQuestionToSection?: (type: string) => void;
 }
 
-//  SectionBar: tab bar for switching/creating/deleting sections 
 function SectionBar({
   sections,
   activeSectionId,
@@ -85,7 +84,7 @@ function SectionBar({
         gap: 4,
         padding: "8px 8px 0",
         flexWrap: "wrap",
-         minWidth: 0,
+        minWidth: 0,
       }}
     >
       {sections.map((s) => {
@@ -94,6 +93,10 @@ function SectionBar({
           <div
             key={s.id}
             onClick={() => onSelect(s.id)}
+            role="tab"
+            aria-selected={isActive}
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(s.id); }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -105,17 +108,18 @@ function SectionBar({
               borderBottom: isActive ? "1.5px solid #fff" : "1.5px solid transparent",
               cursor: "pointer",
               fontWeight: isActive ? 700 : 400,
-              fontSize: 12.5,
+              fontSize: 13,
               color: isActive ? accent : "#6b7280",
               transition: "all .15s",
               position: "relative",
               userSelect: "none",
               marginBottom: isActive ? -1 : 0,
               whiteSpace: "nowrap",
-              flexShrink: 0,  
+              flexShrink: 0,
             }}
           >
             {editingId === s.id ? (
+
               <input
                 autoFocus
                 value={editValue}
@@ -127,15 +131,17 @@ function SectionBar({
                   e.stopPropagation();
                 }}
                 onClick={(e) => e.stopPropagation()}
+                size={Math.max(8, editValue.length + 2)}
                 style={{
                   border: "none",
                   outline: "none",
                   background: "transparent",
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: 700,
                   color: accent,
                   fontFamily: "inherit",
-                  width: Math.max(60, editValue.length * 8),
+                  minWidth: 60,
+                  maxWidth: 200,
                 }}
               />
             ) : (
@@ -147,8 +153,9 @@ function SectionBar({
             {isActive && editingId !== s.id && (
               <span
                 onClick={(e) => startEdit(s, e)}
+                role="button"
+                aria-label={`Đổi tên phần ${s.title}`}
                 style={{ color: `${accent}80`, fontSize: 11, cursor: "pointer", lineHeight: 1 }}
-                title="Đổi tên"
               >
                 <EditOutlined />
               </span>
@@ -156,12 +163,10 @@ function SectionBar({
 
             {isActive && sections.length > 1 && (
               <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(s.id);
-                }}
+                onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                role="button"
+                aria-label={`Xóa phần ${s.title}`}
                 style={{ color: "#dc262680", fontSize: 11, cursor: "pointer", lineHeight: 1 }}
-                title="Xóa phần"
               >
                 <DeleteOutlined />
               </span>
@@ -170,10 +175,9 @@ function SectionBar({
         );
       })}
 
-      {/* Add section button */}
       <button
         onClick={onCreate}
-        title="Thêm phần mới"
+        aria-label="Thêm phần mới"
         style={{
           display: "flex",
           alignItems: "center",
@@ -183,7 +187,7 @@ function SectionBar({
           border: "1.5px dashed #d1d5db",
           background: "transparent",
           cursor: "pointer",
-          fontSize: 11.5,
+          fontSize: 12,
           color: "#9ca3af",
           fontFamily: "inherit",
           fontWeight: 500,
@@ -207,7 +211,6 @@ function SectionBar({
   );
 }
 
-//  Footer display block 
 function FooterBlock({
   footer,
   accent,
@@ -227,17 +230,17 @@ function FooterBlock({
       onClick={editable ? onEdit : undefined}
       onMouseEnter={() => editable && setHov(true)}
       onMouseLeave={() => setHov(false)}
+      role={editable ? "button" : undefined}
+      aria-label={editable ? "Chỉnh sửa footer" : undefined}
       style={{
-        background: "#fff",
-        borderTop: "1px solid #e2e8f0",
+        background: hov ? `${accent}04` : "#fff",
+        borderTop: hov ? `1.5px dashed ${accent}70` : "1px solid #e2e8f0",
+        border: hov ? `1.5px dashed ${accent}70` : "1px solid #e2e8f0",
         borderRadius: "0 0 10px 10px",
         padding: "24px 28px 32px",
         textAlign: "center",
         cursor: editable ? "pointer" : "default",
-        border: hov ? `1.5px dashed ${accent}70` : "1px solid #e2e8f0",
-        borderTop: hov ? `1.5px dashed ${accent}70` : "1px solid #e2e8f0",
         transition: "border .15s, background .15s",
-        background: hov ? `${accent}04` : "#fff",
         position: "relative",
       }}
     >
@@ -247,7 +250,7 @@ function FooterBlock({
             position: "absolute",
             top: 8,
             right: 10,
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 700,
             color: "#fff",
             background: accent,
@@ -256,7 +259,7 @@ function FooterBlock({
             letterSpacing: ".04em",
           }}
         >
-           Sửa footer
+          Sửa footer
         </div>
       )}
       {hasContent ? (
@@ -274,14 +277,13 @@ function FooterBlock({
         </>
       ) : editable ? (
         <div style={{ color: "#94a3b8", fontSize: 13, fontStyle: "italic" }}>
-           Nhấn để thêm lời cảm ơn (footer)
+          Nhấn để thêm lời cảm ơn (footer)
         </div>
       ) : null}
     </div>
   );
 }
 
-//  FooterEditPopup 
 function FooterEditPopup({
   footer,
   accent,
@@ -296,6 +298,12 @@ function FooterEditPopup({
   const [primary, setPrimary] = useState(footer?.primaryText ?? "");
   const [secondary, setSecondary] = useState(footer?.secondaryText ?? "");
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
     <div
       style={{
@@ -309,6 +317,9 @@ function FooterEditPopup({
         padding: 20,
       }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Chỉnh sửa footer"
     >
       <div
         style={{
@@ -331,17 +342,18 @@ function FooterEditPopup({
             background: `linear-gradient(135deg, ${accent}08, transparent)`,
           }}
         >
-          <span style={{ fontWeight: 700, fontSize: 13.5 }}>🏷️ Chân trang (Footer)</span>
+          <span style={{ fontWeight: 700, fontSize: 14 }}>Chân trang (Footer)</span>
           <button
             onClick={onClose}
-            style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 16, color: "#9ca3af" }}
+            aria-label="Đóng"
+            style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 16, color: "#9ca3af", lineHeight: 1 }}
           >
             ✕
           </button>
         </div>
         <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
               Dòng cảm ơn (in đậm)
             </div>
             <textarea
@@ -355,7 +367,7 @@ function FooterEditPopup({
             />
           </div>
           <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 6 }}>
               Lời chúc (in nghiêng)
             </div>
             <textarea
@@ -369,12 +381,15 @@ function FooterEditPopup({
             />
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
-            <button onClick={onClose} style={{ height: 32, padding: "0 14px", border: "1px solid #e2e8f0", borderRadius: 7, background: "#fff", cursor: "pointer", fontSize: 12.5, fontWeight: 600, color: "#6b7280", fontFamily: "inherit" }}>
+            <button
+              onClick={onClose}
+              style={{ height: 32, padding: "0 14px", border: "1px solid #e2e8f0", borderRadius: 7, background: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#6b7280", fontFamily: "inherit" }}
+            >
               Hủy
             </button>
             <button
               onClick={() => { onSave({ primaryText: primary, secondaryText: secondary }); onClose(); }}
-              style={{ height: 32, padding: "0 16px", border: "none", borderRadius: 7, background: accent, cursor: "pointer", fontSize: 12.5, fontWeight: 700, color: "#fff", fontFamily: "inherit" }}
+              style={{ height: 32, padding: "0 16px", border: "none", borderRadius: 7, background: accent, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#fff", fontFamily: "inherit" }}
             >
               ✓ Lưu
             </button>
@@ -385,7 +400,6 @@ function FooterEditPopup({
   );
 }
 
-//  Main CenterCanvas ─
 export function CenterCanvas({
   name, desc, accent, questions, activeId, setActiveId,
   onUpdateQuestion, onDuplicate, onRemove, onMove,
@@ -397,13 +411,16 @@ export function CenterCanvas({
 }: CenterCanvasProps) {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragSourceIndex = useRef<number | null>(null);
+
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const colRef = useRef<HTMLDivElement>(null);
   const [footerEditOpen, setFooterEditOpen] = useState(false);
 
-  // Toolbar position
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+
+  const rafId = useRef<number | null>(null);
 
   const measureToolbar = useCallback(() => {
     if (!activeId) { setToolbarPos(null); return; }
@@ -414,7 +431,10 @@ export function CenterCanvas({
     const cardRect = card.getBoundingClientRect();
     const colRect = col.getBoundingClientRect();
     const scrollRect = scroll.getBoundingClientRect();
-    if (cardRect.bottom < scrollRect.top || cardRect.top > scrollRect.bottom) { setToolbarPos(null); return; }
+    if (cardRect.bottom < scrollRect.top || cardRect.top > scrollRect.bottom) {
+      setToolbarPos(null);
+      return;
+    }
     const topRaw = cardRect.top;
     const top = Math.max(scrollRect.top + 8, Math.min(topRaw, scrollRect.bottom - 120));
     setToolbarPos({ top, left: colRect.right + 10 });
@@ -430,7 +450,14 @@ export function CenterCanvas({
     return () => window.removeEventListener("resize", measureToolbar);
   }, [measureToolbar]);
 
-  //  drag 
+  const handleScroll = useCallback(() => {
+    if (rafId.current !== null) return;
+    rafId.current = requestAnimationFrame(() => {
+      measureToolbar();
+      rafId.current = null;
+    });
+  }, [measureToolbar]);
+
   const handleDragStart = (e: React.DragEvent, idx: number) => {
     dragSourceIndex.current = idx;
     e.dataTransfer.setData("text/plain", idx.toString());
@@ -460,7 +487,6 @@ export function CenterCanvas({
   const activeIdx = questions.findIndex((q) => q.id === activeId);
 
   const handleAddAfterActive = (type: string) => {
-    // Always add question, even without sections
     if (onAddQuestionToSection) {
       onAddQuestionToSection(type);
     } else {
@@ -470,39 +496,36 @@ export function CenterCanvas({
     }
   };
 
-  //  Section rename 
   const handleRenameSection = (id: string, title: string) => {
     if (!onSectionsChange) return;
     onSectionsChange(sections.map((s) => s.id === id ? { ...s, title } : s));
   };
 
-  //  Questions filtered by active section (or all if no sections) 
   const visibleQuestions = sections.length === 0
     ? questions
     : activeSectionId
     ? questions.filter((q) => q.sectionId === activeSectionId)
     : questions;
 
-  // Global indices for move/toolbar
   const getGlobalIdx = (q: Question) => questions.findIndex((x) => x.id === q.id);
 
-  //  render questions 
   const renderQuestions = () => {
-    // if (visibleQuestions.length === 0) {
-    //   return (
-    //     <div
-    //       style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", padding: "52px 28px", textAlign: "center" }}
-    //       onDragOver={(e) => e.preventDefault()}
-    //       onDrop={(e) => handleDrop(e, questions.length)}
-    //     >
-    //       <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 20 }}>✦</div>
-    //       <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4, fontSize: 13 }}>Chưa có câu hỏi nào</div>
-    //       <div style={{ fontSize: 12.5, color: "#c4c9d4" }}>
-    //         Dùng nút <strong>+</strong> bên phải để thêm câu hỏi
-    //       </div>
-    //     </div>
-    //   );
-    // }
+
+    if (visibleQuestions.length === 0) {
+      return (
+        <div
+          style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", padding: "52px 28px", textAlign: "center" }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => handleDrop(e, questions.length)}
+        >
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 20 }}>✦</div>
+          <div style={{ fontWeight: 600, color: "#9ca3af", marginBottom: 4, fontSize: 13 }}>Chưa có câu hỏi nào</div>
+          <div style={{ fontSize: 13, color: "#c4c9d4" }}>
+            Dùng nút <strong>+</strong> bên phải để thêm câu hỏi
+          </div>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -512,7 +535,14 @@ export function CenterCanvas({
             return (
               <div
                 key={q.id}
-                ref={(el) => { cardRefs.current[q.id] = el; }}
+
+                ref={(el) => {
+                  if (el) {
+                    cardRefs.current[q.id] = el;
+                  } else {
+                    delete cardRefs.current[q.id];
+                  }
+                }}
                 draggable
                 onDragStart={(e) => handleDragStart(e, idx)}
                 onDragOver={(e) => handleDragOver(e, idx)}
@@ -520,6 +550,7 @@ export function CenterCanvas({
                 onDragEnd={handleDragEnd}
                 style={{ borderTop: dragOverIndex === idx ? `2px solid ${accent}` : "none", transition: "border .08s" }}
               >
+                {}
                 <Canvas
                   question={q}
                   index={idx}
@@ -541,7 +572,7 @@ export function CenterCanvas({
             );
           })}
         </div>
-        <div style={{ textAlign: "center", marginTop: 8, fontSize: 11.5, color: "#9ca3af", fontWeight: 500 }}>
+        <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "#9ca3af", fontWeight: 500 }}>
           {visibleQuestions.length} câu hỏi · Kéo để sắp xếp
         </div>
       </>
@@ -556,12 +587,13 @@ export function CenterCanvas({
       <div
         style={{ flex: 1, overflowY: "auto", position: "relative" }}
         ref={scrollRef}
-        onScroll={measureToolbar}
+
+        onScroll={handleScroll}
       >
         <div style={{ padding: "20px 20px 32px" }}>
           <div ref={colRef} style={{ maxWidth: 640, margin: "0 auto", width: "100%", position: "relative", overflowX: "auto" }}>
 
-            {/*  Header / title / description (no footer here)  */}
+            {}
             <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,.07)", marginBottom: 16, overflow: "hidden" }}>
               <PDFCanvas
                 surveyTitle={name}
@@ -576,11 +608,10 @@ export function CenterCanvas({
                 onHeaderChange={(h) => onHeaderChange({ orgUnit: h.ministry || "", orgName: h.academy || "", address: h.address || "", phone: h.phone || "" })}
                 onTitleChange={onNameChange}
                 onDescriptionParagraphsChange={(ps) => onDescChange(ps.join("\n\n"))}
-                /* do NOT pass onFooterChange here — footer lives below */
               />
             </div>
 
-            {/*  Section tabs  */}
+            {}
             {sections.length > 0 && (
               <div style={{ marginBottom: 0 }}>
                 <SectionBar
@@ -592,12 +623,11 @@ export function CenterCanvas({
                   onDelete={onDeleteSection ?? (() => {})}
                   onRename={handleRenameSection}
                 />
-                {/* Tab panel border-top */}
                 <div style={{ height: 2, background: `${accent}20`, marginBottom: 8 }} />
               </div>
             )}
 
-            {/*  No sections yet: prompt to add  */}
+            {}
             {sections.length === 0 && (
               <div
                 style={{
@@ -612,21 +642,20 @@ export function CenterCanvas({
                   cursor: "pointer",
                 }}
                 onClick={onCreateSection}
+                role="button"
+                aria-label="Thêm phần để tổ chức câu hỏi"
               >
                 <PlusOutlined style={{ color: accent, fontSize: 13 }} />
-                <span style={{ fontSize: 12.5, color: accent, fontWeight: 600 }}>
+                <span style={{ fontSize: 13, color: accent, fontWeight: 600 }}>
                   Thêm phần (section) để tổ chức câu hỏi
                 </span>
-                {/* <span style={{ fontSize: 11, color: `${accent}80`, marginLeft: "auto" }}>
-                  Không bắt buộc
-                </span> */}
               </div>
             )}
 
-            {/*  Questions  */}
+            {}
             {renderQuestions()}
 
-            {/*  Footer block — always at the bottom  */}
+            {}
             <div style={{ marginTop: 16 }}>
               <FooterBlock
                 footer={footer}
@@ -635,12 +664,11 @@ export function CenterCanvas({
                 onEdit={() => setFooterEditOpen(true)}
               />
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* Floating question toolbar */}
+      {}
       <QuestionToolbar
         anchorTop={toolbarPos?.top ?? null}
         anchorLeft={toolbarPos?.left ?? null}
@@ -654,7 +682,7 @@ export function CenterCanvas({
         canMoveDown={activeIdx >= 0 && activeIdx < questions.length - 1}
       />
 
-      {/* Footer edit modal */}
+      {}
       {footerEditOpen && onFooterChange && (
         <FooterEditPopup
           footer={footer}

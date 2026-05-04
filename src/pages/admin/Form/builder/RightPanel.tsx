@@ -18,7 +18,6 @@ type PanelTab = "bank" | "theme" | "logic";
 type LogicAction = "show" | "hide" | "skip" | "require";
 type LogicOperator = "equals" | "not_equals" | "contains";
 
-// ✅ FIX: Export LogicRule so Form type can use it
 export interface LogicRule {
   id: string;
   sourceQuestionId: string;
@@ -39,8 +38,6 @@ export interface ThemePreset {
   tag: string;
 }
 
-// ✅ FIX: THEME_PRESETS is now the single source of truth - imported by index.tsx/Preview.tsx
-// The old THEMES in constants.ts should be replaced by this.
 export const THEME_PRESETS: ThemePreset[] = [
   { id: "academic", name: "Academic",  primaryColor: "#0f766e", secondaryColor: "#ccfbf1", bodyBg: "#f0fdfa", font: "'Times New Roman', Georgia, serif", radius: "4px",  tag: "Học thuật" },
   { id: "official", name: "Official",  primaryColor: "#1d4ed8", secondaryColor: "#dbeafe", bodyBg: "#eff6ff", font: "'Times New Roman', serif",              radius: "2px",  tag: "Trang trọng" },
@@ -64,7 +61,7 @@ interface RightPanelProps {
   open?: boolean;
   onToggle?: () => void;
   asDrawer?: boolean;
-  // ✅ FIX: logic rules now lifted to parent via props (was local state → data was lost on tab switch)
+
   logicRules?: LogicRule[];
   onLogicRulesChange?: (rules: LogicRule[]) => void;
 }
@@ -94,8 +91,6 @@ const PANEL_TABS: { key: PanelTab; icon: React.ReactNode; label: string }[] = [
   { key: "theme", icon: <BgColorsOutlined />, label: "Giao diện" },
   { key: "logic", icon: <BranchesOutlined />, label: "Logic điều kiện" },
 ];
-
-// ── BankPanel ──────────────────────────────────────────────────────────────
 
 function BankPanel({ onAddFromBank, accent, onClose }: {
   onAddFromBank: (q: BankQuestion) => void;
@@ -151,8 +146,6 @@ function BankPanel({ onAddFromBank, accent, onClose }: {
     </div>
   );
 }
-
-// ── ThemePanel ─────────────────────────────────────────────────────────────
 
 function ThemePanel({
   accent,
@@ -218,7 +211,7 @@ function ThemePanel({
                 </div>
               )}
 
-              {/* Thumbnail */}
+              {}
               <div style={{ background: theme.primaryColor, height: 20 }} />
               <div style={{ padding: "5px 7px 4px", display: "flex", flexDirection: "column", gap: 2, background: theme.bodyBg }}>
                 <div style={{ background: theme.secondaryColor, height: 4, borderRadius: 3, width: "65%", opacity: 0.9 }} />
@@ -226,7 +219,7 @@ function ThemePanel({
                 <div style={{ marginTop: 1, width: 18, height: 5, borderRadius: 3, background: theme.primaryColor, opacity: 0.75 }} />
               </div>
 
-              {/* Label */}
+              {}
               <div style={{ padding: "4px 7px 6px", fontSize: 11, fontWeight: 600, color: isSel ? theme.primaryColor : "#555", background: "#fff", textAlign: "center" }}>
                 {theme.name}
               </div>
@@ -237,10 +230,6 @@ function ThemePanel({
     </div>
   );
 }
-
-// ── LogicPanel ─────────────────────────────────────────────────────────────
-// ✅ FIX: rules and setRules are now received as props instead of local useState
-// → rules persist when switching tabs or closing the panel
 
 function LogicPanel({
   questions,
@@ -349,8 +338,6 @@ function LogicPanel({
   );
 }
 
-// ── RightPanel (main export) ───────────────────────────────────────────────
-
 export function RightPanel({
   onAddFromBank,
   accent,
@@ -360,7 +347,7 @@ export function RightPanel({
   questions = [],
   onToggle,
   asDrawer = false,
-  // ✅ FIX: lifted state from LogicPanel
+
   logicRules = [],
   onLogicRulesChange,
 }: RightPanelProps) {
@@ -369,7 +356,6 @@ export function RightPanel({
 
   const handleRulesChange = (rules: LogicRule[]) => onLogicRulesChange?.(rules);
 
-  // Drawer mode (mobile)
   if (asDrawer) {
     return (
       <div style={{ width: "100%", height: "100%", background: "#fff", display: "flex", flexDirection: "column" }}>
@@ -388,11 +374,10 @@ export function RightPanel({
     );
   }
 
-  // Desktop: icon strip + sliding panel
   return (
     <div style={{ display: "flex", height: "100%", flexShrink: 0 }}>
 
-      {/* Sliding panel */}
+      {}
       <div style={{ width: activeTab ? PANEL_WIDTH : 0, minWidth: 0, height: "100%", overflow: "hidden", transition: "width .22s cubic-bezier(.16,1,.3,1)", borderLeft: "1px solid #e8eaed", background: "#fff", display: "flex", flexDirection: "column" }}>
         <div style={{ height: 42, display: "flex", alignItems: "center", padding: "0 12px", borderBottom: "1px solid #f0f2f5", flexShrink: 0, background: "#fafafa", gap: 6, minWidth: PANEL_WIDTH }}>
           <span style={{ fontSize: 13, color: accent }}>{PANEL_TABS.find((t) => t.key === activeTab)?.icon}</span>
@@ -406,7 +391,7 @@ export function RightPanel({
         </div>
       </div>
 
-      {/* Icon strip */}
+      {}
       <div style={{ width: 44, height: "100%", borderLeft: "1px solid #e8eaed", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 12, gap: 3, flexShrink: 0 }}>
         {PANEL_TABS.map((t) => {
           const isActive = activeTab === t.key;

@@ -5,13 +5,19 @@ import type { Form } from "../../../feature/form/types";
 import { PDFCanvas } from "./builder/Form";
 import type { Survey, Question, Section, SurveyHeader, SurveyFooter } from "../../../feature/form/types";
 
+function getAccentFromThemeId(themeId?: string): string {
+  const t = THEMES.find((t) => t.id === themeId);
+  if (t) return t.accent;
+  if (themeId?.startsWith("#")) return themeId;
+  return THEMES[0].accent;
+}
+
 function getTheme(themeId?: string) {
   return THEMES.find((t) => t.id === themeId) ?? THEMES[0];
 }
 
-
 function mapFormToSurvey(form: Form): Survey {
-  // Dùng sections từ form nếu có, fallback tạo 1 section mặc định
+
   const sections: Section[] =
     (form as any).sections?.length > 0
       ? (form as any).sections
@@ -44,10 +50,12 @@ function mapFormToSurvey(form: Form): Survey {
     return {
       id: oldQ.id,
       type: newType,
+
       title: oldQ.title,
       placeholder: newType === "text" ? "Câu trả lời của bạn" : undefined,
       options: newOptions,
       required: oldQ.required,
+
       sectionId: oldQ.sectionId || defaultSectionId,
       order: order++,
     };
@@ -110,10 +118,10 @@ export function SurveyPreview({ form, compact = false, initialValues, onSubmit }
     );
   }
 
-  const th = getTheme(form.themeId);
+  const accent = getAccentFromThemeId(form.themeId);
   const survey = mapFormToSurvey(form);
   const descParagraphs = survey.description ? survey.description.split(/\n\s*\n/) : [];
-  // ✅ FIX: Pass logicRules xuống PDFCanvas để render đúng logic điều kiện
+
   const logicRules = (form as any).logicRules ?? [];
 
   return (
@@ -122,7 +130,7 @@ export function SurveyPreview({ form, compact = false, initialValues, onSubmit }
       descriptionParagraphs={descParagraphs}
       sections={survey.sections}
       questions={survey.questions}
-      accent={th.accent}
+      accent={accent}
       header={survey.defaultHeader}
       footer={survey.defaultFooter}
       interactive={!compact}
@@ -142,7 +150,8 @@ interface StandaloneProps {
 }
 
 export default function PreviewView({ form, onBack }: StandaloneProps) {
-  const th = form ? getTheme(form.themeId) : THEMES[0];
+  const th = form ? (getTheme(form.themeId) ?? THEMES[0]) : THEMES[0];
+  const thAccent = form ? getAccentFromThemeId(form.themeId) : THEMES[0].accent;
   return (
     <div style={{ minHeight: "100vh", background: th.bg ?? "#f5f5f5" }}>
       <div
@@ -166,7 +175,7 @@ export default function PreviewView({ form, onBack }: StandaloneProps) {
             Xem trước
           </span>
         </Space>
-        <div style={{ width: 10, height: 10, borderRadius: "50%", background: th.accent }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: thAccent }} />
       </div>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
         <SurveyPreview form={form} compact={false} />

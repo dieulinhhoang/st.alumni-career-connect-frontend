@@ -16,7 +16,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editorRef = useRef<any>(null);
 
-  // Cấu hình các plugin và thanh công cụ
   const plugins = [
     'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
     'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
@@ -30,7 +29,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <Editor
-      apiKey= "72ss4370jkl1knwe93ii22la90htxpmwaimieyvvdkfhw46y"
+      apiKey= {import.meta.env.VITE_TINYMCE_KEY || ""}
       onInit={(evt, editor) => editorRef.current = editor}
       value={value}
       onEditorChange={(newValue) => onChange(newValue)}
