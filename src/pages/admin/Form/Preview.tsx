@@ -277,14 +277,14 @@ function mapForm(form: Form) {
   return { sections, questions, header, footer, descParagraphs }
 }
 
-//  PreviewView 
+//  SurveyPreview 
 
-interface PreviewViewProps {
+interface SurveyPreviewProps {
   form: Form | null
   onBack?: () => void
 }
 
-export default function SurveyPreview({ form, onBack }: PreviewViewProps) {
+export  function SurveyPreview({ form, onBack }: SurveyPreviewProps) {
   // Inject DM Sans font if not already loaded
   useEffect(() => {
     const id = 'dm-sans-font'
