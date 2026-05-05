@@ -284,7 +284,7 @@ interface PreviewViewProps {
   onBack?: () => void
 }
 
-export default function PreviewView({ form, onBack }: PreviewViewProps) {
+export default function SurveyPreview({ form, onBack }: PreviewViewProps) {
   // Inject DM Sans font if not already loaded
   useEffect(() => {
     const id = 'dm-sans-font'
