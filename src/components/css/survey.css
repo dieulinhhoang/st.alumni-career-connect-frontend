@@ -8,7 +8,7 @@
   background: #fff;
 }
 
-/* ── HEADER ─────────────────────────────────── */
+/*  HEADER  */
 .theme-academic .fp-header {
   text-align: center;
   margin-bottom: 20px;
@@ -33,7 +33,7 @@
   margin: 0;
 }
 
-/* ── TIÊU ĐỀ ────────────────────────────────── */
+/*  TIÊU ĐỀ  */
 .theme-academic .fp-title-block {
   text-align: center;
   padding: 20px 0 16px;
@@ -61,7 +61,7 @@
   margin: 16px 0 24px;
 }
 
-/* ── SECTIONS ───────────────────────────────── */
+/*  SECTIONS  */
 .theme-academic .fp-sections {
   display: flex;
   flex-direction: column;
@@ -79,7 +79,7 @@
   font-family: "Times New Roman", serif;
 }
 
-/* ── QUESTIONS ──────────────────────────────── */
+/*  QUESTIONS  */
 .theme-academic .fp-form {
   padding: 0 4px;
 }
@@ -106,7 +106,7 @@
   padding: 8px 0;
 }
 
-/* ── INPUTS ─────────────────────────────────── */
+/*  INPUTS  */
 .theme-academic .fp-input.ant-input[disabled] {
   background: #fafafa !important;
   border-color: #d9d9d9 !important;
@@ -129,7 +129,7 @@
   border-radius: 2px !important;
 }
 
-/* ── FOOTER ─────────────────────────────────── */
+/*  FOOTER  */
 .theme-academic .fp-footer {
   margin-top: 32px;
   padding-top: 16px;
@@ -143,14 +143,14 @@
 }
 .theme-academic .fp-footer p { margin: 0; }
 
-/* ── RESPONSIVE ─────────────────────────────── */
+/*  RESPONSIVE  */
 @media (max-width: 768px) {
   .theme-academic .fp-title { font-size: 14px; }
   .theme-academic .fp-section-title { font-size: 12px; }
   .theme-academic .fp-question-label { font-size: 12px; }
 }
 
-/* ── FIX LOGO TO HƠN ─────────────────────────── */
+/*  FIX LOGO TO HƠN  */
 .theme-academic .fp-logo {
     width: 80px !important;
     height: 80px !important;

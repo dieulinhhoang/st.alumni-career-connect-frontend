@@ -12,8 +12,8 @@ import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types'
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { KHOA_OPTIONS, NGANH_OPTIONS } from '../../../feature/alumni/constants';
 import { SurveyPreview } from '../Form/Preview';
-import { PDFCanvas } from '../Form/builder/Form';
-import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
+ import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
+import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
 
 const { Text, Title } = Typography;
 

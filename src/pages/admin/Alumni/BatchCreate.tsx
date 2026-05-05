@@ -77,7 +77,7 @@ export const BatchCreate: React.FC = () => {
           maxWidth: hasSelectedForm ? '100%' : 680,
         }}>
 
-          {/* ── Form card ────────────────────────────────────────────────── */}
+          {/*  Form card  */}
           <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 24 }}>
             <div style={{ fontWeight: 600, fontSize: 14, color: '#1D9E75', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
               <FormOutlined /> Thông tin đợt khảo sát
@@ -140,7 +140,7 @@ export const BatchCreate: React.FC = () => {
             </Form>
           </div>
 
-          {/* ── Preview pane ─────────────────────────────────────────────── */}
+          {/*  Preview pane  */}
           <div style={{ position: 'sticky', top: 24 }}>
             {selectedForm ? (
               <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>

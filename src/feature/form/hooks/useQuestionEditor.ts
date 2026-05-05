@@ -82,16 +82,18 @@ export function useQuestionEditor(initial: Question[]) {
     });
   };
 
-  const moveQuestion = (fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
-    setQs((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-      return next;
-    });
-  };
-
+  const moveQuestion = (id: string, direction: 'up' | 'down') => {
+  setQs((prev) => {
+    const idx = prev.findIndex((q) => q.id === id)
+    if (idx === -1) return prev
+    const toIndex = direction === 'up' ? idx - 1 : idx + 1
+    if (toIndex < 0 || toIndex >= prev.length) return prev
+    const next = [...prev]
+    const [moved] = next.splice(idx, 1)
+    next.splice(toIndex, 0, moved)
+    return next
+  })
+}
   // Option helpers
   const addOption = (qid: string) => {
     setQs((prev) =>

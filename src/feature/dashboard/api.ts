@@ -1,6 +1,6 @@
 import type { DotEntry, KhoaItem, EnterpriseItem, ChartMode, ChartModeConfig } from "./type";
 
-// ─── Khoa list ──────────────────────────────────────────────────────────────
+//  Khoa list 
 
 export const KHOA_LIST: KhoaItem[] = [
   { ten: "Khoa CNTT",            viet_tat: "CNTT", mau: "#6366f1", ngayNop: "15/03/2024", daNop: true,  soSV: 298, tongSV: 320 },
@@ -13,7 +13,7 @@ export const KHOA_LIST: KhoaItem[] = [
   { ten: "Khoa Quản lý đất đai", viet_tat: "QĐ",   mau: "#f59e0b", ngayNop: null,         daNop: false, soSV: 0,   tongSV: 180 },
 ];
 
-// ─── Enterprise list ────────────────────────────────────────────────────────
+//  Enterprise list 
 
 export const ENTERPRISE_LIST: EnterpriseItem[] = [
   { name: "FPT Software",  viet_tat: "FPT",  mau: "#6366f1", industry: "Công nghệ thông tin",    jobs: 42, verified: true  },
@@ -24,7 +24,7 @@ export const ENTERPRISE_LIST: EnterpriseItem[] = [
   { name: "KPMG Vietnam",  viet_tat: "KPMG", mau: "#f97316", industry: "Kiểm toán & Tư vấn",     jobs: 11, verified: false },
 ];
 
-// ─── Chart modes ────────────────────────────────────────────────────────────
+//  Chart modes 
 
 export const CHART_MODES: { value: ChartMode; label: string }[] = [
   { value: "coViec",    label: "Tỉ lệ có việc làm / chưa có việc" },
@@ -64,7 +64,7 @@ export const MODE_CONFIG: Record<ChartMode, ChartModeConfig> = {
   },
 };
 
-// ─── Filter options ─────────────────────────────────────────────────────────
+//  Filter options 
 
 export const KHOA_OPTIONS = [
   { value: "all",  label: "Tất cả khoa"     },
@@ -82,7 +82,7 @@ export const NGANH_BY_KHOA: Record<string, { value: string; label: string }[]> =
   MT:   [{ value: "all", label: "Tất cả ngành" }, { value: "KHMT", label: "Khoa học môi trường" }, { value: "QLTN", label: "Quản lý tài nguyên"  }],
 };
 
-// ─── Survey dot data ─────────────────────────────────────────────────────────
+//  Survey dot data 
 
 const DETAIL_DATA: Record<string, Record<string, DotEntry>> = {
   "all|all|all": {
