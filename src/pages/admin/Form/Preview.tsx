@@ -476,3 +476,4 @@ export  function SurveyPreview({ form, onBack }: SurveyPreviewProps) {
     </div>
   )
 }
+export default SurveyPreview;
