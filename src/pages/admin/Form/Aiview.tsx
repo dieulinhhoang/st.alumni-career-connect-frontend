@@ -68,7 +68,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
 
   return (
     <div className="page">
-      {/* TOP BAR */}
+      {}
       <div className="topbar">
         <Space size={12}>
           <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
@@ -90,11 +90,11 @@ export function AIView({ onSave, onBack }: AIViewProps) {
         )}
       </div>
 
-      {/* SPLIT */}
+      {}
       <div className="ai-split">
-        {/* LEFT */}
+        {}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Prompt */}
+          {}
           <div className="card" style={{ padding: "18px 20px" }}>
             <div className="field-label" style={{ marginBottom: 8 }}>
               Mô tả yêu cầu form
@@ -118,7 +118,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
             </div>
           </div>
 
-          {/* File upload */}
+          {}
           <div className="card" style={{ padding: "18px 20px" }}>
             <div className="field-label" style={{ marginBottom: 8 }}>
               Tài liệu đính kèm
@@ -193,7 +193,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
             />
           </div>
 
-          {/* Actions */}
+          {}
           <div
             style={{
               display: "flex",
@@ -219,7 +219,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
           )}
         </div>
 
-        {/* RIGHT */}
+        {}
         <div className="ai-panel-right">
           {status === "idle" && (
             <div
@@ -287,7 +287,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
 
           {status === "success" && result && (
             <div className="ai-result-preview">
-              {/* Header */}
+              {}
               <div className="ai-result-header">
                 <div
                   style={{
@@ -355,7 +355,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
                 </div>
               </div>
 
-              {/* Questions */}
+              {}
               <div style={{ maxHeight: "calc(100vh - 360px)", overflowY: "auto" }}>
                 {result.questions.map((q, i) => {
                   const qt = Q_TYPES.find((t) => t.value === q.type);
@@ -413,7 +413,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
                 })}
               </div>
 
-              {/* Footer */}
+              {}
               <div
                 style={{
                   padding: "10px 14px",

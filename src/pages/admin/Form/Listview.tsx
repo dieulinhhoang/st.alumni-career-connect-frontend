@@ -11,7 +11,6 @@ import {
   ThunderboltOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
-  QuestionOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
 import type { Form } from "../../../feature/form/types";
@@ -63,14 +62,18 @@ export default function ListView({
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  const filtered = forms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = forms.filter((f) =>
+    f.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const columns: ColumnsType<Form> = [
     {
       title: "STT",
       key: "index",
       width: 50,
-      render: (_, __, index) => <span style={{ color: "#9ca3af" }}>{index + 1}</span>,
+      render: (_, __, index) => (
+        <span style={{ color: "#9ca3af" }}>{index + 1}</span>
+      ),
     },
     {
       title: "Tên form",
@@ -93,8 +96,10 @@ export default function ListView({
             <FileOutlined />
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: "#111827", marginBottom: 4 }}>{text}</div>
-            <div style={{ fontSize: 11.5, color: "#9ca3af" }}>
+            <div style={{ fontWeight: 700, color: "#111827", marginBottom: 4 }}>
+              {text}
+            </div>
+            <div style={{ fontSize: 12, color: "#6b7280" }}>
               {record.description || "Chưa có mô tả"}
             </div>
           </div>
@@ -105,16 +110,14 @@ export default function ListView({
       title: "Số câu hỏi",
       dataIndex: "questions",
       key: "questions",
-      width: 100,
-      render: (questions) => (
-        <Tag>{questions.length} câu</Tag>
-      ),
+      width: 110,
+      render: (questions) => <Tag>{questions.length} câu</Tag>,
     },
     {
       title: "Ngày tạo",
       dataIndex: "created_at",
       key: "created_at",
-      width: 120,
+      width: 130,
       render: (date) => (
         <Space size={4}>
           <CalendarOutlined />
@@ -122,27 +125,6 @@ export default function ListView({
         </Space>
       ),
     },
-    // {
-    //   title: "Theme",
-    //   dataIndex: "themeId",
-    //   key: "themeId",
-    //   width: 100,
-    //   render: (themeId) => (
-    //     <Space size={4}>
-    //       <div
-    //         style={{
-    //           width: 10,
-    //           height: 10,
-    //           borderRadius: "50%",
-    //           background: getAccent(themeId),
-    //         }}
-    //       />
-    //       <span style={{ fontSize: 11, color: "#6b7280", textTransform: "capitalize" }}>
-    //         {themeId}
-    //       </span>
-    //     </Space>
-    //   ),
-    // },
     {
       title: "Thao tác",
       key: "actions",
@@ -150,20 +132,32 @@ export default function ListView({
       render: (_, record) => (
         <Space>
           <Tooltip title="Xem trước">
-            <Button type="text" icon={<EyeOutlined />} onClick={() => onPreview(record)} />
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={(e) => { e.stopPropagation(); onPreview(record); }}
+            />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
-            <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={(e) => { e.stopPropagation(); onEdit(record); }}
+            />
           </Tooltip>
           <Tooltip title="Nhân bản">
-            <Button type="text" icon={<CopyOutlined />} onClick={() => onDup(record)} />
+            <Button
+              type="text"
+              icon={<CopyOutlined />}
+              onClick={(e) => { e.stopPropagation(); onDup(record); }}
+            />
           </Tooltip>
           <Tooltip title="Xóa">
             <Button
               type="text"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => onDelete(record.id as number)}
+              onClick={(e) => { e.stopPropagation(); onDelete(record.id as number); }}
             />
           </Tooltip>
         </Space>
@@ -173,7 +167,7 @@ export default function ListView({
 
   return (
     <div className="page">
-      {/* TOP BAR */}
+      {}
       <div className="topbar">
         <div>
           <div className="eyebrow" style={{ marginBottom: 4 }}>
@@ -182,7 +176,11 @@ export default function ListView({
           <div className="page-title">Form khảo sát</div>
         </div>
         <Space>
-          <Button icon={<ThunderboltOutlined />} onClick={onAI} className="btn-gold">
+          <Button
+            icon={<ThunderboltOutlined />}
+            onClick={onAI}
+            className="btn-gold"
+          >
             Tạo bằng AI
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
@@ -191,8 +189,11 @@ export default function ListView({
         </Space>
       </div>
 
-      {/* TOOLBAR */}
-      <div className="toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {}
+      <div
+        className="toolbar"
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
         <Input
           placeholder="Tìm kiếm form..."
           prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
@@ -200,13 +201,13 @@ export default function ListView({
           onChange={(e) => setSearch(e.target.value)}
           style={{ maxWidth: 380 }}
         />
-
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Tooltip title="Chế độ lưới">
             <Button
               type={viewMode === "grid" ? "primary" : "default"}
               icon={<AppstoreOutlined />}
               onClick={() => setViewMode("grid")}
+              aria-pressed={viewMode === "grid"}
             />
           </Tooltip>
           <Tooltip title="Chế độ danh sách">
@@ -214,18 +215,19 @@ export default function ListView({
               type={viewMode === "table" ? "primary" : "default"}
               icon={<UnorderedListOutlined />}
               onClick={() => setViewMode("table")}
+              aria-pressed={viewMode === "table"}
             />
           </Tooltip>
           <Tag color="blue">{filtered.length} form</Tag>
         </div>
       </div>
 
-      {/* CONTENT - Grid or Table */}
+      {}
       {viewMode === "grid" ? (
         <Row gutter={[14, 14]}>
-          {/* AI Card - Giữ nguyên như cũ */}
+          {}
           <Col xs={24} sm={12} md={8}>
-            <div className="ai-card" onClick={onAI}>
+            <div className="ai-card" onClick={onAI} role="button" aria-label="Tạo form bằng AI">
               <div className="ai-title">
                 Tạo form thông minh
                 <br />
@@ -238,9 +240,9 @@ export default function ListView({
             </div>
           </Col>
 
-          {/* New Form Card - Giữ nguyên như cũ */}
+          {}
           <Col xs={24} sm={12} md={8}>
-            <div className="new-card" onClick={onCreate}>
+            <div className="new-card" onClick={onCreate} role="button" aria-label="Tạo form mới">
               <div className="new-ring">
                 <PlusOutlined />
               </div>
@@ -248,22 +250,23 @@ export default function ListView({
             </div>
           </Col>
 
-          {/* Form Cards - Chỉ sửa phần icon action */}
+          {}
           {filtered.map((form) => {
             const accent = getAccent(form.themeId as string);
             return (
               <Col xs={24} sm={12} md={8} key={form.id}>
-                <div className="form-card" onClick={() => onPreview(form)}>
-                  <div className="form-card-accent" style={{ background: accent }} />
+                <div
+                  className="form-card"
+                  onClick={() => onPreview(form)}
+                  role="button"
+                  aria-label={`Xem trước form ${form.name}`}
+                >
+                  <div
+                    className="form-card-accent"
+                    style={{ background: accent }}
+                  />
                   <div className="form-card-body">
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 10,
-                        marginBottom: 12,
-                      }}
-                    >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
                       <div
                         className="form-icon"
                         style={{ background: accent + "1a", color: accent }}
@@ -272,129 +275,57 @@ export default function ListView({
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="form-name">{form.name}</div>
-                        <div className="form-desc">{form.description || "Chưa có mô tả"}</div>
+                        <div className="form-desc">
+                          {form.description || "Chưa có mô tả"}
+                        </div>
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                      <Tag >{form.questions.length} câu hỏi</Tag>
+                      <Tag>{form.questions.length} câu hỏi</Tag>
                       <Tag icon={<CalendarOutlined />}>{fmt(form.created_at)}</Tag>
                     </div>
                   </div>
 
-                   <div className="form-card-actions" onClick={(e) => e.stopPropagation()} style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "flex-end",
-                    gap: "4px",
-                    padding: "12px 16px",
-                    borderTop: "1px solid #f0f0f0",
-                    background: "#fafafa"
-                  }}>
+                  {}
+                  <div
+                    className="form-card-actions"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Tooltip title="Xem trước">
-                      <button 
-                        className="fa-btn" 
+                      <button
+                        className="fa-btn"
                         onClick={() => onPreview(form)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "6px 8px",
-                          borderRadius: "6px",
-                          color: "#6b7280",
-                          fontSize: "16px",
-                          display: "inline-flex",
-                          alignItems: "center"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#e5e7eb";
-                          e.currentTarget.style.color = "#374151";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#6b7280";
-                        }}
+                        aria-label="Xem trước"
                       >
                         <EyeOutlined />
                       </button>
                     </Tooltip>
-                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <span className="fa-sep" />
                     <Tooltip title="Chỉnh sửa">
-                      <button 
-                        className="fa-btn" 
+                      <button
+                        className="fa-btn"
                         onClick={() => onEdit(form)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "6px 8px",
-                          borderRadius: "6px",
-                          color: "#6b7280",
-                          fontSize: "16px",
-                          display: "inline-flex",
-                          alignItems: "center"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#e5e7eb";
-                          e.currentTarget.style.color = "#374151";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#6b7280";
-                        }}
+                        aria-label="Chỉnh sửa"
                       >
                         <EditOutlined />
                       </button>
                     </Tooltip>
-                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <span className="fa-sep" />
                     <Tooltip title="Nhân bản">
-                      <button 
-                        className="fa-btn" 
+                      <button
+                        className="fa-btn"
                         onClick={() => onDup(form)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "6px 8px",
-                          borderRadius: "6px",
-                          color: "#6b7280",
-                          fontSize: "16px",
-                          display: "inline-flex",
-                          alignItems: "center"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#e5e7eb";
-                          e.currentTarget.style.color = "#374151";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#6b7280";
-                        }}
+                        aria-label="Nhân bản"
                       >
                         <CopyOutlined />
                       </button>
                     </Tooltip>
-                    <span className="fa-sep" style={{ width: "1px", height: "20px", background: "#e5e7eb" }} />
+                    <span className="fa-sep" />
                     <Tooltip title="Xóa">
-                      <button 
-                        className="fa-btn danger" 
+                      <button
+                        className="fa-btn danger"
                         onClick={() => onDelete(form.id as number)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "6px 8px",
-                          borderRadius: "6px",
-                          color: "#dc2626",
-                          fontSize: "16px",
-                          display: "inline-flex",
-                          alignItems: "center"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#fee2e2";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "transparent";
-                        }}
+                        aria-label="Xóa"
                       >
                         <DeleteOutlined />
                       </button>

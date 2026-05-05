@@ -1,4 +1,3 @@
-// Deletemodal.tsx
 import { Modal, Button } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import type { Form } from "../../../feature/form/types";
