@@ -1,4 +1,4 @@
-// ─── Employment / Stats ───────────────────────────────────────────────────────
+//  Employment / Stats 
 
 export type EmploymentStatus =
   | "employed_relevant"
@@ -25,7 +25,7 @@ export interface SurveyStats {
   statusDistribution: Record<EmploymentStatus, number>;
 }
 
-// ─── Enterprise / Partner ────────────────────────────────────────────────────
+//  Enterprise / Partner 
 
 export interface Enterprise {
   id: string;
@@ -49,7 +49,7 @@ export interface JobPosting {
   deadline?: string;
 }
 
-// ─── Alumni / User ───────────────────────────────────────────────────────────
+//  Alumni / User 
 
 export interface AlumniProfile {
   id: string;
@@ -63,7 +63,7 @@ export interface AlumniProfile {
   linkedin?: string;
 }
 
-// ─── API Generics ─────────────────────────────────────────────────────────────
+//  API Generics 
 
 export interface ApiResponse<T> {
   data: T;

@@ -26,7 +26,7 @@ export function useFaculties() {
 }
 
 
-// ─────────────────────────────────────────────────────────────────
+// 
 // src/features/faculty/hooks/useFacultyDetail.ts
 
 import { fetchFacultyBySlug, fetchMajorsByFacultySlug } from "../api";
@@ -69,7 +69,7 @@ export function useFacultyDetail(slug: string) {
 }
 
 
-// ─────────────────────────────────────────────────────────────────
+// 
 // src/features/faculty/hooks/useMajorDetail.ts
 
 import { fetchMajorBySlug, fetchClassesByMajorSlug } from "../api";

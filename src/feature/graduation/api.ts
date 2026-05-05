@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 const USE_MOCK = true; // Tắt cái này khi API sẵn sàng
 
-// ─── Mock Graduations ─────────────────────────────────────────────────────────
+//  Mock Graduations 
 const MOCK_GRADUATIONS: Graduation[] = [
   {
     id: 1,
@@ -63,7 +63,7 @@ const MOCK_GRADUATIONS: Graduation[] = [
   },
 ];
 
-// ─── Mock Students ────────────────────────────────────────────────────────────
+//  Mock Students 
 const MOCK_STUDENTS: GraduationStudent[] = [
   {
     id: 1,

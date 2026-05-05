@@ -1,185 +1,124 @@
-import { Button, Space } from "antd";
-import { ArrowLeftOutlined, FileOutlined } from "@ant-design/icons";
-import { THEMES } from "../../../feature/form/constants";
-import type { Form } from "../../../feature/form/types";
-import { PDFCanvas } from "./builder/Form";
-import type { Survey, Question, Section, SurveyHeader, SurveyFooter } from "../../../feature/form/types";
+import { Button, Space } from 'antd'
+import { ArrowLeftOutlined, FileOutlined } from '@ant-design/icons'
+import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../../../feature/form/types'
+ import { PDFCanvas } from './builder/form/PDFCanvas'
+import { THEMES } from '../../../feature/form/constants'
 
-function getAccentFromThemeId(themeId?: string): string {
-  const t = THEMES.find((t) => t.id === themeId);
-  if (t) return t.accent;
-  if (themeId?.startsWith("#")) return themeId;
-  return THEMES[0].accent;
+ function getAccent(themeId?: string): string {
+  const t = THEMES.find((t) => t.id === themeId)
+  if (t) return t.accent
+  if (themeId?.startsWith('#')) return themeId
+  return THEMES[0].accent
 }
 
-function getTheme(themeId?: string) {
-  return THEMES.find((t) => t.id === themeId) ?? THEMES[0];
-}
-
-function mapFormToSurvey(form: Form): Survey {
-
+function mapFormToCanvas(form: Form) {
   const sections: Section[] =
     (form as any).sections?.length > 0
       ? (form as any).sections
-      : [{ id: "default_section", title: "Nội dung khảo sát", order: 0 }];
+      : [{ id: 'default-section', title: 'Nội dung khảo sát', order: 0 }]
+  const defaultSectionId = sections[0].id
 
-  const defaultSectionId = sections[0].id;
-  let order = 0;
-
-  const questions: Question[] = form.questions.map((oldQ) => {
-    let newType: Question["type"] = "text";
-    switch (oldQ.type) {
-      case "short":   newType = "text";           break;
-      case "long":    newType = "text";           break;
-      case "radio":   newType = "multiple-choice"; break;
-      case "checkbox": newType = "checkbox";      break;
-      case "dropdown": newType = "select";        break;
-      case "select":  newType = "select";         break;
-      case "date":    newType = "date";           break;
-      case "address": newType = "address";        break;
-      case "email":   newType = "text";           break;
-      case "tel":     newType = "text";           break;
-      // case "rating":  newType = "rating" as any;  break;
-      default:        newType = "text";
+  let order = 0
+  const questions: Question[] = form.questions.map((q: any) => {
+    const typeMap: Record<string, Question['type']> = {
+      short: 'short', long: 'long', radio: 'radio', checkbox: 'checkbox',
+      dropdown: 'select', select: 'select', date: 'date', address: 'address',
+      email: 'email', tel: 'tel',
     }
-
-    const newOptions = oldQ.options
-      ? oldQ.options.map((opt: any) => (typeof opt === "string" ? opt : opt.label))
-      : undefined;
-
     return {
-      id: oldQ.id,
-      type: newType,
+      id: q.id, type: typeMap[q.type] ?? 'short', title: q.title,
+      placeholder: q.type === 'short' ? 'Câu trả lời của bạn' : undefined,
+      options: q.options?.map((o: any) => (typeof o === 'string' ? o : o.label)),
+      required: q.required, sectionId: q.sectionId ?? defaultSectionId, order: order++,
+    }
+  })
 
-      title: oldQ.title,
-      placeholder: newType === "text" ? "Câu trả lời của bạn" : undefined,
-      options: newOptions,
-      required: oldQ.required,
-
-      sectionId: oldQ.sectionId || defaultSectionId,
-      order: order++,
-    };
-  });
-
-  const defaultHeader: SurveyHeader = {
-    logoUrl:
-      (form as any).logoUrl ||
-      "https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png",
-    ministry: (form as any).header?.ministry ?? "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG",
-    academy:  (form as any).header?.academy  ?? "HỌC VIỆN NÔNG NGHIỆP VIỆT NAM",
-    address:  (form as any).header?.address  ?? "Xã Gia Lâm, Thành phố Hà Nội",
-    phone:    (form as any).header?.phone    ?? "024.62617586",
-    fax:      (form as any).header?.fax      ?? "024.62617586",
-    showDate: true,
-  };
-
-  const defaultFooter: SurveyFooter = {
-    primaryText:   (form as any).footer?.primaryText   ?? "Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!",
-    secondaryText: (form as any).footer?.secondaryText ?? "Kính chúc Anh/Chị sức khỏe và thành công!",
-  };
-
-  return {
-    id: form.id?.toString() || "",
-    title: form.name,
-    description: form.description,
-    sections,
-    questions,
-    defaultHeader,
-    defaultFooter,
-  };
-}
-
-interface PreviewProps {
-  form: Form | null;
-  compact?: boolean;
-  onBack?: () => void;
-  initialValues?: Record<string, any>;
-  onSubmit?: (answers: Record<string, any>) => void;
-}
-
-export function SurveyPreview({ form, compact = false, initialValues, onSubmit }: PreviewProps) {
-  if (!form) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          padding: 32,
-          color: "#9ca3af",
-          gap: 12,
-        }}
-      >
-        <FileOutlined style={{ fontSize: 40 }} />
-        <span style={{ fontSize: 13, fontWeight: 500 }}>Chưa có nội dung để xem trước</span>
-      </div>
-    );
+  const header: SurveyHeader = {
+    logoUrl:   (form as any).logoUrl ?? 'https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png',
+    ministry:  (form as any).header?.ministry  ?? 'BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG',
+    academy:   (form as any).header?.academy   ?? 'HỌC VIỆN NÔNG NGHIỆP VIỆT NAM',
+    address:   (form as any).header?.address   ?? 'Xã Gia Lâm, Thành phố Hà Nội',
+    phone:     (form as any).header?.phone     ?? '024.62617586',
+    showDate:  true,
   }
 
-  const accent = getAccentFromThemeId(form.themeId);
-  const survey = mapFormToSurvey(form);
-  const descParagraphs = survey.description ? survey.description.split(/\n\s*\n/) : [];
+  const footer: SurveyFooter = {
+    primaryText:   (form as any).footer?.primaryText   ?? 'Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!',
+    secondaryText: (form as any).footer?.secondaryText ?? 'Kính chúc Anh/Chị sức khỏe và thành công!',
+  }
 
-  const logicRules = (form as any).logicRules ?? [];
+  return { sections, questions, header, footer, accent: getAccent(form.themeId) }
+}
+
+//  SurveyPreview (embeddable) 
+interface SurveyPreviewProps {
+  form: Form | null
+  compact?: boolean
+  initialValues?: Record<string, any>
+  onSubmit?: (answers: Record<string, any>) => void
+}
+
+export function SurveyPreview({ form, compact = false, initialValues, onSubmit }: SurveyPreviewProps) {
+  if (!form) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: 32, color: '#9ca3af', gap: 12 }}>
+      <FileOutlined style={{ fontSize: 40 }} />
+      <span style={{ fontSize: 13, fontWeight: 500 }}>Chưa có nội dung xem trước</span>
+    </div>
+  )
+
+  const { sections, questions, header, footer, accent } = mapFormToCanvas(form)
+  const descParagraphs = form.description ? form.description.split('\n').filter(Boolean) : []
+  const logicRules = (form as any).logicRules ?? []
 
   return (
     <PDFCanvas
-      surveyTitle={survey.title}
+      surveyTitle={form.name}
       descriptionParagraphs={descParagraphs}
-      sections={survey.sections}
-      questions={survey.questions}
+      sections={sections}
+      questions={questions}
       accent={accent}
-      header={survey.defaultHeader}
-      footer={survey.defaultFooter}
+      header={header}
+      footer={footer}
       interactive={!compact}
       headerOnly={false}
-      logoUrl={survey.defaultHeader.logoUrl}
-      logoSize={compact ? 36 : 120}
+      logoUrl={header.logoUrl}
+      logoSize={compact ? 36 : ((form as any).logoSize ?? 120)}
       initialValues={initialValues}
       onSubmit={onSubmit}
       logicRules={logicRules}
     />
-  );
+  )
 }
 
-interface StandaloneProps {
-  form: Form | null;
-  onBack: () => void;
+//  PreviewView (standalone page) 
+interface PreviewViewProps {
+  form: Form | null
+  onBack: () => void
 }
 
-export default function PreviewView({ form, onBack }: StandaloneProps) {
-  const th = form ? (getTheme(form.themeId) ?? THEMES[0]) : THEMES[0];
-  const thAccent = form ? getAccentFromThemeId(form.themeId) : THEMES[0].accent;
+export default function PreviewView({ form, onBack }: PreviewViewProps) {
+  const accent = form ? getAccent(form.themeId) : THEMES[0].accent
+  const theme   = THEMES.find((t) => t.id === form?.themeId) ?? THEMES[0]
+
   return (
-    <div style={{ minHeight: "100vh", background: th.bg ?? "#f5f5f5" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: "#fff",
-          padding: "0 20px",
-          borderBottom: "1px solid #e5e7eb",
-          height: 48,
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
+    <div style={{ minHeight: '100vh', background: theme.bg ?? '#f5f5f5' }}>
+      {/* Sticky top bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', padding: '0 20px', borderBottom: '1px solid #e5e7eb', height: 48, position: 'sticky', top: 0, zIndex: 10 }}>
         <Space size={12}>
           <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} aria-label="Quay lại" />
-          <div style={{ width: 1, height: 18, background: "#e5e7eb" }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase" }}>
-            Xem trước
-          </span>
+          <div style={{ width: 1, height: 18, background: '#e5e7eb' }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' as const }}>Xem trước</span>
         </Space>
-        <div style={{ width: 10, height: 10, borderRadius: "50%", background: thAccent }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: accent }} />
+          <span style={{ fontSize: 12, color: '#6b7280', fontFamily: 'monospace' }}>{accent}</span>
+        </div>
       </div>
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+
+      {/* Preview content */}
+      <div style={{ maxWidth: 800, margin: '0 auto', paddingBottom: 40 }}>
         <SurveyPreview form={form} compact={false} />
       </div>
     </div>
-  );
+  )
 }

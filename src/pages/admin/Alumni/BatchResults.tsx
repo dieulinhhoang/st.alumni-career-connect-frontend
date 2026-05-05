@@ -25,7 +25,7 @@ import { KHOA_OPTIONS, NGANH_OPTIONS, getLopOptions } from '../../../feature/alu
 
 const { Text, Title } = Typography;
 
-/* ─ Excel / CSV export ─ */
+/*  Excel / CSV export  */
 const buildLabelMaps = () => {
   const khoaMap = Object.fromEntries(KHOA_OPTIONS.map(k => [k.value, k.label]));
   const nganhMap: Record<string, string> = {};
@@ -90,7 +90,7 @@ const exportAllPDF = async (rows: AlumniResponse[], batch: SurveyBatch) => {
   }
 };
 
-/* ─ Export PDF cho từng sinh viên ─ */
+/*  Export PDF cho từng sinh viên  */
 const exportSinglePDF = async (r: AlumniResponse, batch: SurveyBatch) => {
   try {
     const { default: jsPDF }     = await import('jspdf');
@@ -161,7 +161,7 @@ const exportSinglePDF = async (r: AlumniResponse, batch: SurveyBatch) => {
   }
 };
 
-/* ─ Popover "Cách tính chỉ số" ─ */
+/*  Popover "Cách tính chỉ số"  */
 const ChiSoPopover = () => (
   <div style={{ width: 280 }}>
     <div style={{ fontWeight: 600, color: '#1D9E75', marginBottom: 12, fontSize: 13 }}>Cách tính chỉ số</div>
@@ -191,7 +191,7 @@ const ChiSoPopover = () => (
   </div>
 );
 
-/* ─ Main ─ */
+/*  Main  */
 export const BatchResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

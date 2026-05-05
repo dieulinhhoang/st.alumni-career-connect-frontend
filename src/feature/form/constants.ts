@@ -2,7 +2,7 @@ import type { Theme, Form } from "./types";
 import type { QuestionTypeOption, FontOption, RadiusOption } from "./types";
 
 //  QUESTION TYPES 
-export const Q_TYPES: QuestionTypeOption[] = [
+export const QTYPES: QuestionTypeOption[] = [
   { value: "short",    label: "Văn bản ngắn",   icon: "" },
   { value: "long",     label: "Văn bản dài",     icon: "" },
   { value: "radio",    label: "Một lựa chọn",   icon: "" },

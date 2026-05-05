@@ -1,6 +1,6 @@
 import type { Faculty, Major, ClassItem } from "./types";
 
-// ── Mock data ────────────────────────────────────────────────────
+//  Mock data 
 const FACULTIES: Faculty[] = [
   { id: "1", slug: "cong-nghe-thong-tin",  name: "Công nghệ thông tin",  abbr: "CNTT", color: "#7c3aed", majors: 5, classes: 24, students: 1200 },
   { id: "2", slug: "kinh-te",              name: "Kinh tế",              abbr: "KT",   color: "#0ea5e9", majors: 4, classes: 18, students: 980  },
@@ -34,7 +34,7 @@ const CLASSES: ClassItem[] = [
 // Simulate network latency
 const delay = (ms = 300) => new Promise(res => setTimeout(res, ms));
 
-// ── API functions ────────────────────────────────────────────────
+//  API functions 
 export async function fetchFaculties(): Promise<Faculty[]> {
   await delay();
   return FACULTIES;

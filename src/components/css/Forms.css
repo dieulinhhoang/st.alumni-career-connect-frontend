@@ -5,7 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 
-/*   CSS Variables ─ */
+/*   CSS Variables  */
 :root {
   --bg-canvas:        #ffffff;
   --bg-surface:       #ffffff;
@@ -160,7 +160,7 @@ body {
   border-left: 3px solid var(--primary);
 }
 
-/*   Ant Design Input Override                ─ */
+/*   Ant Design Input Override                 */
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-input-textarea textarea {
@@ -232,7 +232,7 @@ body {
   transform: scale(0.97) !important;
 }
 
-/*   Save Button  ─ */
+/*   Save Button   */
 .ant-btn-primary[size="large"] {
   font-family: var(--font-ui) !important;
   font-weight: 700 !important;
@@ -256,7 +256,7 @@ body {
   transform: scale(0.98) !important;
 }
 
-/*   Upload Button ─ */
+/*   Upload Button  */
 .ant-upload .ant-btn {
   font-family: var(--font-ui) !important;
   font-size: 12.5px !important;
@@ -293,7 +293,7 @@ body {
 
 
 
-/*   Theme Sidebar ─ */
+/*   Theme Sidebar  */
 .theme-sidebar .sidebar-block {
   position: sticky;
   top: 24px;
@@ -347,7 +347,7 @@ body {
   text-overflow: ellipsis;
 }
 
-/*   Section Panel (target TSX gốc)             ─ */
+/*   Section Panel (target TSX gốc)              */
 
 /* Root card */
 .border.border-gray-200.rounded-xl {
