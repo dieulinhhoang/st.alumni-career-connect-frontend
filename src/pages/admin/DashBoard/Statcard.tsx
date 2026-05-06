@@ -1,60 +1,55 @@
-import { ArrowUpOutlined } from "@ant-design/icons";
+import type { ReactNode } from "react";
 
 interface Props {
   index: number;
   label: string;
   value: string;
   sub: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   accentColor: string;
   trend?: string;
 }
 
-export function StatCard({ label, value, sub, icon, accentColor, trend }: Props) {
+export function StatCard({ label, value, sub, accentColor, trend }: Props) {
+  const isNegative = trend?.startsWith("-");
+  const trendColor = isNegative ? "#dc2626" : "#059669";
+  const trendArrow = isNegative ? "↓" : "↑";
+
   return (
     <div
       style={{
-        background: `linear-gradient(145deg, ${accentColor}12 0%, ${accentColor}06 100%)`,
-        borderRadius: 16,
-        padding: "14px 18px 12px",
+        background: "#fff",
+        borderRadius: 12,
+        padding: "16px 18px",
         height: "100%",
-        boxShadow: `0 2px 12px ${accentColor}18`,
-        border: `1px solid ${accentColor}25`,
-        position: "relative",
-        overflow: "hidden",
+        border: "1px solid #e2e8f0",
+        borderLeft: `4px solid ${accentColor}`,
+        transition: "box-shadow 0.2s",
       }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
     >
-      {/* Decorative circles */}
-      <div style={{ position: "absolute", top: -15, right: -15, width: 70, height: 70, borderRadius: "50%", background: `${accentColor}12` }} />
-      <div style={{ position: "absolute", bottom: -20, right: 15, width: 55, height: 55, borderRadius: "50%", background: `${accentColor}08` }} />
-
-      {/* Top row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-        <div style={{
-          width: 34, height: 34, borderRadius: 10,
-          background: `${accentColor}18`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: accentColor, fontSize: 15,
-        }}>
-          {icon}
-        </div>
+      {/* Label + trend */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <span style={{ fontSize: 12, color: "#64748b", fontWeight: 500 }}>{label}</span>
         {trend && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 4,
-            fontSize: 11, fontWeight: 700, color: accentColor,
-            background: `${accentColor}15`, padding: "3px 8px", borderRadius: 100,
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 3,
+            fontSize: 11, fontWeight: 600, color: trendColor,
+            background: `${trendColor}12`, border: `1px solid ${trendColor}25`,
+            padding: "2px 7px", borderRadius: 99,
           }}>
-            <ArrowUpOutlined style={{ fontSize: 9 }} />
-            {trend}
-          </div>
+            {trendArrow} {trend}
+          </span>
         )}
       </div>
 
       {/* Value */}
-      <div style={{ fontSize: 26, fontWeight: 800, color: "#0f172a", lineHeight: 1, marginBottom: 4, fontVariantNumeric: "tabular-nums" }}>
+      <div style={{ fontSize: 28, fontWeight: 700, color: "#0f172a", lineHeight: 1, marginBottom: 6, letterSpacing: "-0.5px" }}>
         {value}
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 2 }}>{label}</div>
+
+      {/* Sub */}
       <div style={{ fontSize: 11, color: "#94a3b8" }}>{sub}</div>
     </div>
   );
