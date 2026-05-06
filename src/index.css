@@ -1,4 +1,4 @@
-/*ẩn banner bắt trả tiền */
+/* Hide paid banner */
 .svc-creator__banner {
     display: none !important;
 }
@@ -13,7 +13,7 @@
 }
 
 /* ========================================
-   GLOBAL FONT SIZE — áp dụng toàn hệ thống
+   GLOBAL FONT SIZE
    ======================================== */
 html {
     font-size: 17px;
@@ -83,12 +83,43 @@ h6 { font-size: 1rem    !important; }
 .ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
 .ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
 
-/* Table — tăng kích thước chữ */
-.ant-table-thead > tr > th { font-size: 1.15rem !important; font-weight: 700 !important; }
-.ant-table-tbody > tr > td { font-size: 1.1rem !important; }
-.ant-table { font-size: 1.1rem !important; }
+/* ========================================
+   TABLE — stronger selectors for Ant Design v5
+   ======================================== */
 
-/* Menu */
+/* Table wrapper & base */
+.ant-table,
+.ant-table-wrapper,
+.ant-table-wrapper .ant-table {
+    font-size: 15px !important;
+}
+
+/* Column headers */
+.ant-table-wrapper .ant-table-thead > tr > th,
+.ant-table-wrapper .ant-table-thead > tr > td,
+table thead > tr > th,
+:where(.css-dev-only-do-not-override-1md480f).ant-table-wrapper .ant-table-thead > tr > th {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+/* Table body cells */
+.ant-table-wrapper .ant-table-tbody > tr > td,
+.ant-table-wrapper .ant-table-tbody > tr > th,
+table tbody > tr > td {
+    font-size: 15px !important;
+}
+
+/* Table cell content spans */
+.ant-table-cell,
+.ant-table-cell span,
+.ant-table-cell div {
+    font-size: 15px !important;
+}
+
+/* ========================================
+   Menu
+   ======================================== */
 .ant-menu-item,
 .ant-menu-submenu-title { font-size: 1rem !important; }
 
