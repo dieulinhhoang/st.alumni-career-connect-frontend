@@ -121,10 +121,10 @@ export function Navbar() {
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <IconGradCap />
           </div>
-          <span style={{ fontFamily: font, fontWeight: 700, fontSize: 18, color: "#1e1b4b" }}>
-            ST{" "}
+          <span style={{ fontFamily: font, fontWeight: 700, fontSize: 17, color: "#1e1b4b" }}>
+            Hệ Thống{" "}
             <span style={{ background: `linear-gradient(90deg, ${purple}, ${purpleDark})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Alumni
+              Khảo Sát Việc Làm
             </span>
           </span>
         </div>
