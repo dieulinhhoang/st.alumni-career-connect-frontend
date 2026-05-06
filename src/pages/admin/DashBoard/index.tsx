@@ -1,46 +1,119 @@
-import { Card, Row, Col, Statistic, Typography } from 'antd';
-import {
-  UserOutlined, BankOutlined, FileTextOutlined, CheckCircleOutlined
-} from '@ant-design/icons';
-import AdminLayout from '../../../components/layout/AdminLayout';
+import { useMemo } from "react";
+import { Col, Row, Typography } from "antd";
+import { FileTextOutlined, SolutionOutlined, ReadOutlined, StarOutlined } from "@ant-design/icons";
+import AdminLayout from "../../../components/layout/AdminLayout";
+import { StatCard }       from "./Statcard";
+import { FacultyCard }    from "./FacultyCard";
+import { EnterpriseList } from "./Enterpriselist";
+import { ChartSection }   from "./Chartsection";
+import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
+import { getFilteredDotData, getLatestDot, KHOA_LIST } from "../../../feature/dashboard/api";
+import { COLOR } from "./theme";
 
 const { Title, Text } = Typography;
 
-const stats = [
-  { title: 'Tổng sinh viên', value: 1280, icon: <UserOutlined />, color: '#7c3aed', bg: '#ede9fe' },
-  { title: 'Doanh nghiệp đối tác', value: 42, icon: <BankOutlined />, color: '#0891b2', bg: '#e0f2fe' },
-  { title: 'Khảo sát đang mở', value: 5, icon: <FileTextOutlined />, color: '#059669', bg: '#d1fae5' },
-  { title: 'Phản hồi hôm nay', value: 38, icon: <CheckCircleOutlined />, color: '#d97706', bg: '#fef3c7' },
-];
+export function DashBoard() {
+  const { chartMode, setChartMode, khoa, setKhoa, nganh, setNganh } = useChartFilter();
 
-export default function DashBoard() {
+  const { LATEST_DOT, STAT_CARDS } = useMemo(() => {
+    const latestDot        = getLatestDot();
+    const dotData          = getFilteredDotData("all", "all");
+    const dotKeys          = Object.keys(dotData);
+    const latest           = dotData[latestDot];
+    const prev             = dotKeys.length >= 2 ? dotData[dotKeys[dotKeys.length - 2]] : null;
+    const tongSVTotnghiep  = KHOA_LIST.filter(k => k.daNop).reduce((s, k) => s + k.tongSV, 0);
+
+    const totalPhanhoi = latest.coViec + latest.chuaCoViec;
+    const tyLePhanhoi  = Math.round((totalPhanhoi / tongSVTotnghiep) * 100);
+    const employed     = Math.round((latest.coViec / totalPhanhoi) * 100);
+    const overGrad     = Math.round((latest.coViec / tongSVTotnghiep) * 100);
+    const relevant     = Math.round((latest.dungNganh + latest.lienQuan + latest.tiepTucHoc) / totalPhanhoi * 100);
+
+    const calcTrend = (curr: number, prevVal: number | undefined) => {
+      if (!prevVal) return undefined;
+      const diff = curr - prevVal;
+      return (diff >= 0 ? "+" : "") + diff + "%";
+    };
+
+    const prevPhanhoi  = prev ? prev.coViec + prev.chuaCoViec : 0;
+    const trendPhanhoi = prev ? calcTrend(tyLePhanhoi, Math.round((prevPhanhoi / tongSVTotnghiep) * 100)) : undefined;
+    const trendViec    = prev ? calcTrend(employed,    Math.round((prev.coViec / prevPhanhoi) * 100))     : undefined;
+    const trendTN      = prev ? calcTrend(overGrad,    Math.round((prev.coViec / tongSVTotnghiep) * 100)) : undefined;
+    const trendRel     = prev ? calcTrend(relevant,    Math.round((prev.dungNganh + prev.lienQuan + prev.tiepTucHoc) / prevPhanhoi * 100)) : undefined;
+
+    const cards = [
+      { index: 1, label: "Tỷ lệ phản hồi",      value: `${tyLePhanhoi}%`, sub: `${totalPhanhoi} / ${tongSVTotnghiep} SV`,  icon: <FileTextOutlined />, accentColor: COLOR.primary, trend: trendPhanhoi },
+      { index: 2, label: "Có việc / phản hồi",   value: `${employed}%`,   sub: "Trên số SV đã trả lời",                     icon: <SolutionOutlined />, accentColor: COLOR.success, trend: trendViec    },
+      { index: 3, label: "Có việc / tốt nghiệp", value: `${overGrad}%`,   sub: "Trên tổng số SV tốt nghiệp",                icon: <ReadOutlined />,     accentColor: COLOR.warning, trend: trendTN      },
+      { index: 4, label: "Việc làm phù hợp",     value: `${relevant}%`,   sub: "Đúng ngành + Liên quan + Học tiếp",         icon: <StarOutlined />,     accentColor: COLOR.pink,    trend: trendRel     },
+    ];
+
+    return { LATEST_DOT: latestDot, STAT_CARDS: cards };
+  }, []);
+
   return (
     <AdminLayout>
-      <div style={{ padding: '0 0 32px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <Title level={3} style={{ margin: 0 }}>Bảng điều khiển</Title>
-          <Text type="secondary">Tổng quan hệ thống quản lý cựu sinh viên</Text>
+      {/* Page header — giữ gradient như cũ */}
+      <div style={{
+        marginBottom: 24,
+        background: "linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)",
+        borderRadius: 20, padding: "20px 24px",
+        position: "relative", overflow: "hidden",
+        border: "1px solid #e8e5ff",
+      }}>
+        <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "rgba(99,102,241,0.06)" }} />
+        <div style={{ position: "absolute", bottom: -20, right: 80, width: 80, height: 80, borderRadius: "50%", background: "rgba(139,92,246,0.05)" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, position: "relative" }}>
+          <div>
+            <Title level={4} style={{ margin: 0, color: "#1e1b4b", fontWeight: 800, fontSize: 20 }}>
+              Tổng quan hệ thống
+            </Title>
+            <Text style={{ fontSize: 13, color: COLOR.textMuted }}>
+              Thống kê việc làm sinh viên · Đợt mới nhất:{" "}
+              <strong style={{ color: COLOR.primary }}>{LATEST_DOT}</strong>
+            </Text>
+          </div>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6,
+            background: "#fff", borderRadius: 100, padding: "6px 14px",
+            border: "1px solid #e8e5ff", boxShadow: "0 1px 4px rgba(99,102,241,0.1)",
+          }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 0 2px rgba(74,222,128,0.4)" }} />
+            <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>Dữ liệu cập nhật</Text>
+          </div>
         </div>
-        <Row gutter={[16, 16]}>
-          {stats.map(s => (
-            <Col key={s.title} xs={24} sm={12} lg={6}>
-              <Card style={{ borderRadius: 14, border: 'none', background: s.bg }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 10,
-                    background: s.color + '20',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: s.color,
-                  }}>
-                    {s.icon}
-                  </div>
-                  <Statistic title={s.title} value={s.value} valueStyle={{ color: s.color, fontWeight: 800 }} />
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
       </div>
+
+      {/* Stat cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="top">
+        {STAT_CARDS.map(item => (
+          <Col xs={24} sm={12} md={12} lg={6} key={item.index}>
+            <StatCard {...item} />
+          </Col>
+        ))}
+      </Row>
+
+      {/* Lists */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="top">
+        <Col xs={24} lg={14}><FacultyCard /></Col>
+        <Col xs={24} lg={10}><EnterpriseList /></Col>
+      </Row>
+
+      {/* Chart */}
+      <ChartSection
+        chartMode={chartMode} setChartMode={setChartMode}
+        khoa={khoa} setKhoa={setKhoa}
+        nganh={nganh} setNganh={setNganh}
+      />
+
+      <style>{`
+        .ant-select-selector { border-radius: 8px !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+      `}</style>
     </AdminLayout>
   );
 }
+
+export default DashBoard;
