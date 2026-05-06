@@ -219,12 +219,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                             <span style={{ 
                                 marginLeft: 10, 
                                 fontWeight: 800, 
-                                fontSize: 15,
+                                fontSize: 18,
                                 color: '#111827', 
                                 letterSpacing: -0.3,
                                 whiteSpace: 'nowrap'
                             }}>
-                                Hệ Thống Khảo Sát Việc Làm
+                                Trang quản trị
                             </span>
                         )}
                     </div>
@@ -250,8 +250,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                             src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" 
                             style={{ borderRadius: 8 }} 
                         />
-                        <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 15, color: '#111827' }}>
-                            Hệ Thống Khảo Sát Việc Làm
+                        <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 18, color: '#111827' }}>
+                            Trang quản trị
                         </span>
                     </div>
                 }
@@ -301,8 +301,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
 
                         {/* Mobile logo text */}
                         {isMobile && (
-                            <span style={{ fontWeight: 800, fontSize: 15, color: '#111827' }}>
-                                Hệ Thống Khảo Sát Việc Làm
+                            <span style={{ fontWeight: 800, fontSize: 18, color: '#111827' }}>
+                                Trang quản trị
                             </span>
                         )}
                     </div>

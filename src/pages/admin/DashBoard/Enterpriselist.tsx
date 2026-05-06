@@ -10,11 +10,14 @@ export function EnterpriseList() {
   return (
     <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 3, height: 18, borderRadius: 99, background: "#6366f1", flexShrink: 0 }} /><span style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>Doanh nghiệp đối tác</span></div>
+      <div style={{ padding: "16px 18px 14px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 3, height: 20, borderRadius: 99, background: "#6366f1", flexShrink: 0 }} />
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>Doanh nghiệp đối tác</span>
+        </div>
         <button
           onClick={() => navigate("/admin/enterprises")}
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#6366f1", fontWeight: 600, padding: 0 }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#6366f1", fontWeight: 600, padding: 0 }}
         >
           Xem tất cả →
         </button>
@@ -28,7 +31,7 @@ export function EnterpriseList() {
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
             style={{
-              display: "flex", alignItems: "center", gap: 12, padding: "10px 16px",
+              display: "flex", alignItems: "center", gap: 12, padding: "12px 18px",
               background: hovered === i ? "#eff6ff" : i % 2 === 0 ? "#fff" : "#f8fafc",
               borderBottom: "1px solid #f1f5f9",
               cursor: "pointer", transition: "background 0.1s",
@@ -36,18 +39,15 @@ export function EnterpriseList() {
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
                   {e.name}
                 </span>
-                {/* {e.verified && (
-                  <span style={{ fontSize: 10, color: "#15803d", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "0 5px", borderRadius: 99, flexShrink: 0 }}>✓</span>
-                )} */}
               </div>
-              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>{e.industry}</div>
+              <div style={{ fontSize: 12.5, color: "#94a3b8", marginTop: 2 }}>{e.industry}</div>
             </div>
             <div style={{ textAlign: "right" as const, flexShrink: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: "#0f172a" }}>{e.jobs}</div>
-              <div style={{ fontSize: 10, color: "#94a3b8" }}>vị trí</div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: "#0f172a" }}>{e.jobs}</div>
+              <div style={{ fontSize: 11.5, color: "#94a3b8" }}>vị trí</div>
             </div>
           </div>
         ))}

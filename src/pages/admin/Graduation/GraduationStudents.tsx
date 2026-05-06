@@ -11,7 +11,7 @@ import CustomTable from "../../../components/common/customTable";
 
 const pill = (color: string): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center",
-  padding: "2px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
+  padding: "3px 11px", borderRadius: 20, fontSize: 13, fontWeight: 600,
   background: "#fff", color, border: `1.5px solid ${color}40`,
 });
 
@@ -50,38 +50,38 @@ export default function GraduationStudentsPage() {
     {
       title: "STT", key: "stt", width: 55, align: "center" as const,
       render: (_: any, __: GraduationStudent, i: number) => (
-        <span style={{ fontSize: 12, color: "#9ca3af" }}>
+        <span style={{ fontSize: 13, color: "#9ca3af" }}>
           {isSearching ? i + 1 : (meta.current_page - 1) * meta.per_page + i + 1}
         </span>
       ),
     },
     {
       title: "Mã SV", dataIndex: "code", key: "code", width: 115,
-      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 600 }}>{v}</span>,
+      render: (v: string) => <span style={{ fontSize: 13.5, color: "#374151", fontWeight: 600 }}>{v}</span>,
     },
     {
       title: "Họ tên", dataIndex: "full_name", key: "full_name",
-      render: (v: string) => <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{v}</span>,
+      render: (v: string) => <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{v}</span>,
     },
     {
       title: "Giới tính", dataIndex: "gender", key: "gender", width: 90, align: "center" as const,
-      render: (v: string) => <span style={{ fontSize: 12.5, color: "#6b7280" }}>{v === "male" ? "Nam" : "Nữ"}</span>,
+      render: (v: string) => <span style={{ fontSize: 13.5, color: "#6b7280" }}>{v === "male" ? "Nam" : "Nữ"}</span>,
     },
     {
       title: "Ngày sinh", dataIndex: "dob", key: "dob", width: 115, align: "center" as const,
-      render: (v: string) => <span style={{ fontSize: 12, color: "#9ca3af" }}>{v ? new Date(v).toLocaleDateString("vi-VN") : "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 13, color: "#9ca3af" }}>{v ? new Date(v).toLocaleDateString("vi-VN") : "—"}</span>,
     },
     {
       title: "CCCD", dataIndex: "citizen_identification", key: "citizen_identification", width: 140,
-      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 13.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
       title: "Email", dataIndex: "email", key: "email",
-      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 13.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
       title: "SĐT", dataIndex: "phone", key: "phone", width: 125,
-      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 13.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
       title: "Mã ngành", dataIndex: "training_industry_code", key: "training_industry_code", width: 115, align: "center" as const,
@@ -89,7 +89,7 @@ export default function GraduationStudentsPage() {
     },
     {
       title: "Tên ngành", dataIndex: "training_industry_name", key: "training_industry_name", width: 200,
-      render: (v: string, r: GraduationStudent) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? `ID: ${r.training_industry_id}`}</span>,
+      render: (v: string, r: GraduationStudent) => <span style={{ fontSize: 13.5, color: "#374151" }}>{v ?? `ID: ${r.training_industry_id}`}</span>,
     },
   ];
 
@@ -104,14 +104,14 @@ export default function GraduationStudentsPage() {
             style={{
               background: "none", border: "none", cursor: "pointer",
               display: "flex", alignItems: "center", gap: 6,
-              color: "#9ca3af", fontSize: 12.5, fontWeight: 500,
+              color: "#9ca3af", fontSize: 13, fontWeight: 500,
               marginBottom: 14, padding: 0,
             }}
           >
-            <ArrowLeftOutlined style={{ fontSize: 11 }} /> Danh sách đợt tốt nghiệp
+            <ArrowLeftOutlined style={{ fontSize: 12 }} /> Danh sách đợt tốt nghiệp
           </button>
-          <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>{graduationName}</div>
-          <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>{graduationName}</div>
+          <div style={{ fontSize: 13.5, color: "#9ca3af", marginTop: 2 }}>
             {loading ? "Đang tải..." : `${meta.total} sinh viên`}
           </div>
         </div>
@@ -126,14 +126,14 @@ export default function GraduationStudentsPage() {
             flexWrap: "wrap",
           }}>
             <Input
-              prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
+              prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 13 }} />}
               placeholder="Tìm theo tên, mã SV, email, CCCD, ngành..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               allowClear
-              style={{ flex: "1 1 240px", maxWidth: 360, borderRadius: 8, height: 34 }}
+              style={{ flex: "1 1 240px", maxWidth: 360, borderRadius: 8, height: 36 }}
             />
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
+            <span style={{ marginLeft: "auto", fontSize: 13, color: "#9ca3af", whiteSpace: "nowrap" }}>
               {isSearching
                 ? `${filtered.length} kết quả`
                 : `${meta.total} sinh viên`}
