@@ -84,45 +84,17 @@ h6 { font-size: 1rem    !important; }
 .ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
 
 /* ========================================
-   TABLE — stronger selectors for Ant Design v5
-   ======================================== */
-
-/* Table wrapper & base */
-.ant-table,
-.ant-table-wrapper,
-.ant-table-wrapper .ant-table {
-    font-size: 15px !important;
-}
-
-/* Column headers */
-.ant-table-wrapper .ant-table-thead > tr > th,
-.ant-table-wrapper .ant-table-thead > tr > td,
-table thead > tr > th,
-:where(.css-dev-only-do-not-override-1md480f).ant-table-wrapper .ant-table-thead > tr > th {
-    font-size: 15px !important;
-    font-weight: 700 !important;
-}
-
-/* Table body cells */
-.ant-table-wrapper .ant-table-tbody > tr > td,
-.ant-table-wrapper .ant-table-tbody > tr > th,
-table tbody > tr > td {
-    font-size: 15px !important;
-}
-
-/* Table cell content spans */
-.ant-table-cell,
-.ant-table-cell span,
-.ant-table-cell div {
-    font-size: 15px !important;
-}
-
-/* ========================================
    Menu
    ======================================== */
 .ant-menu-item,
-.ant-menu-submenu-title { font-size: 1rem !important; }
+.ant-menu-submenu-title {
+    font-size: 1rem !important;
+}
 
 /* Pagination */
-.ant-pagination { font-size: 1rem !important; }
-.ant-pagination-item a { font-size: 1rem !important; }
+.ant-pagination {
+    font-size: 1rem !important;
+}
+.ant-pagination-item a {
+    font-size: 1rem !important;
+}
