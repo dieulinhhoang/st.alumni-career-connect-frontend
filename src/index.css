@@ -3,12 +3,94 @@
     display: none !important;
 }
 
- .sjs-license-notification {
+.sjs-license-notification {
     display: none !important;
 }
- 
 
- .svc-creator {
+.svc-creator {
     height: 100vh !important;
-    width: 100vw ! ;
+    width: 100vw !important;
 }
+
+/* ========================================
+   GLOBAL FONT SIZE — áp dụng toàn hệ thống
+   ======================================== */
+html {
+    font-size: 17px;
+}
+
+body {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Ant Design global override */
+.ant-typography,
+.ant-btn,
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select,
+.ant-select-selector,
+.ant-menu-item,
+.ant-menu-submenu-title,
+.ant-table,
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td,
+.ant-form-item-label > label,
+.ant-form-item-explain,
+.ant-modal-title,
+.ant-modal-body,
+.ant-drawer-title,
+.ant-drawer-body,
+.ant-card-head-title,
+.ant-card-body,
+.ant-list-item,
+.ant-tag,
+.ant-badge,
+.ant-tooltip-inner,
+.ant-popover-title,
+.ant-popover-inner-content,
+.ant-dropdown-menu-item,
+.ant-tabs-tab,
+.ant-breadcrumb,
+.ant-pagination,
+.ant-statistic-title,
+.ant-statistic-content,
+.ant-descriptions-item-label,
+.ant-descriptions-item-content,
+.ant-radio-wrapper,
+.ant-checkbox-wrapper,
+.ant-switch,
+.ant-slider,
+.ant-upload,
+.ant-message,
+.ant-notification {
+    font-size: 1rem !important;
+}
+
+/* Heading scale */
+h1 { font-size: 2.2rem !important; }
+h2 { font-size: 1.8rem !important; }
+h3 { font-size: 1.5rem !important; }
+h4 { font-size: 1.25rem !important; }
+h5 { font-size: 1.1rem  !important; }
+h6 { font-size: 1rem    !important; }
+
+/* Ant Design heading overrides */
+.ant-typography.ant-typography-h1 { font-size: 2.2rem !important; }
+.ant-typography.ant-typography-h2 { font-size: 1.8rem !important; }
+.ant-typography.ant-typography-h3 { font-size: 1.5rem !important; }
+.ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
+.ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
+
+/* Table */
+.ant-table-thead > tr > th { font-size: 1rem !important; font-weight: 600 !important; }
+.ant-table-tbody > tr > td { font-size: 1rem !important; }
+
+/* Menu */
+.ant-menu-item,
+.ant-menu-submenu-title { font-size: 1rem !important; }
+
+/* Pagination */
+.ant-pagination { font-size: 1rem !important; }
+.ant-pagination-item a { font-size: 1rem !important; }

@@ -1,7 +1,6 @@
 :root {
     --ink: #0f172a;
     --bd: #e5e7eb;
-
     --kha-bg: #e9ecdd;
     --gioi-bg: #dbeafe;
     --xuatsac-bg: #fee2e2;
@@ -11,23 +10,15 @@
 .stat-card {
     border: 1px solid var(--bd);
     border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     padding: 16px 18px;
     background: var(--tong-bg);
     min-width: 0;
 }
 
-.card-kha {
-    background: var(--kha-bg) !important;
-}
-
-.card-gioi {
-    background: var(--gioi-bg) !important;
-}
-
-.card-xuatsac {
-    background: var(--xs-bg) !important;
-}
+.card-kha  { background: var(--kha-bg)   !important; }
+.card-gioi { background: var(--gioi-bg)  !important; }
+.card-xuatsac { background: var(--xs-bg) !important; }
 
 .stat-card .ant-card-head {
     border-bottom: none;
@@ -37,7 +28,7 @@
 .stat-card .ant-card-head-title {
     color: var(--ink);
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     white-space: normal;
     overflow-wrap: anywhere;
 }
@@ -50,7 +41,7 @@
     line-height: 0.8;
     color: var(--ink);
     margin-top: 6px;
-    font-size: clamp(21px, 3vw, 20px);
+    font-size: clamp(24px, 3.5vw, 28px);
 }
 
 .stat-card .ant-card-body {
@@ -58,11 +49,8 @@
 }
 
 @media (max-width: 576px) {
-    .stat-card {
-        padding: 14px 14px;
-    }
-
-    .stat-card .ant-card-body {
-        padding: 8px 14px 14px 14px;
-    }
+    .stat-card { padding: 14px; }
+    .stat-card .ant-card-body { padding: 8px 14px 14px 14px; }
+    .stat-card .ant-card-head-title { font-size: 1.1rem; }
+    .stat-number { font-size: clamp(20px, 4vw, 24px); }
 }
