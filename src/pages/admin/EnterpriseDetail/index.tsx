@@ -22,7 +22,6 @@ import {
 
 import { JobFormModal } from "./JobFormModal";
 import { JobCard } from "./JobCard";
-// Fix: import đúng tên — EnterpriseFormModal từ EditEnterpriseModal.tsx
 import { EnterpriseFormModal } from "./EditEnterpriseModal";
 
 const IconBuilding = () => (
@@ -82,7 +81,7 @@ export default function EnterpriseDetailPage() {
   const handleTogglePartner = () => {
     if (ent.partnerStatus === "active") {
       Modal.confirm({
-        title: "Ngừng hợp tác đối tác?",
+        title: "Ngưng hợp tác đối tác?",
         content: `"${ent.name}" sẽ bị hủy kích hoạt. Tin tuyển dụng sẽ bị ẩn với sinh viên.`,
         okText: "Hủy kích hoạt", okType: "danger", cancelText: "Quay lại",
         onOk: () => togglePartnerStatus("inactive" as PartnerStatus),
@@ -137,13 +136,13 @@ export default function EnterpriseDetailPage() {
                 <span style={{ fontSize: 17, fontWeight: 900, color: ent.color }}>{ent.abbr}</span>
               </div>
               <div style={{ paddingBottom: 2 }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2 }}>{ent.name}</div>
-                <div style={{ fontSize: 12.5, color: "#6b7280", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2 }}>{ent.name}</div>
+                <div style={{ fontSize: 14, color: "#6b7280", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
                   <span>{ent.industry}</span>
                   {ent.size && <>
                     <span style={{ color: "#d1d5db" }}>·</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                      <TeamOutlined style={{ fontSize: 11 }} />{ent.size}
+                      <TeamOutlined style={{ fontSize: 13 }} />{ent.size}
                     </span>
                   </>}
                 </div>
@@ -154,7 +153,7 @@ export default function EnterpriseDetailPage() {
               <Button icon={<PlusOutlined />} type="primary" style={{ background: ent.color, border: "none", borderRadius: 8 }} onClick={() => setJobModal({ open: true, job: null })}>
                 Thêm tin tuyển dụng
               </Button>
-              <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)} style={{ borderRadius: 8 }}>Chỉnh sửa</Button>
+              <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)} style={{ borderRadius: 8 }}>Điều chỉnh</Button>
               {!ent.verified && (
                 <Button icon={<SafetyCertificateOutlined />} style={{ background: "#059669", border: "none", color: "white", borderRadius: 8 }} onClick={verify}>Xác minh</Button>
               )}
@@ -173,7 +172,7 @@ export default function EnterpriseDetailPage() {
           {/* Left panel */}
           <Col xs={24} lg={8}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thông tin liên hệ</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Thông tin liên hệ</span>}>
                 {[
                   { icon: <GlobalOutlined     style={{ color: ent.color }} />, label: "Website",    value: ent.website },
                   { icon: <MailOutlined        style={{ color: ent.color }} />, label: "Email",      value: ent.email   },
@@ -183,27 +182,26 @@ export default function EnterpriseDetailPage() {
                   <div key={item.label} style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                     <div style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{item.icon}</div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 11, color: "#9ca3af" }}>{item.label}</div>
-                      {/* Fix: word-break để link/email dài không tràn */}
-                      <div style={{ fontSize: 13, color: "#374151", fontWeight: 500, wordBreak: "break-all" }}>
+                      <div style={{ fontSize: 13, color: "#9ca3af" }}>{item.label}</div>
+                      <div style={{ fontSize: 15, color: "#374151", fontWeight: 500, wordBreak: "break-all" }}>
                         {item.value}
                       </div>
                     </div>
                   </div>
                 ))}
                 <Divider style={{ margin: "8px 0 12px" }} />
-                <div style={{ fontSize: 11, color: "#9ca3af", marginBottom: 4 }}>Đối tác từ</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
+                <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 4 }}>Đối tác từ</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
               </Card>
 
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Khoa đối tác</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Khoa đối tác</span>}>
                 {(ent.faculties ?? []).length === 0
-                  ? <span style={{ color: "#9ca3af", fontSize: 13 }}>Chưa có khoa liên kết</span>
+                  ? <span style={{ color: "#9ca3af", fontSize: 14 }}>Chưa có khoa liên kết</span>
                   : (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                       {ent.faculties.map(k => (
                         <span key={k} style={{
-                          padding: "5px 14px", borderRadius: 100, fontSize: 12, fontWeight: 600,
+                          padding: "5px 14px", borderRadius: 100, fontSize: 13, fontWeight: 600,
                           background: getColor(k) + "15", color: getColor(k), border: `1px solid ${getColor(k)}30`,
                         }}>
                           {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
@@ -214,7 +212,7 @@ export default function EnterpriseDetailPage() {
                 }
               </Card>
 
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thống kê tuyển dụng</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Thống kê tuyển dụng</span>}>
                 <Row gutter={[12, 12]}>
                   {[
                     { label: "Tổng tin",    value: jobs.length,        color: ent.color,  bg: ent.color + "12" },
@@ -224,7 +222,7 @@ export default function EnterpriseDetailPage() {
                     <Col key={s.label} span={8}>
                       <div style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: s.bg }}>
                         <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
-                        <div style={{ fontSize: 11, color: s.color, marginTop: 2 }}>{s.label}</div>
+                        <div style={{ fontSize: 13, color: s.color, marginTop: 2 }}>{s.label}</div>
                       </div>
                     </Col>
                   ))}
@@ -236,15 +234,15 @@ export default function EnterpriseDetailPage() {
           {/* Right panel */}
           <Col xs={24} lg={16}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 14, fontWeight: 700 }}>Giới thiệu</span>}>
-                <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.8, margin: 0 }}>{ent.description}</p>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Giới thiệu</span>}>
+                <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.8, margin: 0 }}>{ent.description}</p>
               </Card>
 
               <Card
                 style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
                 title={
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700 }}>Tin tuyển dụng</span>
+                    <span style={{ fontSize: 16, fontWeight: 700 }}>Tin tuyển dụng</span>
                     <Badge count={activeJobs.length} style={{ backgroundColor: ent.color }} />
                   </div>
                 }
@@ -302,7 +300,7 @@ export default function EnterpriseDetailPage() {
         open={editOpen}
         enterprise={ent}
         onClose={() => setEditOpen(false)}
-        onSave={edit as (v: EnterpriseFormValues) => Promise<void>}
+        onSave={edit as (v: any) => Promise<void>}
       />
 
       <JobFormModal
