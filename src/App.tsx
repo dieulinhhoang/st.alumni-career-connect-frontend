@@ -22,6 +22,40 @@ function App() {
           fontSizeHeading4: 16,
           fontSizeHeading5: 15,
         },
+        components: {
+          Table: {
+            fontSize: 15,
+            headerBg: '#fafafa',
+          },
+          Menu: {
+            fontSize: 15,
+            itemHeight: 42,
+          },
+          Pagination: {
+            fontSize: 14,
+          },
+          Select: {
+            fontSize: 15,
+          },
+          Input: {
+            fontSize: 15,
+          },
+          Button: {
+            fontSize: 15,
+          },
+          Modal: {
+            fontSize: 15,
+          },
+          Drawer: {
+            fontSize: 15,
+          },
+          Form: {
+            fontSize: 15,
+          },
+          Tag: {
+            fontSize: 13,
+          },
+        },
       }}
     >
       <RouterProvider router={router} />
