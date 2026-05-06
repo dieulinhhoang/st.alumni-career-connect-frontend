@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Typography } from "antd";
+import { Col, Row, Input, Typography, Alert } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
 import type { Graduation } from "../../../feature/graduation/type";
@@ -19,7 +20,8 @@ export default function GraduationList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [query, setQuery] = useState({ page: 0, size: 10 });
+
+  const [pageSize, setPageSize] = useState(10);
 
   const { data: graduations, meta, loading, error } = useGraduations(page);
 
@@ -33,17 +35,18 @@ export default function GraduationList() {
     );
   }, [graduations, search]);
 
-  const totalStudents = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
+
+  const totalStudentsCurrentPage = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
 
   const stats = [
-    { label: "Tổng đợt",       value: meta.total,                     color: "#6366f1" },
-    { label: "Tổng sinh viên",  value: totalStudents.toLocaleString(), color: "#10b981" },
+    { label: "Tổng đợt",      value: meta.total,                              color: "#6366f1" },
+    { label: "Sinh viên ", value: totalStudentsCurrentPage.toLocaleString(), color: "#10b981" },
   ];
 
   const listData = {
     data: filtered,
     page: {
-      total_elements: meta.total,
+      total_elements: search.trim() ? filtered.length : meta.total,
       current_page: meta.current_page,
       total_pages: meta.total_pages,
     }
@@ -99,12 +102,9 @@ export default function GraduationList() {
 
   const handleTableChange = (pagination: any) => {
     const newPage = pagination.current || 1;
+    const newSize = pagination.pageSize || pageSize;
     setPage(newPage);
-    setQuery(prev => ({
-      ...prev,
-      page: newPage - 1,
-      size: pagination.pageSize || prev.size,
-    }));
+    setPageSize(newSize);
   };
 
   return (
@@ -129,27 +129,40 @@ export default function GraduationList() {
           </Row>
         </div>
 
+        {error && <Alert type="error" message={error} showIcon />}
+
         {/* Table */}
         <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{
+            padding: "14px 20px", borderBottom: "1px solid #f5f5f5",
+            display: "flex", gap: 10, alignItems: "center",
+            flexWrap: "wrap",
+          }}>
             <Input
+              prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
               placeholder="Tìm kiếm đợt tốt nghiệp..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
-              style={{ width: 260, borderRadius: 8, height: 34 }}
+              allowClear
+              style={{ flex: "1 1 200px", maxWidth: 300, borderRadius: 8, height: 34 }}
             />
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af" }}>{filtered.length}/{meta.total}</span>
+            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
+              {search.trim() ? `${filtered.length} kết quả` : `${meta.total} đợt`}
+            </span>
           </div>
 
           <CustomTable
             columns={columns}
             data={listData}
-            filter={query}
+            filter={{ page: page - 1, size: pageSize }}
             loading={loading}
             handleTableChange={handleTableChange}
             rowKey="id"
             onRow={(record: Graduation) => ({
-              onClick: () => navigate(`/admin/graduation/${record.id}/${toSlug(record.name)}/students`, { state: { graduationName: record.name } }),
+              onClick: () => navigate(
+                `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
+                { state: { graduationName: record.name } }
+              ),
               style: { cursor: "pointer" },
             })}
           />

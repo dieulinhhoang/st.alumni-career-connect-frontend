@@ -44,10 +44,16 @@ export default function GraduationStudentsPage() {
     );
   }, [students, search]);
 
+  const isSearching = search.trim().length > 0;
+
   const columns: ColumnsType<GraduationStudent> = [
     {
       title: "STT", key: "stt", width: 55, align: "center",
-      render: (_, __, i) => <span style={{ fontSize: 12, color: "#9ca3af" }}>{(meta.current_page - 1) * meta.per_page + i + 1}</span>,
+      render: (_, __, i) => (
+        <span style={{ fontSize: 12, color: "#9ca3af" }}>
+          {isSearching ? i + 1 : (meta.current_page - 1) * meta.per_page + i + 1}
+        </span>
+      ),
     },
     {
       title: "Mã SV", dataIndex: "code", key: "code", width: 115,
@@ -95,9 +101,14 @@ export default function GraduationStudentsPage() {
         <div style={{ ...card, padding: "20px 24px" }}>
           <button
             onClick={() => navigate("/admin/graduation")}
-            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#9ca3af", fontSize: 12.5, fontWeight: 500, marginBottom: 14, padding: 0 }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              color: "#9ca3af", fontSize: 12.5, fontWeight: 500,
+              marginBottom: 14, padding: 0,
+            }}
           >
-            <ArrowLeftOutlined style={{ fontSize: 11 }} /> danh sách đợt tốt nghiệp
+            <ArrowLeftOutlined style={{ fontSize: 11 }} /> Danh sách đợt tốt nghiệp
           </button>
           <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>{graduationName}</div>
           <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>
@@ -105,23 +116,36 @@ export default function GraduationStudentsPage() {
           </div>
         </div>
 
-        {error && <Alert type="error" message={error} />}
+        {error && <Alert type="error" message={error} showIcon />}
 
         {/* Table */}
         <div style={{ ...card, overflow: "hidden" }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f3f4f6", display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{
+            padding: "14px 20px", borderBottom: "1px solid #f3f4f6",
+            display: "flex", gap: 10, alignItems: "center",
+            // RESPONSIVE FIX: wrap trên mobile
+            flexWrap: "wrap",
+          }}>
             <Input
-              // prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
+              prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
               placeholder="Tìm theo tên, mã SV, email, CCCD, ngành..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
-              // allowClear
-              style={{ width: 320, borderRadius: 8, height: 34 }}
+              allowClear
+              style={{ flex: "1 1 240px", maxWidth: 360, borderRadius: 8, height: 34 }}
             />
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af" }}>{filtered.length}/{meta.total}</span>
+            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
+              {isSearching
+                ? `${filtered.length} kết quả`
+                : `${meta.total} sinh viên`}
+            </span>
           </div>
           <Table
-            dataSource={filtered} columns={columns} rowKey="id" loading={loading} size="middle"
+            dataSource={filtered}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            size="middle"
             scroll={{ x: 1200 }}
             onRow={record => ({
               onClick: () => navigate(
@@ -130,10 +154,24 @@ export default function GraduationStudentsPage() {
               ),
               style: { cursor: "pointer", transition: "background 0.12s" },
             })}
-            pagination={{
-              current: meta.current_page, pageSize: meta.per_page, total: filtered.length,
-              onChange: setPage, showTotal: t => `${t} sinh viên`, size: "small",
-            }}
+            pagination={
+            
+              isSearching
+                ? {
+                    pageSize: meta.per_page,
+                    total: filtered.length,
+                    showTotal: t => `${t} sinh viên`,
+                    size: "small",
+                  }
+                : {
+                    current: meta.current_page,
+                    pageSize: meta.per_page,
+                    total: meta.total,
+                    onChange: setPage,
+                    showTotal: t => `${t} sinh viên`,
+                    size: "small",
+                  }
+            }
             locale={{ emptyText: <div style={{ padding: "40px 0", color: "#9ca3af", textAlign: "center" }}>Không có sinh viên nào</div> }}
           />
         </div>

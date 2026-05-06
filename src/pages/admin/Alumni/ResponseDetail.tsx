@@ -79,7 +79,7 @@ export const ResponseDetail: React.FC = () => {
       <div style={{ padding: 80, textAlign: 'center' }}>
         <Empty description="Không tìm thấy dữ liệu phản hồi" />
         <Button style={{ marginTop: 16 }} onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>
-          danh sách
+          Danh sách
         </Button>
       </div>
     </AdminLayout>

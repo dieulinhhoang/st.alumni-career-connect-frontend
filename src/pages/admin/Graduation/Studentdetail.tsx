@@ -89,7 +89,7 @@ export default function StudentDetail() {
             marginBottom: "1.5rem",
           }}
         >
-          ← danh sách sinh viên
+          ← Danh sách sinh viên
         </button>
 
         {!student ? (
