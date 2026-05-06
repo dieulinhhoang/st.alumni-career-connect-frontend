@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Button, Input, Tooltip, Table, Tag, Space } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { Button, Input, Tooltip, Tag, Space } from 'antd'
 import {
   EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined,
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
   AppstoreOutlined, UnorderedListOutlined, CalendarOutlined,
 } from '@ant-design/icons'
 import type { Form } from '../../../../feature/form/types'
+import CustomTable from '../../../../components/common/customTable'
 
 const ACCENT_MAP: Record<string, string> = {
   blue: '#2563eb', green: '#16a34a', red: '#dc2626', purple: '#7c3aed',
@@ -33,15 +33,15 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const filtered = forms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
 
-  //  table columns 
-  const columns: ColumnsType<Form> = [
+  //  table columns
+  const columns = [
     {
       title: 'STT', key: 'index', width: 50,
-      render: (_, __, index) => <span style={{ color: '#9ca3af' }}>{index + 1}</span>,
+      render: (_: any, __: Form, index: number) => <span style={{ color: '#9ca3af' }}>{index + 1}</span>,
     },
     {
       title: 'Tên form', dataIndex: 'name', key: 'name',
-      render: (text, record) => (
+      render: (text: string, record: Form) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 8, background: `${getAccent(record.themeId)}1a`, color: getAccent(record.themeId), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <FileOutlined />
@@ -55,15 +55,15 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
     },
     {
       title: 'Số câu hỏi', dataIndex: 'questions', key: 'questions', width: 110,
-      render: (qs) => <Tag>{qs.length} câu</Tag>,
+      render: (qs: any[]) => <Tag>{qs.length} câu</Tag>,
     },
     {
       title: 'Ngày tạo', dataIndex: 'createdat', key: 'createdat', width: 130,
-      render: (date) => <Space size={4}><CalendarOutlined /><span>{fmt(date)}</span></Space>,
+      render: (date: string) => <Space size={4}><CalendarOutlined /><span>{fmt(date)}</span></Space>,
     },
     {
       title: 'Thao tác', key: 'actions', width: 160,
-      render: (_, record) => (
+      render: (_: any, record: Form) => (
         <Space>
           <Tooltip title="Xem trước"><Button type="text" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onPreview(record) }} aria-label="Xem trước" /></Tooltip>
           <Tooltip title="Chỉnh sửa"><Button type="text" icon={<EditOutlined />} onClick={(e) => { e.stopPropagation(); onEdit(record) }} aria-label="Chỉnh sửa" /></Tooltip>
@@ -74,7 +74,7 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
     },
   ]
 
-  //  render 
+  //  render
   return (
     <div className="page">
       {/* Header */}
@@ -176,12 +176,21 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
 
       {/* Table view */}
       {viewMode === 'table' && (
-        <Table
+        <CustomTable
           columns={columns}
-          dataSource={filtered}
+          data={{ data: filtered }}
+          pagination={{
+            pageSize: 10,
+            total: filtered.length,
+            showTotal: (total: number, range: [number, number]) =>
+              `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
+            position: ['bottomCenter'],
+          }}
+          onRow={(record: Form) => ({
+            onClick: () => onPreview(record),
+            style: { cursor: 'pointer' },
+          })}
           rowKey="id"
-          pagination={{ pageSize: 10 }}
-          onRow={(record) => ({ onClick: () => onPreview(record), style: { cursor: 'pointer' } })}
         />
       )}
     </div>

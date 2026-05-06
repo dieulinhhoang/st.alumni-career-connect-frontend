@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Table, Button, Alert, Input } from "antd";
+import { Button, Alert, Input } from "antd";
 import { ArrowLeftOutlined, SearchOutlined } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduationStudents } from "../../../feature/graduation/hooks/useGraduation";
 import type { GraduationStudent } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
+import CustomTable from "../../../components/common/customTable";
 
 const pill = (color: string): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center",
@@ -46,10 +46,10 @@ export default function GraduationStudentsPage() {
 
   const isSearching = search.trim().length > 0;
 
-  const columns: ColumnsType<GraduationStudent> = [
+  const columns = [
     {
-      title: "STT", key: "stt", width: 55, align: "center",
-      render: (_, __, i) => (
+      title: "STT", key: "stt", width: 55, align: "center" as const,
+      render: (_: any, __: GraduationStudent, i: number) => (
         <span style={{ fontSize: 12, color: "#9ca3af" }}>
           {isSearching ? i + 1 : (meta.current_page - 1) * meta.per_page + i + 1}
         </span>
@@ -57,39 +57,39 @@ export default function GraduationStudentsPage() {
     },
     {
       title: "Mã SV", dataIndex: "code", key: "code", width: 115,
-      render: v => <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 600 }}>{v}</span>,
+      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151", fontWeight: 600 }}>{v}</span>,
     },
     {
       title: "Họ tên", dataIndex: "full_name", key: "full_name",
-      render: v => <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{v}</span>,
+      render: (v: string) => <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{v}</span>,
     },
     {
-      title: "Giới tính", dataIndex: "gender", key: "gender", width: 90, align: "center",
-      render: v => <span style={{ fontSize: 12.5, color: "#6b7280" }}>{v === "male" ? "Nam" : "Nữ"}</span>,
+      title: "Giới tính", dataIndex: "gender", key: "gender", width: 90, align: "center" as const,
+      render: (v: string) => <span style={{ fontSize: 12.5, color: "#6b7280" }}>{v === "male" ? "Nam" : "Nữ"}</span>,
     },
     {
-      title: "Ngày sinh", dataIndex: "dob", key: "dob", width: 115, align: "center",
-      render: v => <span style={{ fontSize: 12, color: "#9ca3af" }}>{v ? new Date(v).toLocaleDateString("vi-VN") : "—"}</span>,
+      title: "Ngày sinh", dataIndex: "dob", key: "dob", width: 115, align: "center" as const,
+      render: (v: string) => <span style={{ fontSize: 12, color: "#9ca3af" }}>{v ? new Date(v).toLocaleDateString("vi-VN") : "—"}</span>,
     },
     {
       title: "CCCD", dataIndex: "citizen_identification", key: "citizen_identification", width: 140,
-      render: v => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
       title: "Email", dataIndex: "email", key: "email",
-      render: v => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
       title: "SĐT", dataIndex: "phone", key: "phone", width: 125,
-      render: v => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
+      render: (v: string) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? "—"}</span>,
     },
     {
-      title: "Mã ngành", dataIndex: "training_industry_code", key: "training_industry_code", width: 115, align: "center",
-      render: v => v ? <span style={pill("#0369a1")}>{v}</span> : <span style={{ color: "#d1d5db" }}>—</span>,
+      title: "Mã ngành", dataIndex: "training_industry_code", key: "training_industry_code", width: 115, align: "center" as const,
+      render: (v: string) => v ? <span style={pill("#0369a1")}>{v}</span> : <span style={{ color: "#d1d5db" }}>—</span>,
     },
     {
       title: "Tên ngành", dataIndex: "training_industry_name", key: "training_industry_name", width: 200,
-      render: (v, r) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? `ID: ${r.training_industry_id}`}</span>,
+      render: (v: string, r: GraduationStudent) => <span style={{ fontSize: 12.5, color: "#374151" }}>{v ?? `ID: ${r.training_industry_id}`}</span>,
     },
   ];
 
@@ -123,7 +123,6 @@ export default function GraduationStudentsPage() {
           <div style={{
             padding: "14px 20px", borderBottom: "1px solid #f3f4f6",
             display: "flex", gap: 10, alignItems: "center",
-            // RESPONSIVE FIX: wrap trên mobile
             flexWrap: "wrap",
           }}>
             <Input
@@ -140,27 +139,28 @@ export default function GraduationStudentsPage() {
                 : `${meta.total} sinh viên`}
             </span>
           </div>
-          <Table
-            dataSource={filtered}
+          <CustomTable
             columns={columns}
-            rowKey="id"
+            data={{
+              data: filtered,
+              page: { total_elements: isSearching ? filtered.length : meta.total },
+            }}
             loading={loading}
-            size="middle"
             scroll={{ x: 1200 }}
-            onRow={record => ({
-              onClick: () => navigate(
-                `/admin/graduation/${id}/${slug}/students/${record.id}/${toSlug(record.full_name)}`,
-                { state: { student: record, graduationName } }
-              ),
+            onRow={(record: GraduationStudent) => ({
+              onClick: () =>
+                navigate(
+                  `/admin/graduation/${id}/${slug}/students/${record.id}/${toSlug(record.full_name)}`,
+                  { state: { student: record, graduationName } }
+                ),
               style: { cursor: "pointer", transition: "background 0.12s" },
             })}
             pagination={
-            
               isSearching
                 ? {
                     pageSize: meta.per_page,
                     total: filtered.length,
-                    showTotal: t => `${t} sinh viên`,
+                    showTotal: (t: number) => `${t} sinh viên`,
                     size: "small",
                   }
                 : {
@@ -168,11 +168,12 @@ export default function GraduationStudentsPage() {
                     pageSize: meta.per_page,
                     total: meta.total,
                     onChange: setPage,
-                    showTotal: t => `${t} sinh viên`,
+                    showTotal: (t: number) => `${t} sinh viên`,
                     size: "small",
                   }
             }
-            locale={{ emptyText: <div style={{ padding: "40px 0", color: "#9ca3af", textAlign: "center" }}>Không có sinh viên nào</div> }}
+            filter={{ page: meta.current_page - 1, size: meta.per_page }}
+            rowKey="id"
           />
         </div>
       </div>
