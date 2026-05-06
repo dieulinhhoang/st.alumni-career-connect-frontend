@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Modal, Form, Input, Select, Tag, Row, Col } from "antd";
+import { useEffect } from "react";
+import { Modal, Form, Input, Select, DatePicker, Button, Space } from "antd";
+import dayjs from "dayjs";
 import {
-  ALL_FACULTIES, FACULTY_VI_NAME, FACULTY_COLOR_MAP, JOB_LOCATIONS,
+  FACULTY_VI_NAME,
   type Job, type JobFormValues,
 } from "../../../feature/enterprise/type";
 
@@ -11,139 +12,82 @@ interface Props {
   entColor: string;
   entFaculties: string[];
   onClose: () => void;
-  onSave: (data: JobFormValues) => Promise<void>;
+  onSave: (values: JobFormValues) => Promise<void>;
 }
 
 export function JobFormModal({ open, job, entColor, entFaculties, onClose, onSave }: Props) {
   const [form] = Form.useForm();
-  const [saving, setSaving] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
     if (open) {
-      form.setFieldsValue(job ?? { status: "active" });
-      setTags(job?.tags ?? []);
-    } else {
-      form.resetFields();
-      setTags([]);
-      setTagInput("");
+      if (job) {
+        form.setFieldsValue({
+          ...job,
+          deadline: job.deadline ? dayjs(job.deadline, 'DD/MM/YYYY') : undefined,
+        });
+      } else {
+        form.resetFields();
+      }
     }
-  }, [open, job, form]);
-
-  const addTag = () => {
-    const t = tagInput.trim();
-    if (t && !tags.includes(t)) setTags(prev => [...prev, t]);
-    setTagInput("");
-  };
+  }, [open, job]);
 
   const handleOk = async () => {
     const values = await form.validateFields();
-    setSaving(true);
-    try {
-      await onSave({ ...values, tags });
-      onClose();
-    } finally {
-      setSaving(false);
-    }
+    await onSave({
+      ...values,
+      deadline: values.deadline?.format('DD/MM/YYYY'),
+    });
+    onClose();
   };
-
-  const facultyList = entFaculties.length > 0 ? entFaculties : [...ALL_FACULTIES];
 
   return (
     <Modal
-      title={job ? " Chỉnh sửa tin tuyển dụng" : "Thêm tin tuyển dụng"}
       open={open}
-      onOk={handleOk}
+      title={job ? 'Chỉnh sửa tin tuyển dụng' : 'Thêm tin tuyển dụng'}
       onCancel={onClose}
-      okText={job ? "Lưu thay đổi" : "Đăng tin"}
-      cancelText="Hủy"
-      width={580}
-      confirmLoading={saving}
-      okButtonProps={{ style: { background: entColor, border: "none" } }}
+      footer={[
+        <Button key="cancel" onClick={onClose}>Hủy</Button>,
+        <Button key="ok" type="primary" style={{ background: entColor, border: 'none' }} onClick={handleOk}>
+          {job ? 'Cập nhật' : 'Thêm tin'}
+        </Button>,
+      ]}
+      width={560}
       destroyOnClose
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-        <Form.Item
-          name="title"
-          label="Vị trí tuyển dụng"
-          rules={[{ required: true, message: "Nhập tên vị trí" }]}
-        >
+      <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+        <Form.Item name="title" label="Vị trí tuyển dụng" rules={[{ required: true }]}>
           <Input placeholder="VD: Lập trình viên Backend" />
         </Form.Item>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="location"
-              label="Địa điểm"
-              rules={[{ required: true, message: "Chọn địa điểm" }]}
-            >
-              <Select placeholder="Chọn tỉnh/thành">
-                {JOB_LOCATIONS.map(l => (
-                  <Select.Option key={l} value={l}>{l}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="salary" label="Mức lương">
-              <Input placeholder="VD: 15–25 triệu" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item name="faculties" label="Khoa phù hợp">
-          <Select mode="multiple" allowClear placeholder="Chọn khoa liên quan">
-            {facultyList.map(k => (
-              <Select.Option key={k} value={k}>
-                <span style={{ color: FACULTY_COLOR_MAP?.[k] ?? "#6d28d9" }}>●</span>{" "}
-                {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
-              </Select.Option>
-            ))}
-          </Select>
+        <Space style={{ display: 'flex', gap: 12 }} align="start">
+          <Form.Item name="location" label="Địa điểm" rules={[{ required: true }]} style={{ flex: 1 }}>
+            <Input placeholder="Hà Nội" />
+          </Form.Item>
+          <Form.Item name="salary" label="Mức lương" style={{ flex: 1 }}>
+            <Input placeholder="15-25 triệu" />
+          </Form.Item>
+        </Space>
+        <Form.Item name="deadline" label="Hạn nộp hồ sơ">
+          <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="Chọn ngày" />
         </Form.Item>
-
-        <Form.Item label="Kỹ năng / Tags">
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8, minHeight: 24 }}>
-            {tags.map(t => (
-              <Tag
-                key={t}
-                closable
-                onClose={() => setTags(p => p.filter(x => x !== t))}
-                color="purple"
-                style={{ fontSize: 12 }}
-              >
-                {t}
-              </Tag>
-            ))}
-          </div>
-          <Input.Search
-            value={tagInput}
-            onChange={e => setTagInput(e.target.value)}
-            onSearch={addTag}
-            onPressEnter={e => { e.preventDefault(); addTag(); }}
-            placeholder="Nhập kỹ năng rồi nhấn Enter hoặc +"
-            enterButton="+"
-            style={{ maxWidth: 320 }}
+        <Form.Item name="tags" label="Kỹ năng yêu cầu">
+          <Select mode="tags" placeholder="Nhập kỹ năng, nhấn Enter" />
+        </Form.Item>
+        <Form.Item name="faculties" label="Khoa phù hợp">
+          <Select
+            mode="multiple"
+            placeholder="Chọn khoa"
+            options={entFaculties.map(k => ({
+              value: k,
+              label: FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k,
+            }))}
           />
         </Form.Item>
-
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item name="deadline" label="Hạn nộp hồ sơ">
-              <Input placeholder="DD/MM/YYYY" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="status" label="Trạng thái" initialValue="active">
-              <Select>
-                <Select.Option value="active">Đang tuyển</Select.Option>
-                <Select.Option value="closed">Đã đóng</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.Item name="status" label="Trạng thái" initialValue="active">
+          <Select options={[
+            { value: 'active', label: 'Đang tuyển' },
+            { value: 'closed', label: 'Đã đóng' },
+          ]} />
+        </Form.Item>
       </Form>
     </Modal>
   );

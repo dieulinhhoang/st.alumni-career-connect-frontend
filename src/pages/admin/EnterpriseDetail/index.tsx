@@ -133,16 +133,16 @@ export default function EnterpriseDetailPage() {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                 marginTop: -28,
               }}>
-                <span style={{ fontSize: 17, fontWeight: 900, color: ent.color }}>{ent.abbr}</span>
+                <span style={{ fontWeight: 900, color: ent.color }}>{ent.abbr}</span>
               </div>
               <div style={{ paddingBottom: 2 }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2 }}>{ent.name}</div>
-                <div style={{ fontSize: 14, color: "#6b7280", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2 }}>{ent.name}</div>
+                <div style={{ color: "#6b7280", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
                   <span>{ent.industry}</span>
                   {ent.size && <>
                     <span style={{ color: "#d1d5db" }}>·</span>
                     <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                      <TeamOutlined style={{ fontSize: 13 }} />{ent.size}
+                      <TeamOutlined />{ent.size}
                     </span>
                   </>}
                 </div>
@@ -153,7 +153,7 @@ export default function EnterpriseDetailPage() {
               <Button icon={<PlusOutlined />} type="primary" style={{ background: ent.color, border: "none", borderRadius: 8 }} onClick={() => setJobModal({ open: true, job: null })}>
                 Thêm tin tuyển dụng
               </Button>
-              <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)} style={{ borderRadius: 8 }}>Điều chỉnh</Button>
+              <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)} style={{ borderRadius: 8 }}>Chỉnh sửa</Button>
               {!ent.verified && (
                 <Button icon={<SafetyCertificateOutlined />} style={{ background: "#059669", border: "none", color: "white", borderRadius: 8 }} onClick={verify}>Xác minh</Button>
               )}
@@ -169,39 +169,36 @@ export default function EnterpriseDetailPage() {
         </Card>
 
         <Row gutter={[20, 20]}>
-          {/* Left panel */}
           <Col xs={24} lg={8}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Thông tin liên hệ</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontWeight: 700 }}>Thông tin liên hệ</span>}>
                 {[
-                  { icon: <GlobalOutlined     style={{ color: ent.color }} />, label: "Website",    value: ent.website },
-                  { icon: <MailOutlined        style={{ color: ent.color }} />, label: "Email",      value: ent.email   },
-                  { icon: <PhoneOutlined       style={{ color: ent.color }} />, label: "Điện thoại", value: ent.phone   },
-                  { icon: <EnvironmentOutlined style={{ color: ent.color }} />, label: "Địa chỉ",    value: ent.address },
+                  { icon: <GlobalOutlined style={{ color: ent.color }} />, label: "Website",    value: ent.website },
+                  { icon: <MailOutlined   style={{ color: ent.color }} />, label: "Email",      value: ent.email   },
+                  { icon: <PhoneOutlined  style={{ color: ent.color }} />, label: "Điện thoại", value: ent.phone   },
+                  { icon: <EnvironmentOutlined style={{ color: ent.color }} />, label: "Địa chỉ", value: ent.address },
                 ].map(item => (
                   <div key={item.label} style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-                    <div style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{item.icon}</div>
+                    <div style={{ marginTop: 1, flexShrink: 0 }}>{item.icon}</div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, color: "#9ca3af" }}>{item.label}</div>
-                      <div style={{ fontSize: 15, color: "#374151", fontWeight: 500, wordBreak: "break-all" }}>
-                        {item.value}
-                      </div>
+                      <div style={{ color: "#9ca3af" }}>{item.label}</div>
+                      <div style={{ color: "#374151", fontWeight: 500, wordBreak: "break-all" }}>{item.value}</div>
                     </div>
                   </div>
                 ))}
                 <Divider style={{ margin: "8px 0 12px" }} />
-                <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 4 }}>Đối tác từ</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
+                <div style={{ color: "#9ca3af", marginBottom: 4 }}>Đối tác từ</div>
+                <div style={{ fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
               </Card>
 
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Khoa đối tác</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontWeight: 700 }}>Khoa đối tác</span>}>
                 {(ent.faculties ?? []).length === 0
-                  ? <span style={{ color: "#9ca3af", fontSize: 14 }}>Chưa có khoa liên kết</span>
+                  ? <span style={{ color: "#9ca3af" }}>Chưa có khoa liên kết</span>
                   : (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                       {ent.faculties.map(k => (
                         <span key={k} style={{
-                          padding: "5px 14px", borderRadius: 100, fontSize: 13, fontWeight: 600,
+                          padding: "5px 14px", borderRadius: 100, fontWeight: 600,
                           background: getColor(k) + "15", color: getColor(k), border: `1px solid ${getColor(k)}30`,
                         }}>
                           {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
@@ -212,17 +209,17 @@ export default function EnterpriseDetailPage() {
                 }
               </Card>
 
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Thống kê tuyển dụng</span>}>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontWeight: 700 }}>Thống kê tuyển dụng</span>}>
                 <Row gutter={[12, 12]}>
                   {[
-                    { label: "Tổng tin",    value: jobs.length,        color: ent.color,  bg: ent.color + "12" },
-                    { label: "Đang tuyển",  value: activeJobs.length,  color: "#059669",  bg: "#d1fae5"        },
-                    { label: "Đã đóng",     value: closedJobs.length,  color: "#d97706",  bg: "#fef3c7"        },
+                    { label: "Tổng tin",   value: jobs.length,       color: ent.color, bg: ent.color + "12" },
+                    { label: "Đang tuyển", value: activeJobs.length, color: "#059669", bg: "#d1fae5" },
+                    { label: "Đã đóng",    value: closedJobs.length, color: "#d97706", bg: "#fef3c7" },
                   ].map(s => (
                     <Col key={s.label} span={8}>
                       <div style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: s.bg }}>
-                        <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
-                        <div style={{ fontSize: 13, color: s.color, marginTop: 2 }}>{s.label}</div>
+                        <div style={{ fontWeight: 800, color: s.color }}>{s.value}</div>
+                        <div style={{ color: s.color, marginTop: 2 }}>{s.label}</div>
                       </div>
                     </Col>
                   ))}
@@ -231,18 +228,17 @@ export default function EnterpriseDetailPage() {
             </div>
           </Col>
 
-          {/* Right panel */}
           <Col xs={24} lg={16}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontSize: 16, fontWeight: 700 }}>Giới thiệu</span>}>
-                <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.8, margin: 0 }}>{ent.description}</p>
+              <Card style={{ borderRadius: 14, border: "1px solid #ede9fe" }} title={<span style={{ fontWeight: 700 }}>Giới thiệu</span>}>
+                <p style={{ color: "#374151", lineHeight: 1.8, margin: 0 }}>{ent.description}</p>
               </Card>
 
               <Card
                 style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
                 title={
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 16, fontWeight: 700 }}>Tin tuyển dụng</span>
+                    <span style={{ fontWeight: 700 }}>Tin tuyển dụng</span>
                     <Badge count={activeJobs.length} style={{ backgroundColor: ent.color }} />
                   </div>
                 }
@@ -267,26 +263,16 @@ export default function EnterpriseDetailPage() {
               >
                 {displayJobs.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "32px 0", color: "#9ca3af" }}>
-                    <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
-                      <IconClipboard />
-                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><IconClipboard /></div>
                     <div>Chưa có tin tuyển dụng</div>
-                    <Button
-                      type="primary" icon={<PlusOutlined />}
-                      style={{ marginTop: 12, background: ent.color, border: "none" }}
-                      onClick={() => setJobModal({ open: true, job: null })}
-                    >
+                    <Button type="primary" icon={<PlusOutlined />} style={{ marginTop: 12, background: ent.color, border: "none" }} onClick={() => setJobModal({ open: true, job: null })}>
                       Thêm tin mới
                     </Button>
                   </div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {displayJobs.map(j => (
-                      <JobCard
-                        key={j.id} job={j} entColor={ent.color} getColor={getColor}
-                        onEdit={job => setJobModal({ open: true, job })}
-                        onDelete={removeJob}
-                      />
+                      <JobCard key={j.id} job={j} entColor={ent.color} getColor={getColor} onEdit={job => setJobModal({ open: true, job })} onDelete={removeJob} />
                     ))}
                   </div>
                 )}
@@ -296,21 +282,8 @@ export default function EnterpriseDetailPage() {
         </Row>
       </div>
 
-      <EnterpriseFormModal
-        open={editOpen}
-        enterprise={ent}
-        onClose={() => setEditOpen(false)}
-        onSave={edit as (v: any) => Promise<void>}
-      />
-
-      <JobFormModal
-        open={jobModal.open}
-        job={jobModal.job}
-        entColor={ent.color}
-        entFaculties={ent.faculties ?? []}
-        onClose={() => setJobModal({ open: false, job: null })}
-        onSave={handleSaveJob}
-      />
+      <EnterpriseFormModal open={editOpen} enterprise={ent} onClose={() => setEditOpen(false)} onSave={edit as (v: any) => Promise<void>} />
+      <JobFormModal open={jobModal.open} job={jobModal.job} entColor={ent.color} entFaculties={ent.faculties ?? []} onClose={() => setJobModal({ open: false, job: null })} onSave={handleSaveJob} />
     </AdminLayout>
   );
 }

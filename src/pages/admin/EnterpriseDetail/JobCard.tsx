@@ -29,22 +29,13 @@ export function JobCard({ job, entColor, getColor, onEdit, onDelete }: Props) {
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, gap: 8 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontWeight: 700, fontSize: 16, color: "#1e1b4b", marginBottom: 4,
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>
+          <div style={{ fontWeight: 700, color: "#1e1b4b", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {job.title}
           </div>
-          <div style={{ display: "flex", gap: 12, fontSize: 14, color: "#6b7280", flexWrap: "wrap" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <EnvironmentOutlined />{job.location}
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <DollarOutlined />{job.salary}
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <ClockCircleOutlined />Đăng {job.postedAt}
-            </span>
+          <div style={{ display: "flex", gap: 12, color: "#6b7280", flexWrap: "wrap" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}><EnvironmentOutlined />{job.location}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}><DollarOutlined />{job.salary}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}><ClockCircleOutlined />Đăng {job.postedAt}</span>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
@@ -52,28 +43,18 @@ export function JobCard({ job, entColor, getColor, onEdit, onDelete }: Props) {
             {job.status === "active" ? "Đang tuyển" : "Đã đóng"}
           </Tag>
           {job.deadline && (
-            <span style={{ fontSize: 13, color: "#ef4444", whiteSpace: "nowrap" }}>
-              Hạn: {job.deadline}
-            </span>
+            <span style={{ color: "#ef4444", whiteSpace: "nowrap" }}>Hạn: {job.deadline}</span>
           )}
         </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {job.tags.map(t => (
-            <Tag key={t} color="purple" style={{ fontSize: 13, margin: 0 }}>{t}</Tag>
-          ))}
+          {job.tags.map(t => <Tag key={t} color="purple" style={{ margin: 0 }}>{t}</Tag>)}
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {(job.faculties ?? []).map(k => (
-            <span
-              key={k}
-              style={{
-                fontSize: 13, padding: "2px 8px", borderRadius: 100,
-                background: getColor(k) + "15", color: getColor(k), fontWeight: 600,
-              }}
-            >
+            <span key={k} style={{ padding: "2px 8px", borderRadius: 100, background: getColor(k) + "15", color: getColor(k), fontWeight: 600 }}>
               {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
             </span>
           ))}
@@ -81,37 +62,18 @@ export function JobCard({ job, entColor, getColor, onEdit, onDelete }: Props) {
       </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 12, paddingTop: 10, borderTop: "1px solid #f5f5f5" }}>
-        <Button
-          size="small"
-          icon={<EditOutlined />}
-          style={{ fontSize: 13, borderRadius: 6 }}
-          onClick={() => onEdit(job)}
-        >
-          Chỉnh sửa
-        </Button>
-        <Button
-          size="small"
-          icon={<DeleteOutlined />}
-          danger
-          style={{ fontSize: 13, borderRadius: 6 }}
-          onClick={() =>
-            Modal.confirm({
-              title: "Xóa tin tuyển dụng?",
-              content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
-              okText: "Xóa", okType: "danger", cancelText: "Hủy",
-              onOk: () => onDelete(job.id),
-            })
-          }
-        >
-          Xóa
-        </Button>
+        <Button size="small" icon={<EditOutlined />} style={{ borderRadius: 6 }} onClick={() => onEdit(job)}>Chỉnh sửa</Button>
+        <Button size="small" icon={<DeleteOutlined />} danger style={{ borderRadius: 6 }}
+          onClick={() => Modal.confirm({
+            title: "Xóa tin tuyển dụng?",
+            content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
+            okText: "Xóa", okType: "danger", cancelText: "Hủy",
+            onOk: () => onDelete(job.id),
+          })}
+        >Xóa</Button>
       </div>
 
-      <style>{`
-        .job-card:hover {
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        }
-      `}</style>
+      <style>{`.job-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }`}</style>
     </div>
   );
 }
