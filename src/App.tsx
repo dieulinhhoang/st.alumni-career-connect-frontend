@@ -14,12 +14,12 @@ function App() {
         token: {
           fontSize: 15,
           fontSizeSM: 13,
-          fontSizeLG: 17,
-          fontSizeXL: 19,
-          fontSizeHeading1: 34,
-          fontSizeHeading2: 26,
-          fontSizeHeading3: 21,
-          fontSizeHeading4: 17,
+          fontSizeLG: 16,
+          fontSizeXL: 18,
+          fontSizeHeading1: 28,
+          fontSizeHeading2: 22,
+          fontSizeHeading3: 18,
+          fontSizeHeading4: 16,
           fontSizeHeading5: 15,
         },
       }}

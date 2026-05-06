@@ -13,10 +13,10 @@
 }
 
 /* ========================================
-   GLOBAL FONT SIZE — áp dụng toàn hệ thống
+   GLOBAL FONT SIZE
    ======================================== */
 html {
-    font-size: 20px;
+    font-size: 15px;
 }
 
 body {
@@ -24,73 +24,34 @@ body {
     line-height: 1.6;
 }
 
-/* Ant Design global override */
-.ant-typography,
-.ant-btn,
-.ant-input,
-.ant-input-affix-wrapper,
-.ant-select,
-.ant-select-selector,
-.ant-menu-item,
-.ant-menu-submenu-title,
+/* Headings — giảm xuống vừa phải */
+h1 { font-size: 1.8rem !important; }
+h2 { font-size: 1.5rem !important; }
+h3 { font-size: 1.25rem !important; }
+h4 { font-size: 1.1rem  !important; }
+h5 { font-size: 1rem    !important; }
+h6 { font-size: 0.95rem !important; }
+
+/* Ant Typography headings */
+.ant-typography h1, h1.ant-typography { font-size: 1.8rem !important; }
+.ant-typography h2, h2.ant-typography { font-size: 1.5rem !important; }
+.ant-typography h3, h3.ant-typography { font-size: 1.25rem !important; }
+.ant-typography h4, h4.ant-typography { font-size: 1.1rem !important; }
+.ant-typography h5, h5.ant-typography { font-size: 1rem !important; }
+
+/* Table — tăng lên 16px */
 .ant-table,
+.ant-table table,
 .ant-table-thead > tr > th,
 .ant-table-tbody > tr > td,
-.ant-form-item-label > label,
-.ant-form-item-explain,
-.ant-modal-title,
-.ant-modal-body,
-.ant-drawer-title,
-.ant-drawer-body,
-.ant-card-head-title,
-.ant-card-body,
-.ant-list-item,
-.ant-tag,
-.ant-badge,
-.ant-tooltip-inner,
-.ant-popover-title,
-.ant-popover-inner-content,
-.ant-dropdown-menu-item,
-.ant-tabs-tab,
-.ant-breadcrumb,
-.ant-pagination,
-.ant-statistic-title,
-.ant-statistic-content,
-.ant-descriptions-item-label,
-.ant-descriptions-item-content,
-.ant-radio-wrapper,
-.ant-checkbox-wrapper,
-.ant-switch,
-.ant-slider,
-.ant-upload,
-.ant-message,
-.ant-notification {
-    font-size: 1rem !important;
+.ant-table-summary > tr > td,
+.ant-table-footer {
+    font-size: 16px !important;
 }
 
-/* Heading scale */
-h1 { font-size: 2.2rem !important; }
-h2 { font-size: 1.8rem !important; }
-h3 { font-size: 1.5rem !important; }
-h4 { font-size: 1.25rem !important; }
-h5 { font-size: 1.1rem  !important; }
-h6 { font-size: 1rem    !important; }
-
-/* Ant Design heading overrides */
-.ant-typography.ant-typography-h1 { font-size: 2.2rem !important; }
-.ant-typography.ant-typography-h2 { font-size: 1.8rem !important; }
-.ant-typography.ant-typography-h3 { font-size: 1.5rem !important; }
-.ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
-.ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
-
-/* Table */
-.ant-table-thead > tr > th { font-size: 1rem !important; font-weight: 600 !important; }
-.ant-table-tbody > tr > td { font-size: 1rem !important; }
-
-/* Menu */
-.ant-menu-item,
-.ant-menu-submenu-title { font-size: 1rem !important; }
-
-/* Pagination */
-.ant-pagination { font-size: 1rem !important; }
-.ant-pagination-item a { font-size: 1rem !important; }
+.ant-table-pagination,
+.ant-pagination,
+.ant-pagination-item a,
+.ant-pagination-item-link {
+    font-size: 14px !important;
+}
