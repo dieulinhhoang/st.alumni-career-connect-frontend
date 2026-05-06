@@ -10,6 +10,7 @@ const { Title } = Typography;
 export default function FacultyListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { data: faculties, loading } = useFaculties();
 
   const filtered = faculties.filter(f =>
@@ -20,8 +21,19 @@ export default function FacultyListPage() {
   const totalStudents = faculties.reduce((s, f) => s + f.students, 0);
   const totalMajors   = faculties.reduce((s, f) => s + f.majors, 0);
 
+  const isEmpty = !loading && filtered.length === 0;
+  const isNoFaculties = isEmpty && faculties.length === 0 && search === "";
+  const isNoResults   = isEmpty && !isNoFaculties;
+
   return (
     <AdminLayout>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
+
       <div>
         <div style={{ marginBottom: 24 }}>
           <Title level={4} style={{ margin: 0 }}>Khoa</Title>
@@ -33,7 +45,7 @@ export default function FacultyListPage() {
             { label: "Ngành đào tạo",  value: totalMajors,                    color: "#0ea5e9", bg: "#f0f9ff", border: "#e0f2fe" },
             { label: "Tổng sinh viên", value: totalStudents.toLocaleString(),  color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
           ].map(s => (
-            <Col key={s.label} xs={12} md={8}>
+            <Col key={s.label} xs={8} md={8}>
               <div style={{
                 background: s.bg, borderRadius: 12, padding: "14px 18px",
                 border: `1.5px solid ${s.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
@@ -63,25 +75,26 @@ export default function FacultyListPage() {
                 <div
                   key={f.id}
                   onClick={() => navigate(`/admin/faculties/${f.slug}`)}
+                  onMouseEnter={() => setHoveredId(f.id)}
+                  onMouseLeave={() => setHoveredId(null)}
                   style={{
-                    background: "white", borderRadius: 16, border: "1px solid #f0f0f0",
-                    padding: "20px 24px", cursor: "pointer", transition: "all 0.2s",
-                    position: "relative", overflow: "hidden",
-                  }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.transform = "translateY(-2px)";
-                    el.style.boxShadow = `0 8px 24px ${f.color}20`;
-                    el.style.borderColor = f.color + "40";
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.transform = "translateY(0)";
-                    el.style.boxShadow = "none";
-                    el.style.borderColor = "#f0f0f0";
+                    background: "white",
+                    borderRadius: 16,
+                    border: `1px solid ${hoveredId === f.id ? f.color + "40" : "#f0f0f0"}`,
+                    padding: "20px 24px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    position: "relative",
+                    overflow: "hidden",
+                    transform: hoveredId === f.id ? "translateY(-2px)" : "translateY(0)",
+                    boxShadow: hoveredId === f.id ? `0 8px 24px ${f.color}20` : "none",
                   }}
                 >
-                  <div style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", borderRadius: "16px 0 0 16px" }} />
+                  <div style={{
+                    position: "absolute", top: 0, left: 0, width: 4, height: "100%",
+                    borderRadius: "16px 0 0 16px",
+                    background: f.color,
+                  }} />
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                       <div style={{ width: 48, height: 48, borderRadius: 12, background: f.color + "15", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -104,10 +117,15 @@ export default function FacultyListPage() {
                 </div>
               ))
           }
-          {!loading && filtered.length === 0 && (
+
+           {isNoFaculties && (
             <div style={{ textAlign: "center", padding: "48px 0", color: "#9ca3af" }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🏫</div>
-              <div>Không tìm thấy khoa nào</div>
+              <div>Chưa có khoa nào trong hệ thống</div>
+            </div>
+          )}
+          {isNoResults && (
+            <div style={{ textAlign: "center", padding: "48px 0", color: "#9ca3af" }}>
+              <div>Không tìm thấy khoa nào phù hợp với "<strong>{search}</strong>"</div>
             </div>
           )}
         </div>

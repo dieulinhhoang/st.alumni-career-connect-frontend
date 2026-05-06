@@ -1,9 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Row, Col, Button, Tag, Typography, Divider } from "antd";
+import { Card, Row, Col, Button, Tag, Typography } from "antd";
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined } from "@ant-design/icons";
 import AdminLayout from "../../../../components/layout/AdminLayout";
-import { useMajorDetail } from "../../../../feature/faculty/hooks/useFaculties";
-import { useFacultyDetail } from "../../../../feature/faculty/hooks/useFaculties";
+import { useMajorDetail, useFacultyDetail } from "../../../../feature/faculty/hooks/useFaculties";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -46,33 +45,64 @@ export default function MajorDetailPage() {
           {faculty?.name}
         </Button>
 
-        {/* Hero */}
-        <Card style={{ borderRadius: 16, marginBottom: 20, border: `1px solid ${color}30`, overflow: "hidden" }}>
-          <div style={{ height: 80, background: `linear-gradient(135deg, ${color}22, ${color}44)`, margin: "-24px -24px 0", borderBottom: `2px solid ${color}20` }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: -28 }}>
-            <div style={{ width: 60, height: 60, borderRadius: 14, background: color + "18", border: "3px solid white", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", flexShrink: 0 }}>
-              <span style={{ fontWeight: 900, fontSize: 13, color }}>{major.code}</span>
+       
+        <div style={{
+          borderRadius: 16,
+          border: `1px solid ${color}25`,
+          overflow: "hidden",
+          marginBottom: 20,
+          background: "white",
+        }}>
+          {/* Gradient banner */}
+          <div style={{
+            height: 90,
+            background: `linear-gradient(135deg, ${color}35 0%, ${color}60 100%)`,
+          }} />
+
+          {/* Avatar + Info */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            padding: "0 24px 20px",
+          }}>
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: 14,
+              background: "white",
+              border: `2px solid ${color}30`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              marginTop: -32,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            }}>
+              <span style={{ fontWeight: 900, fontSize: 12, color }}>{major.code}</span>
             </div>
-            <div style={{ paddingBottom: 4 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+            <div style={{ paddingTop: 12 }}>
+              {/* flexWrap so Tag doesn't overflow on narrow screens */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <Title level={4} style={{ margin: 0, color: "#1e1b4b" }}>{major.name}</Title>
                 <Tag color="purple" style={{ fontSize: 12 }}>{major.code}</Tag>
               </div>
               <Text type="secondary" style={{ fontSize: 13 }}>{faculty?.name}</Text>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Stats */}
         <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
           {[
-            { label: "Sinh viên",      value: major.students,      icon: <UserOutlined />,     color,          bg: color + "12"  },
-            { label: "Khóa đào tạo",   value: major.khoa.length,   icon: <CalendarOutlined />, color: "#0ea5e9", bg: "#e0f2fe"   },
+            { label: "Sinh viên",     value: major.students,    color,           bg: color + "12" },
+            { label: "Khóa đào tạo",  value: major.khoa.length, color: "#0ea5e9", bg: "#e0f2fe"   },
           ].map(s => (
             <Col key={s.label} xs={12}>
               <Card variant="borderless" style={{ borderRadius: 12, background: s.bg, border: "none", textAlign: "center" }}>
-                <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: s.color, opacity: 0.8, marginTop: 2 }}>{s.label}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: 13, color: s.color, opacity: 0.85, marginTop: 4 }}>{s.label}</div>
               </Card>
             </Col>
           ))}
@@ -98,9 +128,9 @@ export default function MajorDetailPage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
             {major.khoa.map(k => (
               <span key={k} style={{
-                padding: "5px 16px", borderRadius: 20, fontSize: 13, fontWeight: 600,
+                padding: "6px 18px", borderRadius: 20, fontSize: 13, fontWeight: 600,
                 background: color + "15", color,
-                border: `1px solid ${color}25`,
+                border: `1px solid ${color}30`,
               }}>
                 Khóa {k}
               </span>

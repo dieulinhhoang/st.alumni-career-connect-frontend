@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Select, Button, Tag, Typography } from "antd";
+import { Select, Button, Tag, Typography } from "antd";
 import { ArrowLeftOutlined, BookOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../../../../components/layout/AdminLayout";
 import { useFacultyDetail } from "../../../../feature/faculty/hooks/useFaculties";
 import type { Major } from "../../../../feature/faculty/types";
 import CustomTable from "../../../../components/common/customTable";
- 
+
 const { Title, Text } = Typography;
 const ALL_KHOA = [2021, 2022, 2023, 2024];
 
@@ -27,18 +27,16 @@ export default function FacultyDetailPage() {
       title: "Tên ngành",
       dataIndex: "name",
       key: "name",
-      render: (v, record) => (
+      render: (v) => (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 8,
-            background: faculty!.color + "12",
+            background: (faculty?.color ?? "#7c3aed") + "15",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>
-            <BookOutlined style={{ color: faculty!.color, fontSize: 13 }} />
+            <BookOutlined style={{ color: faculty?.color ?? "#7c3aed", fontSize: 13 }} />
           </div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 14, color: "#1e1b4b" }}>{v}</div>
-          </div>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "#1e1b4b" }}>{v}</div>
         </div>
       ),
     },
@@ -46,7 +44,7 @@ export default function FacultyDetailPage() {
       title: "Mã ngành",
       dataIndex: "code",
       key: "code",
-      width: 100,
+      width: 120,
       render: v => <Tag color="purple" style={{ fontSize: 11 }}>{v}</Tag>,
     },
     {
@@ -79,6 +77,8 @@ export default function FacultyDetailPage() {
     </AdminLayout>
   );
 
+  const color = faculty.color;
+
   return (
     <AdminLayout>
       <div>
@@ -89,40 +89,53 @@ export default function FacultyDetailPage() {
           onClick={() => navigate("/admin/faculties")}
         >Quay lại danh sách khoa</Button>
 
-        {/* Hero + Stats */}
-        <Card style={{ borderRadius: 16, marginBottom: 20, border: `1px solid ${faculty.color}30`, overflow: "hidden" }}>
+       
+        <div style={{
+          borderRadius: 16,
+          border: `1px solid ${color}25`,
+          overflow: "hidden",
+          marginBottom: 20,
+          background: "white",
+        }}>
+          {/* Gradient banner */}
           <div style={{
-            height: 80,
-            background: `linear-gradient(135deg, ${faculty.color}22, ${faculty.color}44)`,
-            margin: "-50px -24px 0",
+            height: 90,
+            background: `linear-gradient(135deg, ${color}35 0%, ${color}60 100%)`,
           }} />
 
+          {/* Avatar + Info — padding starts here, avatar pulled up with negative marginTop */}
           <div style={{
-            display: "flex", alignItems: "flex-end",
-            justifyContent: "space-between", flexWrap: "wrap",
-            gap: 16, marginTop: -28,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            padding: "0 24px 20px",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{
-                width: 60, height: 60, borderRadius: 14,
-                background: faculty.color + "18", border: "3px solid white",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)", flexShrink: 0,
-              }}>
-                <span style={{ fontWeight: 900, fontSize: 14, color: faculty.color }}>{faculty.abbr}</span>
-              </div>
-              <div style={{ paddingBottom: 4 }}>
-                <Title level={4} style={{ margin: 0, color: "#1e1b4b" }}>{faculty.name}</Title>
-                <Text type="secondary" style={{ fontSize: 13 }}>
-                  {majors.length} ngành đào tạo | {majors.reduce((s, m) => s + m.students, 0).toLocaleString()} sinh viên
-                </Text>
-              </div>
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: 14,
+              background: "white",
+              border: `2px solid ${color}30`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              marginTop: -32, // avatar overlaps banner bottom by ~half its height
+              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            }}>
+              <span style={{ fontWeight: 900, fontSize: 13, color }}>{faculty.abbr}</span>
+            </div>
+            <div style={{ paddingTop: 12 }}>
+              <Title level={4} style={{ margin: 0, color: "#1e1b4b" }}>{faculty.name}</Title>
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                {majors.length} ngành đào tạo &nbsp;|&nbsp; {majors.reduce((s, m) => s + m.students, 0).toLocaleString()} sinh viên
+              </Text>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Filter */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
           <Text style={{ fontSize: 13, color: "#6b7280" }}>Lọc theo khóa:</Text>
           <Select value={khoaFilter} onChange={setKhoaFilter} style={{ width: 140 }}>
             <Select.Option value="all">Tất cả khóa</Select.Option>
@@ -131,14 +144,15 @@ export default function FacultyDetailPage() {
           <Text type="secondary" style={{ fontSize: 12 }}>{filtered.length} ngành</Text>
         </div>
 
-        {/* CustomTable */}
+        {/* Table */}
         <CustomTable
           columns={columns}
-          data={{ data: filtered }}   
+          data={{ data: filtered }}
           rowKey="id"
-          // pagination={false}      
+          pagination={false}
           onRow={(record: Major) => ({
             style: { cursor: "pointer" },
+            onClick: () => navigate(`/admin/faculties/${facultySlug}/${record.slug}`),
           })}
         />
       </div>
