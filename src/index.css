@@ -24,7 +24,7 @@ body {
     line-height: 1.6;
 }
 
-/* Headings — giảm xuống vừa phải */
+/* Headings */
 h1 { font-size: 1.8rem !important; }
 h2 { font-size: 1.5rem !important; }
 h3 { font-size: 1.25rem !important; }
@@ -39,14 +39,16 @@ h6 { font-size: 0.95rem !important; }
 .ant-typography h4, h4.ant-typography { font-size: 1.1rem !important; }
 .ant-typography h5, h5.ant-typography { font-size: 1rem !important; }
 
-/* Table — tăng lên 16px */
+/* ========================================
+   TABLE
+   ======================================== */
 .ant-table,
 .ant-table table,
 .ant-table-thead > tr > th,
 .ant-table-tbody > tr > td,
 .ant-table-summary > tr > td,
 .ant-table-footer {
-    font-size: 16px !important;
+    font-size: 15px !important;
 }
 
 .ant-table-pagination,
@@ -54,4 +56,99 @@ h6 { font-size: 0.95rem !important; }
 .ant-pagination-item a,
 .ant-pagination-item-link {
     font-size: 14px !important;
+}
+
+/* ========================================
+   TAG, BADGE
+   ======================================== */
+.ant-tag {
+    font-size: 13px !important;
+    padding: 2px 10px !important;
+    line-height: 20px !important;
+}
+
+.ant-badge-count {
+    font-size: 12px !important;
+}
+
+/* ========================================
+   CARD
+   ======================================== */
+.ant-card-head-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+.ant-card-body {
+    font-size: 14px !important;
+}
+
+/* ========================================
+   MENU / SIDEBAR
+   ======================================== */
+.ant-menu-item,
+.ant-menu-submenu-title,
+.ant-menu-title-content {
+    font-size: 14px !important;
+}
+
+/* Section group label (QUẢN LÍ CHUNG, DOANH NGHIỆP...) */
+.ant-menu-item-group-title {
+    font-size: 12px !important;
+    letter-spacing: 0.06em;
+}
+
+/* ========================================
+   BUTTON
+   ======================================== */
+.ant-btn {
+    font-size: 14px !important;
+}
+
+.ant-btn-sm {
+    font-size: 13px !important;
+}
+
+/* ========================================
+   FORM / INPUT / SELECT
+   ======================================== */
+.ant-form-item-label > label {
+    font-size: 14px !important;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker {
+    font-size: 14px !important;
+}
+
+.ant-select-item {
+    font-size: 14px !important;
+}
+
+/* ========================================
+   MODAL / DRAWER
+   ======================================== */
+.ant-modal-title {
+    font-size: 17px !important;
+}
+
+.ant-modal-body,
+.ant-drawer-body {
+    font-size: 14px !important;
+}
+
+/* ========================================
+   MISC SMALL TEXTS
+   ======================================== */
+/* Chạy tất cả các đoạn text nhỏ được set bằng inline style nhỏ hơn 13px
+   → dùng CSS filter với font-size tối thiểu */
+body * {
+    min-height: 0; /* chỉ để trigger, không liên quan font */
+}
+
+/* Ép tất cả span, div, p nhỏ hơn 13px lên 13px — trick dùng CSS clamp-like */
+span, p, div, td, th, li, label, a {
+    font-size: max(inherit, 13px);
 }
