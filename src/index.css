@@ -83,9 +83,10 @@ h6 { font-size: 1rem    !important; }
 .ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
 .ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
 
-/* Table */
-.ant-table-thead > tr > th { font-size: 1rem !important; font-weight: 600 !important; }
-.ant-table-tbody > tr > td { font-size: 1rem !important; }
+/* Table — tăng kích thước chữ */
+.ant-table-thead > tr > th { font-size: 1.15rem !important; font-weight: 700 !important; }
+.ant-table-tbody > tr > td { font-size: 1.1rem !important; }
+.ant-table { font-size: 1.1rem !important; }
 
 /* Menu */
 .ant-menu-item,
