@@ -20,7 +20,7 @@ body {
     line-height: 1.6;
 }
 /* Ant Design global override */
-/* NOTE: font size cho Table doực quan lý bỏi ConfigProvider token.fontSize */
+/* NOTE: font size cho Table doực quan lý bỏi ConfigProvider token.fontSize */
 .ant-typography,
 .ant-btn,
 .ant-input,
@@ -86,4 +86,40 @@ h6 { font-size: 1rem !important; }
 }
 .ant-pagination-item a {
     font-size: 1rem !important;
+}
+
+/* ========================================
+   Custom responsive table
+   ======================================== */
+.custom-responsive-table {
+    width: 100%;
+}
+
+.custom-responsive-table .ant-table-wrapper,
+.custom-responsive-table.ant-table-wrapper {
+    width: 100%;
+}
+
+.custom-responsive-table .ant-table-container {
+    min-width: 100%;
+}
+
+.custom-responsive-table .ant-table {
+    width: max-content;
+    min-width: 100%;
+}
+
+.custom-responsive-table .ant-table-thead > tr > th {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+}
+
+.custom-responsive-table .ant-table-tbody > tr > td {
+    font-size: 15px !important;
+    vertical-align: middle;
+}
+
+.custom-responsive-table .ant-table-pagination {
+    padding-top: 8px;
 }

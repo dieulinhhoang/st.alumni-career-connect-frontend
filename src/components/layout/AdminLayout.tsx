@@ -121,12 +121,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                     padding-left: 14px !important;
                     height: 38px !important;
                     line-height: 38px !important;
-                    font-size: 13px !important;
+                    font-size: 15px !important;
                     color: #4b5563 !important;
-                    font-weight: 500 !important;
+                    font-weight: 600 !important;
                 }
                 .ant-menu-item .anticon, .ant-menu-submenu-title .anticon {
-                    font-size: 15px !important;
+                    font-size: 18px !important;
                     color: #9ca3af !important;
                 }
                 .ant-menu-light .ant-menu-item-selected {
@@ -148,8 +148,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 }
                 .ant-menu-item-group-title {
                     padding-left: 20px !important;
-                    font-size: 10px !important;
-                    font-weight: 700 !important;
+                    font-size: 12px !important;
+                    font-weight: 800 !important;
                     letter-spacing: 0.06em !important;
                     color: #d1d5db !important;
                     margin-top: 12px !important;
@@ -219,7 +219,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                             <span style={{ 
                                 marginLeft: 10, 
                                 fontWeight: 800, 
-                                fontSize: 13, 
+                                fontSize: 15,
                                 color: '#111827', 
                                 letterSpacing: -0.3,
                                 whiteSpace: 'nowrap'
@@ -250,7 +250,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                             src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" 
                             style={{ borderRadius: 8 }} 
                         />
-                        <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 13, color: '#111827' }}>
+                        <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 15, color: '#111827' }}>
                             Hệ Thống Khảo Sát Việc Làm
                         </span>
                     </div>
@@ -301,7 +301,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
 
                         {/* Mobile logo text */}
                         {isMobile && (
-                            <span style={{ fontWeight: 800, fontSize: 13, color: '#111827' }}>
+                            <span style={{ fontWeight: 800, fontSize: 15, color: '#111827' }}>
                                 Hệ Thống Khảo Sát Việc Làm
                             </span>
                         )}
@@ -316,7 +316,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                         <Button type="text" style={{ height: 44, borderRadius: 8 }}>
                             <Space size={8}>
                                 <Avatar size={28} src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
-                                <span className="admin-avatar-text" style={{ fontWeight: 600, fontSize: 13, color: '#111827' }}>
+                                <span className="admin-avatar-text" style={{ fontWeight: 600, fontSize: 15, color: '#111827' }}>
                                     Quản trị viên
                                 </span>
                                 <DownOutlined style={{ fontSize: 9, color: '#9ca3af' }} />

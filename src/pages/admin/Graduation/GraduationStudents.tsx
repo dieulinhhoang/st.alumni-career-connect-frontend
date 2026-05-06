@@ -146,7 +146,6 @@ export default function GraduationStudentsPage() {
               page: { total_elements: isSearching ? filtered.length : meta.total },
             }}
             loading={loading}
-            scroll={{ x: 1200 }}
             onRow={(record: GraduationStudent) => ({
               onClick: () =>
                 navigate(
