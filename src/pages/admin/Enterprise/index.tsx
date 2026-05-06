@@ -1,55 +1,66 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Select, Button, Space, Modal, Tooltip } from "antd";
-import { PlusOutlined, EditOutlined, SafetyCertificateOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { Col, Row, Input, Select, Button, Modal, Tooltip } from "antd";
+import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { toSlug } from "../../../components/common/utils";
 import { useEnterprises } from "../../../feature/enterprise/hooks/useEnterprises";
-import { useFacultyColors } from "../../../feature/enterprise/hooks/useFacultyColors";
-import { INDUSTRIES, ALL_FACULTIES, FACULTY_VI_NAME, type PartnerStatus, type EnterpriseFormValues, type Enterprise } from "../../../feature/enterprise/type";
+import {
+  INDUSTRIES, ALL_FACULTIES, FACULTY_VI_NAME,
+  type PartnerStatus, type EnterpriseFormValues, type Enterprise,
+} from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import CustomTable from "../../../components/common/customTable";
 
-const pill = (bg: string, color: string): React.CSSProperties => ({
+const C = {
+  primary: "#6366f1", success: "#10b981", warning: "#f59e0b", danger: "#f43f5e",
+  text: "#111827", sub: "#9ca3af", muted: "#6b7280", border: "#f0f0f0",
+};
+
+const pill = (faded = false): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center", gap: 4,
-  padding: "2px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
-  background: bg, color, border: `1.5px solid ${color}30`,
+  padding: "2px 9px", borderRadius: 6, fontSize: 11.5, fontWeight: 500,
+  whiteSpace: "nowrap", opacity: faded ? 0.45 : 1,
+  background: "#f4f4f5", color: "#52525b", border: "1px solid #e4e4e7",
 });
 
-function Avatar({ abbr, color }: { abbr: string; color: string }) {
-  return (
-    <div style={{ width: 36, height: 36, borderRadius: 9, background: color + "18", border: `1.5px solid ${color}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-      <span style={{ fontSize: 10, fontWeight: 800, color }}>{abbr}</span>
-    </div>
-  );
+const stripeCSS = document.createElement("style");
+stripeCSS.textContent = `.row-stripe td { background: #fafafa !important; }`;
+if (!document.head.querySelector("[data-stripe]")) {
+  stripeCSS.setAttribute("data-stripe", "1");
+  document.head.appendChild(stripeCSS);
 }
 
 export default function Enterprise() {
   const navigate = useNavigate();
-  const { getColor } = useFacultyColors();
   const { enterprises, loading, addEnterprise, editEnterprise, verify, togglePartnerStatus } = useEnterprises();
 
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
   const [facultyFilter, setFacultyFilter] = useState("all");
-  const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>({ open: false, enterprise: null });
   const [query, setQuery] = useState({ page: 0, size: 8 });
+  const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>({ open: false, enterprise: null });
+
+  const faded = (r: Enterprise) => r.partnerStatus === "inactive";
 
   const filtered = enterprises.filter(e =>
     (e.name.toLowerCase().includes(search.toLowerCase()) || e.email.toLowerCase().includes(search.toLowerCase())) &&
     (industry === "Tất cả ngành" || e.industry === industry) &&
-    (facultyFilter === "all" || e.faculties.includes(facultyFilter))
+    (facultyFilter === "all" || e.faculties.includes(facultyFilter)),
   );
 
   const listData = {
     data: filtered,
-    page: {
-      total_elements: filtered.length,
-      current_page: query.page,
-      total_pages: Math.ceil(filtered.length / query.size),
-    }
+    page: { total_elements: filtered.length, current_page: query.page, total_pages: Math.ceil(filtered.length / query.size) },
   };
+
+  const stats = [
+    { label: "Tổng",         value: enterprises.length,                                                                    color: C.primary },
+    { label: "Hoạt động",    value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: C.success },
+    { label: "Tạm dừng",     value: enterprises.filter(e => e.partnerStatus === "inactive").length,                        color: C.danger  },
+    { label: "Vị trí tuyển", value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), color: C.warning },
+  ];
 
   const handleSave = async (values: EnterpriseFormValues) => {
     modal.enterprise ? await editEnterprise(modal.enterprise.id, values) : await addEnterprise(values);
@@ -61,89 +72,57 @@ export default function Enterprise() {
     const newStatus: PartnerStatus = checked ? "active" : "inactive";
     if (!checked) {
       Modal.confirm({
-        title: "Ngừng hợp tác đối tác?",
-        content: `"${ent.name}" sẽ bị hủy kích hoạt.`,
+        title: "Ngừng hợp tác đối tác?", content: `"${ent.name}" sẽ bị hủy kích hoạt.`,
         okText: "Hủy kích hoạt", okType: "danger", cancelText: "Quay lại",
         onOk: () => togglePartnerStatus(id, newStatus),
       });
     } else togglePartnerStatus(id, newStatus);
   };
 
-  const handleTableChange = (pagination: any) => {
-    setQuery(prev => ({
-      ...prev,
-      page: (pagination.current || 1) - 1,
-      size: pagination.pageSize || prev.size,
-    }));
-  };
-
-  const stats = [
-    { label: "Tổng",         value: enterprises.length,                                                                    color: "#6366f1" },
-    { label: "Hoạt động",    value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: "#10b981" },
-    { label: "Tạm dừng",    value: enterprises.filter(e => e.partnerStatus === "inactive").length,                         color: "#f43f5e" },
-    { label: "Vị trí tuyển", value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), color: "#f59e0b" },
-  ];
-
   const columns = [
     {
-      title: "Doanh nghiệp", key: "name",
+      title: "Doanh nghiệp", key: "name", width: 240,
       render: (_: any, r: Enterprise) => (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>
-          <Avatar abbr={r.abbr} color={r.color} />
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", display: "flex", alignItems: "center", gap: 5 }}>
-              {r.name}
-              {r.verified && <CheckCircleOutlined style={{ color: "#10b981", fontSize: 11 }} />}
-            </div>
-            <div style={{ fontSize: 11, color: "#9ca3af" }}>{r.website}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: faded(r) ? 0.45 : 1 }}>
+          <div style={{ width: 36, height: 36, flexShrink: 0, borderRadius: 9, background: `${r.color}18`, border: `1.5px solid ${r.color}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 10, fontWeight: 800, color: r.color }}>{r.abbr}</span>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+            <div style={{ fontSize: 11, color: C.sub, marginTop: 1 }}>{r.website}</div>
           </div>
         </div>
       ),
     },
     {
-      title: "Ngành", dataIndex: "industry", key: "industry",
-      render: (v: string, r: Enterprise) => <span style={{ ...pill("#f5f3ff", "#6d28d9"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>{v}</span>,
+      title: "Ngành", dataIndex: "industry", key: "industry", width: 140,
+      render: (v: string, r: Enterprise) => <span style={pill(faded(r))}>{v}</span>,
     },
     {
-      title: "Khoa đối tác", key: "faculties",
+      title: "Khoa đối tác", key: "faculties", width: 200,
       render: (_: any, r: Enterprise) => (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, opacity: faded(r) ? 0.45 : 1 }}>
           {r.faculties.slice(0, 2).map(k => (
-            <span key={k} style={pill(getColor(k) + "15", getColor(k))}>
-              {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
-            </span>
+            <span key={k} style={pill()}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</span>
           ))}
           {r.faculties.length > 2 && (
             <Tooltip title={r.faculties.slice(2).map(k => FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k).join(", ")}>
-              <span style={pill("#f3f4f6", "#6b7280")}>+{r.faculties.length - 2}</span>
+              <span style={{ ...pill(), cursor: "pointer" }}>+{r.faculties.length - 2}</span>
             </Tooltip>
           )}
         </div>
       ),
     },
     {
-      title: "Việc làm", dataIndex: "jobs", key: "jobs", align: "center" as const,
-      render: (v: number, r: Enterprise) => <span style={{ fontWeight: 700, fontSize: 13, color: r.partnerStatus === "inactive" ? "#9ca3af" : "#6d28d9" }}>{v}</span>,
+      title: "Việc làm", dataIndex: "jobs", key: "jobs", align: "center" as const, width: 80,
+      render: (v: number, r: Enterprise) => (
+        <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 20, fontWeight: 700, fontSize: 12, background: faded(r) ? "#f4f4f5" : "#f5f3ff", color: faded(r) ? C.sub : "#6d28d9" }}>{v}</span>
+      ),
     },
     {
-      title: "Trạng thái", key: "status",
-      render: (_: any, r: Enterprise) => r.verified
-        ? <span style={{ ...pill("#ecfdf5", "#059669"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}><CheckCircleOutlined style={{ fontSize: 10 }} />Đã xác minh</span>
-        : (
-          <Space size={6}>
-            <span style={{ ...pill("#fffbeb", "#d97706"), opacity: r.partnerStatus === "inactive" ? 0.5 : 1 }}>Chờ duyệt</span>
-            <Button size="small" type="primary" icon={<SafetyCertificateOutlined />}
-              style={{ background: "#10b981", border: "none", fontSize: 11, borderRadius: 6, fontWeight: 600 }}
-              onClick={e => { e.stopPropagation(); verify(r.id); }}>Xác minh</Button>
-          </Space>
-        ),
-    },
-    {
-      title: "", key: "actions", align: "center" as const, width: 50,
+      title: "Hành động", key: "actions", align: "center" as const, width: 120,
       render: (_: any, r: Enterprise) => (
-        <Button size="small" icon={<EditOutlined />}
-          onClick={e => { e.stopPropagation(); setModal({ open: true, enterprise: r }); }}
-          style={{ borderRadius: 7, border: "1.5px solid #e5e7eb" }} />
+        <Button size="small" icon={<EditOutlined />} style={{ borderRadius: 6, borderColor: "#d1d5db", color: C.muted }} onClick={e => { e.stopPropagation(); setModal({ open: true, enterprise: r }); }} />
       ),
     },
   ];
@@ -151,23 +130,21 @@ export default function Enterprise() {
   return (
     <AdminLayout>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-        {/* Header + Stats */}
-        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
+        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>Doanh nghiệp đối tác</div>
-              <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>Quản lý danh sách và trạng thái hợp tác</div>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>Doanh nghiệp đối tác</h2>
+              <p style={{ margin: "2px 0 0", fontSize: 12.5, color: C.sub }}>Quản lý danh sách và trạng thái hợp tác</p>
             </div>
-            <Button type="primary" icon={<PlusOutlined />}
-              style={{ background: "#6366f1", border: "none", borderRadius: 9, fontWeight: 600, height: 38, paddingInline: 18, boxShadow: "0 2px 8px #6366f140" }}
-              onClick={() => setModal({ open: true, enterprise: null })}>Thêm doanh nghiệp</Button>
+            <Button type="primary" icon={<PlusOutlined />} style={{ background: C.primary, border: "none", borderRadius: 9, fontWeight: 600, height: 38, paddingInline: 18, boxShadow: `0 2px 8px ${C.primary}40` }} onClick={() => setModal({ open: true, enterprise: null })}>
+              Thêm doanh nghiệp
+            </Button>
           </div>
           <Row gutter={[12, 12]}>
             {stats.map(s => (
               <Col key={s.label} xs={12} sm={6}>
-                <div style={{ background: s.color + "0d", border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "12px 16px" }}>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
+                <div style={{ background: `${s.color}0d`, border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "12px 16px" }}>
+                  <div style={{ fontSize: "clamp(18px,4vw,24px)", fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
                   <div style={{ fontSize: 11.5, color: s.color, opacity: 0.75, fontWeight: 500, marginTop: 2 }}>{s.label}</div>
                 </div>
               </Col>
@@ -175,33 +152,26 @@ export default function Enterprise() {
           </Row>
         </div>
 
-        {/* Table */}
-        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 210, borderRadius: 8, height: 34 }} />
-            <Select value={industry} onChange={setIndustry} style={{ width: 165, height: 34 }}>
+        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
+          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200, minWidth: 140, borderRadius: 8, height: 34 }} allowClear />
+            <Select value={industry} onChange={setIndustry} style={{ width: 155, minWidth: 130, height: 34 }}>
               <Select.Option value="Tất cả ngành">Tất cả ngành</Select.Option>
               {INDUSTRIES.map(i => <Select.Option key={i} value={i}>{i}</Select.Option>)}
             </Select>
-            <Select value={facultyFilter} onChange={setFacultyFilter} style={{ width: 165, height: 34 }}>
+            <Select value={facultyFilter} onChange={setFacultyFilter} style={{ width: 155, minWidth: 130, height: 34 }}>
               <Select.Option value="all">Tất cả khoa</Select.Option>
               {ALL_FACULTIES.map(k => <Select.Option key={k} value={k}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</Select.Option>)}
             </Select>
-            <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 34, color: "#6b7280", fontSize: 12 }}>Xóa</Button>
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af" }}>{filtered.length}/{enterprises.length}</span>
+            <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 34, color: C.muted, fontSize: 12 }}>Xóa bộ lọc</Button>
+            <span style={{ marginLeft: "auto", fontSize: 12, color: C.sub, flexShrink: 0 }}>{filtered.length}/{enterprises.length}</span>
           </div>
-
           <CustomTable
-            columns={columns}
-            data={listData}
-            filter={query}
-            loading={loading}
-            handleTableChange={handleTableChange}
-            rowKey="id"
-            onRow={(r: Enterprise) => ({
-              onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`),
-              style: { cursor: "pointer", opacity: r.partnerStatus === "inactive" ? 0.65 : 1, transition: "background 0.12s" },
-            })}
+            columns={columns} data={listData} filter={query} loading={loading}
+            handleTableChange={(p: any) => setQuery(prev => ({ ...prev, page: (p.current || 1) - 1, size: p.pageSize || prev.size }))}
+            rowKey="id" scroll={{ x: 700 }}
+            rowClassName={(_: Enterprise, i: number) => i % 2 === 1 ? "row-stripe" : ""}
+            onRow={(r: Enterprise) => ({ onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`), style: { cursor: "pointer", opacity: faded(r) ? 0.65 : 1, transition: "background 0.12s" } })}
           />
         </div>
       </div>

@@ -32,7 +32,7 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
 
   return (
     <Modal
-      title={enterprise ? " Chỉnh sửa doanh nghiệp" : "➕ Thêm doanh nghiệp"}
+      title={enterprise ? " Chỉnh sửa doanh nghiệp" : " Thêm doanh nghiệp"}
       open={open} onOk={handleOk} onCancel={onClose}
       okText={enterprise ? "Lưu thay đổi" : "Thêm mới"} cancelText="Hủy" width={600}
       confirmLoading={saving}
