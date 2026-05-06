@@ -12,15 +12,15 @@ function App() {
       locale={viVN}
       theme={{
         token: {
-          fontSize: 16,
-          fontSizeSM: 14,
-          fontSizeLG: 18,
-          fontSizeXL: 20,
-          fontSizeHeading1: 36,
-          fontSizeHeading2: 28,
-          fontSizeHeading3: 22,
-          fontSizeHeading4: 18,
-          fontSizeHeading5: 16,
+          fontSize: 15,
+          fontSizeSM: 13,
+          fontSizeLG: 17,
+          fontSizeXL: 19,
+          fontSizeHeading1: 34,
+          fontSizeHeading2: 26,
+          fontSizeHeading3: 21,
+          fontSizeHeading4: 17,
+          fontSizeHeading5: 15,
         },
       }}
     >
