@@ -2,29 +2,25 @@
 .svc-creator__banner {
     display: none !important;
 }
-
 .sjs-license-notification {
     display: none !important;
 }
-
 .svc-creator {
     height: 100vh !important;
     width: 100vw !important;
 }
-
 /* ========================================
-   GLOBAL FONT SIZE
-   ======================================== */
+    GLOBAL FONT SIZE
+    ======================================== */
 html {
     font-size: 17px;
 }
-
 body {
     font-size: 1rem;
     line-height: 1.6;
 }
-
 /* Ant Design global override */
+/* NOTE: font size cho Table doực quan lý bỏi ConfigProvider token.fontSize */
 .ant-typography,
 .ant-btn,
 .ant-input,
@@ -33,9 +29,6 @@ body {
 .ant-select-selector,
 .ant-menu-item,
 .ant-menu-submenu-title,
-.ant-table,
-.ant-table-thead > tr > th,
-.ant-table-tbody > tr > td,
 .ant-form-item-label > label,
 .ant-form-item-explain,
 .ant-modal-title,
@@ -67,30 +60,26 @@ body {
 .ant-notification {
     font-size: 1rem !important;
 }
-
 /* Heading scale */
 h1 { font-size: 2.2rem !important; }
 h2 { font-size: 1.8rem !important; }
 h3 { font-size: 1.5rem !important; }
 h4 { font-size: 1.25rem !important; }
-h5 { font-size: 1.1rem  !important; }
-h6 { font-size: 1rem    !important; }
-
+h5 { font-size: 1.1rem !important; }
+h6 { font-size: 1rem !important; }
 /* Ant Design heading overrides */
 .ant-typography.ant-typography-h1 { font-size: 2.2rem !important; }
 .ant-typography.ant-typography-h2 { font-size: 1.8rem !important; }
 .ant-typography.ant-typography-h3 { font-size: 1.5rem !important; }
 .ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
 .ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
-
 /* ========================================
-   Menu
-   ======================================== */
+    Menu
+    ======================================== */
 .ant-menu-item,
 .ant-menu-submenu-title {
     font-size: 1rem !important;
 }
-
 /* Pagination */
 .ant-pagination {
     font-size: 1rem !important;
