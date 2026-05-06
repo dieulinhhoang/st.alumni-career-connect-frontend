@@ -12,18 +12,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ConfigProvider
         theme={{
-          components: {
-            Table: {
-              cellFontSize: 18,
-              cellFontSizeMD: 18,
-              cellFontSizeSM: 16,
-              headerFontSize: 18,
-            },
+          token: {
+            fontSize: 16,
           },
         }}
       >
         <App />
       </ConfigProvider>
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
