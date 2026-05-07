@@ -6,12 +6,15 @@ import { StatCard }       from "./Statcard";
 import { FacultyCard }    from "./FacultyCard";
 import { EnterpriseList } from "./Enterpriselist";
 import { ChartSection }   from "./Chartsection";
+import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
 import { getFilteredDotData, getLatestDot, KHOA_LIST } from "../../../feature/dashboard/api";
 import { COLOR } from "./theme";
 
 const { Title, Text } = Typography;
 
 export function DashBoard() {
+  const { state, setField } = useChartFilter();
+
   const { LATEST_DOT, STAT_CARDS } = useMemo(() => {
     const latestDot        = getLatestDot();
     const dotData          = getFilteredDotData("all", "all");
@@ -97,7 +100,7 @@ export function DashBoard() {
       </Row>
 
       {/* Chart */}
-      <ChartSection />
+      <ChartSection state={state} setField={setField} />
 
       <style>{`
         .ant-select-selector { border-radius: 8px !important; }
