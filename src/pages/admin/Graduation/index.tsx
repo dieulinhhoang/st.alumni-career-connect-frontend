@@ -63,7 +63,7 @@ export default function GraduationList() {
     },
     {
       title: "Đợt tốt nghiệp", dataIndex: "name", key: "name",
-      render: (v: string) => <span style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>{v}</span>,
+      render: (v: string) => <span style={{ fontWeight: 600, fontSize: 15, color: "#111827" }}>{v}</span>,
     },
     {
       title: "Năm tốt nghiệp", dataIndex: "school_year", key: "school_year",
@@ -73,7 +73,7 @@ export default function GraduationList() {
     {
       title: "Sinh viên", dataIndex: "student_count", key: "student_count",
       width: 120, align: "center" as const,
-      render: (v: any) => <span style={{ fontWeight: 700, fontSize: 13, color: "#6d28d9" }}>{v?.toLocaleString() ?? "—"}</span>,
+      render: (v: any) => <span style={{ fontWeight: 700, fontSize: 15, color: "#6d28d9" }}>{v?.toLocaleString() ?? "—"}</span>,
     },
     {
       title: "Số quyết định", dataIndex: "certification", key: "certification",
@@ -84,7 +84,7 @@ export default function GraduationList() {
       title: "Ngày quyết định", dataIndex: "certification_date", key: "certification_date",
       width: 150, align: "center" as const,
       render: (v: any) => (
-        <Text type="secondary" style={{ fontSize: 13 }}>
+        <Text type="secondary" style={{ fontSize: 15 }}>
           {v ? new Date(v).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
         </Text>
       ),
@@ -93,7 +93,7 @@ export default function GraduationList() {
       title: "Ngày cập nhật", dataIndex: "updated_at", key: "updated_at",
       width: 170, align: "center" as const,
       render: (v: any) => (
-        <Text type="secondary" style={{ fontSize: 13 }}>
+        <Text type="secondary" style={{ fontSize: 15 }}>
           {v ? new Date(v).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
         </Text>
       ),
