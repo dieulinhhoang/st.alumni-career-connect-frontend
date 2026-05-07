@@ -1,21 +1,20 @@
 import type { Theme, Form } from "./types";
 import type { QuestionTypeOption, FontOption, RadiusOption } from "./types";
 
-//  QUESTION TYPES 
+//  QUESTION TYPES
 export const QTYPES: QuestionTypeOption[] = [
-  { value: "short",    label: "Văn bản ngắn",   icon: "" },
-  { value: "long",     label: "Văn bản dài",     icon: "" },
-  { value: "radio",    label: "Một lựa chọn",   icon: "" },
-  { value: "checkbox", label: "Nhiều lựa chọn", icon: "" },
-   { value: "date",     label: "Ngày tháng",      icon: "" },
-  { value: "email",    label: "Email",           icon: "" },
-  { value: "tel",      label: "Số điện thoại",   icon: "" },
-  { value: "address",  label: "Địa chỉ",         icon: "" },
-  { value: "dropdown", label: "Danh sách thả xuống", icon: "" },
-  
+  { value: "short",    label: "Văn bản ngắn",        icon: "" },
+  { value: "long",     label: "Văn bản dài",          icon: "" },
+  { value: "radio",    label: "Một lựa chọn",         icon: "" },
+  { value: "checkbox", label: "Nhiều lựa chọn",       icon: "" },
+  { value: "date",     label: "Ngày tháng",           icon: "" },
+  { value: "email",    label: "Email",                icon: "" },
+  { value: "tel",      label: "Số điện thoại",        icon: "" },
+  { value: "address",  label: "Địa chỉ",              icon: "" },
+  { value: "dropdown", label: "Danh sách thả xuống",  icon: "" },
 ];
 
-//  THEMES 
+//  THEMES
 export const THEMES: Theme[] = [
   { id:"purple",  name:"Tím VNUA",    accent:"#6d28d9", header:"#6d28d9", bg:"#f5f3ff", font:"'Be Vietnam Pro',sans-serif", radius:"12px" },
   { id:"blue",    name:"Xanh dương",  accent:"#1d4ed8", header:"#1d4ed8", bg:"#eff6ff", font:"'Be Vietnam Pro',sans-serif", radius:"12px" },
@@ -27,13 +26,13 @@ export const THEMES: Theme[] = [
   { id:"pastel",  name:"Pastel nhẹ",  accent:"#7c3aed", header:"#c4b5fd", bg:"#faf5ff", font:"'Nunito',sans-serif",         radius:"20px" },
 ];
 
-//  ACCENT COLORS 
+//  ACCENT COLORS
 export const ACCENT_COLORS = [
   "#6d28d9","#1d4ed8","#15803d","#be123c","#0f766e",
   "#c2410c","#0369a1","#7e22ce","#92400e","#18181b",
 ];
 
-//  FONTS 
+//  FONTS
 export const FONTS: FontOption[] = [
   { name:"Be Vietnam Pro", val:"'Be Vietnam Pro',sans-serif" },
   { name:"Serif",          val:"Georgia,serif" },
@@ -41,14 +40,14 @@ export const FONTS: FontOption[] = [
   { name:"Nunito",         val:"'Nunito',sans-serif" },
 ];
 
-//  RADIUS OPTIONS 
+//  RADIUS OPTIONS
 export const RADIUS_OPTIONS: RadiusOption[] = [
   { name:"Vuông",   val:"4px"  },
   { name:"Vừa",     val:"12px" },
   { name:"Tròn",    val:"20px" },
 ];
 
-//  AI SUGGESTIONS 
+//  AI SUGGESTIONS
 export const SUGGESTIONS = [
   "Khảo sát việc làm cựu sinh viên sau tốt nghiệp",
   "Đánh giá chất lượng giảng viên và môn học",
@@ -57,7 +56,7 @@ export const SUGGESTIONS = [
   "Khảo sát nhu cầu học bổng sinh viên khó khăn",
 ];
 
-//  MOCK DATA  
+//  MOCK DATA
 export const MOCK_FORMS: Form[] = [
   {
     id: 1,
@@ -66,123 +65,264 @@ export const MOCK_FORMS: Form[] = [
       "Học viện Nông nghiệp Việt Nam – Phiếu khảo sát tình hình việc làm của sinh viên tốt nghiệp năm 2024.",
     themeId: "green",
     created_at: "2026-03-02",
+    sections: [
+      { id: "sec-info",     title: "Thông tin cá nhân",    order: 1 },
+      { id: "sec-job",      title: "Tình hình việc làm",   order: 2 },
+      { id: "sec-skills",   title: "Kỹ năng & khóa học",  order: 3 },
+      { id: "sec-solution", title: "Giải pháp",            order: 4 },
+    ],
     questions: [
-      { id:"q01", type:"short",    title:"Mã sinh viên",             required:true,  options:[] },
-      { id:"q02", type:"short",    title:"Họ và tên",                required:true,  options:[] },
-      { id:"q03", type:"radio",    title:"Giới tính",                required:true,
-        options:[{id:"o1",label:"Nam"},{id:"o2",label:"Nữ"},{id:"o3",label:"Khác"}] },
-      { id:"q04", type:"date",     title:"Ngày sinh",                required:true,  options:[] },
-      { id:"q05", type:"short",    title:"Mã ngành đào tạo",         required:true,  options:[] },
-      { id:"q06", type:"short",    title:"Tên ngành được đào tạo",   required:true,  options:[] },
-      { id:"q07", type:"short",    title:"Số điện thoại",            required:true,  options:[] },
-      { id:"q08", type:"short",    title:"Email",                    required:true,  options:[] },
-      { id:"q09", type:"radio",    title:"Tình trạng việc làm hiện tại", required:true,
-        options:[
-          {id:"o1",label:"Đã có việc làm"},
-          {id:"o2",label:"Đang tiếp tục học"},
-          {id:"o3",label:"Chưa có việc làm"},
-          {id:"o4",label:"Chưa đi tìm việc"},
-        ],
+      // ── THÔNG TIN CÁ NHÂN ──────────────────────────────────────────
+      {
+        id: "q01", type: "short", title: "Mã sinh viên",
+        required: true, options: [],
+        sectionId: "sec-info", order: 1,
+        reportFieldKey: "student_code",
       },
-      { id:"q10", type:"short",    title:"Tên đơn vị tuyển dụng",   required:false, options:[] },
-      { id:"q11", type:"date",     title:"Thời gian tuyển dụng",     required:false, options:[] },
-      { id:"q12", type:"short",    title:"Chức vụ / Vị trí việc làm", required:false, options:[] },
-      { id:"q13", type:"radio",    title:"Khu vực làm việc",         required:false,
-        options:[
-          {id:"o1",label:"Khu vực Nhà nước"},
-          {id:"o2",label:"Khu vực tư nhân"},
-          {id:"o3",label:"Khu vực có yếu tố nước ngoài"},
-          {id:"o4",label:"Tự tạo việc làm"},
-        ],
+      {
+        id: "q02", type: "short", title: "Họ và tên",
+        required: true, options: [],
+        sectionId: "sec-info", order: 2,
+        reportFieldKey: "fullname",
       },
-      { id:"q14", type:"radio",    title:"Sau tốt nghiệp, Anh/Chị có việc làm từ khi nào?", required:false,
-        options:[
-          {id:"o1",label:"Dưới 3 tháng"},
-          {id:"o2",label:"Từ 3 tháng đến dưới 6 tháng"},
-          {id:"o3",label:"Từ 6 tháng đến dưới 12 tháng"},
-          {id:"o4",label:"Từ 12 tháng trở lên"},
+      {
+        id: "q03", type: "radio", title: "Giới tính",
+        required: true,
+        options: [
+          { id: "o1", label: "Nam" },
+          { id: "o2", label: "Nữ" },
+          { id: "o3", label: "Khác" },
         ],
+        sectionId: "sec-info", order: 3,
+        reportFieldKey: "gender",
       },
-      { id:"q15", type:"radio",    title:"Công việc có phù hợp với ngành đào tạo không?", required:false,
-        options:[
-          {id:"o1",label:"Đúng ngành đào tạo"},
-          {id:"o2",label:"Liên quan đến ngành đào tạo"},
-          {id:"o3",label:"Không liên quan đến ngành đào tạo"},
-        ],
+      {
+        id: "q04", type: "date", title: "Ngày sinh",
+        required: true, options: [],
+        sectionId: "sec-info", order: 4,
+        reportFieldKey: "dob",
       },
-      { id:"q16", type:"radio",    title:"Công việc có phù hợp với trình độ chuyên môn không?", required:false,
-        options:[
-          {id:"o1",label:"Phù hợp với trình độ chuyên môn"},
-          {id:"o2",label:"Chưa phù hợp với trình độ chuyên môn"},
-        ],
+      {
+        id: "q05", type: "short", title: "Mã ngành đào tạo",
+        required: true, options: [],
+        sectionId: "sec-info", order: 5,
+        reportFieldKey: "industrycode",
       },
-      { id:"q17", type:"radio",    title:"Anh/Chị có học được kiến thức và kỹ năng cần thiết từ nhà trường không?", required:false,
-        options:[
-          {id:"o1",label:"Đã học được"},
-          {id:"o2",label:"Không học được"},
-          {id:"o3",label:"Chỉ học được một phần"},
-        ],
+      {
+        id: "q06", type: "short", title: "Tên ngành được đào tạo",
+        required: true, options: [],
+        sectionId: "sec-info", order: 6,
+        reportFieldKey: "industryname",
       },
-      { id:"q18", type:"short",    title:"Mức lương khởi điểm (triệu đồng/tháng)", required:false, options:[] },
-      { id:"q19", type:"radio",    title:"Mức thu nhập bình quân/tháng hiện nay", required:false,
-        options:[
-          {id:"o1",label:"Dưới 5 triệu"},
-          {id:"o2",label:"Từ 5 triệu đến dưới 10 triệu"},
-          {id:"o3",label:"Từ 10 triệu đến dưới 15 triệu"},
-          {id:"o4",label:"Từ 15 triệu trở lên"},
-        ],
+      {
+        id: "q07", type: "short", title: "Số điện thoại",
+        required: true, options: [],
+        sectionId: "sec-info", order: 7,
+        reportFieldKey: "phonenumber",
       },
-      { id:"q20", type:"checkbox", title:"Hình thức tìm được việc làm (có thể chọn nhiều)", required:false,
-        options:[
-          {id:"o1",label:"Do Học viện/Khoa giới thiệu"},
-          {id:"o2",label:"Bạn bè, người quen giới thiệu"},
-          {id:"o3",label:"Tự tìm việc làm"},
-          {id:"o4",label:"Tự tạo việc làm"},
-          {id:"o5",label:"Hình thức khác (nhập ngũ, v.v.)"},
-        ],
+      {
+        id: "q08", type: "short", title: "Email",
+        required: true, options: [],
+        sectionId: "sec-info", order: 8,
+        reportFieldKey: "email",
       },
-      { id:"q21", type:"checkbox", title:"Hình thức tuyển dụng", required:false,
-        options:[
-          {id:"o1",label:"Thi tuyển"},
-          {id:"o2",label:"Xét tuyển"},
-          {id:"o3",label:"Hợp đồng"},
-          {id:"o4",label:"Biệt phái"},
-          {id:"o5",label:"Điều động"},
-          {id:"o6",label:"Hình thức khác"},
+
+      // ── TÌNH HÌNH VIỆC LÀM ─────────────────────────────────────────
+      {
+        id: "q09", type: "radio", title: "Tình trạng việc làm hiện tại",
+        required: true,
+        options: [
+          { id: "o1", label: "Đã có việc làm" },
+          { id: "o2", label: "Đang tiếp tục học" },
+          { id: "o3", label: "Chưa có việc làm" },
+          { id: "o4", label: "Chưa đi tìm việc" },
         ],
+        sectionId: "sec-job", order: 1,
+        reportFieldKey: "employmentstatus",
       },
-      { id:"q22", type:"checkbox", title:"Kỹ năng mềm cần thiết trong công việc (có thể chọn nhiều)", required:false,
-        options:[
-          {id:"o1",label:"Kỹ năng giao tiếp"},
-          {id:"o2",label:"Kỹ năng lãnh đạo"},
-          {id:"o3",label:"Kỹ năng thuyết trình"},
-          {id:"o4",label:"Kỹ năng tiếng Anh"},
-          {id:"o5",label:"Kỹ năng làm việc nhóm"},
-          {id:"o6",label:"Kỹ năng tin học"},
-          {id:"o7",label:"Kỹ năng viết báo cáo tài liệu"},
-          {id:"o8",label:"Kỹ năng hội nhập quốc tế"},
-        ],
+      {
+        id: "q10", type: "short", title: "Tên đơn vị tuyển dụng",
+        required: false, options: [],
+        sectionId: "sec-job", order: 2,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "recruitpartnername",
       },
-      { id:"q23", type:"checkbox", title:"Khóa học nâng cao sau tuyển dụng (có thể chọn nhiều)", required:false,
-        options:[
-          {id:"o1",label:"Nâng cao kiến thức chuyên môn"},
-          {id:"o2",label:"Nâng cao kỹ năng chuyên môn nghiệp vụ"},
-          {id:"o3",label:"Nâng cao kỹ năng công nghệ thông tin"},
-          {id:"o4",label:"Nâng cao kỹ năng ngoại ngữ"},
-          {id:"o5",label:"Phát triển kỹ năng quản lý"},
-          {id:"o6",label:"Tiếp tục học thạc sĩ, tiến sĩ"},
-          {id:"o7",label:"Khóa học khác"},
-        ],
+      {
+        id: "q11", type: "date", title: "Thời gian tuyển dụng",
+        required: false, options: [],
+        sectionId: "sec-job", order: 3,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "recruitmentdate",
       },
-      { id:"q24", type:"checkbox", title:"Giải pháp giúp tăng tỷ lệ có việc làm đúng ngành (có thể chọn nhiều)", required:false,
-        options:[
-          {id:"o1",label:"Học viện tổ chức trao đổi kinh nghiệm tìm việc giữa cựu SV với SV"},
-          {id:"o2",label:"Học viện tổ chức trao đổi giữa đơn vị tuyển dụng với sinh viên"},
-          {id:"o3",label:"Đơn vị sử dụng lao động tham gia vào quá trình đào tạo"},
-          {id:"o4",label:"Chương trình đào tạo điều chỉnh theo nhu cầu thị trường"},
-          {id:"o5",label:"Tăng cường hoạt động thực hành và chuyên môn tại cơ sở"},
-          {id:"o6",label:"Các giải pháp khác"},
+      {
+        id: "q12", type: "short", title: "Chức vụ / Vị trí việc làm",
+        required: false, options: [],
+        sectionId: "sec-job", order: 4,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "jobtitle",
+      },
+      {
+        id: "q13", type: "radio", title: "Khu vực làm việc",
+        required: false,
+        options: [
+          { id: "o1", label: "Khu vực Nhà nước" },
+          { id: "o2", label: "Khu vực tư nhân" },
+          { id: "o3", label: "Khu vực có yếu tố nước ngoài" },
+          { id: "o4", label: "Tự tạo việc làm" },
         ],
+        sectionId: "sec-job", order: 5,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "workarea",
+      },
+      {
+        id: "q14", type: "radio", title: "Sau tốt nghiệp, Anh/Chị có việc làm từ khi nào?",
+        required: false,
+        options: [
+          { id: "o1", label: "Dưới 3 tháng" },
+          { id: "o2", label: "Từ 3 tháng đến dưới 6 tháng" },
+          { id: "o3", label: "Từ 6 tháng đến dưới 12 tháng" },
+          { id: "o4", label: "Từ 12 tháng trở lên" },
+        ],
+        sectionId: "sec-job", order: 6,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "timetogetjob",
+      },
+      {
+        id: "q15", type: "radio", title: "Công việc có phù hợp với ngành đào tạo không?",
+        required: false,
+        options: [
+          { id: "o1", label: "Đúng ngành đào tạo" },
+          { id: "o2", label: "Liên quan đến ngành đào tạo" },
+          { id: "o3", label: "Không liên quan đến ngành đào tạo" },
+        ],
+        sectionId: "sec-job", order: 7,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "trainedfieldmatch",
+      },
+      {
+        id: "q16", type: "radio", title: "Công việc có phù hợp với trình độ chuyên môn không?",
+        required: false,
+        options: [
+          { id: "o1", label: "Phù hợp với trình độ chuyên môn" },
+          { id: "o2", label: "Chưa phù hợp với trình độ chuyên môn" },
+        ],
+        sectionId: "sec-job", order: 8,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "expertisematch",
+      },
+      {
+        id: "q17", type: "radio",
+        title: "Anh/Chị có học được kiến thức và kỹ năng cần thiết từ nhà trường không?",
+        required: false,
+        options: [
+          { id: "o1", label: "Đã học được" },
+          { id: "o2", label: "Không học được" },
+          { id: "o3", label: "Chỉ học được một phần" },
+        ],
+        sectionId: "sec-job", order: 9,
+        reportFieldKey: "skillslearned",
+      },
+      {
+        id: "q18", type: "short", title: "Mức lương khởi điểm (triệu đồng/tháng)",
+        required: false, options: [],
+        sectionId: "sec-job", order: 10,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "startingsalary",
+      },
+      {
+        id: "q19", type: "radio", title: "Mức thu nhập bình quân/tháng hiện nay",
+        required: false,
+        options: [
+          { id: "o1", label: "Dưới 5 triệu" },
+          { id: "o2", label: "Từ 5 triệu đến dưới 10 triệu" },
+          { id: "o3", label: "Từ 10 triệu đến dưới 15 triệu" },
+          { id: "o4", label: "Từ 15 triệu trở lên" },
+        ],
+        sectionId: "sec-job", order: 11,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "averageincome",
+      },
+      {
+        id: "q20", type: "checkbox",
+        title: "Hình thức tìm được việc làm (có thể chọn nhiều)",
+        required: false,
+        options: [
+          { id: "o1", label: "Do Học viện/Khoa giới thiệu" },
+          { id: "o2", label: "Bạn bè, người quen giới thiệu" },
+          { id: "o3", label: "Tự tìm việc làm" },
+          { id: "o4", label: "Tự tạo việc làm" },
+          { id: "o5", label: "Hình thức khác (nhập ngũ, v.v.)" },
+        ],
+        sectionId: "sec-job", order: 12,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "jobsearchmethod",
+      },
+      {
+        id: "q21", type: "checkbox", title: "Hình thức tuyển dụng",
+        required: false,
+        options: [
+          { id: "o1", label: "Thi tuyển" },
+          { id: "o2", label: "Xét tuyển" },
+          { id: "o3", label: "Hợp đồng" },
+          { id: "o4", label: "Biệt phái" },
+          { id: "o5", label: "Điều động" },
+          { id: "o6", label: "Hình thức khác" },
+        ],
+        sectionId: "sec-job", order: 13,
+        visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
+        reportFieldKey: "recruitmenttype",
+      },
+
+      // ── KỸ NĂNG & KHÓA HỌC ────────────────────────────────────────
+      {
+        id: "q22", type: "checkbox",
+        title: "Kỹ năng mềm cần thiết trong công việc (có thể chọn nhiều)",
+        required: false,
+        options: [
+          { id: "o1", label: "Kỹ năng giao tiếp" },
+          { id: "o2", label: "Kỹ năng lãnh đạo" },
+          { id: "o3", label: "Kỹ năng thuyết trình" },
+          { id: "o4", label: "Kỹ năng tiếng Anh" },
+          { id: "o5", label: "Kỹ năng làm việc nhóm" },
+          { id: "o6", label: "Kỹ năng tin học" },
+          { id: "o7", label: "Kỹ năng viết báo cáo tài liệu" },
+          { id: "o8", label: "Kỹ năng hội nhập quốc tế" },
+        ],
+        sectionId: "sec-skills", order: 1,
+        reportFieldKey: "softskills",
+      },
+      {
+        id: "q23", type: "checkbox",
+        title: "Khóa học nâng cao sau tuyển dụng (có thể chọn nhiều)",
+        required: false,
+        options: [
+          { id: "o1", label: "Nâng cao kiến thức chuyên môn" },
+          { id: "o2", label: "Nâng cao kỹ năng chuyên môn nghiệp vụ" },
+          { id: "o3", label: "Nâng cao kỹ năng công nghệ thông tin" },
+          { id: "o4", label: "Nâng cao kỹ năng ngoại ngữ" },
+          { id: "o5", label: "Phát triển kỹ năng quản lý" },
+          { id: "o6", label: "Tiếp tục học thạc sĩ, tiến sĩ" },
+          { id: "o7", label: "Khóa học khác" },
+        ],
+        sectionId: "sec-skills", order: 2,
+        reportFieldKey: "trainingcourses",
+      },
+
+      // ── GIẢI PHÁP ──────────────────────────────────────────────────
+      {
+        id: "q24", type: "checkbox",
+        title: "Giải pháp giúp tăng tỷ lệ có việc làm đúng ngành (có thể chọn nhiều)",
+        required: false,
+        options: [
+          { id: "o1", label: "Học viện tổ chức trao đổi kinh nghiệm tìm việc giữa cựu SV với SV" },
+          { id: "o2", label: "Học viện tổ chức trao đổi giữa đơn vị tuyển dụng với sinh viên" },
+          { id: "o3", label: "Đơn vị sử dụng lao động tham gia vào quá trình đào tạo" },
+          { id: "o4", label: "Chương trình đào tạo điều chỉnh theo nhu cầu thị trường" },
+          { id: "o5", label: "Tăng cường hoạt động thực hành và chuyên môn tại cơ sở" },
+          { id: "o6", label: "Các giải pháp khác" },
+        ],
+        sectionId: "sec-solution", order: 1,
+        reportFieldKey: "solutions",
       },
     ],
   },
@@ -192,9 +332,16 @@ export const MOCK_FORMS: Form[] = [
     description: "Thu thập ý kiến về chất lượng đào tạo",
     themeId: "blue",
     created_at: "2025-08-20",
+    sections: [
+      { id: "sec-info", title: "Thông tin", order: 1 },
+    ],
     questions: [
-      { id:"q1", type:"short",  title:"Mã sinh viên",         required:true,  options:[] },
-     ],
+      {
+        id: "q1", type: "short", title: "Mã sinh viên",
+        required: true, options: [],
+        sectionId: "sec-info", order: 1,
+      },
+    ],
   },
   {
     id: 3,
@@ -202,8 +349,15 @@ export const MOCK_FORMS: Form[] = [
     description: "Phản hồi từ doanh nghiệp về sinh viên thực tập",
     themeId: "purple",
     created_at: "2025-09-01",
+    sections: [
+      { id: "sec-info", title: "Thông tin doanh nghiệp", order: 1 },
+    ],
     questions: [
-      { id:"q1", type:"short",  title:"Tên doanh nghiệp",    required:true,  options:[] },
-     ],
+      {
+        id: "q1", type: "short", title: "Tên doanh nghiệp",
+        required: true, options: [],
+        sectionId: "sec-info", order: 1,
+      },
+    ],
   },
 ];

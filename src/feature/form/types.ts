@@ -1,31 +1,60 @@
-export type QuestionType = 'text' | 'multiple-choice' | 'checkbox' | 'address' | 'date' | 'select' | 'long' | 'short' | 'radio'| 'dropdown' | 'email' | 'tel';
+export type QuestionType =
+  | 'text'
+  | 'multiple-choice'
+  | 'checkbox'
+  | 'address'
+  | 'date'
+  | 'select'
+  | 'long'
+  | 'short'
+  | 'radio'
+  | 'dropdown'
+  | 'email'
+  | 'tel';
+
+// Option for question choices
+export interface QuestionOption {
+  id: string;
+  label: string;
+}
+
+// Conditional display logic
+export interface ConditionalRule {
+  questionId: string; // id of the dependent question
+  operator: 'equals' | 'includes' | 'not_equals';
+  value: string | string[];
+}
 
 export interface Question {
   id: string;
   type: QuestionType;
-  title: string;               // nội dung câu hỏi
-  placeholder?: string;        // cho type text
-  options?: string[];          // cho multiple-choice, checkbox, select
+  title: string;               // question content
+  placeholder?: string;
+  options?: QuestionOption[];  // updated from string[] -> QuestionOption[]
   required: boolean;
-  sectionId: string;           // thuộc về Section nào
-  order: number;               // thứ tự trong section
+  sectionId: string;           // which Section this belongs to
+  order: number;               // order within the section
+
+  // new fields:
+  visibleWhen?: ConditionalRule; // condition for the question to be shown
+  reportFieldKey?: string;       // map to report field (employmentstatus, trainedfield...)
 }
 
 // SURVEY HEADER / FOOTER / SECTION
 
 export interface SurveyHeader {
-  logoUrl?: string;      // URL ảnh logo
-  ministry?: string;     // "BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG"
-  academy?: string;      // "HỌC VIỆN NÔNG NGHIỆP VIỆT NAM"
-  address?: string;      // "Xã Gia Lâm, Thành phố Hà Nội"
-  phone?: string;        // "024.62617586"
-  fax?: string;          // "024.62617586"
-  showDate?: boolean;    // hiện ngày tự động
+  logoUrl?: string;
+  ministry?: string;
+  academy?: string;
+  address?: string;
+  phone?: string;
+  fax?: string;
+  showDate?: boolean;
 }
 
 export interface SurveyFooter {
-  primaryText?: string;   // dòng bold — "Xin trân trọng cảm ơn..."
-  secondaryText?: string; // dòng italic — "Kính chúc Anh/Chị..."
+  primaryText?: string;
+  secondaryText?: string;
 }
 
 export interface Section {
@@ -37,7 +66,7 @@ export interface Section {
 export interface Survey {
   id: string;
   title: string;
-  description: string;        // mô tả chung (hỗ trợ HTML)
+  description: string;
   sections: Section[];
   questions: Question[];
   defaultHeader: SurveyHeader;
@@ -48,11 +77,11 @@ export interface SurveyResponse {
   surveyId: string;
   responses: {
     questionId: string;
-    answer: string | string[]; // string cho text, date, address; string[] cho multiple-choice, checkbox, select
+    answer: string | string[];
   }[];
 }
 
-// THEME TYPES 
+// THEME TYPES
 export interface Theme {
   id: string;
   name: string;
@@ -70,27 +99,27 @@ export interface CustomTheme {
   bg: string;
 }
 
-// FORM TYPES 
+// FORM TYPES
 export interface Form {
   id: number | null;
   name: string;
-  description: string;      // hỗ trợ HTML
-  sections: Section[];      // thêm sections vào form
-  questions: Question[];         
+  description: string;
+  sections: Section[];
+  questions: Question[];
   themeId: string;
   created_at?: string;
   updated_at?: string;
   _customTheme?: CustomTheme | null;
-  header?: SurveyHeader;    // thêm header tùy chỉnh
-  footer?: SurveyFooter;    // thêm footer tùy chỉnh
-  logoUrl?: string; 
+  header?: SurveyHeader;
+  footer?: SurveyFooter;
+  logoUrl?: string;
   status?: 'draft' | 'published';
 }
 
-// VIEW TYPES 
+// VIEW TYPES
 export type ViewType = "list" | "builder" | "ai" | "preview" | "theme";
 
-// Q_TYPES META (có thể cập nhật thêm type mới nếu cần)
+// Q_TYPES META
 export interface QuestionTypeMeta {
   value: QuestionType;
   label: string;
@@ -109,7 +138,7 @@ export interface RadiusOption {
   val: string;
 }
 
-// API PAYLOAD TYPES 
+// API PAYLOAD TYPES
 export interface CreateFormPayload {
   name: string;
   description: string;
