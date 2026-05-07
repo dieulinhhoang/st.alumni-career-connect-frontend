@@ -5,8 +5,8 @@ import {
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
   AppstoreOutlined, UnorderedListOutlined, CalendarOutlined,
 } from '@ant-design/icons'
-import type { Form } from '../../../../feature/form/types'
-import CustomTable from '../../../../components/common/customTable'
+import type { Form } from '../../../feature/form/types'
+import CustomTable from '../../../components/common/customTable'
 
 const ACCENT_MAP: Record<string, string> = {
   blue: '#2563eb', green: '#16a34a', red: '#dc2626', purple: '#7c3aed',

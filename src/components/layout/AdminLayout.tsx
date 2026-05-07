@@ -224,7 +224,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                                 letterSpacing: -0.3,
                                 whiteSpace: 'nowrap'
                             }}>
-                                Trang quản trị
+                                Bảng điều khiển
                             </span>
                         )}
                     </div>
@@ -251,7 +251,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                             style={{ borderRadius: 8 }} 
                         />
                         <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 18, color: '#111827' }}>
-                            Trang quản trị
+                            Bảng điều khiển
                         </span>
                     </div>
                 }
@@ -302,7 +302,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                         {/* Mobile logo text */}
                         {isMobile && (
                             <span style={{ fontWeight: 800, fontSize: 18, color: '#111827' }}>
-                                Trang quản trị
+                                Bảng điều khiển
                             </span>
                         )}
                     </div>

@@ -162,8 +162,8 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
             <div style={{ width: 3, height: 20, borderRadius: 99, background: COLOR.primary }} />
-            <span style={{ fontSize: 16, fontWeight: 700, color: COLOR.textDark }}>
-              Bảng điều khiển
+            <span style={{ fontSize:18, fontWeight: 700, color: COLOR.textDark }}>
+              Biểu đồ thống kê sinh viên theo đợt khảo sát
             </span>
           </div>
           <Text style={{ fontSize: 12, color: COLOR.textFaint, marginLeft: 11 }}>
