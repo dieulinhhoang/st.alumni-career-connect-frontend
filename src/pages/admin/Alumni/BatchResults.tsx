@@ -266,28 +266,28 @@ export const BatchResults: React.FC = () => {
   const columns: ColumnsType<AlumniResponse> = [
     {
       title: 'STT', key: 'stt', width: 55,
-      render: (_, __, i) => <Text type="secondary" style={{ fontSize: 12 }}>{i + 1}</Text>,
+      render: (_, __, i) => <Text type="secondary" style={{ fontSize: 14 }}>{i + 1}</Text>,
     },
     {
       title: 'Mã SV', key: 'studentId', width: 110,
       render: (_, r) => (
-        <Text style={{ fontFamily: 'monospace', fontSize: 12, color: '#2563eb', fontWeight: 600 }}>
+        <Text style={{ fontFamily: 'monospace', fontSize: 14, color: '#2563eb', fontWeight: 600 }}>
           {r.studentId}
         </Text>
       ),
     },
     {
-      title: 'Email', key: 'email', width: 200,
-      render: (_, r) => <Text style={{ fontSize: 12 }}>{r.studentEmail}</Text>,
+      title: 'Email', key: 'email', width: 220,
+      render: (_, r) => <Text style={{ fontSize: 14 }}>{r.studentEmail}</Text>,
     },
     {
       title: 'Họ tên', key: 'name',
-      render: (_, r) => <Text style={{ fontWeight: 500, fontSize: 13 }}>{r.studentName}</Text>,
+      render: (_, r) => <Text style={{ fontWeight: 500, fontSize: 15 }}>{r.studentName}</Text>,
     },
     {
-      title: 'Ngày phản hồi', key: 'submittedAt', width: 150,
+      title: 'Ngày phản hồi', key: 'submittedAt', width: 170,
       render: (_, r) => (
-        <Text type="secondary" style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <Text type="secondary" style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
           <ClockCircleOutlined />
           {r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
         </Text>
@@ -344,7 +344,7 @@ export const BatchResults: React.FC = () => {
           >
            
           </Button>
-          <div style={{ fontSize: 12, color: '#888' }}>
+          <div style={{ fontSize: 14, color: '#888' }}>
             <span style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>
               Khảo sát việc làm
             </span>
@@ -358,23 +358,23 @@ export const BatchResults: React.FC = () => {
 
         {/*  Info + Stats  */}
         <Row gutter={20} style={{ marginBottom: 20 }}>
-          <Col span={10}>
+          <Col xs={24} md={10} lg={9}>
             <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20, height: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600, color: '#374151', fontSize: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600, color: '#374151', fontSize: 16 }}>
                 <InfoCircleOutlined style={{ color: '#2563eb' }} /> Thông tin khảo sát
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 13.5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 15 }}>
                 <CalendarOutlined style={{ color: '#2563eb' }} />
                 <Text type="secondary">Năm khảo sát:</Text>
                 <Text strong style={{ color: '#1e40af' }}>{batch.year}</Text>
               </div>
               <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, marginBottom: 4 }}>
                   <BarChartOutlined style={{ color: '#2563eb' }} />
                   <Text type="secondary">Đợt tốt nghiệp:</Text>
                 </div>
                 <div style={{ paddingLeft: 24 }}>
-                  <Text style={{ color: '#374151', fontSize: 13 }}>› {batch.graduationPeriod}</Text>
+                  <Text style={{ color: '#374151', fontSize: 14 }}>› {batch.graduationPeriod}</Text>
                 </div>
               </div>
               <Divider style={{ margin: '8px 0' }} />
@@ -382,42 +382,42 @@ export const BatchResults: React.FC = () => {
               {/* Phản hồi */}
               <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text strong style={{ color: '#1e40af', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Text strong style={{ color: '#1e40af', fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <InfoCircleOutlined /> Số lượt phản hồi:
                   </Text>
-                  <Text strong style={{ fontSize: 16, color: '#1e40af' }}>{submitted.length} / {batch.totalStudents}</Text>
+                  <Text strong style={{ fontSize: 18, color: '#1e40af' }}>{submitted.length} / {batch.totalStudents}</Text>
                 </div>
                 <Progress percent={pct} size="small" strokeColor="#2563eb" trailColor="#bfdbfe" showInfo={false} style={{ marginBottom: 4 }} />
-                <Text style={{ fontSize: 12, color: '#2563eb' }}>{pct}% đã phản hồi</Text>
+                <Text style={{ fontSize: 14, color: '#2563eb' }}>{pct}% đã phản hồi</Text>
               </div>
 
               {/* Thời gian */}
               <div style={{ background: isEnded ? '#fff1f2' : '#f0fdf4', border: `1px solid ${isEnded ? '#fecdd3' : '#bbf7d0'}`, borderRadius: 8, padding: '12px 14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <ClockCircleOutlined /> Thời gian khảo sát:
                   </Text>
                   {isEnded ? (
-                    <span style={{ background: '#fee2e2', color: '#9f1239', padding: '2px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <ExclamationCircleOutlined style={{ fontSize: 11 }} /> Đã kết thúc
+                    <span style={{ background: '#fee2e2', color: '#9f1239', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+                      <ExclamationCircleOutlined style={{ fontSize: 12 }} /> Đã kết thúc
                     </span>
                   ) : (
-                    <span style={{ background: '#d1fae5', color: '#065f46', padding: '2px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500 }}>
+                    <span style={{ background: '#d1fae5', color: '#065f46', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>
                       Đang diễn ra
                     </span>
                   )}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 8 }}>
-                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 6, fontSize: 13, marginBottom: 8 }}>
+                  <Text type="secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                     <CalendarOutlined /> {new Date(batch.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </Text>
-                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Text type="secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                     <CalendarOutlined /> {new Date(batch.endDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </div>
                 <Progress percent={isEnded ? 100 : pct} size="small" strokeColor={isEnded ? '#e11d48' : '#1D9E75'} trailColor={isEnded ? '#fecdd3' : '#bbf7d0'} showInfo={false} style={{ marginBottom: isEnded ? 4 : 0 }} />
                 {isEnded && (
-                  <Text style={{ fontSize: 12, color: '#e11d48', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ fontSize: 14, color: '#e11d48', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <ExclamationCircleOutlined /> Đã quá hạn {diffWeeks > 0 ? `${diffWeeks} tuần` : `${diffDays} ngày`}
                   </Text>
                 )}
@@ -425,10 +425,10 @@ export const BatchResults: React.FC = () => {
             </div>
           </Col>
 
-          <Col span={14}>
+          <Col xs={24} md={14} lg={15}>
             <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: '#374151', fontSize: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: '#374151', fontSize: 16 }}>
                   <BarChartOutlined style={{ color: '#2563eb' }} /> Thống kê tổng quan
                 </div>
                 <Popover content={<ChiSoPopover />} trigger="click" placement="bottomRight">
@@ -552,7 +552,7 @@ export const BatchResults: React.FC = () => {
 
         {/*  Table  */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: 13.5, color: '#374151' }}>
+          <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: 15, color: '#374151' }}>
             <BarChartOutlined style={{ color: '#2563eb' }} /> Danh sách sinh viên
           </div>
           <CustomTable

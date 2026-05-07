@@ -74,7 +74,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             color: pctColor,
             padding: '3px 8px',
             borderRadius: 6,
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 500,
             letterSpacing: '0.2px',
             lineHeight: 1.5,
@@ -86,12 +86,12 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       {/* Number + label */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, lineHeight: 1 }}>
-          <span style={{ fontSize: 26, fontWeight: 500, color: numColor, lineHeight: 1 }}>
+          <span style={{ fontSize: 28, fontWeight: 500, color: numColor, lineHeight: 1 }}>
             {numerator}
           </span>
-          <Text type="secondary" style={{ fontSize: 13 }}>
+          <Text type="secondary" style={{ fontSize: 14 }}>
             / {denominator}
           </Text>
         </div>
@@ -99,12 +99,11 @@ export const StatCard: React.FC<StatCardProps> = ({
           type="secondary"
           title={label}
           style={{
-            fontSize: 12,
-            lineHeight: 1.4,
+            fontSize: 13,
+            lineHeight: 1.35,
             display: 'block',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            wordBreak: 'break-word',
+            minHeight: 36,
           }}
         >
           {label}
