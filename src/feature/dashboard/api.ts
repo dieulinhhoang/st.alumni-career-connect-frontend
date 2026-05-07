@@ -153,14 +153,29 @@ const DETAIL_DATA: Record<string, Record<string, DotEntry>> = {
   // Khoa  -> không có data -> getSoSVPhanhoi trả 0
 };
 
-export function getLatestDot(khoa = "all", nganh = "all"): string {
-  const data = getFilteredDotData(khoa, nganh);
+type FilterArg = string | { khoa?: string; nganh?: string };
+
+function resolveKhoaNganh(khoaOrFilter?: FilterArg, nganh?: string): { khoa: string; nganh: string } {
+  if (typeof khoaOrFilter === "object" && khoaOrFilter !== null) {
+    return {
+      khoa: khoaOrFilter.khoa ?? "all",
+      nganh: khoaOrFilter.nganh ?? "all",
+    };
+  }
+  return {
+    khoa: typeof khoaOrFilter === "string" ? khoaOrFilter : "all",
+    nganh: nganh ?? "all",
+  };
+}
+
+export function getLatestDot(khoaOrFilter: FilterArg = "all", nganh = "all"): string {
+  const data = getFilteredDotData(khoaOrFilter, nganh);
   const keys = Object.keys(data);
   return keys[keys.length - 1] ?? "T12/2024";
 }
 
 export const LATEST_DOT = getLatestDot();
- 
+
 export function getSoSVPhanhoi(khoaVietTat: string): number {
   const key = `${khoaVietTat}|all|all`;
   const dotData = DETAIL_DATA[key];
@@ -171,7 +186,11 @@ export function getSoSVPhanhoi(khoaVietTat: string): number {
   return latest.coViec + latest.chuaCoViec;
 }
 
-export function getFilteredDotData(khoa: string, nganh: string): Record<string, DotEntry> {
-  const key = `${khoa}|${nganh}|all`;
+export function getFilteredDotData(
+  khoaOrFilter: FilterArg = "all",
+  nganh = "all",
+): Record<string, DotEntry> {
+  const resolved = resolveKhoaNganh(khoaOrFilter, nganh);
+  const key = `${resolved.khoa}|${resolved.nganh}|all`;
   return DETAIL_DATA[key] ?? DETAIL_DATA["all|all|all"];
 }

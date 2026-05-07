@@ -13,7 +13,7 @@ import { COLOR } from "./theme";
 const { Title, Text } = Typography;
 
 export function DashBoard() {
-  const { chartMode, setChartMode, khoa, setKhoa, nganh, setNganh } = useChartFilter();
+  const { state, setField } = useChartFilter();
 
   const { LATEST_DOT, STAT_CARDS } = useMemo(() => {
     const latestDot        = getLatestDot();
@@ -100,11 +100,7 @@ export function DashBoard() {
       </Row>
 
       {/* Chart */}
-      <ChartSection
-        chartMode={chartMode} setChartMode={setChartMode}
-        khoa={khoa} setKhoa={setKhoa}
-        nganh={nganh} setNganh={setNganh}
-      />
+      <ChartSection state={state} setField={setField} />
 
       <style>{`
         .ant-select-selector { border-radius: 8px !important; }

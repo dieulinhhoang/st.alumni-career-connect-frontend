@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from "react";
-import { Col, Row, Select, Button, Typography } from "antd";
+import { Col, Row, Button, Typography } from "antd";
 import { TableOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Pie as G2Pie, Column as G2Column } from "@antv/g2plot";
-import type { ChartMode } from "../../../feature/dashboard/type";
 import {
-  CHART_MODES, MODE_CONFIG, KHOA_OPTIONS, NGANH_BY_KHOA,
+  MODE_CONFIG,
   getFilteredDotData, getLatestDot,
 } from "../../../feature/dashboard/api";
+import { CHART_FILTER_SCHEMA, type ChartFilterState } from "../../../feature/dashboard/filterSchema";
+import { DynamicFilterBar } from "../../../feature/dashboard/DynamicFilterBar";
 import { COLOR } from "./theme";
 
 const { Text } = Typography;
 
 interface Props {
-  chartMode: ChartMode;
-  setChartMode: (v: ChartMode) => void;
-  khoa: string;
-  setKhoa: (v: string) => void;
-  nganh: string;
-  setNganh: (v: string) => void;
+  state: ChartFilterState;
+  setField: (key: string, value: string) => void;
 }
 
-export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, setNganh }: Props) {
+export function ChartSection({ state, setField }: Props) {
+  const { chartMode, khoa, nganh } = state;
   const navigate = useNavigate();
   const pieRef = useRef<HTMLDivElement>(null);
   const colRef = useRef<HTMLDivElement>(null);
@@ -30,8 +28,8 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
   const [selectedSlice, setSelectedSlice] = useState<string | null>(null);
 
   const cfg = MODE_CONFIG[chartMode];
-  const dotData = getFilteredDotData(khoa, nganh);
-  const latestKey = getLatestDot(khoa, nganh);
+  const dotData = getFilteredDotData({ khoa, nganh });
+  const latestKey = getLatestDot({ khoa, nganh });
   const latestDot = dotData[latestKey] ?? Object.values(dotData)[0];
   const nameColorMap = Object.fromEntries(
     cfg.getPieData(latestDot).map((d, i) => [d.name, cfg.colors[i % cfg.colors.length]])
@@ -47,8 +45,8 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
     setSelectedSlice(null);
 
     const currentCfg = MODE_CONFIG[chartMode];
-    const currentDotData = getFilteredDotData(khoa, nganh);
-    const currentLatestKey = getLatestDot(khoa, nganh);
+    const currentDotData = getFilteredDotData({ khoa, nganh });
+    const currentLatestKey = getLatestDot({ khoa, nganh });
     const latest = currentDotData[currentLatestKey] ?? Object.values(currentDotData)[0];
     const currentPieData = currentCfg.getPieData(latest);
     const currentColorMap = Object.fromEntries(
@@ -137,7 +135,7 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
 
   const handleClearSlice = () => {
     setSelectedSlice(null);
-    const currentDotData = getFilteredDotData(khoa, nganh);
+    const currentDotData = getFilteredDotData({ khoa, nganh });
     const allColData = Object.entries(currentDotData).flatMap(([dot, v]) =>
       MODE_CONFIG[chartMode].getPieData(v).map(({ name, value }) => ({ dot, type: name, value }))
     );
@@ -183,37 +181,14 @@ export function ChartSection({ chartMode, setChartMode, khoa, setKhoa, nganh, se
         </Button>
       </div>
 
-      {/* Filters */}
-      <div style={{
-        padding: "10px 20px",
-        background: "#f8fafc",
-        borderBottom: "1px solid #f1f5f9",
-        display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center",
-      }}>
-        <Text style={{ fontSize: 12, color: COLOR.textMuted, fontWeight: 600, flexShrink: 0 }}>Lọc theo:</Text>
-        <Select value={khoa} onChange={setKhoa} style={{ width: 160 }} size="small">
-          {KHOA_OPTIONS.map(o => (
-            <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
-          ))}
-        </Select>
-        <Select value={nganh} onChange={setNganh} style={{ width: 180 }} size="small">
-          {(NGANH_BY_KHOA[khoa] ?? NGANH_BY_KHOA.all).map(o => (
-            <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
-          ))}
-        </Select>
-        <div style={{ marginLeft: "auto" }}>
-          <Select
-            value={chartMode}
-            onChange={v => setChartMode(v as ChartMode)}
-            style={{ width: 270 }}
-            size="small"
-          >
-            {CHART_MODES.map(m => (
-              <Select.Option key={m.value} value={m.value}>{m.label}</Select.Option>
-            ))}
-          </Select>
-        </div>
-      </div>
+      {/* Filters — driven by schema */}
+      <DynamicFilterBar
+        schema={CHART_FILTER_SCHEMA}
+        state={state as unknown as Record<string, string>}
+        setField={setField}
+        label="Lọc theo:"
+        labelColor={COLOR.textMuted}
+      />
 
       {/* Charts */}
       <div style={{ padding: "16px 20px 20px" }}>
