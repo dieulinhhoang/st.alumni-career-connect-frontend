@@ -1,4 +1,3 @@
-import type { ChartMode } from "./type";
 import { CHART_MODES, KHOA_OPTIONS, NGANH_BY_KHOA } from "./api";
 
 export type FilterOption = { value: string; label: string };
@@ -16,7 +15,10 @@ export type FilterFieldSchema = {
 export type ChartFilterState = {
   khoa: string;
   nganh: string;
-  chartMode: ChartMode;
+  // Reused as the selected statistical question id on the dashboard chart.
+  // Kept under the legacy `chartMode` key so the surrounding hook/state shape
+  // does not change; type widened from ChartMode → string accordingly.
+  chartMode: string;
 };
 
 export const CHART_FILTER_SCHEMA: FilterFieldSchema[] = [
