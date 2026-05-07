@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import type { ChartMode } from "../type";
 import {
   CHART_FILTER_DEFAULTS,
   CHART_FILTER_SCHEMA,
@@ -41,11 +40,6 @@ export function useDynamicFilter<S extends Record<string, string>>(
   return { state, setField, reset, setState };
 }
 
-/**
- * Backwards-compatible chart-filter hook. Uses the schema-driven
- * dynamic filter under the hood and exposes the same surface plus the
- * raw `state`/`setField` for the DynamicFilterBar.
- */
 export function useChartFilter() {
   const { state, setField, reset } = useDynamicFilter<ChartFilterState>(
     CHART_FILTER_SCHEMA,
@@ -56,10 +50,11 @@ export function useChartFilter() {
     state,
     setField,
     reset,
-    chartMode: state.chartMode as ChartMode,
+    // chartMode now holds a statistical questionId (string), not the legacy ChartMode union
+    chartMode: state.chartMode,
     khoa: state.khoa,
     nganh: state.nganh,
-    setChartMode: (v: ChartMode) => setField("chartMode", v),
+    setChartMode: (v: string) => setField("chartMode", v),
     setKhoa: (v: string) => setField("khoa", v),
     setNganh: (v: string) => setField("nganh", v),
   };
