@@ -30,7 +30,7 @@ interface ListViewProps {
 
 export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete }: ListViewProps) {
   const [search, setSearch] = useState('')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const filtered = forms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
 
   //  table columns
