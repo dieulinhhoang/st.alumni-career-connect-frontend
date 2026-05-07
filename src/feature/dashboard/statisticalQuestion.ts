@@ -1,18 +1,3 @@
-/**
- * MOCK CONTRACT — types for the dashboard's dynamic statistical chart.
- *
- * Concept (agreed with BE direction):
- * - Survey forms are dynamic. The admin marks individual questions as
- *   `is_statistical = true` to opt them in to dashboard charting.
- * - The dashboard fetches the list of statistical questions, lets the user
- *   pick one, and renders a chart for that question id.
- *
- * These types describe the FE/BE contract. Keep field names in sync with BE
- * once the endpoints are available. The accompanying file
- * `statisticalQuestionApi.ts` returns mock values for these types — it is
- * NOT real data.
- */
-
 export type StatisticalQuestionType =
   | "single_choice"
   | "multiple_choice"
@@ -41,5 +26,12 @@ export interface ChartResult {
   title: string;
   chartType: StatisticalChartType;
   totalResponses?: number;
+  /** Latest dot — dùng cho biểu đồ tròn */
   data: ChartDatum[];
+  /**
+   * Multi-dot breakdown — dùng cho biểu đồ cột (so sánh qua các đợt).
+   * Key = tên đợt, value = mảng {name, value} cho đợt đó.
+   * MOCK: khi BE sẵn sàng, replace bằng response từ API.
+   */
+  dotData?: Record<string, ChartDatum[]>;
 }

@@ -99,8 +99,8 @@ export function ChartSection({ state, setField }: Props) {
   useEffect(() => {
     if (!pieRef.current || !colRef.current) return;
 
-    try { pieInst.current?.destroy(); } catch (_) {}
-    try { colInst.current?.destroy(); } catch (_) {}
+    try { pieInst.current?.destroy(); } catch (_) { }
+    try { colInst.current?.destroy(); } catch (_) { }
     pieInst.current = null;
     colInst.current = null;
     setSelectedSlice(null);
@@ -110,7 +110,10 @@ export function ChartSection({ state, setField }: Props) {
     const colorMap = Object.fromEntries(
       pieData.map((d, i) => [d.name, CHART_COLORS[i % CHART_COLORS.length]]),
     );
-    const colData = pieData.map(({ name, value }) => ({ dot: name, type: name, value }));
+    const rawDotData = chart.dotData ?? { [latestKey]: pieData };
+    const colData = Object.entries(rawDotData).flatMap(([dot, items]) =>
+      items.map(({ name, value }) => ({ dot, type: name, value }))
+    );
 
     const pie = new G2Pie(pieRef.current, {
       data: pieData,
@@ -123,10 +126,31 @@ export function ChartSection({ state, setField }: Props) {
         content: ({ percent }: any) => `${(percent * 100).toFixed(0)}%`,
         style: { fontSize: 12, fontWeight: 700, fill: "#374151" },
       },
-      legend: { position: "bottom", flipPage: false, itemName: { style: { fontSize: 12 } } },
+      legend: { position: "bottom", flipPage: false, itemName: { style: { fontSize: 8 } } },
       statistic: {
-        title: { style: { color: COLOR.textFaint, fontWeight: 600 }, content: latestKey },
-        content: { style: { fontWeight: 900, color: COLOR.textDark } },
+        title: {
+          style: {
+            color: COLOR.textFaint,
+            fontWeight: 400,
+            fontSize: 11,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "100px",
+          },
+          content: latestKey,
+        },
+        content: {
+          style: {
+            fontWeight: 900,
+            color: COLOR.textDark,
+            fontSize: 22,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "100px",
+          },
+        },
       },
       interactions: [{ type: "element-active" }, { type: "pie-statistic-active" }],
       tooltip: { formatter: (d: any) => ({ name: d.name, value: `${d.value} SV` }) },
@@ -178,8 +202,8 @@ export function ChartSection({ state, setField }: Props) {
     });
 
     return () => {
-      try { pieInst.current?.destroy(); } catch (_) {}
-      try { colInst.current?.destroy(); } catch (_) {}
+      try { pieInst.current?.destroy(); } catch (_) { }
+      try { colInst.current?.destroy(); } catch (_) { }
       pieInst.current = null;
       colInst.current = null;
     };
@@ -187,7 +211,11 @@ export function ChartSection({ state, setField }: Props) {
 
   const handleClearSlice = () => {
     setSelectedSlice(null);
-    const colData = pieData.map(({ name, value }) => ({ dot: name, type: name, value }));
+    if (!chart) return;
+    const rawDotData = chart.dotData ?? { [latestKey]: pieData };
+    const colData = Object.entries(rawDotData).flatMap(([dot, items]) =>
+      items.map(({ name, value }) => ({ dot, type: name, value }))
+    );
     colInst.current?.changeData(colData);
   };
 
@@ -209,7 +237,7 @@ export function ChartSection({ state, setField }: Props) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
             <div style={{ width: 3, height: 20, borderRadius: 99, background: COLOR.primary }} />
-            <span style={{ fontSize:18, fontWeight: 700, color: COLOR.textDark }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: COLOR.textDark }}>
               Biểu đồ thống kê sinh viên theo đợt khảo sát
             </span>
           </div>
