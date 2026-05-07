@@ -4,9 +4,6 @@ import { Typography } from 'antd';
 const { Text } = Typography;
 
 export interface StatCardProps {
-  icon: React.ReactNode;
-  iconBg: string;
-  iconColor?: string;
   numerator: number;
   denominator: number;
   label: string;
@@ -19,9 +16,6 @@ export interface StatCardProps {
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
-  icon,
-  iconBg,
-  iconColor = '#fff',
   numerator,
   denominator,
   label,
@@ -50,70 +44,54 @@ export const StatCard: React.FC<StatCardProps> = ({
         transition: 'border-color 0.15s',
       }}
     >
-      {/* Top row: icon + badge */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div
+      {/* Top row: label + percentage badge */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <Text
+          type="secondary"
+          title={label}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: iconBg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 18,
-            color: iconColor,
-            flexShrink: 0,
+            fontSize: 14,
+            lineHeight: 1.4,
+            fontWeight: 500,
+            color: '#374151',
+            wordBreak: 'break-word',
+            flex: 1,
           }}
         >
-          {icon}
-        </div>
+          {label}
+        </Text>
         <span
           style={{
             background: pctBg,
             color: pctColor,
-            padding: '3px 8px',
+            padding: '3px 10px',
             borderRadius: 6,
-            fontSize: 13,
-            fontWeight: 500,
+            fontSize: 14,
+            fontWeight: 600,
             letterSpacing: '0.2px',
             lineHeight: 1.5,
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           {displayPct}%
         </span>
       </div>
 
-      {/* Number + label */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, lineHeight: 1 }}>
-          <span style={{ fontSize: 28, fontWeight: 500, color: numColor, lineHeight: 1 }}>
-            {numerator}
-          </span>
-          <Text type="secondary" style={{ fontSize: 14 }}>
-            / {denominator}
-          </Text>
-        </div>
-        <Text
-          type="secondary"
-          title={label}
-          style={{
-            fontSize: 13,
-            lineHeight: 1.35,
-            display: 'block',
-            wordBreak: 'break-word',
-            minHeight: 36,
-          }}
-        >
-          {label}
+      {/* Numerator / denominator */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, lineHeight: 1, flex: 1 }}>
+        <span style={{ fontSize: 30, fontWeight: 600, color: numColor, lineHeight: 1 }}>
+          {numerator}
+        </span>
+        <Text type="secondary" style={{ fontSize: 15 }}>
+          / {denominator}
         </Text>
       </div>
 
       {/* Progress bar */}
       <div
         style={{
-          height: 4,
+          height: 5,
           background: 'rgba(0,0,0,0.08)',
           borderRadius: 4,
           overflow: 'hidden',

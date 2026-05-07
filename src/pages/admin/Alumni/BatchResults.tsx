@@ -10,8 +10,6 @@ import {
   ClockCircleOutlined, CalendarOutlined,
   FileExcelOutlined, FilePdfOutlined, FilterOutlined,
   QuestionCircleOutlined, EditOutlined,
-  SolutionOutlined, CloseCircleOutlined, TeamOutlined,
-  LikeOutlined, RiseOutlined, ReadOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById } from '../../../feature/alumni/api';
@@ -265,29 +263,29 @@ export const BatchResults: React.FC = () => {
   /*  Columns  */
   const columns: ColumnsType<AlumniResponse> = [
     {
-      title: 'STT', key: 'stt', width: 55,
-      render: (_, __, i) => <Text type="secondary" style={{ fontSize: 14 }}>{i + 1}</Text>,
+      title: 'STT', key: 'stt', width: 60,
+      render: (_, __, i) => <Text type="secondary" style={{ fontSize: 16 }}>{i + 1}</Text>,
     },
     {
-      title: 'Mã SV', key: 'studentId', width: 110,
+      title: 'Mã SV', key: 'studentId', width: 120,
       render: (_, r) => (
-        <Text style={{ fontFamily: 'monospace', fontSize: 14, color: '#2563eb', fontWeight: 600 }}>
+        <Text style={{ fontFamily: 'monospace', fontSize: 16, color: '#2563eb', fontWeight: 600 }}>
           {r.studentId}
         </Text>
       ),
     },
     {
-      title: 'Email', key: 'email', width: 220,
-      render: (_, r) => <Text style={{ fontSize: 14 }}>{r.studentEmail}</Text>,
+      title: 'Email', key: 'email', width: 240,
+      render: (_, r) => <Text style={{ fontSize: 16 }}>{r.studentEmail}</Text>,
     },
     {
       title: 'Họ tên', key: 'name',
-      render: (_, r) => <Text style={{ fontWeight: 500, fontSize: 15 }}>{r.studentName}</Text>,
+      render: (_, r) => <Text style={{ fontWeight: 500, fontSize: 16 }}>{r.studentName}</Text>,
     },
     {
-      title: 'Ngày phản hồi', key: 'submittedAt', width: 170,
+      title: 'Ngày phản hồi', key: 'submittedAt', width: 180,
       render: (_, r) => (
-        <Text type="secondary" style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+        <Text type="secondary" style={{ fontSize: 16, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
           <ClockCircleOutlined />
           {r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
         </Text>
@@ -439,13 +437,13 @@ export const BatchResults: React.FC = () => {
                   />
                 </Popover>
               </div>
-              <Row gutter={[10, 10]}>
-                <Col span={8}><StatCard icon={<SolutionOutlined />}    iconBg="#d1fae5" iconColor="#065f46" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"        numColor="#065f46" barColor="#1D9E75" pctBg="#d1fae5" pctColor="#065f46" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={<CloseCircleOutlined />} iconBg="#fee2e2" iconColor="#9f1239" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi"   numColor="#9f1239" barColor="#e11d48" pctBg="#fee2e2" pctColor="#9f1239" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={<TeamOutlined />}        iconBg="#dbeafe" iconColor="#1e40af" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"      numColor="#1e40af" barColor="#2563eb" pctBg="#dbeafe" pctColor="#1e40af" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={<LikeOutlined />}        iconBg="#ccfbf1" iconColor="#0f766e" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"   numColor="#0f766e" barColor="#0d9488" pctBg="#ccfbf1" pctColor="#0f766e" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={<RiseOutlined />}        iconBg="#ffedd5" iconColor="#c2410c" numerator={relevG}   denominator={total} label="Việc làm phù hợp / Tốt nghiệp" numColor="#c2410c" barColor="#ea580c" pctBg="#ffedd5" pctColor="#c2410c" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={<ReadOutlined />}        iconBg="#e0e7ff" iconColor="#4338ca" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"          numColor="#4338ca" barColor="#4f46e5" pctBg="#e0e7ff" pctColor="#4338ca" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+              <Row gutter={[12, 12]}>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"        numColor="#065f46" barColor="#1D9E75" pctBg="#d1fae5" pctColor="#065f46" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi"   numColor="#9f1239" barColor="#e11d48" pctBg="#fee2e2" pctColor="#9f1239" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"      numColor="#1e40af" barColor="#2563eb" pctBg="#dbeafe" pctColor="#1e40af" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"   numColor="#0f766e" barColor="#0d9488" pctBg="#ccfbf1" pctColor="#0f766e" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={relevG}   denominator={total} label="Việc làm phù hợp / Tốt nghiệp" numColor="#c2410c" barColor="#ea580c" pctBg="#ffedd5" pctColor="#c2410c" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
+                <Col xs={24} sm={12} xl={8}><StatCard numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#e0e7ff" pctColor="#4338ca" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
               </Row>
             </div>
           </Col>
