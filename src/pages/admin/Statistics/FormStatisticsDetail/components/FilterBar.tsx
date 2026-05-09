@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Select, Button, Form } from 'antd'
+import { Select } from 'antd'
 import type { FormOption, StatisticalQuestion } from '../../../../../feature/statistics/types'
 
 interface Props {
@@ -7,9 +7,8 @@ interface Props {
   questions: StatisticalQuestion[]
   formId?: number
   questionId?: string
-  onChangeForm: (value: number) => void
-  onChangeQuestion: (value: string) => void
-  onReset?: () => void
+  onChangeForm: (value?: number) => void
+  onChangeQuestion: (value?: string) => void
 }
 
 export function FilterBar({
@@ -19,51 +18,63 @@ export function FilterBar({
   questionId,
   onChangeForm,
   onChangeQuestion,
-  onReset,
 }: Props) {
   const formOptions = useMemo(
-    () => forms.map((f) => ({ label: f.name, value: f.id })),
+    () =>
+      forms.map((f) => ({
+        label: f.name,
+        value: f.id,
+        shortLabel: f.name.length > 24 ? `${f.name.slice(0, 24)}...` : f.name,
+      })),
     [forms]
   )
 
   const questionOptions = useMemo(
-    () => questions.map((q) => ({ label: q.title, value: q.id })),
+    () =>
+      questions.map((q) => ({
+        label: q.title,
+        value: q.id,
+        shortLabel:
+          q.title.length > 28 ? `${q.title.slice(0, 28)}...` : q.title,
+      })),
     [questions]
   )
 
-  const handleReset = () => {
-    onReset?.()
-  }
+  const selectedForm = formOptions.find((item) => item.value === formId)
+  const selectedQuestion = questionOptions.find((item) => item.value === questionId)
 
   return (
-    <div className="stats-filter-card">
-      <Form layout="inline">
-        <Form.Item label="Survey form">
-          <Select
-            value={formId}
-            options={formOptions}
-            placeholder="Select form"
-            onChange={onChangeForm}
-            allowClear
-            style={{ minWidth: 200 }}
-          />
-        </Form.Item>
+    <div
+      style={{
+        display: 'flex',
+        gap: 12,
+        flexWrap: 'wrap',
+        alignItems: 'center',
+      }}
+    >
+      <Select
+        value={formId}
+        options={formOptions}
+        placeholder="Chọn biểu mẫu"
+        onChange={onChangeForm}
+        allowClear
+        showSearch
+        optionFilterProp="label"
+        style={{ width: 220 }}
+        labelRender={() => selectedForm?.shortLabel || ''}
+      />
 
-        <Form.Item label="Question">
-          <Select
-            value={questionId}
-            options={questionOptions}
-            placeholder="Select question"
-            onChange={onChangeQuestion}
-            allowClear
-            style={{ minWidth: 200 }}
-          />
-        </Form.Item>
-
-        {/* <Form.Item>
-          <Button onClick={handleReset}>Reset</Button>
-        </Form.Item> */}
-      </Form>
+      <Select
+        value={questionId}
+        options={questionOptions}
+        placeholder="Chọn câu hỏi"
+        onChange={onChangeQuestion}
+        allowClear
+        showSearch
+        optionFilterProp="label"
+        style={{ width: 260 }}
+        labelRender={() => selectedQuestion?.shortLabel || ''}
+      />
     </div>
   )
 }
