@@ -25,15 +25,23 @@ export default function FormStatisticsDetailPage() {
       value: item.value,
     })) ?? []
 
+  const currentQuestion = questions.find((q) => q.id === questionId)
+  const pieLabel = detail ? `Latest responses · ${detail.formName}` : 'Latest responses'
+  const columnLabel = currentQuestion ? `Distribution — ${currentQuestion.title}` : 'Answer distribution'
+
+  const handleReset = () => {
+    setFormId(undefined)
+    setQuestionId(undefined)
+  }
+
   return (
     <AdminLayout>
-      <div >
+      <div>
         <div className="stats-header">
           <div className="stats-header__left">
-            {/* <span className="stats-header__badge">Thống kê</span> */}
-            <h1 className="stats-header__title">Thống kê biểu mẫu</h1>
+            <h1 className="stats-header__title">Form statistics</h1>
             <p className="stats-header__desc">
-              Chọn biểu mẫu và câu hỏi để xem dữ liệu phân tích theo từng form khảo sát.
+              Select a survey form and question to view analytics data.
             </p>
           </div>
         </div>
@@ -46,6 +54,7 @@ export default function FormStatisticsDetailPage() {
             questionId={questionId}
             onChangeForm={setFormId}
             onChangeQuestion={setQuestionId}
+            onReset={handleReset}
           />
 
           {loading ? (
@@ -62,7 +71,7 @@ export default function FormStatisticsDetailPage() {
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
                   <span style={{ color: '#64748b' }}>
-                    Chưa có dữ liệu thống kê cho lựa chọn này
+                    No statistics data for this selection
                   </span>
                 }
               />
@@ -76,7 +85,7 @@ export default function FormStatisticsDetailPage() {
                   <div className="stats-chart-head__text">
                     <div className="stats-chart-head__title">{detail.questionTitle}</div>
                     <div className="stats-chart-head__sub">
-                      Biểu đồ thống kê 
+                      Statistical chart
                     </div>
                   </div>
                 </div>
@@ -85,6 +94,8 @@ export default function FormStatisticsDetailPage() {
                   <PieColumnChart
                     pieData={pieData}
                     latestKey={detail.questionTitle}
+                    pieLabel={pieLabel}
+                    columnLabel={columnLabel}
                   />
                 </div>
               </div>
