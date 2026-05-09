@@ -3,8 +3,8 @@ import AdminLayout from '../../../../components/layout/AdminLayout'
 import { useFormStatisticsDetail } from '../../../../feature/statistics/hooks/useFormStatisticsDetail'
 import { FilterBar } from './components/FilterBar'
 import { StatsOverview } from './components/StatsOverview'
-import { ResponsePieChart } from './components/ResponsePieChart'
-import { ResponseColumnChart } from './components/ResponseColumnChart'
+import ResponsePieChart from './components/ResponsePieChart'
+import ResponseColumnChart from './components/ResponseColumnChart'
 import { DetailTable } from './components/DetailTable'
 
 const { Title, Text } = Typography
