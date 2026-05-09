@@ -1,11 +1,10 @@
-import { Col, Empty, Row, Skeleton, Space } from 'antd'
+import { Empty, Skeleton, Space } from 'antd'
 import AdminLayout from '../../../../components/layout/AdminLayout'
 import { useFormStatisticsDetail } from '../../../../feature/statistics/hooks/useFormStatisticsDetail'
 import { FilterBar } from './components/FilterBar'
 import { StatsOverview } from './components/StatsOverview'
-import ResponsePieChart from './components/ResponsePieChart'
-import ResponseColumnChart from './components/ResponseColumnChart'
 import { DetailTable } from './components/DetailTable'
+import { PieColumnChart } from '../../../../components/charts/PieColumnChart'
 import './styles.css'
 
 export default function FormStatisticsDetailPage() {
@@ -20,13 +19,18 @@ export default function FormStatisticsDetailPage() {
     loading,
   } = useFormStatisticsDetail(1)
 
+  const pieData =
+    detail?.data?.map((item) => ({
+      name: item.label,
+      value: item.value,
+    })) ?? []
+
   return (
     <AdminLayout>
-      <div className="stats-page">
-        {/* Page header */}
+      <div >
         <div className="stats-header">
           <div className="stats-header__left">
-            <span className="stats-header__badge">Thống kê</span>
+            {/* <span className="stats-header__badge">Thống kê</span> */}
             <h1 className="stats-header__title">Thống kê biểu mẫu</h1>
             <p className="stats-header__desc">
               Chọn biểu mẫu và câu hỏi để xem dữ liệu phân tích theo từng form khảo sát.
@@ -67,22 +71,23 @@ export default function FormStatisticsDetailPage() {
             <>
               <StatsOverview detail={detail} />
 
-              <Row gutter={[20, 20]}>
-                <Col xs={24} xl={12}>
-                  <ResponsePieChart
-                    data={detail.data}
-                    title={detail.questionTitle}
-                    subtitle="Biểu đồ tròn"
+              <div className="stats-chart-card">
+                <div className="stats-chart-head">
+                  <div className="stats-chart-head__text">
+                    <div className="stats-chart-head__title">{detail.questionTitle}</div>
+                    <div className="stats-chart-head__sub">
+                      Biểu đồ thống kê 
+                    </div>
+                  </div>
+                </div>
+
+                <div className="stats-chart-body">
+                  <PieColumnChart
+                    pieData={pieData}
+                    latestKey={detail.questionTitle}
                   />
-                </Col>
-                <Col xs={24} xl={12}>
-                  <ResponseColumnChart
-                    data={detail.data}
-                    title={detail.questionTitle}
-                    subtitle="Biểu đồ cột"
-                  />
-                </Col>
-              </Row>
+                </div>
+              </div>
 
               <DetailTable detail={detail} />
             </>
