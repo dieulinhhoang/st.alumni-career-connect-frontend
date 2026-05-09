@@ -38,22 +38,22 @@ export function FilterBar({
   return (
     <div className="stats-filter-card">
       <Form layout="inline">
-        <Form.Item >
+        <Form.Item label="Survey form">
           <Select
             value={formId}
             options={formOptions}
-            placeholder="Chọn biểu mẫu"
+            placeholder="Select form"
             onChange={onChangeForm}
             allowClear
             style={{ minWidth: 200 }}
           />
         </Form.Item>
 
-        <Form.Item >
+        <Form.Item label="Question">
           <Select
             value={questionId}
             options={questionOptions}
-            placeholder="Chọn câu hỏi"
+            placeholder="Select question"
             onChange={onChangeQuestion}
             allowClear
             style={{ minWidth: 200 }}
@@ -61,7 +61,7 @@ export function FilterBar({
         </Form.Item>
 
         {/* <Form.Item>
-          <Button onClick={handleReset}>Làm mới</Button>
+          <Button onClick={handleReset}>Reset</Button>
         </Form.Item> */}
       </Form>
     </div>

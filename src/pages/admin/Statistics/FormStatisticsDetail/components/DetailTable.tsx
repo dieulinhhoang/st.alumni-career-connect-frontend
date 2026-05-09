@@ -1,4 +1,4 @@
-import { Table } from 'antd'
+import CustomTable from '../../../../../components/common/customTable'
 import type { FormStatisticsDetail } from '../../../../../feature/statistics/types'
 
 interface Props {
@@ -6,7 +6,7 @@ interface Props {
 }
 
 export function DetailTable({ detail }: Props) {
-  const maxValue = Math.max(...detail.data.map((d) => d.value))
+  const maxValue = Math.max(...detail.data.map((d) => d.value), 1)
 
   const columns = [
     {
@@ -33,7 +33,14 @@ export function DetailTable({ detail }: Props) {
       key: 'value',
       width: 120,
       render: (value: number) => (
-        <span style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', fontVariantNumeric: 'tabular-nums' }}>
+        <span
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: '#1e293b',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
           {value.toLocaleString('vi-VN')}
         </span>
       ),
@@ -43,9 +50,7 @@ export function DetailTable({ detail }: Props) {
       dataIndex: 'percent',
       key: 'percent',
       width: 90,
-      render: (value: number) => (
-        <span className="stats-percent-pill">{value}%</span>
-      ),
+      render: (value: number) => <span className="stats-percent-pill">{value}%</span>,
     },
     {
       title: 'Mức độ',
@@ -68,11 +73,20 @@ export function DetailTable({ detail }: Props) {
         <span className="stats-table-head__title">Bảng thống kê chi tiết</span>
         <span className="stats-table-head__count">{detail.data.length} nhóm</span>
       </div>
-      <Table
+
+      <CustomTable
+        className="stats-detail-table"
         rowKey="label"
         columns={columns}
-        dataSource={[...detail.data].sort((a, b) => b.value - a.value)}
+        data={{
+          data: [...detail.data].sort((a, b) => b.value - a.value),
+          page: {
+            total_elements: detail.data.length,
+          },
+        }}
         pagination={false}
+        minHeight={0}
+        scroll={{ x: 'max-content' }}
       />
     </div>
   )
