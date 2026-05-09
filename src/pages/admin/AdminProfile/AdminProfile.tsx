@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Button,
@@ -11,13 +11,18 @@ import {
   Row,
   Select,
   Space,
-  Tag,
+  Spin,
   Typography,
   message,
 } from 'antd'
 import { EditOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import AdminLayout from '../../../components/layout/AdminLayout'
+import {
+  useGetAdminProfile,
+  useUpdateAdminProfile,
+} from '../../../feature/adminProfile/hook/query'
+import type { IUpdateAdminProfileBody } from '../../../feature/adminProfile/type'
 
 const { Title, Text } = Typography
 
@@ -27,32 +32,71 @@ const AdminProfile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [avatarUrl] = useState<string | undefined>(undefined)
 
-  const initialValues = {
-    fullName: 'Quản Trị Viên',
-    userName: 'admin',
-    email: 'admin@example.com',
-    mobile: '0123456789',
-    address: 'Hà Nội, Việt Nam',
-    sex: 'MALE',
-    bod: dayjs('1990-01-01'),
-    roleName: 'Quản trị viên',
-    roles: [
-      'Quản trị viên',
-      'Quản lý người dùng',
-      'Quản lý biểu mẫu',
-      'Xem thống kê',
-    ],
-  }
+  const { data: profile, isLoading } = useGetAdminProfile()
+  const updateProfile = useUpdateAdminProfile()
+
+  const initialValues = useMemo(() => {
+    if (!profile) return undefined
+    return {
+      fullName: profile.fullName,
+      userName: profile.userName,
+      email: profile.email,
+      mobile: profile.mobile,
+      address: profile.address,
+      sex: profile.sex,
+      bod: profile.bod ? dayjs(profile.bod) : undefined,
+      roleName: profile.roleName,
+      roles: profile.roles ?? [],
+    }
+  }, [profile])
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+    }
+  }, [form, initialValues])
 
   const handleSave = (values: any) => {
-    console.log('Cập nhật thông tin:', values)
-    messageApi.success('Cập nhật thông tin thành công!')
-    setIsEditing(false)
+    const body: IUpdateAdminProfileBody = {
+      fullName: values.fullName?.trim(),
+      email: values.email,
+      mobile: values.mobile,
+      address: values.address,
+      sex: values.sex,
+      bod: values.bod ? (values.bod as Dayjs).toISOString() : undefined,
+    }
+
+    updateProfile.mutate(body, {
+      onSuccess: () => {
+        messageApi.success('Cập nhật thông tin thành công!')
+        setIsEditing(false)
+      },
+      onError: () => {
+        messageApi.error('Cập nhật thông tin thất bại')
+      },
+    })
   }
 
   const handleCancel = () => {
-    form.resetFields()
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+    } else {
+      form.resetFields()
+    }
     setIsEditing(false)
+  }
+
+  if (isLoading || !initialValues || !profile) {
+    return (
+      <>
+        {contextHolder}
+        <AdminLayout>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+            <Spin />
+          </div>
+        </AdminLayout>
+      </>
+    )
   }
 
   return (
@@ -60,80 +104,55 @@ const AdminProfile: React.FC = () => {
       {contextHolder}
       <AdminLayout>
         <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
-          <div
-            style={{
-              marginBottom: 24,
-              padding: '20px 24px',
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)',
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <Title level={3} style={{ margin: 0 }}>
-              Thông tin tài khoản
-            </Title>
-            <Text type="secondary">
-              Quản lý thông tin cá nhân và nhóm quyền của quản trị viên
-            </Text>
-          </div>
+          <Title level={3} style={{ marginBottom: 24 }}>
+            Thông tin tài khoản
+          </Title>
 
           <Row gutter={[24, 24]}>
+            {/* Cột trái: Avatar + nhóm quyền */}
             <Col xs={24} md={7}>
               <Card
                 style={{
                   textAlign: 'center',
-                  borderRadius: 16,
-                  border: '1px solid #eef2f7',
-                  boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+                  borderRadius: 12,
+                  borderColor: '#f0f0f0',
                 }}
                 styles={{ body: { padding: 24 } }}
               >
                 <div
                   style={{
-                    width: 112,
-                    height: 112,
+                    width: 96,
+                    height: 96,
                     margin: '0 auto 16px',
-                    padding: 4,
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)',
+                    border: '3px solid #7c3aed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
                   <Avatar
-                    size={104}
+                    size={64}
                     src={avatarUrl}
                     icon={!avatarUrl ? <UserOutlined /> : undefined}
-                    style={{ background: '#fff', color: '#7c3aed' }}
+                    style={{ background: '#ffffff', color: '#7c3aed' }}
                   />
                 </div>
 
-                <Text strong style={{ display: 'block', fontSize: 18, marginBottom: 4 }}>
-                  {form.getFieldValue('fullName') || initialValues.fullName}
+                <Text strong style={{ display: 'block', marginBottom: 4 }}>
+                  {form.getFieldValue('fullName') || profile.fullName}
                 </Text>
-
-                <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-                  @{initialValues.userName}
+                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                  @{profile.userName}
                 </Text>
-
-                <Tag
-                  color="purple"
-                  style={{
-                    borderRadius: 999,
-                    padding: '6px 12px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    marginBottom: 20,
-                  }}
-                >
-                  {initialValues.roleName}
-                </Tag>
 
                 <div
                   style={{
                     marginTop: 8,
                     padding: 16,
                     borderRadius: 12,
-                    background: '#f8fafc',
-                    border: '1px solid #eef2f7',
+                    background: '#f9fafb',
+                    border: '1px solid #f1f5f9',
                     textAlign: 'left',
                   }}
                 >
@@ -144,35 +163,38 @@ const AdminProfile: React.FC = () => {
                     Nhóm quyền
                   </Text>
 
-                  <Space wrap size={[8, 8]}>
-                    {initialValues.roles.map((role) => (
-                      <Tag
+                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                    {(profile.roles ?? []).map((role) => (
+                      <div
                         key={role}
-                        color="purple"
-                        style={{ borderRadius: 999, padding: '4px 10px', marginInlineEnd: 0 }}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: 999,
+                          background: '#f5f3ff',
+                          color: '#7c3aed',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          display: 'inline-block',
+                        }}
                       >
                         {role}
-                      </Tag>
+                      </div>
                     ))}
                   </Space>
                 </div>
               </Card>
             </Col>
 
+            {/* Cột phải: Form */}
             <Col xs={24} md={17}>
               <Card
-                style={{
-                  borderRadius: 16,
-                  border: '1px solid #eef2f7',
-                  boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
-                }}
+                style={{ borderRadius: 12, borderColor: '#f0f0f0' }}
                 extra={
                   !isEditing ? (
                     <Button
                       type="primary"
                       icon={<EditOutlined />}
                       onClick={() => setIsEditing(true)}
-                      style={{ borderRadius: 10 }}
                     >
                       Chỉnh sửa
                     </Button>
@@ -183,7 +205,6 @@ const AdminProfile: React.FC = () => {
                 <Form
                   form={form}
                   layout="vertical"
-                  initialValues={initialValues}
                   onFinish={handleSave}
                   disabled={!isEditing}
                 >
@@ -197,7 +218,6 @@ const AdminProfile: React.FC = () => {
                         <Input placeholder="Nhập họ và tên" />
                       </Form.Item>
                     </Col>
-
                     <Col xs={24} sm={12}>
                       <Form.Item label="Tên đăng nhập" name="userName">
                         <Input placeholder="Tên đăng nhập" disabled />
@@ -218,7 +238,6 @@ const AdminProfile: React.FC = () => {
                         <Input placeholder="Nhập email" />
                       </Form.Item>
                     </Col>
-
                     <Col xs={24} sm={12}>
                       <Form.Item
                         label="Số điện thoại"
@@ -245,7 +264,6 @@ const AdminProfile: React.FC = () => {
                         />
                       </Form.Item>
                     </Col>
-
                     <Col xs={24} sm={12}>
                       <Form.Item label="Giới tính" name="sex">
                         <Select placeholder="Chọn giới tính">
@@ -263,7 +281,6 @@ const AdminProfile: React.FC = () => {
                         <Input disabled />
                       </Form.Item>
                     </Col>
-
                     <Col xs={24} sm={12}>
                       <Form.Item label="Địa chỉ" name="address">
                         <Input placeholder="Nhập địa chỉ" />
@@ -283,6 +300,7 @@ const AdminProfile: React.FC = () => {
                             type="primary"
                             htmlType="submit"
                             icon={<SaveOutlined />}
+                            loading={updateProfile.isPending}
                           >
                             Lưu thay đổi
                           </Button>
