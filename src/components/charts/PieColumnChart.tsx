@@ -242,7 +242,7 @@ export function PieColumnChart({
               }}
             />
             <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
-              Filtering: <strong>{selectedSlice}</strong>
+              Bộ lọc : <strong>{selectedSlice}</strong>
             </Text>
           </div>
           <button
@@ -258,7 +258,7 @@ export function PieColumnChart({
               borderRadius: 6,
             }}
           >
-            ✕ Clear filter
+            ✕ 
           </button>
         </div>
       )}

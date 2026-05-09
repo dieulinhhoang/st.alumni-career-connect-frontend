@@ -62,7 +62,7 @@ export function ChartSection({ state, setField }: Props) {
   const dynamicSchema = useMemo<FilterFieldSchema[]>(() => {
     const opts = questions.length
       ? questions.map(q => ({ value: q.questionId, label: q.label }))
-      : [{ value: questionId, label: "Loading…" }];
+      : [{ value: questionId, label: "Đang tải…" }];
     return CHART_FILTER_SCHEMA.map(f =>
       f.key === "chartMode"
         ? { ...f, getOptions: () => opts }
@@ -79,9 +79,9 @@ export function ChartSection({ state, setField }: Props) {
 
   const latestKey = currentQuestion?.label ?? "—";
   const pieLabel = currentQuestion
-    ? `Latest batch · ${currentQuestion.label}`
-    : "Latest batch";
-  const columnLabel = "Count by survey batch";
+    ? `Đợt khảo sát mới nhất · ${currentQuestion.label}`
+    : "Đợt khảo sát mới nhất";
+  const columnLabel = "Số lượng theo từng đợt khảo sát";
 
   return (
     <div style={{
@@ -102,11 +102,11 @@ export function ChartSection({ state, setField }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
             <div style={{ width: 3, height: 20, borderRadius: 99, background: COLOR.primary }} />
             <span style={{ fontSize: 18, fontWeight: 700, color: COLOR.textDark }}>
-              Student statistics by survey batch
+              Thống kê sinh viên theo đợt khảo sát
             </span>
           </div>
           <Text style={{ fontSize: 12, color: COLOR.textFaint, marginLeft: 11 }}>
-            Percentage distribution — comparison across batches
+            Phân bố tỷ lệ phần trăm – so sánh giữa các đợt khảo sát
           </Text>
         </div>
         <Button
@@ -118,7 +118,7 @@ export function ChartSection({ state, setField }: Props) {
             color: COLOR.primary,
           }}
         >
-          View details
+          Xem chi tiết
         </Button>
       </div>
 
@@ -127,7 +127,7 @@ export function ChartSection({ state, setField }: Props) {
         schema={dynamicSchema}
         state={state as unknown as Record<string, string>}
         setField={setField}
-        label="Filter by:"
+        label="Lọc theo:"
         labelColor={COLOR.textMuted}
       />
 

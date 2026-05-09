@@ -21,7 +21,7 @@ export function useFormStatisticsDetail(initialFormId?: number) {
   // data render
   const [detail, setDetail] = useState<FormStatisticsDetail | null>(null)
 
-  // id form đang chọn, giữ state đang chọn
+  // id form đang chọn, giữ state đang chọn để khi ds form load xong sẽ tự động chọn form đầu tiên
   const [formId, setFormId] = useState<number | undefined>(initialFormId)
   const [questionId, setQuestionId] = useState<string | undefined>()
 

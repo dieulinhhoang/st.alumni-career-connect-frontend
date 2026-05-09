@@ -10,7 +10,7 @@ export function DetailTable({ detail }: Props) {
 
   const columns = [
     {
-      title: '#',
+      title: 'STT',
       key: 'rank',
       width: 52,
       render: (_: unknown, __: unknown, index: number) => (

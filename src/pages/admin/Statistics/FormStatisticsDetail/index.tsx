@@ -26,8 +26,10 @@ export default function FormStatisticsDetailPage() {
     })) ?? []
 
   const currentQuestion = questions.find((q) => q.id === questionId)
-  const pieLabel = detail ? `Latest responses · ${detail.formName}` : 'Latest responses'
-  const columnLabel = currentQuestion ? `Distribution — ${currentQuestion.title}` : 'Answer distribution'
+  const pieLabel = detail ? `Biểu đồ tròn · ${detail.formName}` : 'Biểu đồ tròn'
+  const columnLabel = currentQuestion
+    ? `Biểu đồ cột · ${currentQuestion.title}`
+    : 'Biểu đồ cột'
 
   const handleReset = () => {
     setFormId(undefined)
@@ -36,12 +38,12 @@ export default function FormStatisticsDetailPage() {
 
   return (
     <AdminLayout>
-      <div>
+      <div className="stats-page">
         <div className="stats-header">
           <div className="stats-header__left">
-            <h1 className="stats-header__title">Form statistics</h1>
+            <h1 className="stats-header__title">Biểu đồ thống kê</h1>
             <p className="stats-header__desc">
-              Select a survey form and question to view analytics data.
+              Biểu đồ thống kê kết quả khảo sát theo từng câu hỏi.
             </p>
           </div>
         </div>
@@ -71,7 +73,7 @@ export default function FormStatisticsDetailPage() {
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
                   <span style={{ color: '#64748b' }}>
-                    No statistics data for this selection
+                    Chưa có dữ liệu thống kê cho lựa chọn này
                   </span>
                 }
               />
@@ -83,9 +85,11 @@ export default function FormStatisticsDetailPage() {
               <div className="stats-chart-card">
                 <div className="stats-chart-head">
                   <div className="stats-chart-head__text">
-                    <div className="stats-chart-head__title">{detail.questionTitle}</div>
+                    <div className="stats-chart-head__title">
+                      {detail.questionTitle}
+                    </div>
                     <div className="stats-chart-head__sub">
-                      Statistical chart
+                      Phân bố kết quả khảo sát
                     </div>
                   </div>
                 </div>

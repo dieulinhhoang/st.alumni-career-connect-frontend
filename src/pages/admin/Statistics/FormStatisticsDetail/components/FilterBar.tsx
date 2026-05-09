@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
-import FilterComponent from '../../../../../components/common/FilterCustom'
-import type { FilterColumn } from '../../../../../components/common/FilterCustom'
+import { Select, Button, Form } from 'antd'
 import type { FormOption, StatisticalQuestion } from '../../../../../feature/statistics/types'
 
 interface Props {
@@ -22,48 +21,15 @@ export function FilterBar({
   onChangeQuestion,
   onReset,
 }: Props) {
-  const filterColumns = useMemo<FilterColumn[]>(() => [
-    {
-      title: 'Survey form',
-      dataIndex: 'formId',
-      type: 'select',
-      options: forms.map((f) => ({ label: f.name, value: f.id })),
-      placeholder: 'Select form',
-    },
-    {
-      title: 'Question',
-      dataIndex: 'questionId',
-      type: 'select',
-      options: questions.map((q) => ({ label: q.title, value: q.id })),
-      placeholder: 'Select question',
-    },
-  ], [forms, questions])
+  const formOptions = useMemo(
+    () => forms.map((f) => ({ label: f.name, value: f.id })),
+    [forms]
+  )
 
-  // Build current values so FilterComponent reflects external state changes
-  // (e.g. auto-selection of first form/question by the hook).
-  const currentValues = useMemo(() => {
-    const vals: Record<string, any> = {}
-    if (formId !== undefined) vals['formId'] = [formId]
-    if (questionId !== undefined) vals['questionId'] = [questionId]
-    return vals
-  }, [formId, questionId])
-
-  const handleFilterChange = (values: Record<string, any>) => {
-    const newFormId = Array.isArray(values['formId'])
-      ? (values['formId'][0] as number)
-      : (values['formId'] as number | undefined)
-
-    const newQuestionId = Array.isArray(values['questionId'])
-      ? (values['questionId'][0] as string)
-      : (values['questionId'] as string | undefined)
-
-    if (newFormId !== undefined && newFormId !== formId) {
-      onChangeForm(newFormId)
-    }
-    if (newQuestionId !== undefined && newQuestionId !== questionId) {
-      onChangeQuestion(newQuestionId)
-    }
-  }
+  const questionOptions = useMemo(
+    () => questions.map((q) => ({ label: q.title, value: q.id })),
+    [questions]
+  )
 
   const handleReset = () => {
     onReset?.()
@@ -71,13 +37,33 @@ export function FilterBar({
 
   return (
     <div className="stats-filter-card">
-      <FilterComponent
-        columns={filterColumns}
-        initialValues={currentValues}
-        onFilterChange={handleFilterChange}
-        onResetFields={handleReset}
-        className=""
-      />
+      <Form layout="inline">
+        <Form.Item >
+          <Select
+            value={formId}
+            options={formOptions}
+            placeholder="Chọn biểu mẫu"
+            onChange={onChangeForm}
+            allowClear
+            style={{ minWidth: 200 }}
+          />
+        </Form.Item>
+
+        <Form.Item >
+          <Select
+            value={questionId}
+            options={questionOptions}
+            placeholder="Chọn câu hỏi"
+            onChange={onChangeQuestion}
+            allowClear
+            style={{ minWidth: 200 }}
+          />
+        </Form.Item>
+
+        {/* <Form.Item>
+          <Button onClick={handleReset}>Làm mới</Button>
+        </Form.Item> */}
+      </Form>
     </div>
   )
 }
