@@ -18,6 +18,7 @@ import { BatchResults } from '../pages/admin/Alumni/BatchResults';
 import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
 import { BatchList } from '../pages/admin/Alumni/BatchList';
 import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
+import ReportsPage from '../pages/admin/Reports/index';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -61,6 +62,16 @@ const routes = [
                 element: (
                     <Suspense fallback={<Loader />}>
                         <SurveyPage />
+                    </Suspense>
+                )
+            },
+
+            // Reports
+            {
+                path: '/admin/reports',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <ReportsPage />
                     </Suspense>
                 )
             },
