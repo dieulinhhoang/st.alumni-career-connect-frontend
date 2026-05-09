@@ -243,6 +243,15 @@ const routes = [
                     </Suspense>
                 )
             },
+            // Profile
+            {
+                path: '/admin/profile',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                        <AdminProfile />
+                    </Suspense>
+                )
+            },
         ]
     }
 ];
