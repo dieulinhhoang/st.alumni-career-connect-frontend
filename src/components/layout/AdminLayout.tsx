@@ -6,7 +6,7 @@ import {
     SolutionOutlined, IdcardOutlined, UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Space, Drawer } from 'antd';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
 
@@ -15,6 +15,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
     const [isMobile, setIsMobile] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     // Handle responsive breakpoints
     useEffect(() => {
@@ -307,12 +308,32 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                         )}
                     </div>
 
-                    <Dropdown trigger={['click']} menu={{
-                        items: [
-                            { key: '1', icon: <UserOutlined />, label: 'Thông tin' },
-                            { key: 'logout', icon: <LogoutOutlined />, label: 'Thoát', danger: true },
-                        ],
-                    }}>
+                    <Dropdown
+                        trigger={['click']}
+                        menu={{
+                            items: [
+                                {
+                                    key: '/admin/profile',
+                                    icon: <UserOutlined />,
+                                    label: 'Thông tin',
+                                },
+                                {
+                                    key: 'logout',
+                                    icon: <LogoutOutlined />,
+                                    label: 'Thoát',
+                                    danger: true,
+                                },
+                            ],
+                            onClick: ({ key }) => {
+                                if (key === '/admin/profile') {
+                                    navigate('/admin/profile');
+                                } else if (key === 'logout') {
+                                    // TODO: gọi logout action tại đây
+                                    navigate('/');
+                                }
+                            },
+                        }}
+                    >
                         <Button type="text" style={{ height: 44, borderRadius: 8 }}>
                             <Space size={8}>
                                 <Avatar size={28} src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
