@@ -1,21 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import {
-  Avatar,
-  Button,
-  Card,
-  Col,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  Row,
-  Select,
-  Space,
-  Spin,
-  Typography,
-  message,
-} from 'antd'
-import { EditOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
+import { Row, Col, Spin, Typography, message, Form } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import AdminLayout from '../../../components/layout/AdminLayout'
 import {
@@ -23,17 +7,20 @@ import {
   useUpdateAdminProfile,
 } from '../../../feature/adminProfile/hook/query'
 import type { IUpdateAdminProfileBody } from '../../../feature/adminProfile/type'
+import ProfileSidebar from './ProfileSidebar'
+import ProfileForm from './ProfileForm'
 
 const { Title, Text } = Typography
 
 const AdminProfile: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
-  const [form] = Form.useForm()
   const [isEditing, setIsEditing] = useState(false)
   const [avatarUrl] = useState<string | undefined>(undefined)
 
   const { data: profile, isLoading } = useGetAdminProfile()
   const updateProfile = useUpdateAdminProfile()
+
+  const [form] = Form.useForm()
 
   const initialValues = useMemo(() => {
     if (!profile) return undefined
@@ -46,14 +33,11 @@ const AdminProfile: React.FC = () => {
       sex: profile.sex,
       bod: profile.bod ? dayjs(profile.bod) : undefined,
       roleName: profile.roleName,
-      roles: profile.roles ?? [],
     }
   }, [profile])
 
   useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue(initialValues)
-    }
+    if (initialValues) form.setFieldsValue(initialValues)
   }, [form, initialValues])
 
   const handleSave = (values: any) => {
@@ -78,15 +62,12 @@ const AdminProfile: React.FC = () => {
   }
 
   const handleCancel = () => {
-    if (initialValues) {
-      form.setFieldsValue(initialValues)
-    } else {
-      form.resetFields()
-    }
+    if (initialValues) form.setFieldsValue(initialValues)
+    else form.resetFields()
     setIsEditing(false)
   }
 
-  if (isLoading || !initialValues || !profile) {
+  if (isLoading || !profile || !initialValues) {
     return (
       <>
         {contextHolder}
@@ -104,212 +85,107 @@ const AdminProfile: React.FC = () => {
       {contextHolder}
       <AdminLayout>
         <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
-          <Title level={3} style={{ marginBottom: 24 }}>
-            Thông tin tài khoản
-          </Title>
+          <div
+            style={{
+              marginBottom: 24,
+              background:
+                'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)',
+              borderRadius: 20,
+              padding: '20px 24px',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '1px solid #e8e5ff',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: -30,
+                right: -30,
+                width: 160,
+                height: 160,
+                borderRadius: '50%',
+                background: 'rgba(99,102,241,0.06)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -20,
+                right: 80,
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'rgba(139,92,246,0.05)',
+              }}
+            />
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 12,
+                position: 'relative',
+              }}
+            >
+              <div>
+                <Title
+                  level={4}
+                  style={{ margin: 0, color: '#1e1b4b', fontWeight: 800, fontSize: 20 }}
+                >
+                  Thông tin tài khoản
+                </Title>
+                
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: '#fff',
+                  borderRadius: 100,
+                  padding: '6px 14px',
+                  border: '1px solid #e8e5ff',
+                  boxShadow: '0 1px 4px rgba(99,102,241,0.1)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: '#4ade80',
+                    boxShadow: '0 0 0 2px rgba(74,222,128,0.4)',
+                  }}
+                />
+                <Text style={{ fontSize: 12, color: '#4f46e5', fontWeight: 600 }}>
+                  Hồ sơ quản trị
+                </Text>
+              </div>
+            </div>
+          </div>
 
           <Row gutter={[24, 24]}>
-            {/* Cột trái: Avatar + nhóm quyền */}
             <Col xs={24} md={7}>
-              <Card
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 12,
-                  borderColor: '#f0f0f0',
-                }}
-                styles={{ body: { padding: 24 } }}
-              >
-                <div
-                  style={{
-                    width: 96,
-                    height: 96,
-                    margin: '0 auto 16px',
-                    borderRadius: '50%',
-                    border: '3px solid #7c3aed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Avatar
-                    size={64}
-                    src={avatarUrl}
-                    icon={!avatarUrl ? <UserOutlined /> : undefined}
-                    style={{ background: '#ffffff', color: '#7c3aed' }}
-                  />
-                </div>
-
-                <Text strong style={{ display: 'block', marginBottom: 4 }}>
-                  {form.getFieldValue('fullName') || profile.fullName}
-                </Text>
-                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                  @{profile.userName}
-                </Text>
-
-                <div
-                  style={{
-                    marginTop: 8,
-                    padding: 16,
-                    borderRadius: 12,
-                    background: '#f9fafb',
-                    border: '1px solid #f1f5f9',
-                    textAlign: 'left',
-                  }}
-                >
-                  <Text
-                    type="secondary"
-                    style={{ display: 'block', marginBottom: 12, fontWeight: 500 }}
-                  >
-                    Nhóm quyền
-                  </Text>
-
-                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                    {(profile.roles ?? []).map((role) => (
-                      <div
-                        key={role}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: 999,
-                          background: '#f5f3ff',
-                          color: '#7c3aed',
-                          fontSize: 13,
-                          fontWeight: 500,
-                          display: 'inline-block',
-                        }}
-                      >
-                        {role}
-                      </div>
-                    ))}
-                  </Space>
-                </div>
-              </Card>
+              <ProfileSidebar
+                profile={profile}
+                avatarUrl={avatarUrl}
+                displayName={form.getFieldValue('fullName') || profile.fullName}
+              />
             </Col>
 
-            {/* Cột phải: Form */}
             <Col xs={24} md={17}>
-              <Card
-                style={{ borderRadius: 12, borderColor: '#f0f0f0' }}
-                extra={
-                  !isEditing ? (
-                    <Button
-                      type="primary"
-                      icon={<EditOutlined />}
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Chỉnh sửa
-                    </Button>
-                  ) : null
-                }
-                title="Thông tin cá nhân"
-              >
-                <Form
-                  form={form}
-                  layout="vertical"
-                  onFinish={handleSave}
-                  disabled={!isEditing}
-                >
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Họ và tên"
-                        name="fullName"
-                        rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
-                      >
-                        <Input placeholder="Nhập họ và tên" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item label="Tên đăng nhập" name="userName">
-                        <Input placeholder="Tên đăng nhập" disabled />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Email"
-                        name="email"
-                        rules={[
-                          { required: true, message: 'Vui lòng nhập email' },
-                          { type: 'email', message: 'Email không hợp lệ' },
-                        ]}
-                      >
-                        <Input placeholder="Nhập email" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Số điện thoại"
-                        name="mobile"
-                        rules={[
-                          {
-                            pattern: /^[0-9]{9,11}$/,
-                            message: 'Số điện thoại không hợp lệ',
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Nhập số điện thoại" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item label="Ngày sinh" name="bod">
-                        <DatePicker
-                          style={{ width: '100%' }}
-                          format="DD/MM/YYYY"
-                          placeholder="Chọn ngày sinh"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item label="Giới tính" name="sex">
-                        <Select placeholder="Chọn giới tính">
-                          <Select.Option value="MALE">Nam</Select.Option>
-                          <Select.Option value="FEMALE">Nữ</Select.Option>
-                          <Select.Option value="OTHER">Khác</Select.Option>
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item label="Vai trò" name="roleName">
-                        <Input disabled />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item label="Địa chỉ" name="address">
-                        <Input placeholder="Nhập địa chỉ" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  {isEditing && (
-                    <>
-                      <Divider />
-                      <Row justify="end" gutter={12}>
-                        <Col>
-                          <Button onClick={handleCancel}>Hủy</Button>
-                        </Col>
-                        <Col>
-                          <Button
-                            type="primary"
-                            htmlType="submit"
-                            icon={<SaveOutlined />}
-                            loading={updateProfile.isPending}
-                          >
-                            Lưu thay đổi
-                          </Button>
-                        </Col>
-                      </Row>
-                    </>
-                  )}
-                </Form>
-              </Card>
+              <ProfileForm
+                form={form}
+                isEditing={isEditing}
+                isSubmitting={updateProfile.isPending}
+                onEdit={() => setIsEditing(true)}
+                onCancel={handleCancel}
+                onSave={handleSave}
+              />
             </Col>
           </Row>
         </div>
