@@ -23,10 +23,31 @@ export interface PieColumnChartData {
 export interface PieColumnChartProps {
   pieData: PieColumnChartData[]
   dotData?: Record<string, PieColumnChartData[]>
+  /**
+   * Label shown in the donut centre and as the pie sub-label.
+   * In the dashboard this is the question label (e.g. "Tình trạng việc làm").
+   * In the statistics page this is the question title.
+   */
   latestKey: string
+  /**
+   * Label shown above the pie chart (left column header).
+   * Defaults to "Latest batch".
+   */
+  pieLabel?: string
+  /**
+   * Label shown above the column chart (right column header).
+   * Defaults to "Count by survey batch".
+   */
+  columnLabel?: string
 }
 
-export function PieColumnChart({ pieData, dotData, latestKey }: PieColumnChartProps) {
+export function PieColumnChart({
+  pieData,
+  dotData,
+  latestKey,
+  pieLabel = 'Latest batch',
+  columnLabel = 'Count by survey batch',
+}: PieColumnChartProps) {
   const pieRef = useRef<HTMLDivElement>(null)
   const colRef = useRef<HTMLDivElement>(null)
   const pieInst = useRef<G2Pie | null>(null)
@@ -221,7 +242,7 @@ export function PieColumnChart({ pieData, dotData, latestKey }: PieColumnChartPr
               }}
             />
             <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
-              Đang lọc: <strong>{selectedSlice}</strong>
+              Filtering: <strong>{selectedSlice}</strong>
             </Text>
           </div>
           <button
@@ -237,7 +258,7 @@ export function PieColumnChart({ pieData, dotData, latestKey }: PieColumnChartPr
               borderRadius: 6,
             }}
           >
-            ✕ Xoá bộ lọc
+            ✕ Clear filter
           </button>
         </div>
       )}
@@ -253,19 +274,21 @@ export function PieColumnChart({ pieData, dotData, latestKey }: PieColumnChartPr
               minHeight: 320,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <div
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: '50%',
-                  background: COLOR.primary,
-                }}
-              />
-              <Text style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 600 }}>
-                Đợt mới nhất · {latestKey}
-              </Text>
-            </div>
+            {pieLabel && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    background: COLOR.primary,
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 600 }}>
+                  {pieLabel}
+                </Text>
+              </div>
+            )}
             <div ref={pieRef} style={{ height: 280 }} />
           </div>
         </Col>
@@ -280,34 +303,36 @@ export function PieColumnChart({ pieData, dotData, latestKey }: PieColumnChartPr
               minHeight: 320,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <div
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: '50%',
-                  background: COLOR.primary,
-                }}
-              />
-              <Text style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 600 }}>
-                Số lượng theo từng đợt khảo sát
-                {selectedSlice && (
-                  <span
-                    style={{
-                      marginLeft: 8,
-                      fontSize: 10,
-                      background: nameColorMap[selectedSlice] + '18',
-                      color: nameColorMap[selectedSlice],
-                      border: `1px solid ${nameColorMap[selectedSlice]}35`,
-                      padding: '1px 8px',
-                      borderRadius: 100,
-                    }}
-                  >
-                    {selectedSlice}
-                  </span>
-                )}
-              </Text>
-            </div>
+            {columnLabel && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    background: COLOR.primary,
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: COLOR.textMuted, fontWeight: 600 }}>
+                  {columnLabel}
+                  {selectedSlice && (
+                    <span
+                      style={{
+                        marginLeft: 8,
+                        fontSize: 10,
+                        background: nameColorMap[selectedSlice] + '18',
+                        color: nameColorMap[selectedSlice],
+                        border: `1px solid ${nameColorMap[selectedSlice]}35`,
+                        padding: '1px 8px',
+                        borderRadius: 100,
+                      }}
+                    >
+                      {selectedSlice}
+                    </span>
+                  )}
+                </Text>
+              </div>
+            )}
             <div ref={colRef} style={{ height: 280 }} />
           </div>
         </Col>
