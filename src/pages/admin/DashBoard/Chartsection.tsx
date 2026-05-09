@@ -62,7 +62,7 @@ export function ChartSection({ state, setField }: Props) {
   const dynamicSchema = useMemo<FilterFieldSchema[]>(() => {
     const opts = questions.length
       ? questions.map(q => ({ value: q.questionId, label: q.label }))
-      : [{ value: questionId, label: "Đang tải…" }];
+      : [{ value: questionId, label: "Loading…" }];
     return CHART_FILTER_SCHEMA.map(f =>
       f.key === "chartMode"
         ? { ...f, getOptions: () => opts }
@@ -71,10 +71,17 @@ export function ChartSection({ state, setField }: Props) {
   }, [questions, questionId]);
 
   const pieData = chart?.data ?? [];
-  const latestKey = useMemo(() => {
-    const q = questions.find(x => x.questionId === questionId);
-    return q?.label ?? "—";
-  }, [questions, questionId]);
+
+  const currentQuestion = useMemo(
+    () => questions.find(x => x.questionId === questionId),
+    [questions, questionId],
+  );
+
+  const latestKey = currentQuestion?.label ?? "—";
+  const pieLabel = currentQuestion
+    ? `Latest batch · ${currentQuestion.label}`
+    : "Latest batch";
+  const columnLabel = "Count by survey batch";
 
   return (
     <div style={{
@@ -95,11 +102,11 @@ export function ChartSection({ state, setField }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
             <div style={{ width: 3, height: 20, borderRadius: 99, background: COLOR.primary }} />
             <span style={{ fontSize: 18, fontWeight: 700, color: COLOR.textDark }}>
-              Biểu đồ thống kê sinh viên theo đợt khảo sát
+              Student statistics by survey batch
             </span>
           </div>
           <Text style={{ fontSize: 12, color: COLOR.textFaint, marginLeft: 11 }}>
-            Hiển thị tỷ lệ % — so sánh qua các đợt
+            Percentage distribution — comparison across batches
           </Text>
         </div>
         <Button
@@ -111,7 +118,7 @@ export function ChartSection({ state, setField }: Props) {
             color: COLOR.primary,
           }}
         >
-          Xem chi tiết
+          View details
         </Button>
       </div>
 
@@ -120,7 +127,7 @@ export function ChartSection({ state, setField }: Props) {
         schema={dynamicSchema}
         state={state as unknown as Record<string, string>}
         setField={setField}
-        label="Lọc theo:"
+        label="Filter by:"
         labelColor={COLOR.textMuted}
       />
 
@@ -130,6 +137,8 @@ export function ChartSection({ state, setField }: Props) {
           pieData={pieData}
           dotData={chart?.dotData}
           latestKey={latestKey}
+          pieLabel={pieLabel}
+          columnLabel={columnLabel}
         />
       </div>
     </div>
