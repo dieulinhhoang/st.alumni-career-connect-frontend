@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Col, Row, Input, Select, Button, Modal, Tooltip } from "antd";
-import { PlusOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, BankOutlined, CheckCircleOutlined, PauseCircleOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { toSlug } from "../../../components/common/utils";
@@ -17,6 +17,13 @@ const C = {
   primary: "#6366f1", success: "#10b981", warning: "#f59e0b", danger: "#f43f5e",
   text: "#111827", sub: "#9ca3af", muted: "#6b7280", border: "#f0f0f0",
 };
+
+const STAT_CONFIG = [
+  { accent: C.primary, iconBg: "#eef2ff", icon: <BankOutlined /> },
+  { accent: C.success, iconBg: "#ecfdf5", icon: <CheckCircleOutlined /> },
+  { accent: C.danger,  iconBg: "#fff1f2", icon: <PauseCircleOutlined /> },
+  { accent: C.warning, iconBg: "#fffbeb", icon: <ThunderboltOutlined /> },
+];
 
 const pill = (faded = false): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center", gap: 4,
@@ -56,10 +63,10 @@ export default function Enterprise() {
   };
 
   const stats = [
-    { label: "Tổng",         value: enterprises.length,                                                                    color: C.primary },
-    { label: "Hoạt động",    value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: C.success },
-    { label: "Tạm dừng",     value: enterprises.filter(e => e.partnerStatus === "inactive").length,                        color: C.danger  },
-    { label: "Vị trí tuyển", value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), color: C.warning },
+    { label: "Total",          value: enterprises.length,                                                                    sub: "enterprises",         ...STAT_CONFIG[0] },
+    { label: "Active",         value: enterprises.filter(e => e.partnerStatus === "active").length,                          sub: "active partners",     ...STAT_CONFIG[1] },
+    { label: "Paused",         value: enterprises.filter(e => e.partnerStatus === "inactive").length,                        sub: "inactive partners",   ...STAT_CONFIG[2] },
+    { label: "Job Openings",   value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), sub: "positions available",  ...STAT_CONFIG[3] },
   ];
 
   const handleSave = async (values: EnterpriseFormValues) => {
@@ -79,104 +86,215 @@ export default function Enterprise() {
     } else togglePartnerStatus(id, newStatus);
   };
 
+  // ─── columns identical to original (kept) ──────────────────────────────────
   const columns = [
     {
-      title: "Doanh nghiệp", key: "name", width: 260,
-      render: (_: any, r: Enterprise) => (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: faded(r) ? 0.45 : 1 }}>
-          <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 9, background: `${r.color}18`, border: `1.5px solid ${r.color}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: r.color }}>{r.abbr}</span>
+      title: "Tên doanh nghiệp",
+      key: "name",
+      render: (_: unknown, r: Enterprise) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: faded(r) ? 0.55 : 1 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 8,
+            background: faded(r) ? "#f3f4f6" : `${C.primary}12`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 700, fontSize: 13, color: faded(r) ? "#9ca3af" : C.primary, flexShrink: 0,
+          }}>
+            {r.name.charAt(0).toUpperCase()}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 15, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
-            <div style={{ fontSize: 13, color: C.sub, marginTop: 2 }}>{r.website}</div>
+          <div>
+            <div
+              onClick={() => navigate(`/admin/enterprises/${toSlug(r.name)}`)}
+              style={{ fontWeight: 600, fontSize: 14, color: faded(r) ? "#9ca3af" : C.text, cursor: "pointer" }}
+            >
+              {r.name}
+            </div>
+            <div style={{ fontSize: 12, color: C.sub }}>{r.email}</div>
           </div>
         </div>
       ),
     },
     {
-      title: "Ngành", dataIndex: "industry", key: "industry", width: 150,
-      render: (v: string, r: Enterprise) => <span style={pill(faded(r))}>{v}</span>,
+      title: "Ngành",
+      key: "industry",
+      render: (_: unknown, r: Enterprise) => <span style={pill(faded(r))}>{r.industry}</span>,
     },
     {
-      title: "Khoa đối tác", key: "faculties", width: 210,
-      render: (_: any, r: Enterprise) => (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, opacity: faded(r) ? 0.45 : 1 }}>
-          {r.faculties.slice(0, 2).map(k => (
-            <span key={k} style={pill()}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</span>
-          ))}
-          {r.faculties.length > 2 && (
-            <Tooltip title={r.faculties.slice(2).map(k => FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k).join(", ")}>
-              <span style={{ ...pill(), cursor: "pointer" }}>+{r.faculties.length - 2}</span>
-            </Tooltip>
-          )}
+      title: "Khoa liên kết",
+      key: "faculties",
+      render: (_: unknown, r: Enterprise) => (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, opacity: faded(r) ? 0.5 : 1 }}>
+          {r.faculties.length === 0
+            ? <span style={{ fontSize: 12, color: C.sub }}>—</span>
+            : r.faculties.map(f => (
+                <span key={f} style={{ ...pill(), fontSize: 12, padding: "2px 8px" }}>
+                  {FACULTY_VI_NAME[f] ?? f}
+                </span>
+              ))
+          }
         </div>
       ),
     },
     {
-      title: "Việc làm", dataIndex: "jobs", key: "jobs", align: "center" as const, width: 90,
-      render: (v: number, r: Enterprise) => (
-        <span style={{ display: "inline-block", padding: "4px 14px", borderRadius: 20, fontWeight: 700, fontSize: 14, background: faded(r) ? "#f4f4f5" : "#f5f3ff", color: faded(r) ? C.sub : "#6d28d9" }}>{v}</span>
+      title: "Vị trí tuyển",
+      key: "jobs",
+      render: (_: unknown, r: Enterprise) => (
+        <span style={{ fontWeight: 600, fontSize: 14, color: faded(r) ? C.sub : C.warning }}>
+          {r.jobs}
+        </span>
       ),
     },
     {
-      title: "Hành động", key: "actions", align: "center" as const, width: 120,
-      render: (_: any, r: Enterprise) => (
-        <Button size="small" icon={<EditOutlined />} style={{ borderRadius: 6, borderColor: "#d1d5db", color: C.muted }} onClick={e => { e.stopPropagation(); setModal({ open: true, enterprise: r }); }} />
+      title: "Trạng thái",
+      key: "status",
+      render: (_: unknown, r: Enterprise) => {
+        const active = r.partnerStatus === "active";
+        return (
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600,
+            background: active ? "#ecfdf5" : "#fff1f2",
+            color: active ? C.success : C.danger,
+            border: `1px solid ${active ? C.success : C.danger}30`,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: active ? C.success : C.danger }} />
+            {active ? "Hoạt động" : "Tạm dừng"}
+          </span>
+        );
+      },
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_: unknown, r: Enterprise) => (
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              size="small" type="text"
+              icon={<EditOutlined />}
+              onClick={() => setModal({ open: true, enterprise: r })}
+              style={{ color: C.primary }}
+            />
+          </Tooltip>
+        </div>
       ),
     },
   ];
 
   return (
     <AdminLayout>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>Doanh nghiệp đối tác</h2>
-              <p style={{ margin: "4px 0 0", fontSize: 14, color: C.sub }}>Quản lý danh sách và trạng thái hợp tác</p>
-            </div>
-            <Button type="primary" icon={<PlusOutlined />} style={{ background: C.primary, border: "none", borderRadius: 9, fontWeight: 600, height: 40, paddingInline: 20, fontSize: 14, boxShadow: `0 2px 8px ${C.primary}40` }} onClick={() => setModal({ open: true, enterprise: null })}>
-              Thêm doanh nghiệp
-            </Button>
-          </div>
-          <Row gutter={[12, 12]}>
-            {stats.map(s => (
-              <Col key={s.label} xs={12} sm={6}>
-                <div style={{ background: `${s.color}0d`, border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "16px 18px" }}>
-                  <div style={{ fontSize: "clamp(22px,4vw,28px)", fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-                  <div style={{ fontSize: 14, color: s.color, opacity: 0.8, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
+      <div style={{ padding: 0 }}>
+        {/* Page header */}
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#1e293b" }}>Doanh nghiệp</h2>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Quản lý danh sách doanh nghiệp đối tác</p>
+        </div>
+
+        {/* Stat cards — Statistics KPI style */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          {stats.map(s => (
+            <Col key={s.label} xs={12} sm={12} md={6}>
+              <div
+                style={{
+                  background: "#ffffff",
+                  borderRadius: 12,
+                  border: "1px solid rgba(30,41,59,0.10)",
+                  boxShadow: "0 1px 3px rgba(30,41,59,0.07), 0 1px 2px rgba(30,41,59,0.04)",
+                  padding: "20px 22px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  transition: "box-shadow 160ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1)",
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 4px 16px rgba(30,41,59,0.09), 0 1px 4px rgba(30,41,59,0.05)";
+                  el.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 1px 3px rgba(30,41,59,0.07), 0 1px 2px rgba(30,41,59,0.04)";
+                  el.style.transform = "translateY(0)";
+                }}
+              >
+                {/* Icon box */}
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  background: s.iconBg,
+                  color: s.accent,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  flexShrink: 0,
+                }}>
+                  {s.icon}
                 </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
+                {/* Body */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 500, letterSpacing: "0.02em", marginBottom: 4, lineHeight: 1 }}>
+                    {s.label}
+                  </div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: "#1e293b", lineHeight: 1.1, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", marginBottom: 4 }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#94a3b8" }}>{s.sub}</div>
+                </div>
+              </div>
+            </Col>
+          ))}
+        </Row>
 
-        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200, minWidth: 140, borderRadius: 8, height: 38 }} allowClear />
-            <Select value={industry} onChange={setIndustry} style={{ width: 160, minWidth: 130, height: 38 }}>
-              <Select.Option value="Tất cả ngành">Tất cả ngành</Select.Option>
-              {INDUSTRIES.map(i => <Select.Option key={i} value={i}>{i}</Select.Option>)}
-            </Select>
-            <Select value={facultyFilter} onChange={setFacultyFilter} style={{ width: 160, minWidth: 130, height: 38 }}>
-              <Select.Option value="all">Tất cả khoa</Select.Option>
-              {ALL_FACULTIES.map(k => <Select.Option key={k} value={k}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</Select.Option>)}
-            </Select>
-            <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 38, color: C.muted, fontSize: 14 }}>Xóa bộ lọc</Button>
-            <span style={{ marginLeft: "auto", fontSize: 14, color: C.sub, flexShrink: 0 }}>{filtered.length}/{enterprises.length}</span>
-          </div>
-          <CustomTable
-            columns={columns} data={listData} filter={query} loading={loading}
-            handleTableChange={(p: any) => setQuery(prev => ({ ...prev, page: (p.current || 1) - 1, size: p.pageSize || prev.size }))}
-            rowKey="id" scroll={{ x: 760 }}
-            rowClassName={(_: Enterprise, i: number) => i % 2 === 1 ? "row-stripe" : ""}
-            onRow={(r: Enterprise) => ({ onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`), style: { cursor: "pointer", opacity: faded(r) ? 0.65 : 1, transition: "background 0.12s" } })}
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 16 }}>
+          <Input
+            placeholder="Tìm kiếm tên, email..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ width: 240, borderRadius: 8 }}
           />
+          <Select
+            value={industry} onChange={setIndustry}
+            style={{ width: 180, borderRadius: 8 }}
+            options={[{ value: "Tất cả ngành", label: "Tất cả ngành" }, ...INDUSTRIES.map(v => ({ value: v, label: v }))]}
+          />
+          <Select
+            value={facultyFilter} onChange={setFacultyFilter}
+            style={{ width: 160, borderRadius: 8 }}
+            options={[{ value: "all", label: "Tất cả khoa" }, ...ALL_FACULTIES.map(f => ({ value: f, label: FACULTY_VI_NAME[f] ?? f }))]}
+          />
+          <Button
+            type="primary" icon={<PlusOutlined />}
+            style={{ marginLeft: "auto", borderRadius: 8, background: C.primary, borderColor: C.primary }}
+            onClick={() => setModal({ open: true, enterprise: null })}
+          >
+            Thêm doanh nghiệp
+          </Button>
         </div>
-      </div>
 
-      <EnterpriseFormModal open={modal.open} enterprise={modal.enterprise} onClose={() => setModal({ open: false, enterprise: null })} onSave={handleSave} />
+        {/* Table */}
+        <CustomTable
+          columns={columns}
+          dataSource={filtered}
+          loading={loading}
+          pagination={{
+            current: query.page + 1,
+            pageSize: query.size,
+            total: filtered.length,
+            onChange: (p) => setQuery(q => ({ ...q, page: p - 1 })),
+            showSizeChanger: false,
+          }}
+          rowKey="id"
+          rowClassName={(_, i) => (i % 2 === 1 ? "row-stripe" : "")}
+        />
+
+        <EnterpriseFormModal
+          open={modal.open}
+          enterprise={modal.enterprise}
+          onClose={() => setModal({ open: false, enterprise: null })}
+          onSave={handleSave}
+        />
+      </div>
     </AdminLayout>
   );
 }

@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Input, Typography } from "antd";
-import { RightOutlined, BookOutlined, TeamOutlined } from "@ant-design/icons";
+import { RightOutlined, BookOutlined, TeamOutlined, AppstoreOutlined, BookFilled, TeamOutlined as TeamIcon } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 
 const { Title } = Typography;
+
+const STAT_COLORS = [
+  { accent: "#7c3aed", iconBg: "#f5f3ff" },
+  { accent: "#0ea5e9", iconBg: "#f0f9ff" },
+  { accent: "#f59e0b", iconBg: "#fffbeb" },
+];
 
 export default function FacultyListPage() {
   const navigate = useNavigate();
@@ -25,6 +31,30 @@ export default function FacultyListPage() {
   const isNoFaculties = isEmpty && faculties.length === 0 && search === "";
   const isNoResults   = isEmpty && !isNoFaculties;
 
+  const statCards = [
+    {
+      label: "Total Faculties",
+      value: faculties.length,
+      sub: "registered faculties",
+      icon: <AppstoreOutlined />,
+      ...STAT_COLORS[0],
+    },
+    {
+      label: "Training Majors",
+      value: totalMajors,
+      sub: "active programs",
+      icon: <BookFilled />,
+      ...STAT_COLORS[1],
+    },
+    {
+      label: "Total Students",
+      value: totalStudents.toLocaleString(),
+      sub: "enrolled students",
+      icon: <TeamIcon />,
+      ...STAT_COLORS[2],
+    },
+  ];
+
   return (
     <AdminLayout>
       <style>{`
@@ -39,19 +69,58 @@ export default function FacultyListPage() {
           <Title level={4} style={{ margin: 0 }}>Khoa</Title>
         </div>
 
+        {/* Stat cards — Statistics KPI style */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {[
-            { label: "Tổng số khoa",   value: faculties.length,               color: "#7c3aed", bg: "#f5f3ff", border: "#ede9fe" },
-            { label: "Ngành đào tạo",  value: totalMajors,                    color: "#0ea5e9", bg: "#f0f9ff", border: "#e0f2fe" },
-            { label: "Tổng sinh viên", value: totalStudents.toLocaleString(),  color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
-          ].map(s => (
-            <Col key={s.label} xs={8} md={8}>
-              <div style={{
-                background: s.bg, borderRadius: 12, padding: "14px 18px",
-                border: `1.5px solid ${s.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-              }}>
-                <div style={{ fontSize: 26, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: s.color, opacity: 0.7, marginTop: 4, fontWeight: 500 }}>{s.label}</div>
+          {statCards.map(s => (
+            <Col key={s.label} xs={24} sm={8} md={8}>
+              <div
+                style={{
+                  background: "#ffffff",
+                  borderRadius: 12,
+                  border: "1px solid rgba(30,41,59,0.10)",
+                  boxShadow: "0 1px 3px rgba(30,41,59,0.07), 0 1px 2px rgba(30,41,59,0.04)",
+                  padding: "20px 22px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  transition: "box-shadow 160ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1)",
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 4px 16px rgba(30,41,59,0.09), 0 1px 4px rgba(30,41,59,0.05)";
+                  el.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 1px 3px rgba(30,41,59,0.07), 0 1px 2px rgba(30,41,59,0.04)";
+                  el.style.transform = "translateY(0)";
+                }}
+              >
+                {/* Icon box */}
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  background: s.iconBg,
+                  color: s.accent,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  flexShrink: 0,
+                }}>
+                  {s.icon}
+                </div>
+                {/* Body */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: "#94a3b8", fontWeight: 500, letterSpacing: "0.02em", marginBottom: 4, lineHeight: 1 }}>
+                    {s.label}
+                  </div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: "#1e293b", lineHeight: 1.1, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", marginBottom: 4 }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#94a3b8" }}>{s.sub}</div>
+                </div>
               </div>
             </Col>
           ))}
