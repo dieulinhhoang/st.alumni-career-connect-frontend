@@ -19,6 +19,7 @@ import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
 import { BatchList } from '../pages/admin/Alumni/BatchList';
 import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
 import ReportsPage from '../pages/admin/Reports/index';
+import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
