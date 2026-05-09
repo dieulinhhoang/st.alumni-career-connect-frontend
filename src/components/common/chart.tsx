@@ -1,182 +1,219 @@
-import { Column, Pie } from '@antv/g2plot';
-import { each, groupBy } from '@antv/util';
-import React, { useEffect, useRef } from 'react';
+import { Column, Pie } from '@antv/g2plot'
+import { each, groupBy } from '@antv/util'
+import React, { useEffect, useRef } from 'react'
 
 interface Props {
-    apiURL: string;
-    collapsed?: boolean;
+  apiURL: string
+  collapsed?: boolean
 }
 
+type OriginDatum = {
+  city: string
+  type: string
+  value: number
+}
+
+type PieDatum = {
+  type: string
+  value: number
+}
+
+const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6']
+
 const Chart: React.FC<Props> = ({ apiURL, collapsed }) => {
-    const container1 = useRef<HTMLDivElement>(null);
-    const container2 = useRef<HTMLDivElement>(null);
+  const container1 = useRef<HTMLDivElement>(null)
+  const container2 = useRef<HTMLDivElement>(null)
 
-    const pieRef = useRef<Pie | null>(null);
-    const colRef = useRef<Column | null>(null);
+  const pieRef = useRef<Pie | null>(null)
+  const colRef = useRef<Column | null>(null)
 
-    // lưu dữ liệu gốc để khôi phục khi dblclick
-    const originalPieData = useRef<any[]>([]);
-    const originalColData = useRef<any[]>([]);
+  const originalPieData = useRef<PieDatum[]>([])
+  const originalColData = useRef<OriginDatum[]>([])
+  const activeType = useRef<string | null>(null)
 
-    useEffect(() => {
-        if (!container1.current || !container2.current) return;
+  useEffect(() => {
+    if (!container1.current || !container2.current) return
 
-        // Delay to allow container to resize
-        const timer = setTimeout(() => {
-            fetch(apiURL)
-                .then((res) => res.json())
-                .then((originData) => {
-                    // tạo dữ liệu cho pie
-                    const groupData = groupBy(originData, 'type');
-                    const pieData: Array<{ type: string; value: number }> = [];
-                    each(groupData, (values: Array<{ value: number }>, k: string) => {
-                        pieData.push({
-                            type: k,
-                            value: values.reduce((a, b) => a + b.value, 0),
-                        });
-                    });
+    let mounted = true
 
-                    // lưu dữ liệu gốc
-                    originalPieData.current = pieData;
-                    originalColData.current = originData;
+    const buildCharts = async () => {
+      try {
+        const res = await fetch(apiURL)
+        const originData: OriginDatum[] = await res.json()
+        if (!mounted) return
 
-                    // xoá instance cũ
-                    pieRef.current?.destroy();
-                    colRef.current?.destroy();
+        const grouped = groupBy(originData, 'type')
+        const pieData: PieDatum[] = []
 
-                    // khởi tạo Pie chart
-                    pieRef.current = new Pie(container1.current!, {
-                        data: pieData,
-                        colorField: 'type',
-                        angleField: 'value',
-                        label: { type: 'inner' },
-                        tooltip: false,
-                        state: { active: { style: { lineWidth: 0 } } },
-                        interactions: [
-                            {
-                                type: 'element-highlight',
-                                cfg: {
-                                    showEnable: [
-                                        { trigger: 'element:mouseenter', action: 'cursor:pointer' },
-                                    ],
-                                    end: [
-                                        { trigger: 'element:mouseleave', action: 'cursor:default' },
-                                        {
-                                            trigger: 'element:mouseleave',
-                                            action: 'element-highlight:reset',
-                                        },
-                                    ],
-                                },
-                            },
-                        ],
-                        height: 200,
-                        autoFit: true,
-                    });
-                    pieRef.current.render();
+        each(grouped, (values: OriginDatum[], key: string) => {
+          pieData.push({
+            type: key,
+            value: values.reduce((sum, item) => sum + item.value, 0),
+          })
+        })
 
-                    // khởi tạo Column chart
-                    colRef.current = new Column(container2.current!, {
-                        data: originData,
-                        xField: 'city',
-                        yField: 'value',
-                        seriesField: 'type',
-                        isGroup: true,
-                        legend: false,
-                        columnStyle: { radius: [4, 4, 0, 0] },
-                        height: 200,
-                        autoFit: true,
-                        state: {
-                            selected: { style: { stroke: '#000', lineWidth: 1.2 } },
-                            inactive: { style: { opacity: 0.35 } },
-                        },
-                    });
-                    colRef.current.render();
+        originalPieData.current = pieData
+        originalColData.current = originData
+        activeType.current = null
 
-                    // Hover: phóng to lát Pie + highlight cột cùng type
-                    pieRef.current?.on('element:mouseover', (evt) => {
-                        const eventData = evt.data;
-                        if (eventData?.data) {
-                            const type = eventData.data.type;
-                            colRef.current?.setState('selected', (d: any) => d.type === type);
-                            colRef.current?.setState(
-                                'selected',
-                                (d: any) => d.type !== type,
-                                false,
-                            );
+        pieRef.current?.destroy()
+        colRef.current?.destroy()
 
-                            evt.element.animate(
-                                {
-                                    toAttrs: { scaleX: 1.1, scaleY: 1.1 },
-                                    duration: 200,
-                                    easing: 'easeQuadOut',
-                                },
-                                false,
-                            );
-                        }
-                    });
+        pieRef.current = new Pie(container1.current!, {
+          data: pieData,
+          angleField: 'value',
+          colorField: 'type',
+          color: COLORS,
+          radius: 0.88,
+          innerRadius: 0.56,
+          autoFit: true,
+          height: 240,
+          pieStyle: {
+            lineWidth: 2,
+            stroke: '#fff',
+          },
+          label: {
+            type: 'outer',
+            offset: 10,
+            content: ({ percent }: any) => `${(percent * 100).toFixed(0)}%`,
+            style: {
+              fontSize: 12,
+              fontWeight: 600,
+              fill: '#374151',
+            },
+          },
+          legend: {
+            position: 'bottom',
+          },
+          tooltip: {
+            formatter: (d: any) => ({
+              name: d.type,
+              value: d.value,
+            }),
+          },
+          interactions: [{ type: 'element-active' }],
+        })
 
-                    // Mouseleave: reset lại bình thường
-                    pieRef.current?.on('element:mouseleave', (evt) => {
-                        colRef.current?.setState('selected', () => true, false);
-                        evt.element.animate(
-                            {
-                                toAttrs: { scaleX: 1, scaleY: 1 },
-                                duration: 200,
-                                easing: 'easeQuadIn',
-                            },
-                            false,
-                        );
-                    });
+        pieRef.current.render()
 
-                    // Click: lọc dữ liệu theo type
-                    pieRef.current?.on('element:click', (evt) => {
-                        const eventData = evt.data;
-                        if (eventData?.data) {
-                            const type = eventData.data.type;
+        colRef.current = new Column(container2.current!, {
+          data: originData,
+          xField: 'city',
+          yField: 'value',
+          seriesField: 'type',
+          isGroup: true,
+          autoFit: true,
+          height: 240,
+          color: COLORS,
+          columnStyle: {
+            radius: [6, 6, 0, 0],
+          },
+          yAxis: {
+            nice: true,
+          },
+          legend: {
+            position: 'bottom',
+          },
+          label: {
+            position: 'top',
+            style: {
+              fill: '#374151',
+              fontWeight: 600,
+            },
+          },
+          state: {
+            active: {
+              style: {
+                lineWidth: 1,
+                stroke: '#111827',
+              },
+            },
+            inactive: {
+              style: {
+                opacity: 0.25,
+              },
+            },
+          },
+          interactions: [{ type: 'element-highlight' }],
+        })
 
-                            pieRef.current?.changeData(
-                                originalPieData.current.filter((d) => d.type === type),
-                            );
-                            colRef.current?.changeData(
-                                originalColData.current.filter((d) => d.type === type),
-                            );
-                        }
-                    });
+        colRef.current.render()
 
-                    //   Double-click: khôi phục dữ liệu gốc
-                    pieRef.current?.on('element:dblclick', () => {
-                        pieRef.current?.changeData(originalPieData.current);
-                        colRef.current?.changeData(originalColData.current);
-                    });
-                })
-                .catch(console.error);
-        }, 300);
+        pieRef.current.on('element:mouseenter', (evt: any) => {
+          if (activeType.current) return
+          const type = evt?.data?.data?.type
+          if (!type) return
 
-        // cleanup
-        return () => {
-            clearTimeout(timer);
-            pieRef.current?.destroy();
-            colRef.current?.destroy();
-            pieRef.current = null;
-            colRef.current = null;
-        };
-    }, [apiURL, collapsed]);
+          colRef.current?.setState('active', (d: any) => d.type === type)
+          colRef.current?.setState('inactive', (d: any) => d.type !== type)
+        })
 
-    return (
-        <div
-            id='chart-wrapper'
-            style={{
-                display: 'flex',
-                flexDirection: 'row',
-                width: '100%',
-                minHeight: 200,
-                gap: 20,
-            }}
-        >
-            <div id='container1' ref={container1} style={{ flex: 1 }} />
-            <div id='container2' ref={container2} style={{ flex: 2 }} />
-        </div>
-    );
-};
+        pieRef.current.on('element:mouseleave', () => {
+          if (activeType.current) return
+          colRef.current?.setState('active', () => false, false)
+          colRef.current?.setState('inactive', () => false, false)
+        })
 
-export default Chart;
+        pieRef.current.on('element:click', (evt: any) => {
+          const type = evt?.data?.data?.type
+          if (!type) return
+
+          const nextType = activeType.current === type ? null : type
+          activeType.current = nextType
+
+          const nextPieData = nextType
+            ? originalPieData.current.filter(d => d.type === nextType)
+            : originalPieData.current
+
+          const nextColData = nextType
+            ? originalColData.current.filter(d => d.type === nextType)
+            : originalColData.current
+
+          pieRef.current?.changeData(nextPieData)
+          colRef.current?.changeData(nextColData)
+
+          colRef.current?.setState('active', () => false, false)
+          colRef.current?.setState('inactive', () => false, false)
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    buildCharts()
+
+    return () => {
+      mounted = false
+      pieRef.current?.destroy()
+      colRef.current?.destroy()
+      pieRef.current = null
+      colRef.current = null
+    }
+  }, [apiURL])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      pieRef.current?.forceFit?.()
+      colRef.current?.forceFit?.()
+    }, 250)
+
+    return () => clearTimeout(timer)
+  }, [collapsed])
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        minHeight: 240,
+        gap: 20,
+      }}
+    >
+      <div ref={container1} style={{ flex: 1, minWidth: 0 }} />
+      <div ref={container2} style={{ flex: 2, minWidth: 0 }} />
+    </div>
+  )
+}
+
+export default Chart

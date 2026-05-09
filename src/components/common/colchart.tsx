@@ -5,7 +5,7 @@ interface Props {
     apiURL: string;
 }
 
-const ColCharṭ: React.FC<Props> = ({ apiURL }) => {
+const ColChart: React.FC<Props> = ({ apiURL }) => {
     const container = useRef<HTMLDivElement>(null);
     const colRef = useRef<Column | (null)>(null);
 
@@ -41,4 +41,4 @@ const ColCharṭ: React.FC<Props> = ({ apiURL }) => {
     )
 }
 
-export default ColCharṭ;
+export default ColChart;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, Button, Popover, Checkbox, DatePicker, Tag, theme, ConfigProvider } from 'antd';
-import { PlusOutlined, SearchOutlined, CloseOutlined, CalendarOutlined, FilterFilled } from '@ant-design/icons';
-import dayjs, { Dayjs } from 'dayjs';
+import { Input, Button, Popover, Checkbox, DatePicker } from 'antd';
+import { PlusOutlined, CloseOutlined, CalendarOutlined, FilterFilled } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 // --- Types ---
 export type FilterInputType = 'text' | 'select' | 'date' | 'dateRange';
@@ -17,11 +17,13 @@ export interface FilterColumn {
 	type: FilterInputType;
 	options?: FilterOption[];
 	placeholder?: string;
-	width?: number; // Optional width for inputs
+	width?: number;
 }
 
 interface IProps {
 	columns: FilterColumn[];
+	/** Pre-populate filter values (e.g. from external state). Changing this prop resets the bar. */
+	initialValues?: Record<string, any>;
 	onFilterChange?: (values: any) => void;
 	onResetFields?: () => void;
 	className?: string;
@@ -43,7 +45,6 @@ const FilterItem = ({
 	const [isEditingText, setIsEditingText] = useState(false);
 	const inputRef = useRef<any>(null);
 
-	// Auto-focus input when entering edit mode
 	useEffect(() => {
 		if (isEditingText && inputRef.current) {
 			inputRef.current.focus();
@@ -52,7 +53,7 @@ const FilterItem = ({
 
 	const handleClear = (e?: React.MouseEvent) => {
 		e?.stopPropagation();
-		onChange(null); // Clear value
+		onChange(null);
 		setIsEditingText(false);
 	};
 
@@ -60,7 +61,6 @@ const FilterItem = ({
 	if (column.type === 'text') {
 		const hasValue = value !== undefined && value !== null && value !== '';
 
-		// If active (editing or has value), show Input
 		if (isEditingText || hasValue) {
 			return (
 				<div className="relative flex items-center">
@@ -70,7 +70,6 @@ const FilterItem = ({
 						value={value || ''}
 						onChange={(e) => onChange(e.target.value)}
 						onBlur={() => {
-							// If empty on blur, revert to button
 							if (!value) setIsEditingText(false);
 						}}
 						className="rounded-md text-sm"
@@ -89,7 +88,6 @@ const FilterItem = ({
 			);
 		}
 
-		// Default: Button
 		return (
 			<Button
 				type="dashed"
@@ -102,7 +100,7 @@ const FilterItem = ({
 		);
 	}
 
-	// --- RENDER: OTHER TYPES (Select, Date) ---
+	// --- RENDER: OTHER TYPES ---
 	const hasValue = Array.isArray(value) ? value.length > 0 : (value !== undefined && value !== null);
 
 	const renderPopoverContent = () => {
@@ -146,7 +144,6 @@ const FilterItem = ({
 		);
 	};
 
-	// Label generation for tags
 	const getDisplayLabel = () => {
 		if (column.type === 'date' && value) return dayjs(value).format('DD/MM/YYYY');
 		if (column.type === 'dateRange' && value) return `${dayjs(value[0]).format('DD/MM')} - ${dayjs(value[1]).format('DD/MM/YYYY')}`;
@@ -170,7 +167,6 @@ const FilterItem = ({
 			placement="bottomLeft"
 		>
 			{hasValue ? (
-				// Active State: Tag-like Button
 				<div
 					className="inline-flex items-center bg-blue-50 text-blue-600 border border-blue-200 rounded px-2 py-1 cursor-pointer hover:bg-blue-100 transition-colors text-sm h-[32px]"
 				>
@@ -179,13 +175,12 @@ const FilterItem = ({
 					<CloseOutlined
 						className="text-[10px] hover:text-red-500 p-1"
 						onClick={(e) => {
-							e.stopPropagation(); // Prevent reopening popover
+							e.stopPropagation();
 							handleClear(e);
 						}}
 					/>
 				</div>
 			) : (
-				// Inactive State: Dashed Button
 				<Button
 					type="dashed"
 					icon={<PlusOutlined />}
@@ -200,8 +195,15 @@ const FilterItem = ({
 
 
 // --- Main Component ---
-export default function FilterComponent({ columns, onFilterChange, onResetFields, className = '' }: IProps) {
-	const [filterValues, setFilterValues] = useState<Record<string, any>>({});
+export default function FilterComponent({ columns, initialValues, onFilterChange, onResetFields, className = '' }: IProps) {
+	const [filterValues, setFilterValues] = useState<Record<string, any>>(initialValues ?? {});
+
+	// Sync when initialValues changes from outside (e.g. hook auto-selects first item)
+	useEffect(() => {
+		if (initialValues) {
+			setFilterValues(initialValues);
+		}
+	}, [JSON.stringify(initialValues)]);
 
 	const handleChildChange = (key: string, value: any) => {
 		const newFilters = { ...filterValues };
@@ -240,9 +242,9 @@ export default function FilterComponent({ columns, onFilterChange, onResetFields
 					type="text"
 					size="small"
 					onClick={handleReset}
-					className="text-gray-500 hover:text-red-500 ml-2"
+					className="text-gray-400 hover:text-red-500 text-xs"
 				>
-					Reset <CloseOutlined className="text-[10px]" />
+					Clear all
 				</Button>
 			)}
 		</div>

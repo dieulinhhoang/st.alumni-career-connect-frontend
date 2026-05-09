@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import Statistic from '../pages/admin/Statistics';
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
@@ -18,6 +17,7 @@ import { ResponseDetail } from '../pages/admin/Alumni/ResponseDetail';
 import { BatchResults } from '../pages/admin/Alumni/BatchResults';
 import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
 import { BatchList } from '../pages/admin/Alumni/BatchList';
+import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -49,7 +49,7 @@ const routes = [
                 path: '/admin/statistics',
                 element: (
                     <Suspense fallback={<Loader />}>
-                        <Statistic />
+                         element: <FormStatisticsDetailPage />,
                     </Suspense>
                 )
             },
