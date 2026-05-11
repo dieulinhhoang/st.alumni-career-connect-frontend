@@ -3,13 +3,15 @@ import { useScrolled } from "../../../feature/home/hooks/index.ts";
 import { Link } from "react-router-dom";
 
 const font = "'Be Vietnam Pro', sans-serif";
-const purple = "#7c3aed";
-const purpleDark = "#4f46e5";
 
-const NAV_LINKS: string[] = [];
+// VNUA color palette
+const green = "#1a6b35";
+const greenDark = "#14542a";
+const brown = "#7a5c1e";
+const blue = "#1b5299";
 
 const IconGradCap = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
     <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
   </svg>
@@ -23,23 +25,26 @@ export function Navbar() {
     <header
       style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? "rgba(255,255,255,0.95)" : "white",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: `1px solid ${scrolled ? "#ede9fe" : "#f3f4f6"}`,
-        transition: "all 0.3s",
+        background: scrolled ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.98)",
+        backdropFilter: "blur(16px)",
+        borderBottom: `1px solid ${scrolled ? "#d6e8da" : "#e8f0eb"}`,
+        boxShadow: scrolled ? "0 2px 20px rgba(26,107,53,0.08)" : "none",
+        transition: "all 0.3s ease",
       }}
     >
       <style>{`
         .nav-inner {
           padding: 0 5%;
-          height: 64px;
+          height: 68px;
+          max-width: 1280px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
         .nav-links {
           display: flex;
-          gap: 32px;
+          gap: 36px;
           font-family: ${font};
           font-size: 14px;
           font-weight: 500;
@@ -48,16 +53,22 @@ export function Navbar() {
           font-family: ${font};
           font-size: 14px;
           font-weight: 600;
-          padding: 9px 20px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, ${purple}, ${purpleDark});
+          padding: 10px 24px;
+          border-radius: 8px;
+          background: ${green};
           color: white !important;
           cursor: pointer;
-          box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+          letter-spacing: 0.01em;
           transition: all 0.2s;
           white-space: nowrap;
           text-decoration: none;
           display: inline-block;
+          box-shadow: 0 2px 8px rgba(26,107,53,0.25);
+        }
+        .nav-sso:hover {
+          background: ${greenDark};
+          transform: translateY(-1px);
+          box-shadow: 0 4px 16px rgba(26,107,53,0.35);
         }
         .nav-hamburger {
           display: none;
@@ -72,16 +83,17 @@ export function Navbar() {
           display: block;
           width: 22px;
           height: 2px;
-          background: #374151;
+          background: #2d5a3d;
           border-radius: 2px;
           transition: all 0.3s;
         }
         .nav-mobile {
           display: none;
           flex-direction: column;
-          padding: 16px 5% 20px;
-          border-top: 1px solid #f3f4f6;
+          padding: 12px 5% 20px;
+          border-top: 1px solid #e8f0eb;
           gap: 4px;
+          background: white;
         }
         .nav-mobile a {
           font-family: ${font};
@@ -90,7 +102,7 @@ export function Navbar() {
           color: #374151;
           text-decoration: none;
           padding: 10px 0;
-          border-bottom: 1px solid #f9fafb;
+          border-bottom: 1px solid #f3f4f6;
         }
         .nav-mobile-sso {
           margin-top: 12px;
@@ -98,8 +110,8 @@ export function Navbar() {
           font-size: 14px;
           font-weight: 600;
           padding: 12px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, ${purple}, ${purpleDark});
+          border-radius: 8px;
+          background: ${green};
           color: white !important;
           cursor: pointer;
           width: 100%;
@@ -117,53 +129,60 @@ export function Navbar() {
 
       <div className="nav-inner">
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: green,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
             <IconGradCap />
           </div>
-          <span style={{ fontFamily: font, fontWeight: 700, fontSize: 17, color: "#1e1b4b" }}>
-            Hệ Thống{" "}
-            <span style={{ background: `linear-gradient(90deg, ${purple}, ${purpleDark})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Khảo Sát Việc Làm
-            </span>
-          </span>
+          <div>
+            <div style={{ fontFamily: font, fontWeight: 800, fontSize: 15, color: "#1a2e1f", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
+              ST Alumni
+            </div>
+            <div style={{ fontFamily: font, fontWeight: 400, fontSize: 11, color: "#6b7280", letterSpacing: "0.02em", lineHeight: 1 }}>
+              VNUA Career Connect
+            </div>
+          </div>
         </div>
 
         {/* Desktop links */}
         <nav className="nav-links">
-          {NAV_LINKS.map((l) => (
-            <a key={l} href="#"
-              style={{ color: "#6b7280", textDecoration: "none", transition: "color 0.2s" }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = purple)}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#6b7280")}
-            >{l}</a>
-          ))}
+          <a href="#features" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
+            Tính năng
+          </a>
+          <a href="#stats" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
+            Thống kê
+          </a>
+          <a href="#partners" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
+            Doanh nghiệp
+          </a>
         </nav>
 
         {/* Desktop CTA */}
-        <Link
-          to="admin/dashboard"
-          className="nav-sso"
-          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
-        >
-          Đăng nhập với ST SSO
+        <Link to="admin/dashboard" className="nav-sso">
+          Đăng nhập ST SSO
         </Link>
 
         {/* Hamburger */}
-        <button className="nav-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
+        <button className="nav-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Mở menu">
           <span /><span /><span />
         </button>
       </div>
 
       {/* Mobile menu */}
       <div className="nav-mobile" data-open={String(menuOpen)}>
-        {NAV_LINKS.map((l) => (
-          <a key={l} href="#">{l}</a>
-        ))}
-        <Link to="admin/dashboard" className="nav-mobile-sso">
-          Đăng nhập với ST SSO
-        </Link>
+        <a href="#features">Tính năng</a>
+        <a href="#stats">Thống kê</a>
+        <a href="#partners">Doanh nghiệp</a>
+        <Link to="admin/dashboard" className="nav-mobile-sso">Đăng nhập với ST SSO</Link>
       </div>
     </header>
   );
