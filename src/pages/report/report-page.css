@@ -1,0 +1,245 @@
+/* ==================== REPORT PAGE CSS ==================== */
+
+.rp-root {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ===== HEADER ===== */
+.rp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.rp-header-left .rp-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 4px 0;
+}
+
+.rp-header-left .rp-subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.rp-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rp-select {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.rp-select:focus {
+  border-color: #6366f1;
+}
+
+.rp-btn-print {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rp-btn-print:hover {
+  background: #4f46e5;
+}
+
+/* ===== KPI CARDS ===== */
+.rp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.rp-kpi-card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.rp-kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.rp-kpi-label {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ===== TABS ===== */
+.rp-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.rp-tab {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rp-tab:hover {
+  color: #e2e8f0;
+  border-color: #6366f1;
+}
+
+.rp-tab--active {
+  background: #6366f1;
+  color: #fff;
+  border-color: #6366f1;
+}
+
+/* ===== TAB CONTENT ===== */
+.rp-tab-content {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* ===== TABLE ===== */
+.rp-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.rp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.rp-table th,
+.rp-table td {
+  border: 1px solid #334155;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.rp-table th {
+  background: #0f172a;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rp-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.07);
+}
+
+.rp-table td {
+  color: #cbd5e1;
+}
+
+.rp-row-total {
+  background: rgba(20, 184, 166, 0.12) !important;
+}
+
+.rp-row-total td {
+  color: #14b8a6;
+  font-weight: 600;
+}
+
+/* ===== STATUS CELLS ===== */
+.rp-yes {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.rp-no {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ===== LOADING / ERROR ===== */
+.rp-loading {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.rp-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  .rp-header-right,
+  .rp-tabs {
+    display: none;
+  }
+
+  .rp-root {
+    background: #fff;
+    color: #000;
+    padding: 0;
+  }
+
+  .rp-table th,
+  .rp-table td {
+    border-color: #000;
+    color: #000;
+  }
+
+  .rp-tab-content {
+    background: transparent;
+    padding: 0;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .rp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rp-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
