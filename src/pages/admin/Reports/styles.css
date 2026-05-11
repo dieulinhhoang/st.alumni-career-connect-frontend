@@ -1,74 +1,147 @@
-/* Reports Page Styles */
+/* =============================================
+   Reports Page – Formal Document Style
+   ============================================= */
+
+:root {
+  --rp-teal: #0d9488;
+  --rp-blue: #1677ff;
+  --rp-amber: #d97706;
+  --rp-purple: #7c3aed;
+  --rp-border: #d9d9d9;
+  --rp-header-bg: #f0f5ff;
+  --rp-row-alt: #fafafa;
+}
 
 .rp-page {
   padding: 24px;
+  background: #f5f6fa;
+  min-height: 100vh;
 }
 
-.rp-header {
+/* ---- Document Header ---- */
+.rp-doc-header {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--rp-border);
+  border-radius: 10px;
+  padding: 20px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-.rp-header h2 {
-  margin: 0;
-  font-size: 22px;
+.rp-doc-header__org {
+  flex: 0 0 220px;
+  border-right: 2px solid #1a3c6e;
+  padding-right: 20px;
+}
+
+.rp-doc-header__ministry {
+  font-size: 12px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #1a3c6e;
+  text-transform: uppercase;
+  line-height: 1.5;
 }
 
-.rp-header__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 13px;
+.rp-doc-header__dept {
+  font-size: 11px;
+  color: #444;
+  margin-top: 4px;
+  text-transform: uppercase;
   font-weight: 600;
+}
+
+.rp-doc-header__center {
+  flex: 1;
+  text-align: center;
+}
+
+.rp-doc-header__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a3c6e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rp-doc-header__subtitle {
+  font-size: 13px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.rp-doc-header__survey-name {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 14px;
   background: #e6f4ff;
   color: #1677ff;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-/* Filter Bar */
-.rp-filter-bar {
+.rp-doc-header__actions {
+  flex: 0 0 240px;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* ---- Filter helpers ---- */
+.rp-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .rp-filter-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: #555;
+  color: #888;
 }
 
-/* KPI Grid */
+.rp-scope-badge {
+  font-size: 12px;
+  color: #555;
+  background: #f0f5ff;
+  border: 1px solid #adc6ff;
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+
+/* ---- KPI Grid ---- */
 .rp-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .rp-kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .rp-kpi-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--rp-border);
+  border-radius: 10px;
+  padding: 16px 18px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   transition: box-shadow 0.2s;
 }
 
 .rp-kpi-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
 }
 
-.rp-kpi-card__icon {
+.rp-kpi-icon {
   width: 44px;
   height: 44px;
   border-radius: 10px;
@@ -79,58 +152,99 @@
   flex-shrink: 0;
 }
 
-.rp-kpi-card__body {
-  flex: 1;
-  min-width: 0;
-}
+.rp-kpi-body { flex: 1; min-width: 0; }
 
-.rp-kpi-card__value {
-  font-size: 26px;
-  font-weight: 700;
-  color: #1a1a2e;
-  line-height: 1.2;
-}
-
-.rp-kpi-card__label {
-  font-size: 12px;
+.rp-kpi-label {
+  font-size: 11px;
   color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.rp-kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
   margin-top: 2px;
 }
 
-/* Section Cards */
-.rp-section-card {
+.rp-kpi-sub {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+/* ---- Table Card ---- */
+.rp-table-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  margin-bottom: 20px;
+  border: 1px solid var(--rp-border);
+  border-radius: 10px;
+  padding: 16px 20px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-.rp-section-card__title {
-  font-size: 15px;
+.rp-table-title {
+  font-size: 13px;
   font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #1a3c6e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #f0f5ff;
+  border-left: 4px solid #1677ff;
+  border-radius: 4px;
 }
 
-/* Charts row */
-.rp-charts-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+/* ---- Formal Table Overrides ---- */
+.rp-formal-table .ant-table-thead > tr > th {
+  background: #1a3c6e !important;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center !important;
+  white-space: nowrap;
+  border-color: #2a4d7e !important;
 }
 
-@media (max-width: 900px) {
-  .rp-charts-row {
-    grid-template-columns: 1fr;
-  }
+.rp-formal-table .ant-table-thead > tr:nth-child(2) > th {
+  background: #2a5298 !important;
 }
 
-/* Submission Pill */
+.rp-formal-table .ant-table-thead > tr:nth-child(3) > th {
+  background: #3a62a7 !important;
+}
+
+.rp-formal-table .ant-table-tbody > tr:nth-child(even) > td {
+  background: #f8fafc;
+}
+
+.rp-formal-table .ant-table-tbody > tr:hover > td {
+  background: #e8f0fe !important;
+}
+
+.rp-summary-row td {
+  background: #fffbe6 !important;
+  font-weight: 700;
+  border-top: 2px solid #d97706 !important;
+}
+
+/* ---- Tabs ---- */
+.rp-tabs .ant-tabs-tab {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rp-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1a3c6e !important;
+}
+
+.rp-tabs .ant-tabs-ink-bar {
+  background: #1a3c6e !important;
+}
+
+/* ---- Submission Pill ---- */
 .submission-pill {
   display: inline-flex;
   align-items: center;
@@ -141,7 +255,7 @@
   font-weight: 600;
 }
 
-/* MiniBar */
+/* ---- MiniBar ---- */
 .mini-bar-wrap {
   display: flex;
   align-items: center;
@@ -169,28 +283,18 @@
   text-align: right;
 }
 
-/* KPI Ring */
-.kpi-ring-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.kpi-ring-label {
-  font-size: 12px;
-  color: #888;
-  text-align: center;
-}
-
-/* Tabs */
-.rp-tabs .ant-tabs-tab {
-  font-weight: 600;
-}
-
-/* Table tweaks */
-.rp-table .ant-table-thead > tr > th {
-  background: #fafafa;
-  font-weight: 700;
-  font-size: 13px;
+@media (max-width: 768px) {
+  .rp-doc-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rp-doc-header__org {
+    border-right: none;
+    border-bottom: 2px solid #1a3c6e;
+    padding-right: 0;
+    padding-bottom: 12px;
+  }
+  .rp-doc-header__actions {
+    align-items: flex-start;
+  }
 }
