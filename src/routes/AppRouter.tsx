@@ -51,7 +51,7 @@ const routes = [
                 path: '/admin/statistics',
                 element: (
                     <Suspense fallback={<Loader />}>
-                         element: <FormStatisticsDetailPage />,
+                                         <FormStatisticsDetailPage />,
                     </Suspense>
                 )
             },
