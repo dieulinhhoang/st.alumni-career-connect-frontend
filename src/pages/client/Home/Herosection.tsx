@@ -3,177 +3,336 @@ import { useCountUp } from "../../../feature/home/hooks/index.ts";
 import type { SurveyStats } from "../../../feature/home/type.ts";
 
 const font = "'Be Vietnam Pro', sans-serif";
-const purple = "#7c3aed";
-const purpleDark = "#4f46e5";
-const purpleLight = "#ede9fe";
+const green = "#1a6b35";
+const greenLight = "#2d8f4f";
+const gold = "#8B6914";
+const cream = "#faf8f3";
 
 export function HeroSection({ stats }: { stats: SurveyStats }) {
   const alumni = useCountUp(stats.totalRespondents, 1800, 400);
-  const pct    = useCountUp(stats.overallEmploymentRate, 1600, 600);
+  const pct = useCountUp(stats.overallEmploymentRate, 1600, 600);
 
   return (
-    <section style={{ minHeight: "100vh", background: `linear-gradient(135deg, #6d28d9 0%, ${purpleDark} 50%, ${purple} 100%)`, display: "flex", alignItems: "center", padding: "100px 5% 60px", position: "relative", overflow: "hidden" }}>
+    <section
+      style={{
+        minHeight: "100vh",
+        background: cream,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "80px 5%",
+        overflow: "hidden",
+      }}
+    >
       <style>{`
+        @keyframes floatBadge {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes blobMove {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(50px, -50px) scale(1.1); }
+          50% { transform: translate(-30px, 30px) scale(0.9); }
+          75% { transform: translate(20px, 20px) scale(1.05); }
+        }
         .hero-inner {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           gap: 80px;
-          max-width: 1200px;
-          margin: 0 auto;
+          max-width: 1280px;
           width: 100%;
-          position: relative;
-          z-index: 1;
+        }
+        .hero-text {
+          flex: 0 0 50%;
+        }
+        .hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 18px;
+          background: rgba(26, 107, 53, 0.1);
+          border: 1.5px solid rgba(26, 107, 53, 0.3);
+          border-radius: 50px;
+          font-family: ${font};
+          font-size: 13px;
+          font-weight: 600;
+          color: ${green};
+          margin-bottom: 28px;
+          animation: floatBadge 3s ease-in-out infinite;
+        }
+        .hero-badge svg { width: 16px; height: 16px; fill: ${green}; }
+        .hero-title {
+          font-family: ${font};
+          font-size: clamp(38px, 5vw, 56px);
+          font-weight: 800;
+          line-height: 1.15;
+          color: #1a1a1a;
+          margin: 0 0 18px 0;
+          letter-spacing: -1px;
+        }
+        .hero-title .highlight {
+          background: linear-gradient(135deg, ${green} 0%, ${gold} 50%, ${greenLight} 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .hero-desc {
+          font-family: ${font};
+          font-size: 19px;
+          line-height: 1.75;
+          color: #4a4a4a;
+          margin: 0 0 32px 0;
+        }
+        .hero-cta {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 48px;
+        }
+        .hero-btn-primary {
+          font-family: ${font};
+          font-size: 15px;
+          font-weight: 700;
+          padding: 14px 32px;
+          background: linear-gradient(135deg, ${green} 0%, ${greenLight} 100%);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.3s;
+          box-shadow: 0 4px 16px rgba(26, 107, 53, 0.3);
+        }
+        .hero-btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(26, 107, 53, 0.4);
+        }
+        .hero-btn-secondary {
+          font-family: ${font};
+          font-size: 15px;
+          font-weight: 600;
+          padding: 14px 32px;
+          background: transparent;
+          color: ${green};
+          border: 2px solid ${green};
+          border-radius: 12px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.3s;
+        }
+        .hero-btn-secondary:hover {
+          background: rgba(26, 107, 53, 0.08);
+        }
+        .hero-stats-row {
+          display: flex;
+          gap: 40px;
+        }
+        .hero-stat-item {
+          display: flex;
+          flex-direction: column;
+        }
+        .hero-stat-num {
+          font-family: ${font};
+          font-size: 32px;
+          font-weight: 800;
+          color: ${green};
+        }
+        .hero-stat-label {
+          font-family: ${font};
+          font-size: 13px;
+          color: #6b6b6b;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-top: 2px;
         }
         .hero-mockup {
-          flex: 0 0 460px;
-          animation: fadeUp 0.7s 0.2s ease both;
+          flex: 0 0 48%;
+          position: relative;
         }
-        .hero-counters {
+        .hero-mockup-frame {
+          background: white;
+          border-radius: 20px;
+          padding: 24px;
+          box-shadow:
+            0 30px 80px rgba(26, 107, 53, 0.15),
+            0 8px 24px rgba(26, 107, 53, 0.1);
+          border: 1px solid rgba(26, 107, 53, 0.12);
+          transform: perspective(800px) rotateY(-6deg);
+          transition: transform 0.5s ease;
+        }
+        .hero-mockup-frame:hover {
+          transform: perspective(800px) rotateY(0deg);
+        }
+        .mockup-header {
           display: flex;
-          gap: 32px;
-          margin-top: 40px;
-          animation: fadeUp 0.6s 0.4s ease both;
+          align-items: center;
+          gap: 8px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(26, 107, 53, 0.1);
+          margin-bottom: 16px;
         }
-        .hero-btns {
+        .mockup-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+        .mockup-dot.red { background: #ff5f57; }
+        .mockup-dot.yellow { background: #ffbd2e; }
+        .mockup-dot.green { background: #28c840; }
+        .mockup-title {
+          flex: 1;
+          text-align: center;
+          font-family: ${font};
+          font-size: 12px;
+          color: #888;
+        }
+        .mockup-content {
           display: flex;
-          gap: 14px;
-          flex-wrap: wrap;
-          animation: fadeUp 0.6s 0.3s ease both;
+          flex-direction: column;
+          gap: 12px;
         }
-        @media (max-width: 1024px) {
-          .hero-mockup { flex: 0 0 380px; }
-          .hero-inner  { gap: 40px; }
+        .mockup-skeleton-line {
+          height: 10px;
+          border-radius: 5px;
+          background: #e8eee6;
         }
-        @media (max-width: 768px) {
-          .hero-inner   { flex-direction: column; gap: 40px; }
-          .hero-mockup  { flex: unset; width: 100%; max-width: 480px; }
-          .hero-btns    { flex-direction: column; }
-          .hero-btns button { width: 100%; }
-          .hero-counters { gap: 20px; }
+        .mockup-skeleton-line.short { width: 40%; }
+        .mockup-skeleton-line.med { width: 70%; }
+        .mockup-skeleton-line.long { width: 85%; }
+        .hero-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(60px);
+          z-index: -1;
+          animation: blobMove 8s ease-in-out infinite;
+        }
+        .blob-1 {
+          width: 400px;
+          height: 400px;
+          background: rgba(26, 107, 53, 0.08);
+          top: -100px;
+          right: -100px;
+        }
+        .blob-2 {
+          width: 300px;
+          height: 300px;
+          background: rgba(139, 105, 20, 0.08);
+          bottom: 0;
+          left: -50px;
+        }
+        .floating-badge {
+          position: absolute;
+          top: -30px;
+          right: -20px;
+          background: white;
+          padding: 12px 20px;
+          border-radius: 14px;
+          box-shadow: 0 8px 32px rgba(26, 107, 53, 0.15);
+          border: 1px solid rgba(26, 107, 53, 0.1);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          animation: floatBadge 4s ease-in-out infinite;
+        }
+        .floating-badge-icon {
+          width: 36px;
+          height: 36px;
+          background: linear-gradient(135deg, ${green} 0%, ${gold} 100%);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .floating-badge-text {
+          font-family: ${font};
+          font-size: 12px;
+          font-weight: 700;
+          color: #1a1a1a;
+        }
+        .floating-badge-text small {
+          display: block;
+          font-weight: 400;
+          color: #888;
+          font-size: 10px;
+          margin-top: 2px;
+        }
+        @media (max-width: 968px) {
+          .hero-inner { flex-direction: column; }
+          .hero-text { flex: none; }
+          .hero-mockup { flex: none; }
         }
       `}</style>
-
-      {/* Decorative blobs */}
-      {[{ top: -100, right: -100, size: 500 }, { bottom: -150, left: "30%", size: 400 }].map((pos, i) => (
-        <div key={i} style={{ position: "absolute", ...pos, width: pos.size, height: pos.size, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
-      ))}
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none" }} />
-
+      <div className="hero-blob blob-1"></div>
+      <div className="hero-blob blob-2"></div>
       <div className="hero-inner">
-        {/* Left */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 100, padding: "6px 16px", marginBottom: 28, animation: "fadeUp 0.6s ease both" }}>
-            <span style={{ fontSize: 12 }}>✨</span>
-            <span style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.9)", letterSpacing: "0.03em" }}>Nền tảng alumni đầu tiên của VNUA</span>
-          </div> */}
-
-          <h1 style={{ fontFamily: font, fontSize: "clamp(30px, 4vw, 56px)", fontWeight: 800, color: "white", lineHeight: 1.15, marginBottom: 20, animation: "fadeUp 0.6s 0.1s ease both" }}>
-            Kết nối cựu sinh viên
-            <br />
-            <span style={{ background: "linear-gradient(90deg, #fbbf24, #f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              với doanh nghiệp
-            </span>
-          </h1>
-
-          <p style={{ fontFamily: font, fontSize: "clamp(15px, 1.5vw, 17px)", color: "rgba(255,255,255,0.78)", lineHeight: 1.7, maxWidth: 480, marginBottom: 36, animation: "fadeUp 0.6s 0.2s ease both" }}>
-            ST Alumni giúp khảo sát việc làm, phân tích dữ liệu nghề nghiệp và kết nối cựu sinh viên với hơn 350 doanh nghiệp đối tác trên toàn quốc.
-          </p>
-
-          <div className="hero-btns">
-            <Link
-                to="/enterprises"
-                style={{
-                  fontFamily: font, fontWeight: 700, fontSize: 15,
-                  padding: "14px 32px", borderRadius: 12,
-                  background: "white", color: purple,
-                  cursor: "pointer", boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                  transition: "all 0.2s", textDecoration: "none", display: "inline-block",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
-              >
-                Xem doanh nghiệp đối tác →
-              </Link>
-
-              <Link
-                to="admin/dashboard"
-                style={{
-                  fontFamily: font, fontWeight: 600, fontSize: 15,
-                  padding: "14px 28px", borderRadius: 12,
-                  border: "1.5px solid rgba(255,255,255,0.4)",
-                  background: "rgba(255,255,255,0.1)", color: "white",
-                  cursor: "pointer", backdropFilter: "blur(4px)",
-                  transition: "all 0.2s", textDecoration: "none", display: "inline-block",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.18)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; }}
-              >
-                Đăng nhập với ST SSO →
-              </Link>
+        <div className="hero-text">
+          <div className="hero-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/>
+            </svg>
+            Kết nối Cựu sinh viên VNUA
           </div>
-
-          {/* Counters */}
-          <div className="hero-counters">
-            {[
-              { val: `${alumni.toLocaleString("vi-VN")}+`, label: "Cựu sinh viên" },
-              null,
-              { val: "350+", label: "Doanh nghiệp" },
-              null,
-              { val: `${pct}%`, label: "Có việc làm", gold: true },
-            ].map((item, i) =>
-              item === null
-                ? <div key={i} style={{ width: 1, background: "rgba(255,255,255,0.2)", alignSelf: "stretch" }} />
-                : <div key={i}>
-                    <div style={{ fontFamily: font, fontSize: "clamp(22px, 2.5vw, 28px)", fontWeight: 800, color: item.gold ? "#fbbf24" : "white" }}>{item.val}</div>
-                    <div style={{ fontFamily: font, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{item.label}</div>
-                  </div>
-            )}
+          <h1 className="hero-title">
+            Tìm cơ hội nghề nghiệp từ <span className="highlight">hơn 1,800 cựu sinh viên</span>
+          </h1>
+          <p className="hero-desc">
+            Nền tảng kết nối tuyển dụng và chia sẻ kinh nghiệm dành riêng cho cộng đồng cựu sinh viên Học viện Nông nghiệp Việt Nam.
+          </p>
+          <div className="hero-cta">
+            <Link to="/register" className="hero-btn-primary">
+              Tham gia ngay
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"></path>
+                <path d="M12 5l7 7-7 7"></path>
+              </svg>
+            </Link>
+            <Link to="/login" className="hero-btn-secondary">Đăng nhập</Link>
+          </div>
+          <div className="hero-stats-row">
+            <div className="hero-stat-item">
+              <div className="hero-stat-num">{alumni.toLocaleString()}</div>
+              <div className="hero-stat-label">Cựu sinh viên</div>
+            </div>
+            <div className="hero-stat-item">
+              <div className="hero-stat-num">{pct}%</div>
+              <div className="hero-stat-label">Tỷ lệ việc làm</div>
+            </div>
+            <div className="hero-stat-item">
+              <div className="hero-stat-num">50+</div>
+              <div className="hero-stat-label">Doanh nghiệp</div>
+            </div>
           </div>
         </div>
-
-        {/* Right — mockup */}
         <div className="hero-mockup">
-          <div style={{ background: "white", borderRadius: 20, boxShadow: "0 32px 80px rgba(0,0,0,0.3)", overflow: "hidden" }}>
-            {/* Browser bar */}
-            <div style={{ background: "#f3f4f6", padding: "12px 16px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #e5e7eb" }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                {["#ef4444", "#f59e0b", "#22c55e"].map((c) => <div key={c} style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />)}
-              </div>
-              <div style={{ flex: 1, background: "white", borderRadius: 6, padding: "4px 12px", fontSize: 12, color: "#9ca3af", fontFamily: "monospace", border: "1px solid #e5e7eb" }}>
-                    https://st-dse.vnua.edu.vn:6870
-              </div>
+          <div className="floating-badge">
+            <div className="floating-badge-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+              </svg>
             </div>
-            {/* Content */}
-            <div style={{ padding: 24 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <div>
-                  <div style={{ fontFamily: font, fontWeight: 700, fontSize: 15, color: "#1e1b4b" }}>Kết quả khảo sát 2024</div>
-                  <div style={{ fontFamily: font, fontSize: 12, color: "#9ca3af" }}>{stats.totalRespondents.toLocaleString("vi-VN")} phản hồi</div>
-                </div>
-                <span style={{ background: purpleLight, color: purple, fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 100, fontFamily: font }}>Mới nhất</span>
-              </div>
-
-              {stats.byMajor.map((m) => (
-                <div key={m.majorCode} style={{ marginBottom: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontFamily: font, fontSize: 13, color: "#374151" }}>{m.major}</span>
-                    <span style={{ fontFamily: font, fontSize: 13, fontWeight: 700, color: purple }}>{m.employmentRate}%</span>
-                  </div>
-                  <div style={{ height: 6, background: "#f3f4f6", borderRadius: 3, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${m.employmentRate}%`, background: purple, borderRadius: 3 }} />
-                  </div>
-                </div>
-              ))}
-
-              <div style={{ marginTop: 20, padding: 14, background: "#faf5ff", borderRadius: 12, border: `1px solid ${purpleLight}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontFamily: font, fontSize: 11, color: "#9ca3af" }}>Mức lương trung bình</div>
-                  <div style={{ fontFamily: font, fontSize: 18, fontWeight: 800, color: purple }}>{stats.avgSalaryMillionVND} triệu/tháng</div>
-                </div>
-                <div style={{ background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, color: "white", fontSize: 11, fontWeight: 600, padding: "8px 14px", borderRadius: 8, fontFamily: font, cursor: "pointer" }}>
-                  Xem chi tiết →
-                </div>
-              </div>
+            <div className="floating-badge-text">
+              VNUA Alumni
+              <small>FITA - Career Connect</small>
+            </div>
+          </div>
+          <div className="hero-mockup-frame">
+            <div className="mockup-header">
+              <div className="mockup-dot red"></div>
+              <div className="mockup-dot yellow"></div>
+              <div className="mockup-dot green"></div>
+              <div className="mockup-title">st.alumni-career-connect</div>
+            </div>
+            <div className="mockup-content">
+              <div className="mockup-skeleton-line med" style={{ background: `linear-gradient(90deg, ${cream} 0%, rgba(26,107,53,0.08) 50%, ${cream} 100%)` }}></div>
+              <div className="mockup-skeleton-line long"></div>
+              <div className="mockup-skeleton-line" style={{ width: '90%' }}></div>
+              <div className="mockup-skeleton-line" style={{ width: '75%' }}></div>
+              <div className="mockup-skeleton-line short"></div>
             </div>
           </div>
         </div>
