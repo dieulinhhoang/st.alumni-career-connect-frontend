@@ -1,0 +1,84 @@
+import { useEffect, useState } from 'react';
+import type {
+  FilterState,
+  GraduateRow,
+  MajorSummaryRow,
+  FacultySubmissionRow,
+  ResponseRow,
+  CurrentUser,
+  Stats,
+  ReportMeta,
+} from '../types';
+import type { ReportApiResponse } from '../api';
+import { fetchReportData } from '../api';
+
+type ReportDataState = {
+  currentUser: CurrentUser;
+  stats: Stats;
+  majorRows: MajorSummaryRow[];
+  graduateRows: GraduateRow[];
+  responseRows: ResponseRow[];
+  facultyRows: FacultySubmissionRow[];
+  reportMeta: ReportMeta | null;
+  loading: boolean;
+};
+
+export function useReportData(
+  filters: FilterState,
+  userIndex: number
+): ReportDataState {
+  const [state, setState] = useState<ReportDataState>({
+    currentUser: {
+      id: '',
+      name: '',
+      scope: 'school',
+      facultyName: '',
+      majorName: '',
+    },
+    stats: {
+      totalGraduates: 0,
+      submitted: 0,
+      submissionRate: 0,
+      employed: 0,
+      employmentRate: 0,
+      relevantJobRate: 0,
+      avgSalary: '',
+    },
+    majorRows: [],
+    graduateRows: [],
+    responseRows: [],
+    facultyRows: [],
+    reportMeta: null,
+    loading: false,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    setState((prev) => ({ ...prev, loading: true }));
+
+    fetchReportData(filters, userIndex)
+      .then((res: ReportApiResponse) => {
+        if (cancelled) return;
+        setState({
+          currentUser: res.currentUser,
+          stats: res.stats,
+          majorRows: res.majorRows,
+          graduateRows: res.graduateRows,
+          responseRows: res.responseRows,
+          facultyRows: res.facultyRows,
+          reportMeta: res.reportMeta,
+          loading: false,
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setState((prev) => ({ ...prev, loading: false }));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.surveyId, userIndex]);
+
+  return state;
+}
