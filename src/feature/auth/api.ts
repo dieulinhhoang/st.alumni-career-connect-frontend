@@ -5,12 +5,12 @@ import type { LoginResponse } from './type'
  import type { ProfileInfo } from './type'
 
 export const loginAPI = async (params: LoginRequest): Promise<LoginResponse> => {
-  const { data } = await api.post('/v1.0/auth/login', params)
+  const { data } = await api.post('/auth/login', params)
   return data.data
 }
 
 export const refreshTokenAPI = async (refreshToken: string): Promise<LoginResponse> => {
-  const { data } = await api.get('/v1.0/auth/refresh', {
+  const { data } = await api.get('/auth/refresh', {
     headers: {
       Authorization: `Bearer ${refreshToken}`,
       'Content-Type': 'application/json'
@@ -22,6 +22,6 @@ export const refreshTokenAPI = async (refreshToken: string): Promise<LoginRespon
 }
 
 export const getProfileAPI = async (): Promise<BaseResponse<ProfileInfo>> => {
-  const { data } = await api.get('/v1.0/auth/profile')
+  const { data } = await api.get('/auth/profile')
   return data.data
 }

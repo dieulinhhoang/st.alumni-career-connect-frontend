@@ -3,7 +3,7 @@ import type { IAdminProfile, IUpdateAdminProfileBody } from './type'
 
 // bản tạm: lấy user id = 1 làm admin
 export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
-  const { data } = await api.get('/v1.0/users/1')
+  const { data } = await api.get('/users/1')
   const user = data?.data ?? data
 
   const roles = Array.isArray(user?.roles)
@@ -32,5 +32,5 @@ export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
 export const updateAdminProfileAPI = async (
   body: IUpdateAdminProfileBody,
 ): Promise<void> => {
-  await api.put('/v1.0/users/1', body)
+  await api.put('/users/1', body)
 }

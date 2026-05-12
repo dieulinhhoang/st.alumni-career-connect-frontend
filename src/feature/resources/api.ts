@@ -14,13 +14,13 @@ export const getListResourceAPI = async (
   if (query?.code?.trim()) params.code = query.code.trim()
   if ((query as any)?.action?.trim()) params.action = (query as any).action.trim()
 
-  const { data } = await api.get(`/v1.0/resources`, { params })
+  const { data } = await api.get(`/resources`, { params })
   return data
 }
 
 
  export const createResourceAPI = async (body: ICreateResource): Promise<IResource> => {
-  const { data } = await api.post(`/v1.0/resources/`, body)
+  const { data } = await api.post(`/resources/`, body)
   return data.data
 }
 
@@ -28,10 +28,10 @@ export const getListResourceAPI = async (
   id: string,
   body: IUpdateResource
 ): Promise<void> => {
-  await api.put(`/v1.0/resources/${id}`, body)
+  await api.put(`/resources/${id}`, body)
 }
 
  export const deleteResourceAPI = async (id: string): Promise<any> => {
-  const { data } = await api.delete(`/v1.0/resources/${id}`)
+  const { data } = await api.delete(`/resources/${id}`)
   return data
 }

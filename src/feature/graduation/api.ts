@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type { Graduation, GraduationStudent, PaginatedResponse } from './type';
 
 export const fetchGraduations = async (page: number = 0): Promise<PaginatedResponse<Graduation>> => {

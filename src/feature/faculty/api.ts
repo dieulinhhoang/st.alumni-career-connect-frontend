@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type { Faculty, Major, ClassItem } from './types';
 
 // ============ MOCK DATA ============
@@ -33,36 +33,36 @@ const CLASSES: ClassItem[] = [
 ];
 
 // ============ API FUNCTIONS (sau nay thay bang api.get khi co backend) ============
-// Sau nay se thay: api.get('/v1.0/faculties'), api.get('/v1.0/majors'), api.get('/v1.0/classes')
+// Sau nay se thay: api.get('/faculties'), api.get('/majors'), api.get('/classes')
 
 export const delay = (ms = 300) => new Promise((res) => setTimeout(res, ms));
 
 export async function fetchFaculties(): Promise<Faculty[]> {
-  const { data } = await api.get('/v1.0/faculties');
+  const { data } = await api.get('/faculties');
   return data;
 }
 
 export async function fetchFacultyBySlug(slug: string): Promise<Faculty | undefined> {
-  const { data } = await api.get(`/v1.0/faculties/${slug}`);
+  const { data } = await api.get(`/faculties/${slug}`);
   return data;
 }
 
 export async function fetchMajorsByFacultySlug(facultySlug: string): Promise<Major[]> {
-  const { data } = await api.get(`/v1.0/majors`, { params: { facultySlug } });
+  const { data } = await api.get(`/majors`, { params: { facultySlug } });
   return data;
 }
 
 export async function fetchMajorBySlug(majorSlug: string): Promise<Major | undefined> {
-  const { data } = await api.get(`/v1.0/majors/${majorSlug}`);
+  const { data } = await api.get(`/majors/${majorSlug}`);
   return data;
 }
 
 export async function fetchClassesByMajorSlug(majorSlug: string): Promise<ClassItem[]> {
-  const { data } = await api.get(`/v1.0/classes`, { params: { majorSlug } });
+  const { data } = await api.get(`/classes`, { params: { majorSlug } });
   return data;
 }
 
 export async function fetchClassesByYear(year: number): Promise<ClassItem[]> {
-  const { data } = await api.get(`/v1.0/classes`, { params: { year } });
+  const { data } = await api.get(`/classes`, { params: { year } });
   return data;
 }

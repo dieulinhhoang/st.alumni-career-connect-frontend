@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type {
   Enterprise,
   Job,
@@ -35,30 +35,30 @@ const delay = (ms = 200) => new Promise((res) => setTimeout(res, ms));
 const today = () => new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 // ============ API FUNCTIONS (sau nay thay bang api.get khi co backend) ============
-// Sau nay se thay: api.get('/v1.0/enterprises'), api.get('/v1.0/jobs'), etc.
+// Sau nay se thay: api.get('/enterprises'), api.get('/jobs'), etc.
 
 export const listEnterprises = async () => {
-  const { data } = await api.get('/v1.0/enterprises');
+  const { data } = await api.get('/enterprises');
   return data;
 };
 
 export const getEnterpriseById = async (id: string) => {
-  const { data } = await api.get(`/v1.0/enterprises/${id}`);
+  const { data } = await api.get(`/enterprises/${id}`);
   return data;
 };
 
 export const listJobs = async (enterpriseId?: string) => {
-  const url = enterpriseId ? `/v1.0/enterprises/${enterpriseId}/jobs` : '/v1.0/jobs';
+  const url = enterpriseId ? `/enterprises/${enterpriseId}/jobs` : '/jobs';
   const { data } = await api.get(url);
   return data;
 };
 
 export const getJobById = async (id: string) => {
-  const { data } = await api.get(`/v1.0/jobs/${id}`);
+  const { data } = await api.get(`/jobs/${id}`);
   return data;
 };
 
 export const searchEnterprises = async (term: string) => {
-  const { data } = await api.get('/v1.0/enterprises', { params: { q: term } });
+  const { data } = await api.get('/enterprises', { params: { q: term } });
   return data;
 };

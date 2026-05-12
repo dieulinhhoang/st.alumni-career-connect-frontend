@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type {
   ApiResponse,
   PaginatedResponse,
@@ -67,7 +67,7 @@ const FAKE_ALUMNI: AlumniProfile[] = [
 ];
 
 // ============ API FACES (sau nay thay bang api.get/post khi co backend) ============
-// Sau nay se thay: api.get('/v1.0/home/stats'), api.get('/v1.0/enterprises'), v.v.
+// Sau nay se thay: api.get('/home/stats'), api.get('/enterprises'), v.v.
 
 export const statsApi = {
   getOverall: () => Promise.resolve(ok(FAKE_STATS)),

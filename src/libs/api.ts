@@ -383,7 +383,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   console.log('[MOCK]', method, url, { data, params });
 
   // ========== Roles API (EXISTING) ==========
-  if (url === '/v1.0/roles' && method === 'GET') {
+  if (url === '/roles' && method === 'GET') {
     let filtered = [...mockRoles];
     const { page = 0, size = 10, code, name } = params || {};
     if (code) filtered = filtered.filter((r) => r.code.toLowerCase().includes(code.toLowerCase()));
@@ -394,7 +394,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     const id = url.split('/').pop();
     return mockRoles.find((r) => r._id === id);
   }
-  if (url === '/v1.0/roles' && method === 'POST') {
+  if (url === '/roles' && method === 'POST') {
     const newRole = { ...data, _id: String(mockRoles.length + 1), createdAt: new Date().toISOString() };
     return newRole;
   }
@@ -407,7 +407,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   }
 
   // ========== Users API (EXISTING) ==========
-  if (url === '/v1.0/users' && method === 'GET') {
+  if (url === '/users' && method === 'GET') {
     let filtered = [...mockUsers];
     const { page = 0, size = 10, email, role } = params || {};
     if (email) filtered = filtered.filter((u) => u.email.toLowerCase().includes(email.toLowerCase()));
@@ -418,7 +418,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     const id = url.split('/').pop();
     return mockUsers.find((u) => u._id === id);
   }
-  if (url === '/v1.0/users' && method === 'POST') {
+  if (url === '/users' && method === 'POST') {
     return { ...data, _id: String(mockUsers.length + 1), createdAt: new Date().toISOString() };
   }
   if (url.match(/^\/v1\.0\/users\/.+$/) && method === 'PUT') {
@@ -432,10 +432,10 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   }
 
   // ========== Resources API (EXISTING) ==========
-  if (url === '/v1.0/resources' && method === 'GET') {
+  if (url === '/resources' && method === 'GET') {
     return paginate([...mockResources], params?.page || 0, params?.size || 10);
   }
-  if (url === '/v1.0/resources' && method === 'POST') {
+  if (url === '/resources' && method === 'POST') {
     return { ...data, _id: String(mockResources.length + 1), createdAt: new Date().toISOString() };
   }
   if (url.match(/^\/v1\.0\/resources\/.+$/) && method === 'PUT') {
@@ -447,7 +447,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   }
 
   // ========== Forms API (NEW) ==========
-  if (url === '/v1.0/forms' && method === 'GET') {
+  if (url === '/forms' && method === 'GET') {
     let filtered = [...mockForms];
     const { page = 0, size = 10, status } = params || {};
     if (status) filtered = filtered.filter((f) => f.status === status);
@@ -457,7 +457,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     const id = parseInt(url.split('/').pop() || '0', 10);
     return mockForms.find((f) => f.id === id);
   }
-  if (url === '/v1.0/forms' && method === 'POST') {
+  if (url === '/forms' && method === 'POST') {
     const newForm = { ...data, id: mockForms.length + 1, created_at: new Date().toISOString() };
     return newForm;
   }
@@ -493,14 +493,14 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   }
 
   // ========== Alumni API (NEW) ==========
-  if (url === '/v1.0/alumni' && method === 'GET') {
+  if (url === '/alumni' && method === 'GET') {
     return paginate([...mockAlumniBatches], params?.page || 0, params?.size || 10);
   }
   if (url.match(/^\/v1\.0\/alumni\/.+$/) && !url.includes('/stats') && method === 'GET') {
     const id = parseInt(url.split('/').pop() || '0', 10);
     return mockAlumniBatches.find((b) => b.id === id);
   }
-  if (url === '/v1.0/alumni' && method === 'POST') {
+  if (url === '/alumni' && method === 'POST') {
     return { ...data, id: mockAlumniBatches.length + 1 };
   }
   if (url.match(/^\/v1\.0\/alumni\/.+$/) && !url.includes('/stats') && method === 'PUT') {

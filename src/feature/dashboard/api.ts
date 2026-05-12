@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type { DotEntry, KhoaItem, EnterpriseItem, ChartMode, ChartModeConfig } from './type';
 
 // ============ KHOA LIST ============
@@ -32,19 +32,19 @@ export const CHART_MODES: { value: ChartMode; label: string }[] = [
 ];
 
 // ============ API FUNCTIONS (sau nay thay bang api.get khi co backend) ============
-// Sau nay se thay: api.get('/v1.0/dashboard/stats'), api.get('/v1.0/dashboard/faculties'), etc.
+// Sau nay se thay: api.get('/dashboard/stats'), api.get('/dashboard/faculties'), etc.
 
 export const getDashboardStats = async () => {
-  const { data } = await api.get('/v1.0/dashboard/stats');
+  const { data } = await api.get('/dashboard/stats');
   return data;
 };
 
 export const getFacultiesDashboard = async () => {
-  const { data } = await api.get('/v1.0/dashboard/faculties');
+  const { data } = await api.get('/dashboard/faculties');
   return data;
 };
 
 export const getEnterprisesDashboard = async () => {
-  const { data } = await api.get('/v1.0/dashboard/enterprises');
+  const { data } = await api.get('/dashboard/enterprises');
   return data;
 };

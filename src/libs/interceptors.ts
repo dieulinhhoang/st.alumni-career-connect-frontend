@@ -44,7 +44,7 @@ const logout = () => {
 
 export const errorInterceptor = async (error: AxiosError): Promise<void> => {
   // Check if this 401 error is from the refresh token endpoint itself
-  const isRefreshTokenRequest = error.config?.url?.includes('/v1.0/auth/refresh')
+  const isRefreshTokenRequest = error.config?.url?.includes('/auth/refresh')
   if (error.response?.status === 401 && isRefreshTokenRequest) {
     logout()
   }
