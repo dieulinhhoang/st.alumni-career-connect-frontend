@@ -18,30 +18,30 @@ interface SurveyBatchListResponse {
 }
 
 export const getBatches = async (): Promise<SurveyBatch[]> => {
-  const { data } = await api.get('/v1.0/alumni');
+  const { data } = await api.get('/api/v1/alumni');
   return (data as SurveyBatchListResponse).data;
 };
 
 export const getBatchById = async (id: number): Promise<SurveyBatch> => {
-  const { data } = await api.get(`/v1.0/alumni/${id}`);
+  const { data } = await api.get(`/api/v1/alumni/${id}`);
   return data;
 };
 
 export const createBatch = async (payload: CreateBatchPayload): Promise<SurveyBatch> => {
-  const { data } = await api.post('/v1.0/alumni', payload);
+  const { data } = await api.post('/api/v1/alumni', payload);
   return data;
 };
 
 export const updateBatch = async (id: number, updates: UpdateBatchPayload): Promise<SurveyBatch> => {
-  const { data } = await api.put(`/v1.0/alumni/${id}`, updates);
+  const { data } = await api.put(`/api/v1/alumni/${id}`, updates);
   return data;
 };
 
 export const deleteBatch = async (id: number): Promise<void> => {
-  await api.delete(`/v1.0/alumni/${id}`);
+  await api.delete(`/api/v1/alumni/${id}`);
 };
 
 export const getBatchStats = async (batchId: number): Promise<BatchStats> => {
-  const { data } = await api.get(`/v1.0/alumni/${batchId}/stats`);
+  const { data } = await api.get(`/api/v1/alumni/${batchId}/stats`);
   return data;
 };
