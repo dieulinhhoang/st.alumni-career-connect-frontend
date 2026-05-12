@@ -62,3 +62,27 @@ export const searchEnterprises = async (term: string) => {
   const { data } = await api.get('/enterprises', { params: { q: term } });
   return data;
 };
+
+// ============ CRUD MISSING EXPORTS (consultant code needs these) ============
+export const createEnterprise = async (payload: EnterpriseFormValues): Promise<Enterprise> => {
+  const { data } = await api.post('/api/v1/enterprises', payload);
+  return data;
+};
+
+export const updateEnterprise = async (id: string, payload: EnterpriseFormValues): Promise<Enterprise> => {
+  const { data } = await api.put(`/api/v1/enterprises/${id}`, payload);
+  return data;
+};
+
+export const deleteEnterprise = async (id: string): Promise<void> => {
+  await api.delete(`/api/v1/enterprises/${id}`);
+};
+
+export const updateEnterpriseVerified = async (id: string, verified: boolean): Promise<Enterprise> => {
+  const { data } = await api.patch(`/api/v1/enterprises/${id}/verified`, { verified });
+  return data;
+};
+
+// Seed helpers for render/initial data
+export const getSeedEnterprises = (): Enterprise[] => [..._enterprises];
+export const getSeedJobs = (): Job[] => [..._jobs];
