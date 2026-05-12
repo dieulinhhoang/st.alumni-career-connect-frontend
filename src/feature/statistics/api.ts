@@ -1,4 +1,4 @@
-import { api } from '../../../libs/api';
+import { api } from '../../libs/api';
 import type { FormOption, StatisticalQuestion, FormStatisticsDetail } from './types';
 
 export const getForms = async (): Promise<FormOption[]> => {
