@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Empty, Select, Skeleton, Space, Spin, Table, Tabs, Tag } from 'antd';
+import { Select, Skeleton, Spin, Table, Tag, Tabs, Empty, Space, Button } from 'antd';
 import {
-  BarChartOutlined,
   DownloadOutlined,
   FileTextOutlined,
-  PieChartOutlined,
   SendOutlined,
   TeamOutlined,
   TrophyOutlined,
-  UserOutlined,
+  PieChartOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  ExclamationCircleOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '../../../components/layout/AdminLayout';
+
 
 import type {
   FilterState,
@@ -19,6 +22,7 @@ import type {
   MajorSummaryRow,
   FacultySubmissionRow,
   ResponseRow,
+  SubmissionStatus,
 } from './types';
 import { useReportData } from './useReportData';
 import { SubmissionPill, MiniBar } from './components/SubmissionPill';
@@ -26,10 +30,17 @@ import './styles.css';
 
 const { Option } = Select;
 
+const SUBMISSION_KPI_META = [
+  { icon: <CheckCircleOutlined />, label: 'Tổng số khoa', valueKey: 'totalFaculty', color: '#1677ff', bg: '#e6f4ff' },
+  { icon: <SendOutlined />, label: 'Đã nộp', valueKey: 'submitted', color: '#09d488', bg: '#ccfbf1' },
+  { icon: <ExclamationCircleOutlined />, label: 'Cần bổ sung', valueKey: 'returned', color: '#faad14', bg: '#feefe4' },
+  { icon: <AuditOutlined />, label: 'Đã duyệt', valueKey: 'approved', color: '#52c41a', bg: '#f6ffed' },
+];
+
 const SURVEY_OPTIONS = [
-  { value: '2026-1', label: 'Kh\u1ea3o s\u00e1t 2026 - \u0110\u1ee3t 1' },
-  { value: '2025-2', label: 'Kh\u1ea3o s\u00e1t 2025 - \u0110\u1ee3t 2' },
-  { value: '2025-1', label: 'Kh\u1ea3o s\u00e1t 2025 - \u0110\u1ee3t 1' },
+  { value: '2026-1', label: 'Khảo sát 2026 - Đợt 1' },
+  { value: '2025-2', label: 'Khảo sát 2025 - Đợt 2' },
+  { value: '2025-1', label: 'Khảo sát 2025 - Đợt 1' },
 ];
 
 export default function ReportsPage() {
@@ -46,223 +57,429 @@ export default function ReportsPage() {
     loading,
   } = useReportData(filters, userIndex);
 
+  const isSchoolView = currentUser.scope === 'school';
+  const isFacultyLikeView = currentUser.scope === 'faculty' || currentUser.scope === 'major';
+
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('draft');
+
+  const handleSubmitToSchool = () => {
+    setSubmissionStatus('submitted');
+    Message.success('Báo cáo đã được nộp lên trường');
+  };
+
+  const handleWithdrawSubmission = () => {
+    setSubmissionStatus('draft');
+    Message.warning('Báo cáo đã được thu hồi');
+  };
+
+  const updateFacultyStatus = (key: string, status: SubmissionStatus) => {
+    Message.success(`Đã cập nhật trạng thái thành: ${SUBMISSION_STATUS_LABEL[status]}`);
+  };
+
+  const submissionStats = {
+    totalFaculty: facultyRows.length,
+    submitted: facultyRows.filter((r) => r.status === 'submitted').length,
+    returned: facultyRows.filter((r) => r.status === 'returned').length,
+    approved: facultyRows.filter((r) => r.status === 'approved').length,
+  };
+
   const scopeLabel =
     currentUser.scope === 'school'
-      ? 'To\u00e0n tr\u01b0\u1eddng'
+      ? 'Toàn trường'
       : currentUser.scope === 'faculty'
       ? currentUser.facultyName
       : currentUser.majorName;
 
-  const kpis = [
+  const title = isSchoolView ? 'Tổng hợp báo cáo cấp trường' : 'Báo cáo việc làm đơn vị';
+  const subtitle = isSchoolView
+    ? 'Theo dõi các khoa nộp báo cáo lên trường'
+    : 'Rà soát dữ liệu và nộp báo cáo lên trường';
+
+  const KPI_SUBMISSION = isSchoolView
+    ? SUBMISSION_KPI_META.map((m) => ({
+        icon: m.icon,
+        color: m.color,
+        bg: m.bg,
+        label: m.label,
+        value: String(submissionStats[m.valueKey as keyof typeof submissionStats]),
+        sub:
+          m.valueKey === 'totalFaculty'
+            ? 'Khoa/ngành trong trường'
+            : m.valueKey === 'submitted'
+            ? 'Khoa đã nộp báo cáo'
+            : m.valueKey === 'returned'
+            ? 'Khoa cần bổ sung dữ liệu'
+            : 'Khoa đã được trường duyệt',
+      }))
+    : [
+        { icon: <TeamOutlined />, color: '#1677ff', bg: '#e6f4ff', label: 'Tổng sinh viên tốt nghiệp', value: stats.totalGraduates.toLocaleString('vi-VN'), sub: 'Khóa hiện tại' },
+        { icon: <SendOutlined />, color: '#09d488', bg: '#ccfbf1', label: 'Tỷ lệ nộp khảo sát', value: `${stats.submissionRate}%`, sub: `${stats.submitted} / ${stats.totalGraduates} sinh viên` },
+        { icon: <TrophyOutlined />, color: '#d9706e', bg: '#fff3cf', label: 'Tỷ lệ có việc làm', value: `${stats.employmentRate}%`, sub: `${stats.employed} sinh viên` },
+        { icon: <PieChartOutlined />, color: '#7c3aed', bg: '#ede9fe', label: 'Đúng ngành nghề', value: `${stats.relevantJobRate}%`, sub: `TB lương: ${stats.avgSalary}` },
+      ];
+
+  const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
+    draft: 'Chưa nộp',
+    submitted: 'Đã nộp',
+    returned: 'Trả về',
+    approved: 'Đã duyệt',
+  };
+
+  const DEFAULT_DEADLINE = `2026-${String(currentUser.scope === 'faculty' ? '02' : '01').padStart(2, '0')}-15`;
+
+  const demoSubmissionStatus: Record<string, SubmissionStatus> = {
+    '1': 'submitted',
+    '2': 'returned',
+    '3': 'draft',
+    '4': 'approved',
+  };
+
+  const [facultyStatusMap, setFacultyStatusMap] = useState<Record<string, SubmissionStatus>>({});
+  const getFacultyStatus = (row: FacultySubmissionRow): SubmissionStatus =>
+    facultyStatusMap[row.key] ?? demoSubmissionStatus[row.key] ?? row.status ?? 'draft';
+
+  const handleUpdateStatus = (key: string, status: SubmissionStatus) => {
+    setFacultyStatusMap((prev) => ({ ...prev, [key]: status }));
+    Message.success(`Đã cập nhật: ${SUBMISSION_STATUS_LABEL[status]}`);
+  };
+
+  const mau01Columns: ColumnsType<MajorSummaryRow> = [
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
+    { title: 'Mã ngành', dataIndex: 'majorCode', width: 90, align: 'center' },
+    { title: 'Tên ngành đào tạo', dataIndex: 'majorName', width: 180 },
     {
-      icon: <TeamOutlined />,
-      iconClass: 'rp-kpi-icon--blue',
-      label: 'T\u1ed5ng sinh vi\u00ean t\u1ed1t nghi\u1ec7p',
-      value: stats.totalGraduates.toLocaleString('vi-VN'),
-      sub: 'Kh\u00f3a hi\u1ec7n t\u1ea1i',
+      title: 'Số SV tốt nghiệp',
+      children: [
+        { title: 'Tổng số', dataIndex: 'total', width: 70, align: 'right' },
+        { title: 'Nữ', dataIndex: 'totalNu', width: 55, align: 'right' },
+      ],
     },
     {
-      icon: <SendOutlined />,
-      iconClass: 'rp-kpi-icon--teal',
-      label: 'T\u1ef7 l\u1ec7 n\u1ed9p kh\u1ea3o s\u00e1t',
-      value: `${stats.submissionRate}%`,
-      sub: `${stats.submitted} / ${stats.totalGraduates} sinh vi\u00ean`,
+      title: 'Số SV phản hồi',
+      children: [
+        { title: 'Tổng số', dataIndex: 'submitted', width: 70, align: 'right' },
+        { title: 'Nữ', dataIndex: 'submittedNu', width: 55, align: 'right' },
+      ],
     },
     {
-      icon: <TrophyOutlined />,
-      iconClass: 'rp-kpi-icon--amber',
-      label: 'T\u1ef7 l\u1ec7 c\u00f3 vi\u1ec7c l\u00e0m',
-      value: `${stats.employmentRate}%`,
-      sub: `${stats.employed} sinh vi\u00ean`,
+      title: 'Tình hình việc làm (SV có PH)',
+      children: [
+        { title: 'Có VL', dataIndex: 'coViecLam', width: 60, align: 'right' },
+        { title: 'TT học', dataIndex: 'tiepTucHoc', width: 60, align: 'right' },
+        { title: 'Chưa có VL', dataIndex: 'chuaCoViecLam', width: 80, align: 'right' },
+      ],
+    },
+    { title: 'Tỷ lệ có VL / PH', dataIndex: 'submitted', width: 80, align: 'right', render: (_: any, row: MajorSummaryRow) => row.submitted ? `${Math.round((row.approved / row.submitted) * 100)}%` : '-' },
+    { title: 'Tỷ lệ có VL / TN', dataIndex: 'total', width: 80, align: 'right', render: (_: any, row: MajorSummaryRow) => row.total ? `${Math.round((row.approved / row.total) * 100)}%` : '-' },
+  ];
+
+  const mau02Columns: ColumnsType<GraduateRow> = [
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
+    { title: 'Mã SV', dataIndex: 'studentCode', width: 100 },
+    { title: 'Họ và tên', dataIndex: 'fullName', width: 150 },
+    { title: 'Nữ', dataIndex: 'gender', width: 50, align: 'center', render: (v: string) => v === 'female' ? 'X' : '' },
+    { title: 'Mã ngành', dataIndex: 'majorCode', width: 90 },
+    { title: 'Số QP TN', dataIndex: 'certification', width: 100 },
+    { title: 'Ngày ký QP', dataIndex: 'certDate', width: 100 },
+    { title: 'Số điện thoại', dataIndex: 'phone', width: 110 },
+    { title: 'Email', dataIndex: 'email', width: 160 },
+    { title: 'Hình thức KS', dataIndex: 'surveyMethod', width: 90, render: () => 'Online' },
+    {
+      title: 'Có phản hồi', dataIndex: 'status', width: 80, align: 'center', render: (v: string) => v === 'submitted' || v === 'approved' ? 'X' : '',
+    },
+    { title: 'Ghi chú', dataIndex: 'note', width: 120, render: (v: string) => v ?? '' },
+    { title: 'Ngành', dataIndex: 'majorName', width: 140 },
+    { title: 'Khoa', dataIndex: 'cohort', width: 80 },
+  ];
+
+  const mau03Columns: ColumnsType<ResponseRow> = [
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
+    { title: 'Mã SV', dataIndex: 'studentCode', width: 90 },
+    { title: 'Họ và tên', dataIndex: 'fullName', width: 150 },
+    {
+      title: 'Tình hình việc làm',
+      children: [
+        {
+          title: 'Có VL',
+          children: [
+            { title: 'Đúng ngành', dataIndex: 'dungNganh', width: 60, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+            { title: 'Liên quan', dataIndex: 'lienQuan', width: 65, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+            { title: 'Không LQ', dataIndex: 'khongLienQuan', width: 65, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+          ],
+        },
+        { title: 'TT học', dataIndex: 'tiepTucHoc', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Chưa có VL', dataIndex: 'chuaCoVl', width: 70, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+      ],
     },
     {
-      icon: <PieChartOutlined />,
-      iconClass: 'rp-kpi-icon--purple',
-      label: '\u0110\u00fang ng\u00e0nh ngh\u1ec1',
-      value: `${stats.relevantJobRate}%`,
-      sub: `TB l\u01b0\u01a1ng: ${stats.avgSalary}`,
+      title: 'Khu vực làm việc',
+      children: [
+        { title: 'NN', dataIndex: 'kvNhaNuoc', width: 50, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'TN', dataIndex: 'kvTuNhan', width: 50, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'TT VL', dataIndex: 'kvTuTao', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+      ],
+    },
+    { title: 'Nơi làm việc (Tỉnh/TP)', dataIndex: 'workLocation', width: 130, render: (v: string) => v ?? '' },
+    { title: 'Mức lương KD (triệu)', dataIndex: 'salary', width: 100, align: 'right', render: (v: string) => v ?? '-' },
+    {
+      title: 'Đúng ngành', dataIndex: 'relevance', width: 90, render: (v: string) => v ? <Tag color='green'>{v}</Tag> : <Tag color='default'>Chưa xác định</Tag>,
     },
   ];
 
-  const majorColumns: ColumnsType<MajorSummaryRow> = [
-    { title: 'M\u00e3 ng\u00e0nh', dataIndex: 'majorCode', width: 100 },
-    { title: 'T\u00ean ng\u00e0nh', dataIndex: 'majorName' },
-    { title: 'T\u1ed5ng SV', dataIndex: 'total', align: 'right', width: 90 },
-    { title: '\u0110\u00e3 n\u1ed9p', dataIndex: 'submitted', align: 'right', width: 90 },
-    { title: '\u0110\u00e3 duy\u1ec7t', dataIndex: 'approved', align: 'right', width: 90 },
+  const facultySubmissionColumns: ColumnsType<FacultySubmissionRow> = [
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
+    { title: 'Mã khoa', dataIndex: 'facultyCode', width: 90 },
+    { title: 'Tên khoa', dataIndex: 'facultyName' },
     {
-      title: 'Ti\u1ebfn \u0111\u1ed9',
-      render: (_, row) => <MiniBar value={row.submitted} max={row.total} color="var(--rp-teal)" />,
-      width: 180,
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      width: 130,
+      render: (_: any, row: FacultySubmissionRow) => (
+        <SubmissionPill status={getFacultyStatus(row)} />
+      ),
+    },
+    { title: 'Người nộp', dataIndex: 'submittedBy', width: 120, render: (v: string) => v ?? 'Chưa nộp' },
+    { title: 'Thời gian nộp', dataIndex: 'submittedAt', width: 130, render: (v: string) => v ?? 'Chưa nộp' },
+    { title: 'Hạn nộp', dataIndex: 'deadline', width: 100, render: (v: string) => v ?? DEFAULT_DEADLINE },
+    { title: 'Phản hồi', dataIndex: 'feedback', width: 140, render: (v: string) => v ?? 'Chưa có phản hồi' },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      width: 240,
+      render: (_: any, row: FacultySubmissionRow) => {
+        const status = getFacultyStatus(row);
+        return (
+          <Space size='small'>
+            <Button type='link' size='small'>Xem</Button>
+            {status === 'submitted' && (
+              <>
+                <Button size='small' type='primary' onClick={() => handleUpdateStatus(row.key, 'approved')}>Duyệt</Button>
+                <Button size='small' danger onClick={() => handleUpdateStatus(row.key, 'returned')}>Trả bổ sung</Button>
+              </>
+            )}
+            {status === 'returned' && (
+              <Button size='small' onClick={() => handleUpdateStatus(row.key, 'submitted')}>Đánh dấu đã nộp lại</Button>
+            )}
+            {status === 'draft' && <span style={{ color: '#999' }}>Chờ nộp</span>}
+          </Space>
+        );
+      },
     },
   ];
 
-  const graduateColumns: ColumnsType<GraduateRow> = [
-    { title: 'MSSV', dataIndex: 'studentCode', width: 100 },
-    { title: 'H\u1ecd t\u00ean', dataIndex: 'fullName' },
-    { title: 'Ng\u00e0nh', dataIndex: 'majorName' },
-    { title: 'Kh\u00f3a', dataIndex: 'cohort', width: 80 },
-    { title: 'Tr\u1ea1ng th\u00e1i', dataIndex: 'status', render: (v) => <SubmissionPill status={v} /> },
-    { title: 'Ng\u00e0y n\u1ed9p', dataIndex: 'submittedAt', render: (v) => v ?? '\u2014' },
-  ];
+  const tableProps = {
+    size: 'small' as const,
+    pagination: { pageSize: 10 },
+    bordered: true,
+    className: 'rp-formal-table',
+    scroll: { x: 'max-content' as const },
+  };
 
-  const responseColumns: ColumnsType<ResponseRow> = [
-    { title: 'MSSV', dataIndex: 'studentCode', width: 100 },
-    { title: 'H\u1ecd t\u00ean', dataIndex: 'fullName' },
-    { title: 'T\u00ecnh tr\u1ea1ng vi\u1ec7c l\u00e0m', dataIndex: 'employmentStatus' },
-    { title: 'Ch\u1ee9c danh', dataIndex: 'jobTitle', render: (v) => v ?? '\u2014' },
-    { title: 'C\u00f4ng ty', dataIndex: 'company', render: (v) => v ?? '\u2014' },
-    { title: 'M\u1ee9c l\u01b0\u01a1ng', dataIndex: 'salary', render: (v) => v ?? '\u2014' },
-    {
-      title: '\u0110\u00fang ng\u00e0nh',
-      dataIndex: 'relevance',
-      render: (v) =>
-        v ? <Tag color="green">{v}</Tag> : <Tag color="default">Ch\u01b0a x\u00e1c \u0111\u1ecbnh</Tag>,
-    },
-  ];
+  const selectedSurveyLabel =
+    SURVEY_OPTIONS.find((o) => o.value === filters.surveyId)?.label ?? filters.surveyId;
 
-  const facultyColumns: ColumnsType<FacultySubmissionRow> = [
-    { title: 'M\u00e3 khoa', dataIndex: 'facultyCode', width: 100 },
-    { title: 'T\u00ean khoa', dataIndex: 'facultyName' },
-    { title: 'T\u1ed5ng SV', dataIndex: 'total', align: 'right', width: 90 },
-    { title: '\u0110\u00e3 n\u1ed9p', dataIndex: 'submitted', align: 'right', width: 90 },
-    { title: '\u0110\u00e3 duy\u1ec7t', dataIndex: 'approved', align: 'right', width: 90 },
-    {
-      title: 'Ti\u1ebfn \u0111\u1ed9',
-      render: (_, row) => <MiniBar value={row.submitted} max={row.total} color="var(--rp-teal)" />,
-      width: 180,
-    },
-  ];
-
-  const tableProps = { size: 'small' as const, pagination: { pageSize: 10 } };
+  const selectedSurvey =
+    SURVEY_OPTIONS.find((o) => o.value === filters.surveyId)?.label ?? filters.surveyId;
 
   return (
     <AdminLayout>
-      <div className="rp-page">
-        {/* ---- Header ---- */}
-        <div className="rp-header">
-          <div className="rp-header__left">
-            <div className="rp-header__badge">
-              <FileTextOutlined /> B\u00e1o c\u00e1o
-            </div>
-            <h1 className="rp-header__title">B\u00e1o c\u00e1o kh\u1ea3o s\u00e1t vi\u1ec7c l\u00e0m</h1>
-            <p className="rp-header__desc">
-              T\u1ed5ng h\u1ee3p k\u1ebft qu\u1ea3 kh\u1ea3o s\u00e1t vi\u1ec7c l\u00e0m sinh vi\u00ean t\u1ed1t nghi\u1ec7p.
-            </p>
+      <div className='rp-page'>
+        {/* ====== PAGE HEADER ====== */}
+        <div className='rp-doc-header'>
+          <div className='rp-doc-header__org'>
+            <div className='rp-doc-header__ministry'>HỌC VIỆN NÔNG NGHIỆP VIỆT NAM</div>
+            <div className='rp-doc-header__dept'>BAN QUẢN LÝ ĐÀO TẠO</div>
           </div>
-          <div className="rp-header__actions">
-            <div className="rp-filter-row">
-              <div className="rp-filter-item">
-                <label className="rp-filter-label">Vai tr\u00f2 (demo)</label>
-                <Select
-                  value={userIndex}
-                  onChange={setUserIndex}
-                  style={{ width: 180 }}
-                  size="small"
-                >
-                  <Option value={0}>Super Admin</Option>
-                  <Option value={1}>Faculty Officer</Option>
-                  <Option value={2}>Major Officer</Option>
-                </Select>
-              </div>
-              <div className="rp-filter-item">
-                <label className="rp-filter-label">\u0110\u1ee3t kh\u1ea3o s\u00e1t</label>
-                <Select
-                  value={filters.surveyId}
-                  onChange={(v) => setFilters((f) => ({ ...f, surveyId: v }))}
-                  style={{ width: 220 }}
-                  size="small"
-                >
-                  {SURVEY_OPTIONS.map((o) => (
-                    <Option key={o.value} value={o.value}>{o.label}</Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
-            <div className="rp-scope-badge">
-              Ph\u1ea1m vi: <strong>{scopeLabel}</strong>
-            </div>
+          <div className='rp-doc-header__center'>
+            <div className='rp-doc-header__title'>{title}</div>
+            <div className='rp-doc-header__subtitle'>{subtitle}</div>
+            <div className='rp-doc-header__survey-name'>{selectedSurveyLabel}</div>
           </div>
+          <div className='rp-doc-header__actions'>
+            <div className='rp-filter-item'>
+              <label className='rp-filter-label'>Vai trò (demo)</label>
+              <Select value={userIndex} onChange={setUserIndex} style={{ width: 180 }} size='small'>
+                <Option value={0}>Super Admin</Option>
+                <Option value={1}>Faculty Officer</Option>
+                <Option value={2}>Major Officer</Option>
+              </Select>
+            </div>
+            <div className='rp-filter-item' style={{ marginTop: 8 }}>
+              <label className='rp-filter-label'>Đợt khảo sát</label>
+              <Select
+                value={filters.surveyId}
+                onChange={(v) => setFilters((f) => ({ ...f, surveyId: v }))}
+                style={{ width: 220 }}
+                size='small'
+              >
+                {SURVEY_OPTIONS.map((o) => (
+                  <Option key={o.value} value={o.value}>{o.label}</Option>
+                ))}
+              </Select>
+            </div>
+          </div>          <div className='rp-scope-badge' style={{ marginTop: 10 }}>
+            Phạm vi: <strong>{scopeLabel}</strong>
+          </div>
+
+          {/* ====== WORKFLOW BAR (khoa/ng्ảnh only) ====== */}
+          {isFacultyLikeView && (
+            <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <SubmissionPill status={submissionStatus} />
+              {submissionStatus === 'draft' && (
+                <Button size='small' type='primary' icon={<SendOutlined />} onClick={handleSubmitToSchool}>
+                  Nộp báo cáo lên trường
+                </Button>
+              )}
+              {submissionStatus === 'submitted' && (
+                <Button size='small' danger onClick={handleWithdrawSubmission}>Thu hồi</Button>
+              )}
+              {submissionStatus === 'returned' && (
+                <Button size='small' type='primary' icon={<SendOutlined />} onClick={handleSubmitToSchool}>
+                  Nộp lại lên trường
+                </Button>
+              )}
+              {submissionStatus === 'approved' && (
+                <span style={{ color: '#52c41a', fontSize: 13 }}>Trường đã duyệt báo cáo</span>
+              )}
+            </div>
+          )}
         </div>
 
-        <Space direction="vertical" size={20} style={{ width: '100%' }}>
-          {/* ---- KPI Cards ---- */}
-          <div className="rp-kpi-grid">
-            {kpis.map((kpi, i) => (
-              <div className="rp-kpi-card" key={i}>
-                <div className={`rp-kpi-icon ${kpi.iconClass}`}>{kpi.icon}</div>
-                <div className="rp-kpi-body">
-                  <div className="rp-kpi-label">{kpi.label}</div>
-                  <div className="rp-kpi-value">{kpi.value}</div>
-                  <div className="rp-kpi-sub">{kpi.sub}</div>
-                </div>
+        {/* ====== KPI CARDS ====== */}
+        <div className='rp-kpi-grid'>
+          {KPI_SUBMISSION.map((kpi, i) => (
+            <div className='rp-kpi-card' key={i}>
+              <div className='rp-kpi-icon' style={{ background: kpi.bg, color: kpi.color }}>
+                {kpi.icon}
               </div>
-            ))}
-          </div>
-
-          {/* ---- Tables ---- */}
-          <Spin spinning={loading}>
-            <div className="rp-table-card">
-              <Tabs
-                defaultActiveKey="overview"
-                className="rp-tabs"
-                items={[
-                  {
-                    key: 'overview',
-                    label: 'T\u1ed5ng quan theo ng\u00e0nh',
-                    children: (
-                      <Table
-                        {...tableProps}
-                        columns={majorColumns}
-                        dataSource={majorRows}
-                        rowKey="key"
-                      />
-                    ),
-                  },
-                  {
-                    key: 'graduates',
-                    label: 'Danh s\u00e1ch sinh vi\u00ean',
-                    children: (
-                      <Table
-                        {...tableProps}
-                        columns={graduateColumns}
-                        dataSource={graduateRows}
-                        rowKey="key"
-                      />
-                    ),
-                  },
-                  {
-                    key: 'responses',
-                    label: 'Ph\u1ea3n h\u1ed3i kh\u1ea3o s\u00e1t',
-                    children: (
-                      <Table
-                        {...tableProps}
-                        columns={responseColumns}
-                        dataSource={responseRows}
-                        rowKey="key"
-                      />
-                    ),
-                  },
-                  {
-                    key: 'progress',
-                    label: 'Ti\u1ebfn \u0111\u1ed9 n\u1ed9p theo khoa',
-                    children:
-                      currentUser.scope === 'school' ? (
-                        <Table
-                          {...tableProps}
-                          columns={facultyColumns}
-                          dataSource={facultyRows}
-                          rowKey="key"
-                        />
-                      ) : (
-                        <Empty description="Ch\u1ec9 hi\u1ec3n th\u1ecb v\u1edbi quy\u1ec1n To\u00e0n tr\u01b0\u1eddng" />
-                      ),
-                  },
-                ]}
-              />
+              <div className='rp-kpi-body'>
+                <div className='rp-kpi-label'>{kpi.label}</div>
+                <div className='rp-kpi-value' style={{ color: kpi.color }}>{kpi.value}</div>
+                <div className='rp-kpi-sub'>{kpi.sub}</div>
+              </div>
             </div>
-          </Spin>
-        </Space>
+          ))}
+        </div>
+
+        {/* ====== TABLES ====== */}
+        <Spin spinning={loading}>
+          <div className='rp-table-card'>
+            <Tabs defaultActiveKey='mau01' className='rp-tabs' items={[
+              {
+                key: 'mau01',
+                label: (<span><FileTextOutlined /> Mẫu số 01 - Tổng hợp theo ngành</span>),
+                children: (
+                  <>
+                    <div className='rp-table-title'>MẪU SỐ 01: BẢNG TỔNG HỢP TÌNH HÌNH VIỆC LÀM SINH VIÊN TỐT NGHIỆP THEO NGÀNH</div>
+                    <Table
+                      {...tableProps}
+                      columns={mau01Columns as any}
+                      dataSource={majorRows}
+                      rowKey='key'
+                      summary={(rows) => {
+                        const tot = rows.reduce((a, r) => a + (r.total || 0), 0);
+                        const sub = rows.reduce((a, r) => a + (r.submitted || 0), 0);
+                        const app = rows.reduce((a, r) => a + (r.approved || 0), 0);
+                        return (
+                          <Table.Summary.Row className='rp-summary-row'>
+                            <Table.Summary.Cell index={0} colSpan={3} align='center'>
+                              <strong>TỔNG HỢP</strong>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={3} align='right'><strong>{tot}</strong></Table.Summary.Cell>
+                            <Table.Summary.Cell index={4} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={5} align='right'><strong>{sub}</strong></Table.Summary.Cell>
+                            <Table.Summary.Cell index={6} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={7} align='right'><strong>{app}</strong></Table.Summary.Cell>
+                            <Table.Summary.Cell index={8} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={9} align='right'>
+                              <strong>{sub ? `${Math.round((app / sub) * 100)}%` : '-'}</strong>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={10} align='right'>
+                              <strong>{tot ? `${Math.round((app / tot) * 100)}%` : '-'}</strong>
+                            </Table.Summary.Cell>
+                          </Table.Summary.Row>
+                        );
+                      }}
+                    />
+                  </>
+                ),
+              },
+              {
+                key: 'mau02',
+                label: (<span><TeamOutlined /> Mẫu số 02 - Danh sách sinh viên</span>),
+                children: (
+                  <>
+                    <div className='rp-table-title'>MẪU SỐ 02: DANH SÁCH SINH VIÊN TỐT NGHIỆP</div>
+                    <Table
+                      {...tableProps}
+                      columns={mau02Columns}
+                      dataSource={graduateRows}
+                      rowKey='key'
+                    />
+                  </>
+                ),
+              },
+              {
+                key: 'mau03',
+                label: (<span><PieChartOutlined /> Mẫu số 03 - Phản hồi khảo sát</span>),
+                children: (
+                  <>
+                    <div className='rp-table-title'>MẪU SỐ 03: DANH SÁCH SINH VIÊN CÓ PHẢN HỒI KHẢO SÁT VIỆC LÀM</div>
+                    <Table
+                      {...tableProps}
+                      columns={mau03Columns as any}
+                      dataSource={responseRows}
+                      rowKey='key'
+                    />
+                  </>
+                ),
+              },
+              {
+                key: 'progress',
+                label: (<span><SendOutlined /> Tiến độ nộp khoa</span>),
+                children: (
+                  <>
+                    <div className='rp-table-title'>TIẾN ĐỘ NỘP BÁO CÁO THEO KHOA</div>
+                    <Table
+                      {...tableProps}
+                      columns={facultySubmissionColumns}
+                      dataSource={facultyRows.map((row) => ({
+                        ...row,
+                        deadline: row.deadline ?? DEFAULT_DEADLINE,
+                        submittedAt: row.submittedAt,
+                        submittedBy: row.submittedBy ?? 'Chưa nộp',
+                        feedback: row.feedback ?? 'Chưa có phản hồi',
+                        status: getFacultyStatus(row),
+                      }))}
+                      rowKey='key'
+                      locale={{ emptyText: <Empty description='Chưa có dữ liệu tiến độ' /> }}
+                      summary={(rows) => {
+                        const tot = rows.length;
+                        const sub = rows.filter((r) => getFacultyStatus(r) === 'submitted').length;
+                        const app = rows.filter((r) => getFacultyStatus(r) === 'approved').length;
+                        return (
+                          <Table.Summary.Row className='rp-summary-row'>
+                            <Table.Summary.Cell index={0} colSpan={3} align='center'>
+                              <strong>TỔNG HỢP TIẾN ĐỘ</strong>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={3} align='right'>
+                              <strong>{tot} khoa</strong>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={4} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={5} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={6} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={7} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={8} align='right'>-</Table.Summary.Cell>
+                          </Table.Summary.Row>
+                        );
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ]} />
+          </div>
+        </Spin>
       </div>
     </AdminLayout>
   );
