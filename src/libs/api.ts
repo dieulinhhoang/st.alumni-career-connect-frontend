@@ -475,7 +475,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     if (!original) return null;
     return { ...original, id: mockForms.length + 1, name: original.name + ' (Copy)', created_at: new Date().toISOString() };
   }
-  if (url.match(/^\/v1\.0/forms\/.+\/ai\/)generateContent$/) || url.match(/^\/v1\.0\/forms\/ai\/generate$/) && method === 'POST') {
+  if (url.match(/^\/api\/v1\/forms\/.+\/ai\/generateContent$/) || url.match(/^\/api\/v1\/forms\/ai\/generate$/) && method === 'POST') {
     // AI form generation mock
     return {
       form: {
