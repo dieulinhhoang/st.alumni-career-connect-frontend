@@ -13,9 +13,7 @@ import {
   AuditOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import AdminLayout from '../../../components/layout/AdminLayout';
-
-
+import AdminLayout from '../../../../components/layout/AdminLayout';
 import type {
   FilterState,
   GraduateRow,
@@ -31,16 +29,16 @@ import './styles.css';
 const { Option } = Select;
 
 const SUBMISSION_KPI_META = [
-  { icon: <CheckCircleOutlined />, label: 'Tổng số khoa', valueKey: 'totalFaculty', color: '#1677ff', bg: '#e6f4ff' },
-  { icon: <SendOutlined />, label: 'Đã nộp', valueKey: 'submitted', color: '#09d488', bg: '#ccfbf1' },
-  { icon: <ExclamationCircleOutlined />, label: 'Cần bổ sung', valueKey: 'returned', color: '#faad14', bg: '#feefe4' },
-  { icon: <AuditOutlined />, label: 'Đã duyệt', valueKey: 'approved', color: '#52c41a', bg: '#f6ffed' },
+  { icon: <CheckCircleOutlined />, label: 'Total faculties', valueKey: 'totalFaculty', color: '#1677ff', bg: '#e6f4ff' },
+  { icon: <SendOutlined />, label: 'Submitted', valueKey: 'submitted', color: '#09d488', bg: '#ccfbf1' },
+  { icon: <ExclamationCircleOutlined />, label: 'Needs revision', valueKey: 'returned', color: '#faad14', bg: '#feefe4' },
+  { icon: <AuditOutlined />, label: 'Approved', valueKey: 'approved', color: '#52c41a', bg: '#f6ffed' },
 ];
 
 const SURVEY_OPTIONS = [
-  { value: '2026-1', label: 'Khảo sát 2026 - Đợt 1' },
-  { value: '2025-2', label: 'Khảo sát 2025 - Đợt 2' },
-  { value: '2025-1', label: 'Khảo sát 2025 - Đợt 1' },
+  { value: '2026-1', label: 'Survey 2026 - Round 1' },
+  { value: '2025-2', label: 'Survey 2025 - Round 2' },
+  { value: '2025-1', label: 'Survey 2025 - Round 1' },
 ];
 
 export default function ReportsPage() {
@@ -64,16 +62,10 @@ export default function ReportsPage() {
 
   const handleSubmitToSchool = () => {
     setSubmissionStatus('submitted');
-    Message.success('Báo cáo đã được nộp lên trường');
   };
 
   const handleWithdrawSubmission = () => {
     setSubmissionStatus('draft');
-    Message.warning('Báo cáo đã được thu hồi');
-  };
-
-  const updateFacultyStatus = (key: string, status: SubmissionStatus) => {
-    Message.success(`Đã cập nhật trạng thái thành: ${SUBMISSION_STATUS_LABEL[status]}`);
   };
 
   const submissionStats = {
@@ -85,15 +77,22 @@ export default function ReportsPage() {
 
   const scopeLabel =
     currentUser.scope === 'school'
-      ? 'Toàn trường'
+      ? 'All faculties'
       : currentUser.scope === 'faculty'
       ? currentUser.facultyName
       : currentUser.majorName;
 
-  const title = isSchoolView ? 'Tổng hợp báo cáo cấp trường' : 'Báo cáo việc làm đơn vị';
+  const title = isSchoolView
+    ? 'Faculty Submission Status'
+    : isFacultyLikeView
+    ? 'Employment Report'
+    : 'Career Connect Report';
+
   const subtitle = isSchoolView
-    ? 'Theo dõi các khoa nộp báo cáo lên trường'
-    : 'Rà soát dữ liệu và nộp báo cáo lên trường';
+    ? 'Track faculty submissions and approvals'
+    : 'Review employment data and submit to the university';
+
+  const updateFacultyStatus = (key: string, status: SubmissionStatus) => {};
 
   const KPI_SUBMISSION = isSchoolView
     ? SUBMISSION_KPI_META.map((m) => ({
@@ -104,28 +103,28 @@ export default function ReportsPage() {
         value: String(submissionStats[m.valueKey as keyof typeof submissionStats]),
         sub:
           m.valueKey === 'totalFaculty'
-            ? 'Khoa/ngành trong trường'
+            ? 'Faculties in the university'
             : m.valueKey === 'submitted'
-            ? 'Khoa đã nộp báo cáo'
+            ? 'Faculties submitted report'
             : m.valueKey === 'returned'
-            ? 'Khoa cần bổ sung dữ liệu'
-            : 'Khoa đã được trường duyệt',
+            ? 'Faculties need revision'
+            : 'Faculties approved by university',
       }))
     : [
-        { icon: <TeamOutlined />, color: '#1677ff', bg: '#e6f4ff', label: 'Tổng sinh viên tốt nghiệp', value: stats.totalGraduates.toLocaleString('vi-VN'), sub: 'Khóa hiện tại' },
-        { icon: <SendOutlined />, color: '#09d488', bg: '#ccfbf1', label: 'Tỷ lệ nộp khảo sát', value: `${stats.submissionRate}%`, sub: `${stats.submitted} / ${stats.totalGraduates} sinh viên` },
-        { icon: <TrophyOutlined />, color: '#d9706e', bg: '#fff3cf', label: 'Tỷ lệ có việc làm', value: `${stats.employmentRate}%`, sub: `${stats.employed} sinh viên` },
-        { icon: <PieChartOutlined />, color: '#7c3aed', bg: '#ede9fe', label: 'Đúng ngành nghề', value: `${stats.relevantJobRate}%`, sub: `TB lương: ${stats.avgSalary}` },
+        { icon: <TeamOutlined />, color: '#1677ff', bg: '#e6f4ff', label: 'Total graduates', value: stats.totalGraduates.toLocaleString('vi-VN'), sub: 'Current cohort' },
+        { icon: <SendOutlined />, color: '#09d488', bg: '#ccfbf1', label: 'Submission rate', value: `${stats.submissionRate}%`, sub: `${stats.submitted} / ${stats.totalGraduates} students` },
+        { icon: <TrophyOutlined />, color: '#d9706e', bg: '#fff3cf', label: 'Employment rate', value: `${stats.employmentRate}%`, sub: `${stats.employed} students` },
+        { icon: <PieChartOutlined />, color: '#7c3aed', bg: '#ede9fe', label: 'Relevant jobs', value: `${stats.relevantJobRate}%`, sub: `Avg salary: ${stats.avgSalary}` },
       ];
 
   const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
-    draft: 'Chưa nộp',
-    submitted: 'Đã nộp',
-    returned: 'Trả về',
-    approved: 'Đã duyệt',
+    draft: 'Draft',
+    submitted: 'Submitted',
+    returned: 'Returned',
+    approved: 'Approved',
   };
 
-  const DEFAULT_DEADLINE = `2026-${String(currentUser.scope === 'faculty' ? '02' : '01').padStart(2, '0')}-15`;
+  const DEFAULT_DEADLINE = '2026-02-15';
 
   const demoSubmissionStatus: Record<string, SubmissionStatus> = {
     '1': 'submitted',
@@ -140,112 +139,142 @@ export default function ReportsPage() {
 
   const handleUpdateStatus = (key: string, status: SubmissionStatus) => {
     setFacultyStatusMap((prev) => ({ ...prev, [key]: status }));
-    Message.success(`Đã cập nhật: ${SUBMISSION_STATUS_LABEL[status]}`);
   };
 
+  // --- Mẫu 01: Trường theo ngành ---
   const mau01Columns: ColumnsType<MajorSummaryRow> = [
-    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 42, align: 'center' },
     { title: 'Mã ngành', dataIndex: 'majorCode', width: 90, align: 'center' },
     { title: 'Tên ngành đào tạo', dataIndex: 'majorName', width: 180 },
     {
-      title: 'Số SV tốt nghiệp',
+      title: 'Sinh viên tốt nghiệp',
       children: [
-        { title: 'Tổng số', dataIndex: 'total', width: 70, align: 'right' },
-        { title: 'Nữ', dataIndex: 'totalNu', width: 55, align: 'right' },
+        { title: 'Tổng số', dataIndex: 'total', width: 65, align: 'right' },
+        { title: 'Nữ', dataIndex: 'totalNu', width: 50, align: 'right' },
       ],
     },
     {
-      title: 'Số SV phản hồi',
+      title: 'Sinh viên phản hồi',
       children: [
-        { title: 'Tổng số', dataIndex: 'submitted', width: 70, align: 'right' },
-        { title: 'Nữ', dataIndex: 'submittedNu', width: 55, align: 'right' },
+        { title: 'Tổng số', dataIndex: 'submitted', width: 65, align: 'right' },
+        { title: 'Nữ', dataIndex: 'submittedNu', width: 50, align: 'right' },
       ],
     },
     {
-      title: 'Tình hình việc làm (SV có PH)',
+      title: 'Tình hình việc làm',
       children: [
-        { title: 'Có VL', dataIndex: 'coViecLam', width: 60, align: 'right' },
-        { title: 'TT học', dataIndex: 'tiepTucHoc', width: 60, align: 'right' },
-        { title: 'Chưa có VL', dataIndex: 'chuaCoViecLam', width: 80, align: 'right' },
+        { title: 'Có việc làm', dataIndex: 'coViecLam', width: 65, align: 'right' },
+        { title: 'Tiếp tục học', dataIndex: 'tiepTucHoc', width: 65, align: 'right' },
+        { title: 'Chưa có việc làm', dataIndex: 'chuaCoViecLam', width: 75, align: 'right' },
       ],
     },
-    { title: 'Tỷ lệ có VL / PH', dataIndex: 'submitted', width: 80, align: 'right', render: (_: any, row: MajorSummaryRow) => row.submitted ? `${Math.round((row.approved / row.submitted) * 100)}%` : '-' },
-    { title: 'Tỷ lệ có VL / TN', dataIndex: 'total', width: 80, align: 'right', render: (_: any, row: MajorSummaryRow) => row.total ? `${Math.round((row.approved / row.total) * 100)}%` : '-' },
+    {
+      title: 'Tỷ lệ sinh viên có việc làm / Tổng SV phản hồi',
+      dataIndex: 'submitted',
+      width: 70,
+      align: 'right',
+      render: (_: any, row: MajorSummaryRow) =>
+        row.submitted ? `${Math.round((row.approved / row.submitted) * 100)}%` : '-',
+    },
+    {
+      title: 'Tỷ lệ sinh viên có việc làm / Tổng SV tốt nghiệp',
+      dataIndex: 'total',
+      width: 70,
+      align: 'right',
+      render: (_: any, row: MajorSummaryRow) =>
+        row.total ? `${Math.round((row.approved / row.total) * 100)}%` : '-',
+    },
+    {
+      title: 'Khu vực làm việc',
+      children: [
+        { title: 'Nhà nước', dataIndex: 'kvNhaNuoc', width: 60, align: 'right', render: (v: any) => v ?? '0' },
+        { title: 'Tư nhân', dataIndex: 'kvTuNhan', width: 60, align: 'right', render: (v: any) => v ?? '0' },
+        { title: 'Tự tạo việc làm', dataIndex: 'kvTuTao', width: 75, align: 'right', render: (v: any) => v ?? '0' },
+        { title: 'Có yếu tố nước ngoài', dataIndex: 'kvYNuocNgoai', width: 90, align: 'right', render: (v: any) => v ?? '0' },
+      ],
+    },
+    { title: 'Nơi làm việc (Tỉnh/TP)', dataIndex: 'workLocation', width: 120 },
   ];
 
+  // --- Mẫu 02: Danh sách sinh viên ---
   const mau02Columns: ColumnsType<GraduateRow> = [
-    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
-    { title: 'Mã SV', dataIndex: 'studentCode', width: 100 },
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 42, align: 'center' },
+    { title: 'Mã sinh viên', dataIndex: 'studentCode', width: 90 },
     { title: 'Họ và tên', dataIndex: 'fullName', width: 150 },
-    { title: 'Nữ', dataIndex: 'gender', width: 50, align: 'center', render: (v: string) => v === 'female' ? 'X' : '' },
-    { title: 'Mã ngành', dataIndex: 'majorCode', width: 90 },
-    { title: 'Số QP TN', dataIndex: 'certification', width: 100 },
-    { title: 'Ngày ký QP', dataIndex: 'certDate', width: 100 },
-    { title: 'Số điện thoại', dataIndex: 'phone', width: 110 },
+    { title: 'Nữ', dataIndex: 'gender', width: 40, align: 'center', render: (v: string) => v === 'female' ? 'X' : '' },
+    { title: 'Số QP TN', dataIndex: 'certification', width: 90 },
+    { title: 'Số CCCD', dataIndex: 'cccd', width: 110 },
+    { title: 'Mã ngành đào tạo', dataIndex: 'majorCode', width: 90 },
+    { title: 'Quyết định TN', dataIndex: 'decision', width: 90 },
+    { title: 'Ngày ký QP', dataIndex: 'certDate', width: 90 },
+    { title: 'Số điện thoại', dataIndex: 'phone', width: 100 },
     { title: 'Email', dataIndex: 'email', width: 160 },
-    { title: 'Hình thức KS', dataIndex: 'surveyMethod', width: 90, render: () => 'Online' },
-    {
-      title: 'Có phản hồi', dataIndex: 'status', width: 80, align: 'center', render: (v: string) => v === 'submitted' || v === 'approved' ? 'X' : '',
-    },
-    { title: 'Ghi chú', dataIndex: 'note', width: 120, render: (v: string) => v ?? '' },
+    { title: 'Hình thức khảo sát', dataIndex: 'surveyMethod', width: 90, render: () => 'Online' },
+    { title: 'Có phản hồi', dataIndex: 'status', width: 70, align: 'center', render: (v: string) => v === 'submitted' || v === 'approved' ? <Tag color='green'>X</Tag> : '' },
+    { title: 'Ghi chú', dataIndex: 'note', width: 100, render: (v: string) => v ?? '' },
     { title: 'Ngành', dataIndex: 'majorName', width: 140 },
     { title: 'Khoa', dataIndex: 'cohort', width: 80 },
   ];
 
+  // --- Mẫu 03: Phản hồi khảo sát ---
   const mau03Columns: ColumnsType<ResponseRow> = [
-    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
-    { title: 'Mã SV', dataIndex: 'studentCode', width: 90 },
-    { title: 'Họ và tên', dataIndex: 'fullName', width: 150 },
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 42, align: 'center' },
+    { title: 'Mã SV', dataIndex: 'studentCode', width: 80 },
+    { title: 'Họ và tên', dataIndex: 'fullName', width: 140 },
+    { title: 'Ngày sinh', dataIndex: 'dob', width: 80 },
+    { title: 'Giới tính', dataIndex: 'gender', width: 50, render: (v: string) => v === 'female' ? 'Nữ' : 'Nam' },
+    { title: 'Số CCCD', dataIndex: 'cccd', width: 100 },
+    { title: 'Mã ngành', dataIndex: 'majorCode', width: 80 },
+    { title: 'Điện thoại', dataIndex: 'phone', width: 90 },
+    { title: 'Email', dataIndex: 'email', width: 150 },
     {
       title: 'Tình hình việc làm',
       children: [
-        {
-          title: 'Có VL',
-          children: [
-            { title: 'Đúng ngành', dataIndex: 'dungNganh', width: 60, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-            { title: 'Liên quan', dataIndex: 'lienQuan', width: 65, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-            { title: 'Không LQ', dataIndex: 'khongLienQuan', width: 65, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-          ],
-        },
-        { title: 'TT học', dataIndex: 'tiepTucHoc', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-        { title: 'Chưa có VL', dataIndex: 'chuaCoVl', width: 70, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Có việc làm', dataIndex: 'dungNganh', width: 60, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Tiếp tục học', dataIndex: 'tiepTucHoc', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Chưa có việc làm', dataIndex: 'chuaCoVl', width: 70, align: 'center', render: (v: boolean) => v ? 'X' : '' },
       ],
     },
     {
       title: 'Khu vực làm việc',
       children: [
-        { title: 'NN', dataIndex: 'kvNhaNuoc', width: 50, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-        { title: 'TN', dataIndex: 'kvTuNhan', width: 50, align: 'center', render: (v: boolean) => v ? 'X' : '' },
-        { title: 'TT VL', dataIndex: 'kvTuTao', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Nhà nước', dataIndex: 'kvNhaNuoc', width: 55, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Tư nhân', dataIndex: 'kvTuNhan', width: 50, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Tự tạo VL', dataIndex: 'kvTuTao', width: 60, align: 'center', render: (v: boolean) => v ? 'X' : '' },
+        { title: 'Có yếu tố nước ngoài', dataIndex: 'kvYNuocNgoai', width: 90, align: 'center', render: (v: boolean) => v ? 'X' : '' },
       ],
     },
-    { title: 'Nơi làm việc (Tỉnh/TP)', dataIndex: 'workLocation', width: 130, render: (v: string) => v ?? '' },
-    { title: 'Mức lương KD (triệu)', dataIndex: 'salary', width: 100, align: 'right', render: (v: string) => v ?? '-' },
-    {
-      title: 'Đúng ngành', dataIndex: 'relevance', width: 90, render: (v: string) => v ? <Tag color='green'>{v}</Tag> : <Tag color='default'>Chưa xác định</Tag>,
-    },
+    { title: 'Nơi làm việc (Tỉnh/TP)', dataIndex: 'workLocation', width: 120 },
+    { title: 'Học được kiến thức, kỹ năng', dataIndex: 'learnedSkills', width: 90, align: 'center', render: (v: string) => v ? 'X' : '' },
+    { title: 'Mức lương khởi điểm (triệu)', dataIndex: 'salary', width: 90, align: 'right' },
+    { title: 'Thu nhập bình quân (triệu)', dataIndex: 'avgIncome', width: 95, align: 'right' },
+    { title: 'Hình thức tìm việc làm', dataIndex: 'searchMethod', width: 100 },
+    { title: 'Hình thức tuyển dụng', dataIndex: 'hiringMethod', width: 100 },
+    { title: 'Kỹ năng mềm cần thiết', dataIndex: 'softSkills', width: 110 },
+    { title: 'Khóa học sau TN', dataIndex: 'postGradCourse', width: 120 },
+    { title: 'Hài lòng công việc', dataIndex: 'satisfaction', width: 90, align: 'center' },
+    { title: 'Ghi chú', dataIndex: 'note', width: 100 },
   ];
 
+  // --- Columns tiến độ nộp khoa ---
   const facultySubmissionColumns: ColumnsType<FacultySubmissionRow> = [
-    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 48, align: 'center' },
-    { title: 'Mã khoa', dataIndex: 'facultyCode', width: 90 },
+    { title: 'STT', render: (_: any, __: any, i: number) => i + 1, width: 42, align: 'center' },
+    { title: 'Mã khoa', dataIndex: 'facultyCode', width: 80 },
     { title: 'Tên khoa', dataIndex: 'facultyName' },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
-      width: 130,
-      render: (_: any, row: FacultySubmissionRow) => (
-        <SubmissionPill status={getFacultyStatus(row)} />
-      ),
+      width: 120,
+      render: (_: any, row: FacultySubmissionRow) => <SubmissionPill status={getFacultyStatus(row)} />,
     },
-    { title: 'Người nộp', dataIndex: 'submittedBy', width: 120, render: (v: string) => v ?? 'Chưa nộp' },
-    { title: 'Thời gian nộp', dataIndex: 'submittedAt', width: 130, render: (v: string) => v ?? 'Chưa nộp' },
-    { title: 'Hạn nộp', dataIndex: 'deadline', width: 100, render: (v: string) => v ?? DEFAULT_DEADLINE },
-    { title: 'Phản hồi', dataIndex: 'feedback', width: 140, render: (v: string) => v ?? 'Chưa có phản hồi' },
+    { title: 'Người nộp', dataIndex: 'submittedBy', width: 110, render: (v: string) => v ?? 'Chưa nộp' },
+    { title: 'Thời gian nộp', dataIndex: 'submittedAt', width: 120, render: (v: string) => v ?? 'Chưa nộp' },
+    { title: 'Hạn nộp', dataIndex: 'deadline', width: 90, render: (v: string) => v ?? DEFAULT_DEADLINE },
+    { title: 'Phản hồi', dataIndex: 'feedback', width: 130, render: (v: string) => v ?? 'Chưa có phản hồi' },
     {
       title: 'Thao tác',
       key: 'actions',
-      width: 240,
+      width: 230,
       render: (_: any, row: FacultySubmissionRow) => {
         const status = getFacultyStatus(row);
         return (
@@ -278,17 +307,14 @@ export default function ReportsPage() {
   const selectedSurveyLabel =
     SURVEY_OPTIONS.find((o) => o.value === filters.surveyId)?.label ?? filters.surveyId;
 
-  const selectedSurvey =
-    SURVEY_OPTIONS.find((o) => o.value === filters.surveyId)?.label ?? filters.surveyId;
-
   return (
     <AdminLayout>
       <div className='rp-page'>
         {/* ====== PAGE HEADER ====== */}
         <div className='rp-doc-header'>
           <div className='rp-doc-header__org'>
-            <div className='rp-doc-header__ministry'>HỌC VIỆN NÔNG NGHIỆP VIỆT NAM</div>
-            <div className='rp-doc-header__dept'>BAN QUẢN LÝ ĐÀO TẠO</div>
+            <div className='rp-doc-header__ministry'>VIETNAM NATIONAL UNIVERSITY OF AGRICULTURE</div>
+            <div className='rp-doc-header__dept'>TRAINING MANAGEMENT BOARD</div>
           </div>
           <div className='rp-doc-header__center'>
             <div className='rp-doc-header__title'>{title}</div>
@@ -297,7 +323,7 @@ export default function ReportsPage() {
           </div>
           <div className='rp-doc-header__actions'>
             <div className='rp-filter-item'>
-              <label className='rp-filter-label'>Vai trò (demo)</label>
+              <label className='rp-filter-label'>Role (demo)</label>
               <Select value={userIndex} onChange={setUserIndex} style={{ width: 180 }} size='small'>
                 <Option value={0}>Super Admin</Option>
                 <Option value={1}>Faculty Officer</Option>
@@ -305,7 +331,7 @@ export default function ReportsPage() {
               </Select>
             </div>
             <div className='rp-filter-item' style={{ marginTop: 8 }}>
-              <label className='rp-filter-label'>Đợt khảo sát</label>
+              <label className='rp-filter-label'>Survey round</label>
               <Select
                 value={filters.surveyId}
                 onChange={(v) => setFilters((f) => ({ ...f, surveyId: v }))}
@@ -317,29 +343,30 @@ export default function ReportsPage() {
                 ))}
               </Select>
             </div>
-          </div>          <div className='rp-scope-badge' style={{ marginTop: 10 }}>
-            Phạm vi: <strong>{scopeLabel}</strong>
+          </div>
+          <div className='rp-scope-badge' style={{ marginTop: 10 }}>
+            Scope: <strong>{scopeLabel}</strong>
           </div>
 
-          {/* ====== WORKFLOW BAR (khoa/ng्ảnh only) ====== */}
+          {/* ====== WORKFLOW BAR ====== */}
           {isFacultyLikeView && (
             <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
               <SubmissionPill status={submissionStatus} />
               {submissionStatus === 'draft' && (
                 <Button size='small' type='primary' icon={<SendOutlined />} onClick={handleSubmitToSchool}>
-                  Nộp báo cáo lên trường
+                  Submit to university
                 </Button>
               )}
               {submissionStatus === 'submitted' && (
-                <Button size='small' danger onClick={handleWithdrawSubmission}>Thu hồi</Button>
+                <Button size='small' danger onClick={handleWithdrawSubmission}>Withdraw</Button>
               )}
               {submissionStatus === 'returned' && (
                 <Button size='small' type='primary' icon={<SendOutlined />} onClick={handleSubmitToSchool}>
-                  Nộp lại lên trường
+                  Resubmit to university
                 </Button>
               )}
               {submissionStatus === 'approved' && (
-                <span style={{ color: '#52c41a', fontSize: 13 }}>Trường đã duyệt báo cáo</span>
+                <span style={{ color: '#52c41a', fontSize: 13 }}>University has approved your report</span>
               )}
             </div>
           )}
@@ -367,10 +394,10 @@ export default function ReportsPage() {
             <Tabs defaultActiveKey='mau01' className='rp-tabs' items={[
               {
                 key: 'mau01',
-                label: (<span><FileTextOutlined /> Mẫu số 01 - Tổng hợp theo ngành</span>),
+                label: (<span><FileTextOutlined /> Mẫu 01 - Tổng hợp theo ngành</span>),
                 children: (
                   <>
-                    <div className='rp-table-title'>MẪU SỐ 01: BẢNG TỔNG HỢP TÌNH HÌNH VIỆC LÀM SINH VIÊN TỐT NGHIỆP THEO NGÀNH</div>
+                    <div className='rp-table-title'>MẪU SỐ 01: BẢNG TỔNG HỢP TÌNH HÌNH VIỆC LÀM THEO NGÀNH</div>
                     <Table
                       {...tableProps}
                       columns={mau01Columns as any}
@@ -391,12 +418,16 @@ export default function ReportsPage() {
                             <Table.Summary.Cell index={6} align='right'>-</Table.Summary.Cell>
                             <Table.Summary.Cell index={7} align='right'><strong>{app}</strong></Table.Summary.Cell>
                             <Table.Summary.Cell index={8} align='right'>-</Table.Summary.Cell>
-                            <Table.Summary.Cell index={9} align='right'>
+                            <Table.Summary.Cell index={9} align='right'>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={10} align='right'>
                               <strong>{sub ? `${Math.round((app / sub) * 100)}%` : '-'}</strong>
                             </Table.Summary.Cell>
-                            <Table.Summary.Cell index={10} align='right'>
+                            <Table.Summary.Cell index={11} align='right'>
                               <strong>{tot ? `${Math.round((app / tot) * 100)}%` : '-'}</strong>
                             </Table.Summary.Cell>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Table.Summary.Cell key={i} index={12 + i} align='right'>-</Table.Summary.Cell>
+                            ))}
                           </Table.Summary.Row>
                         );
                       }}
@@ -406,31 +437,21 @@ export default function ReportsPage() {
               },
               {
                 key: 'mau02',
-                label: (<span><TeamOutlined /> Mẫu số 02 - Danh sách sinh viên</span>),
+                label: (<span><TeamOutlined /> Mẫu 02 - Danh sách sinh viên</span>),
                 children: (
                   <>
                     <div className='rp-table-title'>MẪU SỐ 02: DANH SÁCH SINH VIÊN TỐT NGHIỆP</div>
-                    <Table
-                      {...tableProps}
-                      columns={mau02Columns}
-                      dataSource={graduateRows}
-                      rowKey='key'
-                    />
+                    <Table {...tableProps} columns={mau02Columns} dataSource={graduateRows} rowKey='key' />
                   </>
                 ),
               },
               {
                 key: 'mau03',
-                label: (<span><PieChartOutlined /> Mẫu số 03 - Phản hồi khảo sát</span>),
+                label: (<span><PieChartOutlined /> Mẫu 03 - Phản hồi khảo sát</span>),
                 children: (
                   <>
-                    <div className='rp-table-title'>MẪU SỐ 03: DANH SÁCH SINH VIÊN CÓ PHẢN HỒI KHẢO SÁT VIỆC LÀM</div>
-                    <Table
-                      {...tableProps}
-                      columns={mau03Columns as any}
-                      dataSource={responseRows}
-                      rowKey='key'
-                    />
+                    <div className='rp-table-title'>MẪU SỐ 03: DANH SÁCH SINH VIÊN CÓ PHẢN HỒI KHẢO SÁT</div>
+                    <Table {...tableProps} columns={mau03Columns as any} dataSource={responseRows} rowKey='key' />
                   </>
                 ),
               },
@@ -455,8 +476,6 @@ export default function ReportsPage() {
                       locale={{ emptyText: <Empty description='Chưa có dữ liệu tiến độ' /> }}
                       summary={(rows) => {
                         const tot = rows.length;
-                        const sub = rows.filter((r) => getFacultyStatus(r) === 'submitted').length;
-                        const app = rows.filter((r) => getFacultyStatus(r) === 'approved').length;
                         return (
                           <Table.Summary.Row className='rp-summary-row'>
                             <Table.Summary.Cell index={0} colSpan={3} align='center'>
@@ -465,11 +484,9 @@ export default function ReportsPage() {
                             <Table.Summary.Cell index={3} align='right'>
                               <strong>{tot} khoa</strong>
                             </Table.Summary.Cell>
-                            <Table.Summary.Cell index={4} align='right'>-</Table.Summary.Cell>
-                            <Table.Summary.Cell index={5} align='right'>-</Table.Summary.Cell>
-                            <Table.Summary.Cell index={6} align='right'>-</Table.Summary.Cell>
-                            <Table.Summary.Cell index={7} align='right'>-</Table.Summary.Cell>
-                            <Table.Summary.Cell index={8} align='right'>-</Table.Summary.Cell>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Table.Summary.Cell key={i} index={4 + i} align='right'>-</Table.Summary.Cell>
+                            ))}
                           </Table.Summary.Row>
                         );
                       }}
