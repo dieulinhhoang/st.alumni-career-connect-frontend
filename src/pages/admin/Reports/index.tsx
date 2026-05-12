@@ -11,7 +11,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import AdminLayout from '../../../../components/layout/AdminLayout';
+import AdminLayout from '../../../components/layout/AdminLayout';
 
 import type {
   FilterState,
