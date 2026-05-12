@@ -29,31 +29,31 @@ export interface BankQuestion {
 
 // ============ Form CRUD ============
 export const getForms = async (params: GetFormsParams = {}): Promise<PaginatedResponse<Form>> => {
-  const { data } = await api.get('/v1.0/forms', { params });
+  const { data } = await api.get('/api/v1/forms', { params });
   return data;
 };
 
 export const getFormById = async (id: number): Promise<Form> => {
-  const { data } = await api.get(`/v1.0/forms/${id}`);
+  const { data } = await api.get(`/api/v1/forms/${id}`);
   return data;
 };
 
 export const createForm = async (payload: CreateFormPayload): Promise<Form> => {
-  const { data } = await api.post('/v1.0/forms', payload);
+  const { data } = await api.post('/api/v1/forms', payload);
   return data;
 };
 
 export const updateForm = async (id: number, updates: UpdateFormPayload): Promise<Form> => {
-  const { data } = await api.put(`/v1.0/forms/${id}`, updates);
+  const { data } = await api.put(`/api/v1/forms/${id}`, updates);
   return data;
 };
 
 export const deleteForm = async (id: number): Promise<void> => {
-  await api.delete(`/v1.0/forms/${id}`);
+  await api.delete(`/api/v1/forms/${id}`);
 };
 
 export const duplicateForm = async (id: number): Promise<Form> => {
-  const { data } = await api.post(`/v1.0/forms/${id}/duplicate`);
+  const { data } = await api.post(`/api/v1/forms/${id}/duplicate`);
   return data;
 };
 
