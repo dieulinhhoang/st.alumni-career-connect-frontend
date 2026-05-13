@@ -1,10 +1,10 @@
 //Hook cho trang chi tiết: load 1 enterprise + toàn bộ jobs của nó.
 import { useState, useEffect, useCallback } from "react";
 import {
-  fetchEnterpriseById,
+  getEnterpriseById,
   updateEnterprise,
-  verifyEnterprise,
-  setPartnerStatus,
+  updateEnterpriseVerified,
+  setEnterprisePartnerStatus,
 } from "../api";
 import type { Enterprise, PartnerStatus } from "../type";
 
@@ -13,14 +13,14 @@ export function useEnterpriseDetail(id: string | undefined) {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
 
-  //  Load 
+  //  Load
 
   const load = useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchEnterpriseById(id);
+      const data = await getEnterpriseById(id);
       setEnterprise(data);
     } catch {
       setError("Không tìm thấy doanh nghiệp");
@@ -31,28 +31,28 @@ export function useEnterpriseDetail(id: string | undefined) {
 
   useEffect(() => { load(); }, [load]);
 
-  //  Update 
+  //  Update
 
   const edit = useCallback(async (payload: Partial<Enterprise>) => {
     if (!enterprise) return;
-    const updated = await updateEnterprise(enterprise.id, payload);
+    const updated = await updateEnterprise(enterprise.id, payload as any);
     setEnterprise(updated);
     return updated;
   }, [enterprise]);
 
-  //  Verify 
+  //  Verify
 
-  const verify = useCallback(async () => {
+  const verify = useCallback(async (verified: boolean) => {
     if (!enterprise) return;
-    const updated = await verifyEnterprise(enterprise.id);
+    const updated = await updateEnterpriseVerified(enterprise.id, verified);
     setEnterprise(updated);
   }, [enterprise]);
 
-  //  Toggle partner status 
+  //  Toggle partner status
 
   const togglePartnerStatus = useCallback(async (status: PartnerStatus) => {
     if (!enterprise) return;
-    const updated = await setPartnerStatus(enterprise.id, status);
+    const updated = await setEnterprisePartnerStatus(enterprise.id, status);
     setEnterprise(updated);
   }, [enterprise]);
 
