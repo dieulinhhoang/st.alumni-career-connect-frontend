@@ -5,6 +5,7 @@ import type {
   EnterpriseFormValues,
   JobFormValues,
   FacultyKey,
+  PartnerStatus,
 } from './type';
 import { FACULTY_COLOR_MAP } from './type';
 
@@ -51,6 +52,11 @@ export const deleteEnterprise = async (id: string): Promise<void> => {
 
 export const updateEnterpriseVerified = async (id: string, verified: boolean): Promise<Enterprise> => {
   const { data } = await api.patch(`/api/v1/enterprises/${id}/verified`, { verified });
+  return data;
+};
+
+export const setEnterprisePartnerStatus = async (id: string, status: PartnerStatus): Promise<Enterprise> => {
+  const { data } = await api.patch(`/api/v1/enterprises/${id}/partner-status`, { status });
   return data;
 };
 
