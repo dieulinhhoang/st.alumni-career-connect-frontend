@@ -1,21 +1,26 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { fetchJobsByEnterprise, createJob, updateJob, deleteJob } from "../api";
+import {
+  listJobs,
+  createJob,
+  updateJob,
+  deleteJob,
+} from "../api";
 import type { Job, JobFormValues } from "../type";
+
 // Hook quản lý state & side-effects cho danh sách tin tuyển dụng của một doanh nghiệp.
 // Cần truyền vào enterpriseId để hook biết lấy tin của doanh nghiệp nào.
 export function useJobs(enterpriseId: string | undefined) {
-  const [jobs, setJobs]     = useState<Job[]>([]);
+  const [jobs, setJobs]       = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
-// Load
+  // Load
   const load = useCallback(async () => {
     if (!enterpriseId) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchJobsByEnterprise(enterpriseId);
+      const data = await listJobs(enterpriseId);
       setJobs(data);
     } catch {
       setError("Không thể tải danh sách tin tuyển dụng");
@@ -26,8 +31,7 @@ export function useJobs(enterpriseId: string | undefined) {
 
   useEffect(() => { load(); }, [load]);
 
-  //Create 
-
+  // Create
   const addJob = useCallback(async (payload: JobFormValues) => {
     if (!enterpriseId) return;
     const newJob = await createJob(enterpriseId, payload);
@@ -35,27 +39,21 @@ export function useJobs(enterpriseId: string | undefined) {
     return newJob;
   }, [enterpriseId]);
 
-  // Update 
-
-  const editJob = useCallback(async (jobId: string, payload: Partial<Job>) => {
-    if (!enterpriseId) return;
-    const updated = await updateJob(enterpriseId, jobId, payload);
+  // Update
+  const editJob = useCallback(async (jobId: string, payload: JobFormValues) => {
+    const updated = await updateJob(jobId, payload);
     setJobs(prev => prev.map(j => j.id === jobId ? updated : j));
     return updated;
-  }, [enterpriseId]);
+  }, []);
 
-  //   Delete 
-
+  // Delete
   const removeJob = useCallback(async (jobId: string) => {
-    if (!enterpriseId) return;
-    await deleteJob(enterpriseId, jobId);
+    await deleteJob(jobId);
     setJobs(prev => prev.filter(j => j.id !== jobId));
-  }, [enterpriseId]);
-
-  //Derived 
+  }, []);
 
   const activeJobs = jobs.filter(j => j.status === "active");
-  const closedJobs = jobs.filter(j => j.status === "closed");
+  const closedJobs = jobs.filter(j => j.status !== "active");
 
   return {
     jobs,
