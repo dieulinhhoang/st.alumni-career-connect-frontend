@@ -565,21 +565,6 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
   return response.data;
 };
 
-// Create axios instance
-eval(`const axiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-};`);
-
-// Re-declare properly outside handler
-const axiosConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-};
-
-const axiosInstance = axios.create(axiosConfig);
-requestInterceptor(axiosInstance);
-successInterceptor(axiosInstance);
-errorInterceptor(axiosInstance);
-
 // Proxy wrapper - intercepts API calls and routes to mock handler when USE_MOCK is true
 const api = new Proxy(axiosInstance, {
   get(target, prop) {
