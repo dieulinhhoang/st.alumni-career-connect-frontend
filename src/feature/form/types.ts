@@ -20,7 +20,7 @@ export interface QuestionOption {
 
 // Conditional display logic
 export interface ConditionalRule {
-  questionId: string; // id of the dependent question
+  questionId: string;
   operator: 'equals' | 'includes' | 'not_equals';
   value: string | string[];
 }
@@ -28,20 +28,17 @@ export interface ConditionalRule {
 export interface Question {
   id: string;
   type: QuestionType;
-  title: string;               // question content
+  title: string;
   placeholder?: string;
-  options?: QuestionOption[];  // updated from string[] -> QuestionOption[]
+  options?: QuestionOption[];
   required: boolean;
-  sectionId: string;           // which Section this belongs to
-  order: number;               // order within the section
-
-  // new fields:
-  visibleWhen?: ConditionalRule; // condition for the question to be shown
-  reportFieldKey?: string;       // map to report field (employmentstatus, trainedfield...)
+  sectionId: string;
+  order: number;
+  visibleWhen?: ConditionalRule;
+  reportFieldKey?: string;
 }
 
 // SURVEY HEADER / FOOTER / SECTION
-
 export interface SurveyHeader {
   logoUrl?: string;
   ministry?: string;
@@ -75,10 +72,7 @@ export interface Survey {
 
 export interface SurveyResponse {
   surveyId: string;
-  responses: {
-    questionId: string;
-    answer: string | string[];
-  }[];
+  responses: { questionId: string; answer: string | string[] }[];
 }
 
 // THEME TYPES
@@ -117,7 +111,7 @@ export interface Form {
 }
 
 // VIEW TYPES
-export type ViewType = "list" | "builder" | "ai" | "preview" | "theme";
+export type ViewType = 'list' | 'builder' | 'ai' | 'preview' | 'theme';
 
 // Q_TYPES META
 export interface QuestionTypeMeta {
@@ -125,7 +119,6 @@ export interface QuestionTypeMeta {
   label: string;
   icon: string;
 }
-
 export type QuestionTypeOption = QuestionTypeMeta;
 
 export interface FontOption {
@@ -177,6 +170,7 @@ export interface AIFormResult {
   description: string;
   sections?: Section[];
   questions: Question[];
+}
 
 // ============ FORM CONSTANTS ============
 export interface BankQuestion {
@@ -254,4 +248,3 @@ export const QUESTION_BANK: BankQuestion[] = [
   { id: 10, title: 'Muc do hai long', type: 'rating', options: [] },
   { id: 11, title: 'Y kien dong gop', type: 'paragraph', options: [] },
 ];
-}
