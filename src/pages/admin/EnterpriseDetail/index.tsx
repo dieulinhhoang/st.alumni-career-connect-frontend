@@ -14,7 +14,7 @@ import { findBySlug } from "../../../components/common/utils";
 import { useEnterpriseDetail } from "../../../feature/enterprise/hooks/useEnterpriseDetail";
 import { useJobs } from "../../../feature/enterprise/hooks/useJobs";
 import { useFacultyColors } from "../../../feature/enterprise/hooks/useFacultyColors";
-import { fetchEnterprises } from "../../../feature/enterprise/api";
+import { listEnterprises } from "../../../feature/enterprise/api";
 import {
   FACULTY_VI_NAME,
   type Enterprise, type Job, type JobFormValues, type PartnerStatus,
@@ -46,7 +46,7 @@ export default function EnterpriseDetailPage() {
 
   const [entId, setEntId] = useState<string | undefined>();
   useEffect(() => {
-    fetchEnterprises().then(list => {
+    listEnterprises().then(list => {
       const found = findBySlug(list, slug ?? "");
       setEntId(found?.id);
     });
@@ -156,7 +156,7 @@ export default function EnterpriseDetailPage() {
               </Button>
               <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)} style={{ borderRadius: 8 }}>Chỉnh sửa</Button>
               {!ent.verified && (
-                <Button icon={<SafetyCertificateOutlined />} style={{ background: "#059669", border: "none", color: "white", borderRadius: 8 }} onClick={verify}>Xác minh</Button>
+                              <Button icon={<SafetyCertificateOutlined />} style={{ background: "#059669", border: "none", color: "white", borderRadius: 8 }} onClick={() => verify(true)}>Xác minh</Button>
               )}
               <Button
                 icon={ent.partnerStatus === "active" ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
