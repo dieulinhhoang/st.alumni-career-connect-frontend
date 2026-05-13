@@ -12,13 +12,11 @@ export type QuestionType =
   | 'email'
   | 'tel';
 
-// Option for question choices
 export interface QuestionOption {
   id: string;
   label: string;
 }
 
-// Conditional display logic
 export interface ConditionalRule {
   questionId: string;
   operator: 'equals' | 'includes' | 'not_equals';
@@ -38,7 +36,6 @@ export interface Question {
   reportFieldKey?: string;
 }
 
-// SURVEY HEADER / FOOTER / SECTION
 export interface SurveyHeader {
   logoUrl?: string;
   ministry?: string;
@@ -75,7 +72,6 @@ export interface SurveyResponse {
   responses: { questionId: string; answer: string | string[] }[];
 }
 
-// THEME TYPES
 export interface Theme {
   id: string;
   name: string;
@@ -93,7 +89,6 @@ export interface CustomTheme {
   bg: string;
 }
 
-// FORM TYPES
 export interface Form {
   id: number | null;
   name: string;
@@ -110,10 +105,8 @@ export interface Form {
   status?: 'draft' | 'published';
 }
 
-// VIEW TYPES
 export type ViewType = 'list' | 'builder' | 'ai' | 'preview' | 'theme';
 
-// Q_TYPES META
 export interface QuestionTypeMeta {
   value: QuestionType;
   label: string;
@@ -131,7 +124,6 @@ export interface RadiusOption {
   val: string;
 }
 
-// API PAYLOAD TYPES
 export interface CreateFormPayload {
   name: string;
   description: string;
@@ -172,7 +164,6 @@ export interface AIFormResult {
   questions: Question[];
 }
 
-// ============ FORM CONSTANTS ============
 export interface BankQuestion {
   id: number;
   title: string;
@@ -201,14 +192,7 @@ export const THEMES: Theme[] = [
   { id: 'slate', name: 'Xam', accent: '#455a64', header: '#455a64', bg: '#ffffff', font: 'roboto', radius: '8px' },
 ];
 
-export const ACCENT_COLORS: string[] = [
-  '#1976d2',
-  '#2e7d32',
-  '#f57c00',
-  '#c62828',
-  '#7b1fa2',
-  '#455a64',
-];
+export const ACCENT_COLORS: string[] = ['#1976d2', '#2e7d32', '#f57c00', '#c62828', '#7b1fa2', '#455a64'];
 
 export const FONTS: FontOption[] = [
   { name: 'Roboto', val: 'roboto' },
@@ -236,15 +220,15 @@ export const SUGGESTIONS: string[] = [
 ];
 
 export const QUESTION_BANK: BankQuestion[] = [
-  { id: 1, title: 'Ho va ten', type: 'short', options: [] },
-  { id: 2, title: 'Ngay sinh', type: 'date', options: [] },
+  { id: 1, title: 'Ho va ten', type: 'short' },
+  { id: 2, title: 'Ngay sinh', type: 'date' },
   { id: 3, title: 'Gioi tinh', type: 'radio', options: ['Nam', 'Nu', 'Khac'] },
-  { id: 4, title: 'Email', type: 'short', options: [] },
-  { id: 5, title: 'So dien thoai', type: 'short', options: [] },
+  { id: 4, title: 'Email', type: 'short' },
+  { id: 5, title: 'So dien thoai', type: 'short' },
   { id: 6, title: 'Lop', type: 'dropdown', options: ['MHTA', 'KHTB', 'CNTT2020'] },
   { id: 7, title: 'Nganh hoc', type: 'radio', options: ['MMT&TTDL', 'KHDL&TTNT'] },
   { id: 8, title: 'Nam hoc', type: 'dropdown', options: ['Nam 1', 'Nam 2', 'Nam 3', 'Nam 4'] },
   { id: 9, title: 'Tinh trang viec lam', type: 'radio', options: ['Da co viec lam', 'Tiep tuc hoc', 'Chua co viec lam'] },
-  { id: 10, title: 'Muc do hai long', type: 'rating', options: [] },
-  { id: 11, title: 'Y kien dong gop', type: 'paragraph', options: [] },
+  { id: 10, title: 'Muc do hai long', type: 'rating' },
+  { id: 11, title: 'Y kien dong gop', type: 'paragraph' },
 ];
