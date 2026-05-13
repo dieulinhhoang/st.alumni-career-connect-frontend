@@ -357,6 +357,15 @@ const mockStatsDetails: Record<string, Record<string, { count: number; percent: 
   },
 };
 
+// ========== AXIOS INSTANCE (MODULE SCOPE) ==========
+// Khai bao o day de dung cho ca Proxy wrapper va fallback trong mockApiHandler
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
+requestInterceptor(axiosInstance);
+successInterceptor(axiosInstance);
+errorInterceptor(axiosInstance);
+
 // ========== HELPER & MOCK API HANDLER ==========
 const delay = (ms: number = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -461,12 +470,12 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     const newForm = { ...data, id: mockForms.length + 1, created_at: new Date().toISOString() };
     return newForm;
   }
-  if (url.match(/^\/v1\.0\/forms\/.+$/)&& !url.includes('/duplicate') && !url.includes('/ai') && method === 'PUT') {
+  if (url.match(/^\/v1\.0\/forms\/.+$/) && !url.includes('/duplicate') && !url.includes('/ai') && method === 'PUT') {
     const id = parseInt(url.split('/').pop() || '0', 10);
     const form = mockForms.find((f) => f.id === id);
     return form ? { ...form, ...data, updated_at: new Date().toISOString() } : null;
   }
-  if (url.match(/^\/v1\.0\/forms\/.+$/)&& !url.includes('/duplicate') && !url.includes('/ai') && method === 'DELETE') {
+  if (url.match(/^\/v1\.0\/forms\/.+$/) && !url.includes('/duplicate') && !url.includes('/ai') && method === 'DELETE') {
     return { success: true };
   }
   if (url.match(/^\/v1\.0\/forms\/.+\/duplicate$/) && method === 'POST') {
@@ -476,7 +485,6 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     return { ...original, id: mockForms.length + 1, name: original.name + ' (Copy)', created_at: new Date().toISOString() };
   }
   if (url.match(/^\/api\/v1\/forms\/.+\/ai\/generateContent$/) || url.match(/^\/api\/v1\/forms\/ai\/generate$/) && method === 'POST') {
-    // AI form generation mock
     return {
       form: {
         id: mockForms.length + 1,
@@ -552,15 +560,7 @@ const mockApiHandler = async (method: string, url: string, data?: any, params?: 
     return mockStatsDetails[key] || null;
   }
 
-  // Fallback - pass through to real API
-  const axiosRequestConfig = {
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-  };
-  const axiosInstance = axios.create(axiosRequestConfig);
-  requestInterceptor(axiosInstance);
-  successInterceptor(axiosInstance);
-  errorInterceptor(axiosInstance);
-
+  // Fallback - su dung axiosInstance tu module scope
   const response = await axiosInstance({ method, url, data, params });
   return response.data;
 };
