@@ -4,7 +4,7 @@ import { HeroSection }     from "./Herosection";
 import { StatsSection }    from "./Statssection";
 import { FeaturesSection } from "./Featuressection";
 import { PartnersSection } from "./Partnerssection";
-import { CTASection }      from "./Ctasection";
+import { CtaSection }      from "./Ctasection";
 import { Footer }          from "./Footer";
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700&family=Actor&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { overflow-x: hidden; }
         @keyframes fadeUp {
@@ -26,9 +26,9 @@ export default function HomePage() {
       <Navbar />
       {stats && <HeroSection stats={stats} />}
       {stats && <StatsSection stats={stats} />}
-      <FeaturesSection />
-      {enterprises.length > 0 && <PartnersSection enterprises={enterprises} />}
-      <CTASection />
+      {/* <FeaturesSection /> */}
+      {enterprises.length > 0 && <PartnersSection partnerLogos={enterprises} />}
+      {/* <CtaSection /> */}
       <Footer />
     </>
   );

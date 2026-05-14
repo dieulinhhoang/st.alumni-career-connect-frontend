@@ -1,341 +1,336 @@
+// HeroSection.tsx
+
 import { Link } from "react-router-dom";
 import { useCountUp } from "../../../feature/home/hooks/index.ts";
 import type { SurveyStats } from "../../../feature/home/type.ts";
 
-const font = "'Be Vietnam Pro', sans-serif";
-const green = "#1a6b35";
-const greenLight = "#2d8f4f";
-const gold = "#8B6914";
-const cream = "#faf8f3";
+const green = "#234b2f";
+const greenLight = "#2f6841";
+const bgPrimary = "#f5f8f1";
+const dark = "#1f1f1f";
 
 export function HeroSection({ stats }: { stats: SurveyStats }) {
   const alumni = useCountUp(stats.totalRespondents, 1800, 400);
   const pct = useCountUp(stats.overallEmploymentRate, 1600, 600);
 
   return (
-    <section
-      style={{
-        minHeight: "100vh",
-        background: cream,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "80px 5%",
-        overflow: "hidden",
-      }}
-    >
+    <section id="home" className="hero-wrapper">
       <style>{`
-        @keyframes floatBadge {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+        :root {
+          --accent: #3f4739;
+          --secondary: #d2b93d;
+          --text-muted: #626262;
+          --card-bg: rgba(255, 255, 255, 0.78);
         }
-        @keyframes blobMove {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(50px, -50px) scale(1.1); }
-          50% { transform: translate(-30px, 30px) scale(0.9); }
-          75% { transform: translate(20px, 20px) scale(1.05); }
+
+        .hero-wrapper {
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+          background:
+            radial-gradient(circle at top left, #edf5e8 0%, transparent 40%),
+            radial-gradient(circle at bottom right, #f7f0c9 0%, transparent 30%),
+            ${bgPrimary};
         }
-        .hero-inner {
+
+        .hero-section {
+          width: 100%;
+          max-width: 1200px;
+          margin: 0 auto;
+          min-height: 88vh;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 80px;
-          max-width: 1280px;
-          width: 100%;
-        }
-        .hero-text {
-          flex: 0 0 50%;
-        }
-        .hero-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 18px;
-          background: rgba(26, 107, 53, 0.1);
-          border: 1.5px solid rgba(26, 107, 53, 0.3);
-          border-radius: 50px;
-          font-family: ${font};
-          font-size: 13px;
-          font-weight: 600;
-          color: ${green};
-          margin-bottom: 28px;
-          animation: floatBadge 3s ease-in-out infinite;
-        }
-        .hero-badge svg { width: 16px; height: 16px; fill: ${green}; }
-        .hero-title {
-          font-family: ${font};
-          font-size: clamp(38px, 5vw, 56px);
-          font-weight: 800;
-          line-height: 1.15;
-          color: #1a1a1a;
-          margin: 0 0 18px 0;
-          letter-spacing: -1px;
-        }
-        .hero-title .highlight {
-          background: linear-gradient(135deg, ${green} 0%, ${gold} 50%, ${greenLight} 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .hero-desc {
-          font-family: ${font};
-          font-size: 19px;
-          line-height: 1.75;
-          color: #4a4a4a;
-          margin: 0 0 32px 0;
-        }
-        .hero-cta {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          margin-bottom: 48px;
-        }
-        .hero-btn-primary {
-          font-family: ${font};
-          font-size: 15px;
-          font-weight: 700;
-          padding: 14px 32px;
-          background: linear-gradient(135deg, ${green} 0%, ${greenLight} 100%);
-          color: white;
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.3s;
-          box-shadow: 0 4px 16px rgba(26, 107, 53, 0.3);
-        }
-        .hero-btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(26, 107, 53, 0.4);
-        }
-        .hero-btn-secondary {
-          font-family: ${font};
-          font-size: 15px;
-          font-weight: 600;
-          padding: 14px 32px;
-          background: transparent;
-          color: ${green};
-          border: 2px solid ${green};
-          border-radius: 12px;
-          cursor: pointer;
-          text-decoration: none;
-          transition: all 0.3s;
-        }
-        .hero-btn-secondary:hover {
-          background: rgba(26, 107, 53, 0.08);
-        }
-        .hero-stats-row {
-          display: flex;
-          gap: 40px;
-        }
-        .hero-stat-item {
-          display: flex;
-          flex-direction: column;
-        }
-        .hero-stat-num {
-          font-family: ${font};
-          font-size: 32px;
-          font-weight: 800;
-          color: ${green};
-        }
-        .hero-stat-label {
-          font-family: ${font};
-          font-size: 13px;
-          color: #6b6b6b;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-top: 2px;
-        }
-        .hero-mockup {
-          flex: 0 0 48%;
+          gap: 64px;
+          padding: 5.5rem 1.5rem 4.5rem;
           position: relative;
+          z-index: 2;
         }
-        .hero-mockup-frame {
-          background: white;
-          border-radius: 20px;
-          padding: 24px;
-          box-shadow:
-            0 30px 80px rgba(26, 107, 53, 0.15),
-            0 8px 24px rgba(26, 107, 53, 0.1);
-          border: 1px solid rgba(26, 107, 53, 0.12);
-          transform: perspective(800px) rotateY(-6deg);
-          transition: transform 0.5s ease;
+
+        @media (max-width: 900px) {
+          .hero-section {
+            flex-direction: column-reverse;
+            text-align: center;
+            gap: 2.5rem;
+            min-height: auto;
+            padding: 4.5rem 1.25rem 3.5rem;
+          }
         }
-        .hero-mockup-frame:hover {
-          transform: perspective(800px) rotateY(0deg);
+
+        /* LEFT */
+
+        .hero-contents {
+          flex: 1 1 560px;
+          max-width: 620px;
         }
-        .mockup-header {
-          display: flex;
+
+        .hero-eyebrow {
+          display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid rgba(26, 107, 53, 0.1);
-          margin-bottom: 16px;
+          padding: 7px 14px;
+          border-radius: 999px;
+          background: rgba(63, 71, 57, 0.06);
+          color: var(--accent);
+          font-size: 0.78rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-bottom: 1.1rem;
+          font-family: "Open Sans", sans-serif;
         }
-        .mockup-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
+
+        .hero-title {
+          font-family: "Actor", sans-serif;
+          font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+          line-height: 1.12;
+          font-weight: 700;
+          color: ${dark};
+          margin-bottom: 0.9rem;
         }
-        .mockup-dot.red { background: #ff5f57; }
-        .mockup-dot.yellow { background: #ffbd2e; }
-        .mockup-dot.green { background: #28c840; }
-        .mockup-title {
-          flex: 1;
-          text-align: center;
-          font-family: ${font};
-          font-size: 12px;
-          color: #888;
+
+        .hero-highlight {
+          background: linear-gradient(135deg, var(--accent), var(--secondary));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
         }
-        .mockup-content {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+
+        .hero-subText {
+          font-family: "Open Sans", sans-serif;
+          font-size: 1rem;
+          line-height: 1.8;
+          color: var(--text-muted);
+          margin-bottom: 1.9rem;
+          max-width: 56ch;
         }
-        .mockup-skeleton-line {
-          height: 10px;
-          border-radius: 5px;
-          background: #e8eee6;
+
+        @media (max-width: 900px) {
+          .hero-subText {
+            margin-inline: auto;
+          }
         }
-        .mockup-skeleton-line.short { width: 40%; }
-        .mockup-skeleton-line.med { width: 70%; }
-        .mockup-skeleton-line.long { width: 85%; }
-        .hero-blob {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(60px);
-          z-index: -1;
-          animation: blobMove 8s ease-in-out infinite;
-        }
-        .blob-1 {
-          width: 400px;
-          height: 400px;
-          background: rgba(26, 107, 53, 0.08);
-          top: -100px;
-          right: -100px;
-        }
-        .blob-2 {
-          width: 300px;
-          height: 300px;
-          background: rgba(139, 105, 20, 0.08);
-          bottom: 0;
-          left: -50px;
-        }
-        .floating-badge {
-          position: absolute;
-          top: -30px;
-          right: -20px;
-          background: white;
-          padding: 12px 20px;
-          border-radius: 14px;
-          box-shadow: 0 8px 32px rgba(26, 107, 53, 0.15);
-          border: 1px solid rgba(26, 107, 53, 0.1);
+
+        /* CTA */
+
+        .hero-cta-row {
           display: flex;
           align-items: center;
-          gap: 10px;
-          animation: floatBadge 4s ease-in-out infinite;
+          gap: 16px;
+          flex-wrap: wrap;
+          margin-bottom: 1.6rem;
         }
-        .floating-badge-icon {
-          width: 36px;
-          height: 36px;
-          background: linear-gradient(135deg, ${green} 0%, ${gold} 100%);
-          border-radius: 10px;
-          display: flex;
+
+        @media (max-width: 900px) {
+          .hero-cta-row {
+            justify-content: center;
+          }
+        }
+
+        .cta-primary {
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-        }
-        .floating-badge-text {
-          font-family: ${font};
-          font-size: 12px;
+          text-decoration: none;
+          padding: 0.9rem 1.6rem;
+          border-radius: 14px;
+          background: linear-gradient(135deg, ${green}, ${greenLight});
+          color: white;
+          font-family: "Open Sans", sans-serif;
+          font-size: 0.95rem;
           font-weight: 700;
-          color: #1a1a1a;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            filter 0.2s ease;
+          box-shadow:
+            0 12px 28px rgba(35, 75, 47, 0.22),
+            0 2px 8px rgba(0, 0, 0, 0.04);
         }
-        .floating-badge-text small {
+
+        .cta-primary:hover {
+          transform: translateY(-3px);
+          box-shadow:
+            0 20px 40px rgba(35, 75, 47, 0.28),
+            0 4px 12px rgba(0, 0, 0, 0.08);
+          filter: brightness(1.03);
+        }
+
+        /* STATS – không tràn */
+
+        .hero-stats {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          max-width: 360px;
+        }
+
+        @media (max-width: 900px) {
+          .hero-stats {
+            justify-content: center;
+            max-width: 100%;
+            margin-inline: auto;
+          }
+        }
+
+        .hero-stat-item {
+          flex: 0 1 110px;
+          padding: 0.9rem 1rem;
+          border-radius: 16px;
+          background: var(--card-bg);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow:
+            0 10px 26px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .hero-stat-value {
+          font-family: "Actor", sans-serif;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: ${dark};
+          margin-bottom: 2px;
+        }
+
+        .hero-stat-label {
+          font-family: "Open Sans", sans-serif;
+          font-size: 0.74rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #787878;
+        }
+
+        /* RIGHT – ảnh ngang, to hơn khoảng 1.5 lần */
+
+        .hero-image-container {
+          flex: 0 1 600px;      /* tăng từ 420 lên 600 (~1.4–1.5 lần) */
+          max-width: 600px;
+          width: 100%;
+          position: relative;
+        }
+
+        .hero-image-container::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          transform: scale(1.02);
+          background: linear-gradient(
+            135deg,
+            rgba(210, 185, 61, 0.22),
+            rgba(63, 71, 57, 0.18)
+          );
+          filter: blur(26px);
+          z-index: -1;
+        }
+
+        .hero-image {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          object-fit: cover;
           display: block;
-          font-weight: 400;
-          color: #888;
-          font-size: 10px;
-          margin-top: 2px;
+          border-radius: 20px;
+          box-shadow:
+            0 18px 40px rgba(0, 0, 0, 0.16),
+            0 8px 18px rgba(0, 0, 0, 0.06);
         }
-        @media (max-width: 968px) {
-          .hero-inner { flex-direction: column; }
-          .hero-text { flex: none; }
-          .hero-mockup { flex: none; }
+
+        @media (max-width: 900px) {
+          .hero-image-container {
+            flex: 1 1 auto;
+            max-width: 100%;
+          }
+          .hero-image {
+            aspect-ratio: 16 / 10;
+          }
+        }
+
+        .hero-badge {
+          position: absolute;
+          left: 18px;
+          bottom: 18px;
+          max-width: 260px;
+          padding: 12px 16px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.88);
+          backdrop-filter: blur(14px);
+          color: ${dark};
+          font-family: "Open Sans", sans-serif;
+          font-size: 0.84rem;
+          font-weight: 600;
+          line-height: 1.55;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        @media (max-width: 900px) {
+          .hero-badge {
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            max-width: unset;
+          }
         }
       `}</style>
-      <div className="hero-blob blob-1"></div>
-      <div className="hero-blob blob-2"></div>
-      <div className="hero-inner">
-        <div className="hero-text">
-          <div className="hero-badge">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/>
-            </svg>
-            Kết nối Cựu sinh viên VNUA
-          </div>
+
+      <div className="container hero-section">
+        {/* LEFT */}
+        <div className="hero-contents">
+          <div className="hero-eyebrow">Hệ Thống Khảo Sát Việc Làm Và Hỗ Trợ Kết Nối Doanh Nghiệp</div>
+
           <h1 className="hero-title">
-            Tìm cơ hội nghề nghiệp từ <span className="highlight">hơn 1,800 cựu sinh viên</span>
+            Kết nối{" "}
+            <span className="hero-highlight">cựu sinh viên</span>
+            <br />
+            & cơ hội nghề nghiệp
           </h1>
-          <p className="hero-desc">
-            Nền tảng kết nối tuyển dụng và chia sẻ kinh nghiệm dành riêng cho cộng đồng cựu sinh viên Học viện Nông nghiệp Việt Nam.
+
+          <p className="hero-subText">
+            Nền tảng khảo sát việc làm hiện đại dành cho cộng đồng cựu sinh viên
+            Học viện Nông nghiệp Việt Nam, giúp kết nối, chia sẻ dữ liệu nghề nghiệp
+            và mở rộng cơ hội tương lai.
           </p>
-          <div className="hero-cta">
-            <Link to="/register" className="hero-btn-primary">
+
+          <div className="hero-cta-row">
+            <Link to="/auth/register" className="cta-primary">
               Tham gia ngay
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14"></path>
-                <path d="M12 5l7 7-7 7"></path>
-              </svg>
             </Link>
-            <Link to="/login" className="hero-btn-secondary">Đăng nhập</Link>
           </div>
-          <div className="hero-stats-row">
+{/* 
+          <div className="hero-stats">
             <div className="hero-stat-item">
-              <div className="hero-stat-num">{alumni.toLocaleString()}</div>
+              <div className="hero-stat-value">
+                {alumni.toLocaleString()}+
+              </div>
               <div className="hero-stat-label">Cựu sinh viên</div>
             </div>
+
             <div className="hero-stat-item">
-              <div className="hero-stat-num">{pct}%</div>
+              <div className="hero-stat-value">{pct}%</div>
               <div className="hero-stat-label">Tỷ lệ việc làm</div>
             </div>
+
             <div className="hero-stat-item">
-              <div className="hero-stat-num">50+</div>
+              <div className="hero-stat-value">50+</div>
               <div className="hero-stat-label">Doanh nghiệp</div>
             </div>
-          </div>
+          </div> */}
         </div>
-        <div className="hero-mockup">
-          <div className="floating-badge">
-            <div className="floating-badge-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-              </svg>
-            </div>
-            <div className="floating-badge-text">
-              VNUA Alumni
-              <small>FITA - Career Connect</small>
-            </div>
-          </div>
-          <div className="hero-mockup-frame">
-            <div className="mockup-header">
-              <div className="mockup-dot red"></div>
-              <div className="mockup-dot yellow"></div>
-              <div className="mockup-dot green"></div>
-              <div className="mockup-title">st.alumni-career-connect</div>
-            </div>
-            <div className="mockup-content">
-              <div className="mockup-skeleton-line med" style={{ background: `linear-gradient(90deg, ${cream} 0%, rgba(26,107,53,0.08) 50%, ${cream} 100%)` }}></div>
-              <div className="mockup-skeleton-line long"></div>
-              <div className="mockup-skeleton-line" style={{ width: '90%' }}></div>
-              <div className="mockup-skeleton-line" style={{ width: '75%' }}></div>
-              <div className="mockup-skeleton-line short"></div>
-            </div>
-          </div>
-        </div>
+
+        {/* RIGHT */}
+        <article className="hero-image-container">
+          <img
+            className="hero-image"
+            src="https://xdcs.cdnchinhphu.vn/446259493575335936/2024/8/18/nn1-17239512376531343079339.jpg"
+            alt="Học viện Nông nghiệp Việt Nam"
+            loading="lazy"
+          />
+          {/* Badge nếu cần */}
+          {/* <div className="hero-badge">
+            Khảo sát việc làm & kết nối nghề nghiệp dành cho cộng đồng VNUA
+          </div> */}
+        </article>
       </div>
     </section>
   );

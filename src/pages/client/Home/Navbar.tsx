@@ -1,21 +1,15 @@
+// Navbar.tsx
+
 import { useState } from "react";
 import { useScrolled } from "../../../feature/home/hooks/index.ts";
 import { Link } from "react-router-dom";
 
-const font = "'Be Vietnam Pro', sans-serif";
-
-// VNUA color palette
-const green = "#1a6b35";
-const greenDark = "#14542a";
-const brown = "#7a5c1e";
-const blue = "#1b5299";
-
-const IconGradCap = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-  </svg>
-);
+const font = "'Open Sans', sans-serif";
+const fontActor = "'Actor', sans-serif";
+const green = "#1e4d2b";
+const greenLight = "#2d6a3f";
+const bgNav = "#fdfbf7";
+const borderSoft = "rgba(15, 23, 42, 0.08)";
 
 export function Navbar() {
   const scrolled = useScrolled();
@@ -24,165 +18,198 @@ export function Navbar() {
   return (
     <header
       style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.98)",
-        backdropFilter: "blur(16px)",
-        borderBottom: `1px solid ${scrolled ? "#d6e8da" : "#e8f0eb"}`,
-        boxShadow: scrolled ? "0 2px 20px rgba(26,107,53,0.08)" : "none",
-        transition: "all 0.3s ease",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: scrolled ? "rgba(253, 251, 247, 0.98)" : "rgba(253, 251, 247, 0.96)",
+        backdropFilter: "blur(14px)",
+        borderBottom: `1px solid ${borderSoft}`,
+        boxShadow: scrolled ? "0 10px 30px rgba(15, 23, 42, 0.15)" : "none",
+        transition: "all 0.25s ease",
       }}
     >
       <style>{`
         .nav-inner {
-          padding: 0 5%;
-          height: 68px;
-          max-width: 1280px;
+          padding: 0 1.5rem;          /* = hero padding 1.5rem */
+          height: 60px;
+          max-width: 1200px;          /* = hero max-width gần giống */
           margin: 0 auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          background: ${bgNav};
         }
-        .nav-links {
+
+        @media (max-width: 768px) {
+          .nav-inner {
+            padding: 0 1.25rem;       /* = hero mobile 1.25rem */
+          }
+        }
+
+        .nav-brand {
           display: flex;
-          gap: 36px;
-          font-family: ${font};
-          font-size: 14px;
-          font-weight: 500;
+          align-items: center;
+          gap: 10px;
         }
+
+        .nav-logo-img {
+          height: 34px;
+          width: auto;
+        }
+
+        .nav-logo-texts {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .nav-logo-title {
+          font-family: ${fontActor};
+          font-size: 20px;
+          color: #111827;
+          letter-spacing: 0.02em;
+          font-weight: 600;
+          line-height: 1.25;
+        }
+
+        .nav-main {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
         .nav-sso {
           font-family: ${font};
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
-          padding: 10px 24px;
-          border-radius: 8px;
+          padding: 8px 18px;
+          border-radius: 4px;
+          border: none;
           background: ${green};
-          color: white !important;
-          cursor: pointer;
-          letter-spacing: 0.01em;
-          transition: all 0.2s;
-          white-space: nowrap;
+          color: #ffffff;
           text-decoration: none;
-          display: inline-block;
-          box-shadow: 0 2px 8px rgba(26,107,53,0.25);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
         }
+
         .nav-sso:hover {
-          background: ${greenDark};
+          background: ${greenLight};
+          box-shadow: 0 8px 22px rgba(30, 77, 43, 0.28);
           transform: translateY(-1px);
-          box-shadow: 0 4px 16px rgba(26,107,53,0.35);
         }
+
         .nav-hamburger {
           display: none;
           flex-direction: column;
-          gap: 5px;
+          gap: 4px;
           cursor: pointer;
           padding: 4px;
           background: none;
           border: none;
         }
+
         .nav-hamburger span {
           display: block;
-          width: 22px;
+          width: 20px;
           height: 2px;
-          background: #2d5a3d;
-          border-radius: 2px;
-          transition: all 0.3s;
+          background: rgba(15, 23, 42, 0.85);
+          border-radius: 999px;
+          transition: transform 0.2s ease, opacity 0.2s ease;
         }
+
+        .nav-hamburger[data-open="true"] span:nth-child(1) {
+          transform: translateY(6px) rotate(45deg);
+        }
+        .nav-hamburger[data-open="true"] span:nth-child(2) {
+          opacity: 0;
+        }
+        .nav-hamburger[data-open="true"] span:nth-child(3) {
+          transform: translateY(-6px) rotate(-45deg);
+        }
+
         .nav-mobile {
           display: none;
           flex-direction: column;
-          padding: 12px 5% 20px;
-          border-top: 1px solid #e8f0eb;
-          gap: 4px;
-          background: white;
+          padding: 8px 1.5rem 14px;     /* khớp container */
+          border-top: 1px solid ${borderSoft};
+          background: rgba(253, 251, 247, 0.98);
         }
-        .nav-mobile a {
-          font-family: ${font};
-          font-size: 15px;
-          font-weight: 500;
-          color: #374151;
-          text-decoration: none;
-          padding: 10px 0;
-          border-bottom: 1px solid #f3f4f6;
-        }
+
         .nav-mobile-sso {
-          margin-top: 12px;
           font-family: ${font};
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
-          padding: 12px;
-          border-radius: 8px;
+          padding: 9px 0;
+          border-radius: 4px;
+          border: none;
           background: ${green};
-          color: white !important;
+          color: #ffffff;
           cursor: pointer;
           width: 100%;
           text-decoration: none;
-          display: block;
           text-align: center;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
         }
+
+        .nav-mobile-sso:hover {
+          background: ${greenLight};
+        }
+
         @media (max-width: 768px) {
-          .nav-links     { display: none; }
-          .nav-sso       { display: none; }
-          .nav-hamburger { display: flex; }
-          .nav-mobile[data-open="true"] { display: flex; }
+          .nav-sso {
+            display: none;
+          }
+          .nav-hamburger {
+            display: flex;
+          }
+          .nav-mobile[data-open="true"] {
+            display: flex;
+          }
         }
       `}</style>
 
       <div className="nav-inner">
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: green,
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <IconGradCap />
-          </div>
-          <div>
-            <div style={{ fontFamily: font, fontWeight: 800, fontSize: 15, color: "#1a2e1f", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
-              ST Alumni
-            </div>
-            <div style={{ fontFamily: font, fontWeight: 400, fontSize: 11, color: "#6b7280", letterSpacing: "0.02em", lineHeight: 1 }}>
-              VNUA Career Connect
-            </div>
+        <div className="nav-brand">
+          <img
+            src="https://vitc.edu.vn/Frond_end/images/logo_vnua-1.png"
+            alt="VNUA Logo"
+            className="nav-logo-img"
+          />
+          <div className="nav-logo-texts">
+            <span className="nav-logo-title">Hệ Thống Khảo Sát Việc Làm</span>
           </div>
         </div>
 
-        {/* Desktop links */}
-        <nav className="nav-links">
-          <a href="#features" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
-            Tính năng
-          </a>
-          <a href="#stats" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
-            Thống kê
-          </a>
-          <a href="#partners" style={{ color: "#4b5563", textDecoration: "none", transition: "color 0.2s" }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = green)}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#4b5563")}>
-            Doanh nghiệp
-          </a>
-        </nav>
+        <div className="nav-main">
+          <Link to="admin/dashboard" className="nav-sso">
+            Đăng nhập SSO
+          </Link>
 
-        {/* Desktop CTA */}
-        <Link to="admin/dashboard" className="nav-sso">
-          Đăng nhập ST SSO
-        </Link>
-
-        {/* Hamburger */}
-        <button className="nav-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Mở menu">
-          <span /><span /><span />
-        </button>
+          <button
+            className="nav-hamburger"
+            data-open={String(menuOpen)}
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Mở menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
       <div className="nav-mobile" data-open={String(menuOpen)}>
-        <a href="#features">Tính năng</a>
-        <a href="#stats">Thống kê</a>
-        <a href="#partners">Doanh nghiệp</a>
-        <Link to="admin/dashboard" className="nav-mobile-sso">Đăng nhập với ST SSO</Link>
+        <Link
+          to="admin/dashboard"
+          className="nav-mobile-sso"
+          onClick={() => setMenuOpen(false)}
+        >
+          Đăng nhập SSO
+        </Link>
       </div>
     </header>
   );
