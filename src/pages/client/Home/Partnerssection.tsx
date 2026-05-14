@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 
 const green = "#234b2f";
-const gold = "#c8a84b";
 
 export interface PartnerLogo {
   companyName?: string;
@@ -31,30 +30,6 @@ const PARTNERS_STYLES = `
     position: relative;
     overflow: hidden;
     padding: 110px 0;
-  }
-
-  #partners::before {
-    content: "";
-    position: absolute;
-    width: 1200px; height: 1200px;
-    left: -520px; top: -520px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(214,190,98,0.16) 0%, rgba(214,190,98,0.08) 24%, transparent 70%);
-    filter: blur(12px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  #partners::after {
-    content: "";
-    position: absolute;
-    width: 1400px; height: 1400px;
-    left: -680px; top: -620px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.24);
-    opacity: 0.7;
-    pointer-events: none;
-    z-index: 0;
   }
 
   .partners-inner {
@@ -117,12 +92,12 @@ const PARTNERS_STYLES = `
 
   .partners-carousel-outer::before {
     left: 0;
-    background: linear-gradient(to right, #f5f6f1, rgba(245,246,241,0));
+    background: linear-gradient(to right, #f5f8f1, rgba(245,248,241,0));
   }
 
   .partners-carousel-outer::after {
     right: 0;
-    background: linear-gradient(to left, #f5f3e8, rgba(245,243,232,0));
+    background: linear-gradient(to left, #f5f8f1, rgba(245,248,241,0));
   }
 
   .partners-track {
@@ -208,18 +183,8 @@ const PARTNERS_STYLES = `
 
 function ImageWithFallback({ src, alt }: { src?: string; alt: string }) {
   const [error, setError] = useState(false);
-
-  if (!src || error) {
-    return <span className="partner-name-fallback">{alt}</span>;
-  }
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      onError={() => setError(true)}
-    />
-  );
+  if (!src || error) return <span className="partner-name-fallback">{alt}</span>;
+  return <img src={src} alt={alt} onError={() => setError(true)} />;
 }
 
 function PartnerCard({ companyName, logoUrl }: { companyName: string; logoUrl?: string }) {
@@ -235,11 +200,7 @@ interface PartnersSectionProps {
 }
 
 export function PartnersSection({ partnerLogos }: PartnersSectionProps) {
-  const normalized = useMemo(
-    () => partnerLogos.map(normalize),
-    [partnerLogos]
-  );
-
+  const normalized = useMemo(() => partnerLogos.map(normalize), [partnerLogos]);
   const track = useMemo(
     () => [...normalized, ...normalized, ...normalized],
     [normalized]

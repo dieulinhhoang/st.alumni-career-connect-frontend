@@ -1,108 +1,36 @@
+// StatsSection.tsx
+
 import type { SurveyStats } from "../../../feature/home/type.ts";
-import {
-  useCountUp,
-  useInView,
-} from "../../../feature/home/hooks/index.ts";
+import { useCountUp, useInView } from "../../../feature/home/hooks/index.ts";
 
 const font = "'Open Sans', sans-serif";
 const fontActor = "'Actor', sans-serif";
-
 const green = "#234b2f";
 const gold = "#c8a84b";
-
 const dark = "#0f172a";
 
-export function StatsSection({
-  stats,
-}: {
-  stats: SurveyStats;
-}) {
-  // useInView trả về { ref, inView } — dùng đúng tên `inView`
+export function StatsSection({ stats }: { stats: SurveyStats }) {
   const { ref, inView } = useInView();
 
-  const alumni = useCountUp(
-    stats.totalRespondents ?? 0,
-    inView ? 0 : stats.totalRespondents ?? 0
-  );
-
-  const pct = useCountUp(
-    stats.overallEmploymentRate ?? 0,
-    inView ? 0 : stats.overallEmploymentRate ?? 0
-  );
-
-  const companies = useCountUp(
-    stats.partnerCompanies ?? 0,
-    inView ? 0 : stats.partnerCompanies ?? 0
-  );
-
-  const studying = useCountUp(
-    stats.stillStudying ?? 0,
-    inView ? 0 : stats.stillStudying ?? 0
-  );
+  const alumni    = useCountUp(stats.totalRespondents ?? 0,     inView ? 0 : stats.totalRespondents ?? 0);
+  const pct       = useCountUp(stats.overallEmploymentRate ?? 0, inView ? 0 : stats.overallEmploymentRate ?? 0);
+  const companies = useCountUp(stats.partnerCompanies ?? 0,     inView ? 0 : stats.partnerCompanies ?? 0);
+  const studying  = useCountUp(stats.stillStudying ?? 0,        inView ? 0 : stats.stillStudying ?? 0);
 
   return (
-    <section
-      id="stats"
-      ref={ref}
-    >
+    <section id="stats" ref={ref}>
       <style>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         #stats {
           position: relative;
           overflow: hidden;
           padding: 78px 1.5rem 92px;
-          background:
-            linear-gradient(
-              180deg,
-              #f5f7f2 0%,
-              #f6f6f2 36%,
-              #f5f3e8 100%
-            );
-        }
-
-        #stats::before {
-          content: "";
-          position: absolute;
-          width: 1200px;
-          height: 1200px;
-          right: -420px;
-          top: -380px;
-          border-radius: 50%;
-          pointer-events: none;
-          background:
-            radial-gradient(
-              circle,
-              rgba(214,190,98,0.16) 0%,
-              rgba(214,190,98,0.10) 22%,
-              rgba(214,190,98,0.05) 42%,
-              transparent 70%
-            );
-          filter: blur(10px);
-          z-index: 0;
-        }
-
-        #stats::after {
-          content: "";
-          position: absolute;
-          width: 1400px;
-          height: 1400px;
-          right: -520px;
-          top: -500px;
-          border-radius: 50%;
-          border: 2px solid rgba(255,255,255,0.26);
-          opacity: 0.75;
-          pointer-events: none;
-          z-index: 0;
         }
 
         .stats-shell {
-          position: relative;
-          z-index: 2;
-          width: 100%;
-          max-width: 1200px;
+          position: relative; z-index: 2;
+          width: 100%; max-width: 1200px;
           margin: 0 auto;
         }
 
@@ -115,9 +43,7 @@ export function StatsSection({
           margin-bottom: 38px;
         }
 
-        .stats-head-left {
-          max-width: 560px;
-        }
+        .stats-head-left { max-width: 560px; }
 
         .stats-kicker {
           display: inline-flex;
@@ -127,17 +53,15 @@ export function StatsSection({
         }
 
         .stats-kicker-dot {
-          width: 8px;
-          height: 8px;
+          width: 8px; height: 8px;
           border-radius: 999px;
-          background: linear-gradient(135deg, ${gold});
+          background: linear-gradient(135deg, ${gold}, #e0c96a);
           box-shadow: 0 0 12px rgba(200,168,75,0.4);
         }
 
         .stats-kicker-text {
           font-family: ${font};
-          font-size: 12px;
-          font-weight: 700;
+          font-size: 12px; font-weight: 700;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: #667085;
@@ -147,24 +71,21 @@ export function StatsSection({
           margin: 0 0 14px;
           font-family: ${fontActor};
           font-size: clamp(32px, 4vw, 48px);
-          line-height: 1.1;
-          font-weight: 700;
+          line-height: 1.1; font-weight: 700;
           letter-spacing: -0.02em;
           color: #111827;
         }
 
         .stats-sub {
           max-width: 58ch;
-          font-family: "Open Sans", sans-serif;
-          font-size: 1.02rem;
-          line-height: 1.9;
+          font-family: ${font};
+          font-size: 1.02rem; line-height: 1.9;
           color: #5f6470;
         }
 
         .stats-head-tag {
           display: inline-flex;
-          align-items: center;
-          gap: 10px;
+          align-items: center; gap: 10px;
           padding: 10px 18px;
           border-radius: 999px;
           background: linear-gradient(180deg, rgba(35,75,47,0.10), rgba(35,75,47,0.06));
@@ -172,14 +93,12 @@ export function StatsSection({
           border: 1px solid rgba(35,75,47,0.14);
           box-shadow: 0 4px 14px rgba(35,75,47,0.06);
           font-family: ${font};
-          font-size: 12px;
-          font-weight: 600;
+          font-size: 12px; font-weight: 600;
           color: ${green};
         }
 
         .stats-head-tag-dot {
-          width: 8px;
-          height: 8px;
+          width: 8px; height: 8px;
           border-radius: 999px;
           background: linear-gradient(135deg, #2f6841, #5b9b74);
           box-shadow: 0 0 10px rgba(47,104,65,0.35);
@@ -192,8 +111,7 @@ export function StatsSection({
         }
 
         .stats-card {
-          position: relative;
-          overflow: hidden;
+          position: relative; overflow: hidden;
           padding: 22px 22px 20px;
           border-radius: 24px;
           background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82));
@@ -203,16 +121,11 @@ export function StatsSection({
             0 10px 30px rgba(15,23,42,0.05),
             0 1px 2px rgba(15,23,42,0.04),
             inset 0 1px 0 rgba(255,255,255,0.8);
-          transition:
-            transform 0.24s ease,
-            box-shadow 0.24s ease,
-            border-color 0.24s ease;
+          transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
         }
 
         .stats-card::before {
-          content: "";
-          position: absolute;
-          inset: 0;
+          content: ""; position: absolute; inset: 0;
           background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent);
           pointer-events: none;
         }
@@ -220,56 +133,45 @@ export function StatsSection({
         .stats-card:hover {
           transform: translateY(-4px);
           border-color: rgba(200,168,75,0.28);
-          box-shadow:
-            0 18px 40px rgba(15,23,42,0.08),
-            0 4px 12px rgba(15,23,42,0.04);
+          box-shadow: 0 18px 40px rgba(15,23,42,0.08), 0 4px 12px rgba(15,23,42,0.04);
         }
 
         .stats-card-label {
           display: inline-block;
           margin-bottom: 10px;
           font-family: ${font};
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
+          font-size: 12px; font-weight: 700;
+          letter-spacing: 0.18em; text-transform: uppercase;
           color: #667085;
         }
 
         .stats-card-main {
-          display: flex;
-          align-items: baseline;
-          gap: 10px;
-          margin-bottom: 10px;
+          display: flex; align-items: baseline;
+          gap: 10px; margin-bottom: 10px;
         }
 
         .stats-card-value {
           font-family: ${fontActor};
-          font-size: 40px;
-          line-height: 1;
+          font-size: 40px; line-height: 1;
           color: ${dark};
         }
 
         .stats-card-unit {
           font-family: ${font};
-          font-size: 14px;
-          color: #475467;
+          font-size: 14px; color: #475467;
         }
 
         .stats-card-note {
           font-family: ${font};
-          font-size: 13px;
-          line-height: 1.7;
+          font-size: 13px; line-height: 1.7;
           color: #98a2b3;
         }
 
         @media (max-width: 768px) {
           #stats { padding: 56px 1rem 72px; }
-          #stats::before { width: 900px; height: 900px; right: -420px; top: -260px; }
-          #stats::after  { width: 1000px; height: 1000px; right: -480px; top: -320px; }
           .stats-head { align-items: flex-start; }
           .stats-title { font-size: 34px; }
-          .stats-card  { border-radius: 20px; }
+          .stats-card { border-radius: 20px; }
           .stats-card-value { font-size: 34px; }
         }
       `}</style>
@@ -286,11 +188,9 @@ export function StatsSection({
             </h2>
             <p className="stats-sub">
               Các con số bên dưới được rút ra từ dữ liệu khảo sát việc làm,
-              giúp Học viện và cựu sinh viên có thêm thông tin tham khảo
-              sau tốt nghiệp.
+              giúp Học viện và cựu sinh viên có thêm thông tin tham khảo sau tốt nghiệp.
             </p>
           </div>
-
           <div className="stats-head-tag">
             <span className="stats-head-tag-dot" />
             Dữ liệu cập nhật từ hệ thống khảo sát
