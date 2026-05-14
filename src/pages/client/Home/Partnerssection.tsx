@@ -31,7 +31,6 @@ const PARTNERS_STYLES = `
     position: relative;
     overflow: hidden;
     padding: 110px 0;
-    background: linear-gradient(180deg, #f5f7f2 0%, #f6f5ef 48%, #f5f3e8 100%);
   }
 
   #partners::before {
