@@ -184,7 +184,7 @@ export function StatsSection({ stats }: { stats: SurveyStats }) {
               <span className="stats-kicker-text">Số liệu tổng quan</span>
             </div>
             <h2 className="stats-title">
-              Thống kê từ kết quả khảo sát cựu sinh viên
+              Thống kê từ kết quả khảo sát 
             </h2>
             <p className="stats-sub">
               Số liệu bên dưới được rút ra từ dữ liệu khảo sát việc làm,
