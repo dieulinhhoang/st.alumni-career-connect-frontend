@@ -2,9 +2,7 @@ import { useSurveyStats, useEnterprises } from "../../../feature/home/hooks/inde
 import { Navbar }          from "./Navbar.tsx";
 import { HeroSection }     from "./Herosection";
 import { StatsSection }    from "./Statssection";
-import { FeaturesSection } from "./Featuressection";
 import { PartnersSection } from "./Partnerssection";
-import { CtaSection }      from "./Ctasection";
 import { Footer }          from "./Footer";
 
 export default function HomePage() {

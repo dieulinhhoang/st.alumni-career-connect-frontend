@@ -1,5 +1,3 @@
-// HeroSection.tsx
-
 import { Link } from "react-router-dom";
 import { useCountUp } from "../../../feature/home/hooks/index.ts";
 import type { SurveyStats } from "../../../feature/home/type.ts";
