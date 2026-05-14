@@ -184,10 +184,10 @@ export function StatsSection({ stats }: { stats: SurveyStats }) {
               <span className="stats-kicker-text">Số liệu tổng quan</span>
             </div>
             <h2 className="stats-title">
-              Thống kê nhanh từ kết quả khảo sát cựu sinh viên
+              Thống kê từ kết quả khảo sát cựu sinh viên
             </h2>
             <p className="stats-sub">
-              Các con số bên dưới được rút ra từ dữ liệu khảo sát việc làm,
+              Số liệu bên dưới được rút ra từ dữ liệu khảo sát việc làm,
               giúp Học viện và cựu sinh viên có thêm thông tin tham khảo sau tốt nghiệp.
             </p>
           </div>
