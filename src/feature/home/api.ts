@@ -7,12 +7,13 @@ import type {
   AlumniProfile,
 } from "./type.ts";
 
-//  Fake data 
 
 const FAKE_STATS: SurveyStats = {
   totalRespondents: 4218,
   overallEmploymentRate: 87,
   avgSalaryMillionVND: 14.2,
+  partnerCompanies: 50,
+  stillStudying: 480,
   byMajor: [
     { major: "Công nghệ thông tin",     majorCode: "CNTT", employmentRate: 87, avgSalaryMillionVND: 18.5, respondents: 620 },
     { major: "Nông nghiệp & Sinh học",  majorCode: "NN",   employmentRate: 74, avgSalaryMillionVND: 11.2, respondents: 980 },
@@ -37,12 +38,12 @@ const FAKE_STATS: SurveyStats = {
 };
 
 const FAKE_ENTERPRISES: Enterprise[] = [
-  { id: "1", name: "FPT Software",  logo: "🔷", industry: "Công nghệ thông tin",    openPositions: 42, verified: true  },
-  { id: "2", name: "Vingroup",      logo: "🟣", industry: "Tập đoàn đa ngành",      openPositions: 28, verified: true  },
-  { id: "3", name: "Agribank",      logo: "🟢", industry: "Ngân hàng & Tài chính",  openPositions: 15, verified: true  },
-  { id: "4", name: "VinFast",       logo: "🔵", industry: "Công nghiệp & Sản xuất", openPositions: 33, verified: true  },
-  { id: "5", name: "Masan Group",   logo: "🔴", industry: "Nông nghiệp & FMCG",     openPositions: 19, verified: true  },
-  { id: "6", name: "KPMG Vietnam",  logo: "🟡", industry: "Kiểm toán & Tư vấn",     openPositions: 11, verified: false },
+  { id: "1", name: "FPT Software",  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/1280px-FPT_logo_2010.svg.png", industry: "Công nghệ thông tin",    openPositions: 42, verified: true  },
+  { id: "2", name: "Vingroup",      logo: "https://vingroup.net/assets/images/share-social.jpg",                                                         industry: "Tập đoàn đa ngành",      openPositions: 28, verified: true  },
+  { id: "3", name: "Agribank",      logo: "https://cdn.haitrieu.com/wp-content/uploads/2022/01/Icon-Agribank.png",                                        industry: "Ngân hàng & Tài chính",  openPositions: 15, verified: true  },
+  { id: "4", name: "VinFast",       logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVae0sjncjR0f-zSmNzKViNghRPqCErp641w&s",               industry: "Công nghiệp & Sản xuất", openPositions: 33, verified: true  },
+  { id: "5", name: "Masan Group",   logo: "https://brandlogos.net/wp-content/uploads/2021/12/masan_group-brandlogo.net_.png",                             industry: "Nông nghiệp & FMCG",     openPositions: 19, verified: true  },
+  { id: "6", name: "KPMG Vietnam",  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/KPMG.svg/3840px-KPMG.svg.png",                       industry: "Kiểm toán & Tư vấn",     openPositions: 11, verified: false },
 ];
 
 const FAKE_JOBS: JobPosting[] = [
@@ -75,7 +76,7 @@ function paginate<T>(items: T[], page: number, pageSize: number): PaginatedRespo
   return { success: true, message: "OK", data: items.slice(start, start + pageSize), total: items.length, page, pageSize };
 }
 
-//  APIs (luôn dùng fake data) 
+//  APIs 
 
 export const statsApi = {
   getOverall: () => Promise.resolve(ok(FAKE_STATS)),
@@ -86,9 +87,9 @@ export const statsApi = {
 };
 
 export const enterpriseApi = {
-  list:     (page = 1, pageSize = 6) => Promise.resolve(paginate(FAKE_ENTERPRISES, page, pageSize)),
-  getById:  (id: string)             => Promise.resolve(ok(FAKE_ENTERPRISES.find((e) => e.id === id)!)),
-  getJobs:  (enterpriseId: string)   => Promise.resolve(ok(FAKE_JOBS.filter((j) => j.enterpriseId === enterpriseId))),
+  list:    (page = 1, pageSize = 6) => Promise.resolve(paginate(FAKE_ENTERPRISES, page, pageSize)),
+  getById: (id: string)             => Promise.resolve(ok(FAKE_ENTERPRISES.find((e) => e.id === id)!)),
+  getJobs: (enterpriseId: string)   => Promise.resolve(ok(FAKE_JOBS.filter((j) => j.enterpriseId === enterpriseId))),
 };
 
 export const jobsApi = {
@@ -102,9 +103,9 @@ export const jobsApi = {
 };
 
 export const alumniApi = {
-  getProfile:    (studentCode: string)                          =>
+  getProfile:    (studentCode: string) =>
     Promise.resolve(ok(FAKE_ALUMNI.find((a) => a.studentCode === studentCode)!)),
-  search:        (query: string)                                =>
+  search:        (query: string) =>
     Promise.resolve(ok(FAKE_ALUMNI.filter((a) => a.fullName.toLowerCase().includes(query.toLowerCase())))),
   updateProfile: (studentCode: string, data: Partial<AlumniProfile>) =>
     Promise.resolve(ok({ ...FAKE_ALUMNI.find((a) => a.studentCode === studentCode)!, ...data })),

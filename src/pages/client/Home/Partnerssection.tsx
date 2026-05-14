@@ -1,110 +1,247 @@
-import { useInView } from "../../../feature/home/hooks/index.ts";
-import type { Enterprise } from "../../../feature/home/type.ts";
+import React, { useMemo, useState } from "react";
 
-const font = "'Be Vietnam Pro', sans-serif";
-const purple = "#7c3aed";
-const purpleLight = "#ede9fe";
+const green = "#234b2f";
 
-const AVATAR_COLORS = [
-  { bg: "#ede9fe", color: "#7c3aed" },
-  { bg: "#dbeafe", color: "#2563eb" },
-  { bg: "#dcfce7", color: "#16a34a" },
-  { bg: "#fef3c7", color: "#d97706" },
-  { bg: "#fce7f3", color: "#db2777" },
-  { bg: "#e0f2fe", color: "#0284c7" },
-];
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
+export interface PartnerLogo {
+  companyName?: string;
+  name?: string;
+  logoUrl?: string;
+  logo?: string;
+  [key: string]: any;
 }
 
-function getAvatarColor(id: string) {
-  const index = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
+function isUrl(s?: string) {
+  if (!s) return false;
+  return s.startsWith("http") || s.startsWith("/");
 }
 
-export function PartnersSection({ enterprises }: { enterprises: Enterprise[] }) {
-  const { ref, visible } = useInView();
+function normalize(p: PartnerLogo) {
+  const logoUrl = isUrl(p.logo) ? p.logo : isUrl(p.logoUrl) ? p.logoUrl : undefined;
+  return {
+    companyName: p.companyName ?? p.name ?? "Partner",
+    logoUrl,
+  };
+}
+
+const PARTNERS_STYLES = `
+  * { box-sizing: border-box; }
+
+  #partners {
+    position: relative;
+    overflow: hidden;
+    padding: 110px 0;
+  }
+
+  .partners-inner {
+    position: relative; z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .partners-header {
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    margin-bottom: 58px;
+  }
+
+  .partners-eyebrow {
+    display: inline-flex; align-items: center;
+    gap: 12px; margin-bottom: 18px;
+  }
+
+  .partners-eyebrow-dot {
+    width: 10px; height: 10px;
+    border-radius: 999px;
+    background: ${green};
+    box-shadow: 0 0 12px rgba(200,168,75,0.35);
+  }
+
+  .partners-eyebrow-text {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: #667085;
+  }
+
+  .partners-title {
+    margin: 0 0 14px;
+    font-family: 'Actor', sans-serif;
+    font-size: clamp(34px, 4vw, 50px);
+    line-height: 1.08; letter-spacing: -0.04em;
+    color: #0f172a;
+  }
+
+  .partners-subtitle {
+    max-width: 640px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.98rem; line-height: 1.85;
+    color: #667085;
+  }
+
+  .partners-carousel-outer {
+    position: relative; overflow: hidden; padding: 12px 0;
+  }
+
+  .partners-carousel-outer::before,
+  .partners-carousel-outer::after {
+    content: ""; position: absolute;
+    top: 0; bottom: 0; width: 140px;
+    z-index: 3; pointer-events: none;
+  }
+
+  .partners-carousel-outer::before {
+    left: 0;
+    background: linear-gradient(to right, #f5f8f1, rgba(245,248,241,0));
+  }
+
+  .partners-carousel-outer::after {
+    right: 0;
+    background: linear-gradient(to left, #f5f8f1, rgba(245,248,241,0));
+  }
+
+  .partners-track {
+    display: flex; align-items: center;
+    width: max-content;
+    animation: partners-marquee 36s linear infinite;
+  }
+
+  .partners-carousel-outer:hover .partners-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes partners-marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-33.333%); }
+  }
+
+  .partner-card {
+    position: relative; overflow: hidden;
+    flex: 0 0 auto;
+    width: 270px; height: 150px;
+    margin-right: 24px;
+    border-radius: 32px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90));
+    border: 1px solid rgba(255,255,255,0.9);
+    backdrop-filter: blur(18px);
+    box-shadow:
+      0 12px 40px rgba(15,23,42,0.05),
+      0 2px 6px rgba(15,23,42,0.03),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  }
+
+  .partner-card::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.36), transparent);
+    pointer-events: none;
+  }
+
+  .partner-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(200,168,75,0.24);
+    box-shadow: 0 24px 50px rgba(15,23,42,0.08), 0 8px 20px rgba(15,23,42,0.04);
+  }
+
+  .partner-card img {
+    max-width: 100%; max-height: 72px;
+    object-fit: contain;
+    filter: grayscale(0.05) opacity(0.95);
+    transition: transform 0.28s ease, filter 0.28s ease;
+  }
+
+  .partner-card:hover img {
+    transform: scale(1.05);
+    filter: grayscale(0) opacity(1);
+  }
+
+  .partner-name-fallback {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: #243444; text-align: center;
+    line-height: 1.3;
+  }
+
+  .partners-empty {
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #98a2b3;
+    padding: 32px 0;
+  }
+
+  @media (max-width: 768px) {
+    #partners { padding: 84px 0; }
+    .partners-title { font-size: 40px; }
+    .partner-card { width: 220px; height: 126px; border-radius: 24px; padding: 22px; }
+    .partner-card img { max-height: 58px; }
+  }
+`;
+
+function ImageWithFallback({ src, alt }: { src?: string; alt: string }) {
+  const [error, setError] = useState(false);
+  if (!src || error) return <span className="partner-name-fallback">{alt}</span>;
+  return <img src={src} alt={alt} onError={() => setError(true)} />;
+}
+
+function PartnerCard({ companyName, logoUrl }: { companyName: string; logoUrl?: string }) {
+  return (
+    <div className="partner-card" aria-label={companyName}>
+      <ImageWithFallback src={logoUrl} alt={companyName} />
+    </div>
+  );
+}
+
+interface PartnersSectionProps {
+  partnerLogos: PartnerLogo[];
+}
+
+export function PartnersSection({ partnerLogos }: PartnersSectionProps) {
+  const normalized = useMemo(() => partnerLogos.map(normalize), [partnerLogos]);
+  const track = useMemo(
+    () => [...normalized, ...normalized, ...normalized],
+    [normalized]
+  );
 
   return (
-    <section ref={ref} style={{ background: "#faf5ff", padding: "80px 5%" }}>
-      <style>{`
-        .partners-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-        }
-        @media (max-width: 900px) {
-          .partners-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 480px) {
-          .partners-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: purpleLight, color: purple, borderRadius: 100, padding: "6px 16px", fontSize: 13, fontWeight: 600, fontFamily: font, marginBottom: 16 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Mạng lưới tuyển dụng
+    <section id="partners" aria-label="Đối tác doanh nghiệp">
+      <style>{PARTNERS_STYLES}</style>
+
+      <div className="partners-inner">
+        <header className="partners-header">
+          <div className="partners-eyebrow">
+            <span className="partners-eyebrow-dot" />
+            <span className="partners-eyebrow-text">Doanh nghiệp đối tác</span>
           </div>
-          <h2 style={{ fontFamily: font, fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 800, color: "#1e1b4b", marginBottom: 16 }}>
-            Doanh nghiệp đối tác
-          </h2>
-          <p style={{ fontFamily: font, fontSize: "clamp(14px, 1.5vw, 17px)", color: "#6b7280", maxWidth: 520, margin: "0 auto", lineHeight: 1.7 }}>
-            Hơn 350 doanh nghiệp hàng đầu đang tìm kiếm nhân tài từ cộng đồng alumni VNUA
+          <h2 className="partners-title">Kết nối với doanh nghiệp hàng đầu</h2>
+          <p className="partners-subtitle">
+            Mạng lưới doanh nghiệp đồng hành cùng sinh viên trong hoạt động
+            tuyển dụng, thực tập và phát triển nghề nghiệp.
           </p>
-        </div>
+        </header>
 
-        <div className="partners-grid">
-          {enterprises.map((p, i) => {
-            const avatar = getAvatarColor(p.id);
-            return (
-              <div
-                key={p.id}
-                style={{
-                  background: "white", borderRadius: 16, padding: 24,
-                  border: "1px solid #e5e7eb", cursor: "pointer",
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(20px)",
-                  transition: `opacity 0.5s ${i * 0.08}s, transform 0.5s ${i * 0.08}s, box-shadow 0.2s`,
-                  display: "flex", alignItems: "center", gap: 16,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(124,58,237,0.12)"; e.currentTarget.style.borderColor = "#c4b5fd"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
-              >
-                {/* Avatar */}
-                <div style={{
-                  width: 52, height: 52, borderRadius: 12,
-                  background: avatar.bg, color: avatar.color,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: font, fontWeight: 800, fontSize: 16, flexShrink: 0,
-                  letterSpacing: "0.02em",
-                }}>
-                  {getInitials(p.name)}
-                </div>
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: font, fontWeight: 700, fontSize: 15, color: "#1e1b4b", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {p.name}
-                  </div>
-                  <div style={{ fontFamily: font, fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>
-                    {p.industry}
-                  </div>
-                  <span style={{ background: purpleLight, color: purple, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6, fontFamily: font }}>
-                    {p.openPositions} vị trí đang tuyển
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {normalized.length === 0 ? (
+          <p className="partners-empty">Chưa có dữ liệu doanh nghiệp đối tác.</p>
+        ) : (
+          <div
+            className="partners-carousel-outer"
+            role="region"
+            aria-label="Danh sách logo đối tác chạy ngang"
+          >
+            <div className="partners-track">
+              {track.map((p, idx) => (
+                <PartnerCard
+                  key={`${p.companyName}-${idx}`}
+                  companyName={p.companyName}
+                  logoUrl={p.logoUrl}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

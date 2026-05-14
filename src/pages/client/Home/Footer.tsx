@@ -1,84 +1,102 @@
-const font = "'Be Vietnam Pro', sans-serif";
-const purple = "#7c3aed";
-const purpleDark = "#4f46e5";
-
-const COLS = [
-  { title: "Hỗ trợ", items: ["Trung tâm hỗ trợ", "Liên hệ", "Điều khoản", "Chính sách bảo mật"] },
-];
-
-const IconGradCap = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-  </svg>
-);
+const font = "'DM Sans', sans-serif";
 
 export function Footer() {
   return (
-    <footer style={{ background: "#0f0d1a", padding: "60px 5% 32px", color: "#9ca3af" }}>
+    <footer className="ft">
       <style>{`
-        .footer-grid {
-          display: grid;
-          grid-template-columns: 2fr 1fr;
-          gap: 48px;
-          margin-bottom: 48px;
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .ft {
+          font-family: ${font};
+          background: #fdfbf7;
         }
-        .footer-bottom {
-          border-top: 1px solid rgba(255,255,255,0.08);
-          padding-top: 24px;
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
+
+        .ft-strips {
+          display: flex;
+          flex-direction: column;
+        }
+        .ft-strip-gold  { height: 5px; background: #f0b90b; }
+        .ft-strip-brown { height: 5px; background: #7a4e1d; }
+        .ft-strip-green { height: 5px; background: #0c6b37; }
+
+        .ft-body {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 40px 32px 32px;
+        }
+
+        .ft-logo-row {
+          display: flex;
           align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
         }
-        @media (max-width: 768px) {
-          .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-          .footer-bottom { grid-template-columns: 1fr; justify-items: center; gap: 8px; }
+        .ft-logo-img {
+          width: 72px;
+          height: 72px;
+          object-fit: contain;
+        }
+        .ft-logo-abbr {
+          font-size: 20px;
+          font-weight: 700;
+          color: #0c6b37;
+          line-height: 1;
+          letter-spacing: -0.03em;
+        }
+        .ft-logo-full {
+          font-size: 13px;
+          color: #333;
+          line-height: 1.45;
+          margin-top: 3px;
+        }
+
+        .ft-info {
+          font-size: 14px;
+          color: #444;
+          line-height: 1.9;
+          margin-bottom: 20px;
+        }
+
+        .ft-bottom-row {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .ft-copy {
+          font-size: 13.5px;
+          color: #444;
+        }
+
+        @media (max-width: 600px) {
+          .ft-body { padding: 28px 16px 24px; }
+          .ft-logo-abbr { font-size: 16px; }
         }
       `}</style>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div className="footer-grid">
-          {/* Brand */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${purple}, ${purpleDark})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <IconGradCap />
-              </div>
-              <span style={{ fontFamily: font, fontWeight: 700, fontSize: 18, color: "white" }}>ST Alumni</span>
-            </div>
-            <p style={{ fontFamily: font, fontSize: 14, lineHeight: 1.7, maxWidth: 320 }}>
-              Nền tảng khảo sát cựu sinh viên và kết nối doanh nghiệp của Học viện Nông nghiệp Việt Nam.
-            </p>
-          </div>
+      <div className="ft-strips">
+        <div className="ft-strip-gold" />
+        <div className="ft-strip-brown" />
+        <div className="ft-strip-green" />
+      </div>
 
-          {/* Links */}
-          <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
-            {COLS.map((col) => (
-              <div key={col.title}>
-                <div style={{ fontFamily: font, fontWeight: 700, fontSize: 14, color: "white", marginBottom: 16 }}>
-                  {col.title}
-                </div>
-                {col.items.map((item) => (
-                  <div
-                    key={item}
-                    style={{ fontFamily: font, fontSize: 14, color: "#9ca3af", marginBottom: 10, cursor: "pointer", transition: "color 0.2s" }}
-                    onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#c4b5fd")}
-                    onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#9ca3af")}
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            ))}
+      <div className="ft-body">
+        <div className="ft-logo-row">
+          <img src="https://vitc.edu.vn/Frond_end/images/logo_vnua-1.png" alt="VNUA Logo" className="ft-logo-img" />
+          <div>
+            <div className="ft-logo-abbr">Hệ Thống Khảo Sát Việc Làm Và Hỗ Trợ Kết Nối Doanh Nghiệp</div>
+            <div className="ft-logo-full">Học viện Nông nghiệp Việt Nam</div>
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <div />
-          <div style={{ fontFamily: font, fontSize: 13, color: "#6b7280", textAlign: "center", whiteSpace: "nowrap" }}>
-            © 2026 ST TEAM
-          </div>
-          <div />
+        <div className="ft-info">
+          <div>Địa chỉ: 236 phố Ngô Xuân Quảng, xã Gia Lâm, thành phố Hà Nội.</div>
+          <div>Điện thoại: 84.024.62617586</div>
+        </div>
+
+        <div className="ft-bottom-row">
+          <span className="ft-copy">Copyright © 2026 ST TEAM – VNUA. All rights reserved.</span>
         </div>
       </div>
     </footer>
