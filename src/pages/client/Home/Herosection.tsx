@@ -293,7 +293,7 @@ export function HeroSection({ stats }: { stats: SurveyStats }) {
           </p>
 
           <div className="hero-cta-row">
-            <Link to="/auth/register" className="cta-primary">
+            <Link to="" className="cta-primary">
               Tham gia ngay
             </Link>
           </div>
