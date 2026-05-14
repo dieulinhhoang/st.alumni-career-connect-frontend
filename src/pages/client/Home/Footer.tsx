@@ -83,7 +83,7 @@ export function Footer() {
 
       <div className="ft-body">
         <div className="ft-logo-row">
-          <img  src="https://xdcs.cdnchinhphu.vn/446259493575335936/2024/8/18/nn1-17239512376531343079339.jpg" alt="VNUA Logo" className="ft-logo-img" />
+          <img src="https://vitc.edu.vn/Frond_end/images/logo_vnua-1.png" alt="VNUA Logo" className="ft-logo-img" />
           <div>
             <div className="ft-logo-abbr">Hệ Thống Khảo Sát Việc Làm Và Hỗ Trợ Kết Nối Doanh Nghiệp</div>
             <div className="ft-logo-full">Học viện Nông nghiệp Việt Nam</div>
