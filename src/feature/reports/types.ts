@@ -4,10 +4,12 @@ export type FilterState = {
   surveyId: string;
 };
 
+export type UserScope = 'school' | 'faculty' | 'major';
+
 export type CurrentUser = {
   id: string;
   name: string;
-  scope: 'school' | 'faculty' | 'major';
+  scope: UserScope;
   facultyName?: string;
   majorName?: string;
 };
