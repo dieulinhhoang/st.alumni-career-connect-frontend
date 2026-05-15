@@ -18,10 +18,10 @@ function loadDraft(): Form | null {
   } catch { return null }
 }
 function saveDraft(forms: Form[]) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(forms)) } catch {}
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(forms)) } catch { }
 }
 function clearDraft() {
-  try { localStorage.removeItem(DRAFT_KEY) } catch {}
+  try { localStorage.removeItem(DRAFT_KEY) } catch { }
 }
 
 //  ThemePicker modal 
@@ -108,12 +108,12 @@ function makeBlankForm(): Form {
 type ViewType = 'list' | 'builder' | 'ai' | 'preview'
 
 export default function SurveyPage() {
-  const [forms,       setForms]       = useState<Form[]>(MOCK_FORMS)
-  const [view,        setView]        = useState<ViewType>('list')
-  const [activeForm,  setActiveForm]  = useState<Form | null>(null)
-  const [deleteTarget,setDeleteTarget]= useState<Form | undefined>(undefined)
+  const [forms, setForms] = useState<Form[]>(MOCK_FORMS)
+  const [view, setView] = useState<ViewType>('list')
+  const [activeForm, setActiveForm] = useState<Form | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Form | undefined>(undefined)
   const [pendingThemeForm, setPendingThemeForm] = useState<Form | null>(null)
-  const [draftAvailable, setDraftAvailable]     = useState<Form[] | null>(loadDraft)
+  const [draftAvailable, setDraftAvailable] = useState<Form[] | null>(loadDraft)
   const hasUserEdited = useRef(false)
 
   // Autosave with debounce + immediate save on tab close
@@ -173,8 +173,8 @@ export default function SurveyPage() {
     setPendingThemeForm(null)
   }
 
-  const handleDelete   = (id: number) => setDeleteTarget(forms.find((f) => f.id === id))
-  const confirmDelete  = () => {
+  const handleDelete = (id: number) => setDeleteTarget(forms.find((f) => f.id === id))
+  const confirmDelete = () => {
     if (deleteTarget?.id != null) {
       hasUserEdited.current = true
       setForms((prev) => prev.filter((f) => f.id !== deleteTarget.id))
@@ -206,39 +206,43 @@ export default function SurveyPage() {
   )
 
   return (
+
     <AdminLayout>
-      <ListView
-        forms={forms}
-        onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
-        onAI={() => setView('ai')}
-        onEdit={(f) => { setActiveForm(f); setView('builder') }}
-        onPreview={(f) => { setActiveForm(f); setView('preview') }}
-        onDup={handleDup}
-        onDelete={handleDelete}
-      />
+      <div className="stats-page">
 
-      {/* Theme picker overlay (after AI generation) */}
-      {pendingThemeForm && (
-        <ThemePicker
-          formName={pendingThemeForm.name}
-          currentThemeId={pendingThemeForm.themeId ?? 'blue'}
-          onSelect={handleThemeSelected}
-          onSkip={handleThemeSkip}
+        <ListView
+          forms={forms}
+          onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
+          onAI={() => setView('ai')}
+          onEdit={(f) => { setActiveForm(f); setView('builder') }}
+          onPreview={(f) => { setActiveForm(f); setView('preview') }}
+          onDup={handleDup}
+          onDelete={handleDelete}
         />
-      )}
 
-      {/* Delete confirmation */}
-      {deleteTarget && (
-        <DeleteModal form={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(undefined)} />
-      )}
+        {/* Theme picker overlay (after AI generation) */}
+        {pendingThemeForm && (
+          <ThemePicker
+            formName={pendingThemeForm.name}
+            currentThemeId={pendingThemeForm.themeId ?? 'blue'}
+            onSelect={handleThemeSelected}
+            onSkip={handleThemeSkip}
+          />
+        )}
 
-      {/* Draft restore banner */}
-      {draftAvailable && (
-        <DraftBanner
-          onRestore={() => { setForms(draftAvailable as any); setDraftAvailable(null) }}
-          onDiscard={() => { clearDraft(); setDraftAvailable(null) }}
-        />
-      )}
+        {/* Delete confirmation */}
+        {deleteTarget && (
+          <DeleteModal form={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(undefined)} />
+        )}
+
+        {/* Draft restore banner */}
+        {draftAvailable && (
+          <DraftBanner
+            onRestore={() => { setForms(draftAvailable as any); setDraftAvailable(null) }}
+            onDiscard={() => { clearDraft(); setDraftAvailable(null) }}
+          />
+        )}
+      </div>
     </AdminLayout>
   )
 }

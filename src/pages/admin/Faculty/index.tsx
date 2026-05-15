@@ -27,6 +27,8 @@ export default function FacultyListPage() {
 
   return (
     <AdminLayout>
+            <div className="stats-page">
+
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
@@ -129,6 +131,7 @@ export default function FacultyListPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </AdminLayout>
   );

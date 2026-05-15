@@ -169,6 +169,7 @@ const UserManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout >
+        <div className="stats-page">
         <UserListView
           query={query}
           setQuery={setQuery}
@@ -218,6 +219,7 @@ const UserManagement: React.FC = () => {
           onCancel={() => setIsChangePasswordOpen(false)}
           confirmLoading={changeUserPassword.isPending}
         />
+        </div>
       </AdminLayout>
     </>
   )

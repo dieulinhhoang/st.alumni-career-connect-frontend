@@ -14,11 +14,11 @@ import { useNavigate } from 'react-router-dom';
 import { useBatches } from '../../../feature/alumni/hooks/useBatches';
 import type { SurveyBatch } from '../../../feature/alumni/types';
 import { STATUS_CFG } from '../../../feature/alumni/constants';
- import { PctBadge } from './components/PctBadge';
+import { PctBadge } from './components/PctBadge';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
- 
+
 const { Text } = Typography;
 
 const useMenuItems = (
@@ -42,9 +42,9 @@ const useMenuItems = (
     { type: 'divider' },
     ...(r.status === 'draft'
       ? [{
-          key: 'edit', icon: <EditOutlined style={{ color: '#1D9E75' }} />, label: 'Chỉnh sửa',
-          onClick: () => navigate(`/admin/alumni/batches/${r.id}/edit-form`),
-        }]
+        key: 'edit', icon: <EditOutlined style={{ color: '#1D9E75' }} />, label: 'Chỉnh sửa',
+        onClick: () => navigate(`/admin/alumni/batches/${r.id}/edit-form`),
+      }]
       : []),
     {
       key: 'delete',
@@ -59,8 +59,8 @@ const useMenuItems = (
 export const BatchList: React.FC = () => {
   const { batches, loading, deleteBatch } = useBatches();
   const navigate = useNavigate();
-  const [search,    setSearch]    = useState('');
-  const [status,    setStatus]    = useState('all');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatch | null>(null);
 
   const getMenuItems = useMenuItems(navigate, deleteBatch);
@@ -133,48 +133,51 @@ export const BatchList: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div style={{ padding: 24 }}>
-        {/* Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Space>
-            <Input
-              placeholder="Tìm kiếm theo tiêu đề..." allowClear
-              value={search} onChange={e => setSearch(e.target.value)}
-              style={{ width: 260, borderRadius: 6 }}
-            />
-            <Select value={status} onChange={setStatus} style={{ width: 160 }}>
-              <Select.Option value="all">Tất cả trạng thái</Select.Option>
-              <Select.Option value="active">Hoạt động</Select.Option>
-              <Select.Option value="ended">Đã kết thúc</Select.Option>
-              <Select.Option value="draft">Nháp</Select.Option>
-            </Select>
-          </Space>
-          <Button
-            type="primary" icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/alumni/batches/create')}
-            style={{ background: '#1D9E75', borderColor: '#1D9E75', borderRadius: 6, fontWeight: 500 }}
-          >
-            Tạo đợt mới
-          </Button>
+      <div className="stats-page">
+
+        <div style={{ padding: 24 }}>
+          {/* Toolbar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Space>
+              <Input
+                placeholder="Tìm kiếm theo tiêu đề..." allowClear
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ width: 260, borderRadius: 6 }}
+              />
+              <Select value={status} onChange={setStatus} style={{ width: 160 }}>
+                <Select.Option value="all">Tất cả trạng thái</Select.Option>
+                <Select.Option value="active">Hoạt động</Select.Option>
+                <Select.Option value="ended">Đã kết thúc</Select.Option>
+                <Select.Option value="draft">Nháp</Select.Option>
+              </Select>
+            </Space>
+            <Button
+              type="primary" icon={<PlusOutlined />}
+              onClick={() => navigate('/admin/alumni/batches/create')}
+              style={{ background: '#1D9E75', borderColor: '#1D9E75', borderRadius: 6, fontWeight: 500 }}
+            >
+              Tạo đợt mới
+            </Button>
+          </div>
+
+          <CustomTable
+            columns={columns}
+            data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
+            loading={loading}
+            rowKey="id"
+          />
         </div>
 
-        <CustomTable
-          columns={columns}
-          data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
-          loading={loading}
-          rowKey="id"
+        <SurveyLinkModal
+          batchId={linkBatch?.id}
+          batchTitle={linkBatch?.title ?? ''}
+          batchYear={linkBatch?.year}
+          batchGraduationPeriod={linkBatch?.graduationPeriod}
+          batchStatus={linkBatch?.status}
+          open={!!linkBatch}
+          onClose={() => setLinkBatch(null)}
         />
       </div>
-
-      <SurveyLinkModal
-        batchId={linkBatch?.id}
-        batchTitle={linkBatch?.title ?? ''}
-        batchYear={linkBatch?.year}
-        batchGraduationPeriod={linkBatch?.graduationPeriod}
-        batchStatus={linkBatch?.status}
-        open={!!linkBatch}
-        onClose={() => setLinkBatch(null)}
-      />
     </AdminLayout>
   );
 };

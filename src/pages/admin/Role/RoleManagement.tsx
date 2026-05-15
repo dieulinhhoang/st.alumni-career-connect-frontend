@@ -33,7 +33,7 @@ const buildPermissionsFromChecked = (checked: React.Key[]): IPermissionInput[] =
 // Hàm chuyển đổi resource list thành treeData cho Ant Design Tree
 const buildTreeDataFromResources = (resources: any[]): DataNode[] => {
   if (!resources || !Array.isArray(resources)) return []
-  
+
   return resources.map((resource) => ({
     title: resource.name || resource.resourceName,
     key: resource.resourceKey || resource.code,
@@ -169,41 +169,44 @@ const RoleManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout>
-        {view === 'list' ? (
-          <RoleListView
-            query={query}
-            setQuery={setQuery}
-            listData={listData}
-            loading={listLoading}
-            onCreate={openCreate}
-            onEdit={openEdit}
-            onView={openView}
-            onDelete={handleDelete}
-            onTableChange={(p: any) =>
-              setQuery((prev) => ({
-                ...prev,
-                page: p.current - 1,
-                size: p.pageSize,
-              }))
-            }
-          />
-        ) : (
-          <RoleFormView
-            view={view}
-            code={code}
-            name={name}
-            description={description}
-            setCode={setCode}
-            setName={setName}
-            setDescription={setDescription}
-            onBack={handleBackToList}
-            onSubmit={handleSubmit}
-            submitting={createRole.isPending || updateRole.isPending}
-            treeData={treeData}  
-            checkedKeys={checkedKeys}
-            setCheckedKeys={setCheckedKeys}
-          />
-        )}
+        <div className="stats-page">
+
+          {view === 'list' ? (
+            <RoleListView
+              query={query}
+              setQuery={setQuery}
+              listData={listData}
+              loading={listLoading}
+              onCreate={openCreate}
+              onEdit={openEdit}
+              onView={openView}
+              onDelete={handleDelete}
+              onTableChange={(p: any) =>
+                setQuery((prev) => ({
+                  ...prev,
+                  page: p.current - 1,
+                  size: p.pageSize,
+                }))
+              }
+            />
+          ) : (
+            <RoleFormView
+              view={view}
+              code={code}
+              name={name}
+              description={description}
+              setCode={setCode}
+              setName={setName}
+              setDescription={setDescription}
+              onBack={handleBackToList}
+              onSubmit={handleSubmit}
+              submitting={createRole.isPending || updateRole.isPending}
+              treeData={treeData}
+              checkedKeys={checkedKeys}
+              setCheckedKeys={setCheckedKeys}
+            />
+          )}
+        </div>
       </AdminLayout>
     </>
   )

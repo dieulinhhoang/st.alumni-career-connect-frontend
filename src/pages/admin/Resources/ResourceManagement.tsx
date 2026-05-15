@@ -161,6 +161,7 @@ const ResourceManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout>
+        <div className="stats-page">
         <ResourceListView
           query={query}
           setQuery={setQuery}
@@ -185,6 +186,7 @@ const ResourceManagement: React.FC = () => {
           onCancel={closeModal}
           confirmLoading={createResource.isPending || updateResource.isPending}
         />
+        </div>
       </AdminLayout>
     </>
   )

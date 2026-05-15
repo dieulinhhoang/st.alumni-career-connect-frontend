@@ -53,6 +53,8 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
+            <div className="stats-page">
+
       {/* Page header — giữ gradient như cũ */}
       <div style={{
         marginBottom: 24,
@@ -108,6 +110,7 @@ export function DashBoard() {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
       `}</style>
+      </div>
     </AdminLayout>
   );
 }

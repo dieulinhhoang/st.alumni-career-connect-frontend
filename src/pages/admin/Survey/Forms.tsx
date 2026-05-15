@@ -138,9 +138,9 @@ export default function Forms() {
                 {/* CỘT 2: PREVIEW */}
                 <div className="column preview-center">
                     <div className="preview-paper">
-                        <p style={{ textAlign: 'center', fontSize: 10, color: '#bfbfbf', fontFamily: 'monospace', marginBottom: 24, letterSpacing: '0.1em' }}>
+                        {/* <p style={{ textAlign: 'center', fontSize: 10, color: '#bfbfbf', fontFamily: 'monospace', marginBottom: 24, letterSpacing: '0.1em' }}>
                             — MÀN HÌNH XEM TRƯỚC —
-                        </p>
+                        </p> */}
                         <FormPreview themeId={selectedTheme.id} />
                     </div>
                 </div>

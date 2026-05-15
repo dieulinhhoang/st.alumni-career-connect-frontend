@@ -39,7 +39,7 @@ export default function GraduationList() {
   const totalStudentsCurrentPage = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
 
   const stats = [
-    { label: "Tổng đợt",      value: meta.total,                              color: "#6366f1" },
+    { label: "Tổng đợt", value: meta.total, color: "#6366f1" },
     { label: "Sinh viên ", value: totalStudentsCurrentPage.toLocaleString(), color: "#10b981" },
   ];
 
@@ -109,65 +109,68 @@ export default function GraduationList() {
 
   return (
     <AdminLayout>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="stats-page">
 
-        {/* Header + Stats */}
-        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>Đợt tốt nghiệp</div>
-            <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>Quản lý danh sách các đợt tốt nghiệp</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+          {/* Header + Stats */}
+          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>Đợt tốt nghiệp</div>
+              <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>Quản lý danh sách các đợt tốt nghiệp</div>
+            </div>
+            <Row gutter={[12, 12]}>
+              {stats.map(s => (
+                <Col key={s.label} xs={12} sm={6}>
+                  <div style={{ background: s.color + "0d", border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "12px 16px" }}>
+                    <div style={{ fontSize: 24, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
+                    <div style={{ fontSize: 11.5, color: s.color, opacity: 0.75, fontWeight: 500, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
           </div>
-          <Row gutter={[12, 12]}>
-            {stats.map(s => (
-              <Col key={s.label} xs={12} sm={6}>
-                <div style={{ background: s.color + "0d", border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "12px 16px" }}>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-                  <div style={{ fontSize: 11.5, color: s.color, opacity: 0.75, fontWeight: 500, marginTop: 2 }}>{s.label}</div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
 
-        {error && <Alert type="error" message={error} showIcon />}
+          {error && <Alert type="error" message={error} showIcon />}
 
-        {/* Table */}
-        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
-          <div style={{
-            padding: "14px 20px", borderBottom: "1px solid #f5f5f5",
-            display: "flex", gap: 10, alignItems: "center",
-            flexWrap: "wrap",
-          }}>
-            <Input
-              prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
-              placeholder="Tìm kiếm đợt tốt nghiệp..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1); }}
-              allowClear
-              style={{ flex: "1 1 200px", maxWidth: 300, borderRadius: 8, height: 34 }}
+          {/* Table */}
+          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
+            <div style={{
+              padding: "14px 20px", borderBottom: "1px solid #f5f5f5",
+              display: "flex", gap: 10, alignItems: "center",
+              flexWrap: "wrap",
+            }}>
+              <Input
+                prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
+                placeholder="Tìm kiếm đợt tốt nghiệp..."
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                allowClear
+                style={{ flex: "1 1 200px", maxWidth: 300, borderRadius: 8, height: 34 }}
+              />
+              <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
+                {search.trim() ? `${filtered.length} kết quả` : `${meta.total} đợt`}
+              </span>
+            </div>
+
+            <CustomTable
+              columns={columns}
+              data={listData}
+              filter={{ page: page - 1, size: pageSize }}
+              loading={loading}
+              handleTableChange={handleTableChange}
+              rowKey="id"
+              onRow={(record: Graduation) => ({
+                onClick: () => navigate(
+                  `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
+                  { state: { graduationName: record.name } }
+                ),
+                style: { cursor: "pointer" },
+              })}
             />
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
-              {search.trim() ? `${filtered.length} kết quả` : `${meta.total} đợt`}
-            </span>
           </div>
 
-          <CustomTable
-            columns={columns}
-            data={listData}
-            filter={{ page: page - 1, size: pageSize }}
-            loading={loading}
-            handleTableChange={handleTableChange}
-            rowKey="id"
-            onRow={(record: Graduation) => ({
-              onClick: () => navigate(
-                `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
-                { state: { graduationName: record.name } }
-              ),
-              style: { cursor: "pointer" },
-            })}
-          />
         </div>
-
       </div>
     </AdminLayout>
   );

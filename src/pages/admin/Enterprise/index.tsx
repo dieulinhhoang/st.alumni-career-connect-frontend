@@ -56,9 +56,9 @@ export default function Enterprise() {
   };
 
   const stats = [
-    { label: "Tổng",         value: enterprises.length,                                                                    color: C.primary },
-    { label: "Hoạt động",    value: enterprises.filter(e => e.partnerStatus === "active").length,                          color: C.success },
-    { label: "Tạm dừng",     value: enterprises.filter(e => e.partnerStatus === "inactive").length,                        color: C.danger  },
+    { label: "Tổng", value: enterprises.length, color: C.primary },
+    { label: "Hoạt động", value: enterprises.filter(e => e.partnerStatus === "active").length, color: C.success },
+    { label: "Tạm dừng", value: enterprises.filter(e => e.partnerStatus === "inactive").length, color: C.danger },
     { label: "Vị trí tuyển", value: enterprises.filter(e => e.partnerStatus === "active").reduce((s, e) => s + e.jobs, 0), color: C.warning },
   ];
 
@@ -129,53 +129,55 @@ export default function Enterprise() {
 
   return (
     <AdminLayout>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>Doanh nghiệp đối tác</h2>
-              <p style={{ margin: "4px 0 0", fontSize: 14, color: C.sub }}>Quản lý danh sách và trạng thái hợp tác</p>
-            </div>
-            <Button type="primary" icon={<PlusOutlined />} style={{ background: C.primary, border: "none", borderRadius: 9, fontWeight: 600, height: 40, paddingInline: 20, fontSize: 14, boxShadow: `0 2px 8px ${C.primary}40` }} onClick={() => setModal({ open: true, enterprise: null })}>
-              Thêm doanh nghiệp
-            </Button>
-          </div>
-          <Row gutter={[12, 12]}>
-            {stats.map(s => (
-              <Col key={s.label} xs={12} sm={6}>
-                <div style={{ background: `${s.color}0d`, border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "16px 18px" }}>
-                  <div style={{ fontSize: "clamp(22px,4vw,28px)", fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-                  <div style={{ fontSize: 14, color: s.color, opacity: 0.8, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
+      <div className="stats-page">
 
-        <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200, minWidth: 140, borderRadius: 8, height: 38 }} allowClear />
-            <Select value={industry} onChange={setIndustry} style={{ width: 160, minWidth: 130, height: 38 }}>
-              <Select.Option value="Tất cả ngành">Tất cả ngành</Select.Option>
-              {INDUSTRIES.map(i => <Select.Option key={i} value={i}>{i}</Select.Option>)}
-            </Select>
-            <Select value={facultyFilter} onChange={setFacultyFilter} style={{ width: 160, minWidth: 130, height: 38 }}>
-              <Select.Option value="all">Tất cả khoa</Select.Option>
-              {ALL_FACULTIES.map(k => <Select.Option key={k} value={k}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</Select.Option>)}
-            </Select>
-            <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 38, color: C.muted, fontSize: 14 }}>Xóa bộ lọc</Button>
-            <span style={{ marginLeft: "auto", fontSize: 14, color: C.sub, flexShrink: 0 }}>{filtered.length}/{enterprises.length}</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>Doanh nghiệp đối tác</h2>
+                <p style={{ margin: "4px 0 0", fontSize: 14, color: C.sub }}>Quản lý danh sách và trạng thái hợp tác</p>
+              </div>
+              <Button type="primary" icon={<PlusOutlined />} style={{ background: C.primary, border: "none", borderRadius: 9, fontWeight: 600, height: 40, paddingInline: 20, fontSize: 14, boxShadow: `0 2px 8px ${C.primary}40` }} onClick={() => setModal({ open: true, enterprise: null })}>
+                Thêm doanh nghiệp
+              </Button>
+            </div>
+            <Row gutter={[12, 12]}>
+              {stats.map(s => (
+                <Col key={s.label} xs={12} sm={6}>
+                  <div style={{ background: `${s.color}0d`, border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "16px 18px" }}>
+                    <div style={{ fontSize: "clamp(22px,4vw,28px)", fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
+                    <div style={{ fontSize: 14, color: s.color, opacity: 0.8, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
           </div>
-          <CustomTable
-            columns={columns} data={listData} filter={query} loading={loading}
-            handleTableChange={(p: any) => setQuery(prev => ({ ...prev, page: (p.current || 1) - 1, size: p.pageSize || prev.size }))}
-            rowKey="id" scroll={{ x: 760 }}
-            rowClassName={(_: Enterprise, i: number) => i % 2 === 1 ? "row-stripe" : ""}
-            onRow={(r: Enterprise) => ({ onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`), style: { cursor: "pointer", opacity: faded(r) ? 0.65 : 1, transition: "background 0.12s" } })}
-          />
+
+          <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              <Input placeholder="Tìm kiếm..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200, minWidth: 140, borderRadius: 8, height: 38 }} allowClear />
+              <Select value={industry} onChange={setIndustry} style={{ width: 160, minWidth: 130, height: 38 }}>
+                <Select.Option value="Tất cả ngành">Tất cả ngành</Select.Option>
+                {INDUSTRIES.map(i => <Select.Option key={i} value={i}>{i}</Select.Option>)}
+              </Select>
+              <Select value={facultyFilter} onChange={setFacultyFilter} style={{ width: 160, minWidth: 130, height: 38 }}>
+                <Select.Option value="all">Tất cả khoa</Select.Option>
+                {ALL_FACULTIES.map(k => <Select.Option key={k} value={k}>{FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}</Select.Option>)}
+              </Select>
+              <Button onClick={() => { setSearch(""); setIndustry("Tất cả ngành"); setFacultyFilter("all"); }} style={{ borderRadius: 7, height: 38, color: C.muted, fontSize: 14 }}>Xóa bộ lọc</Button>
+              <span style={{ marginLeft: "auto", fontSize: 14, color: C.sub, flexShrink: 0 }}>{filtered.length}/{enterprises.length}</span>
+            </div>
+            <CustomTable
+              columns={columns} data={listData} filter={query} loading={loading}
+              handleTableChange={(p: any) => setQuery(prev => ({ ...prev, page: (p.current || 1) - 1, size: p.pageSize || prev.size }))}
+              rowKey="id" scroll={{ x: 760 }}
+              rowClassName={(_: Enterprise, i: number) => i % 2 === 1 ? "row-stripe" : ""}
+              onRow={(r: Enterprise) => ({ onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`), style: { cursor: "pointer", opacity: faded(r) ? 0.65 : 1, transition: "background 0.12s" } })}
+            />
+          </div>
         </div>
       </div>
-
       <EnterpriseFormModal open={modal.open} enterprise={modal.enterprise} onClose={() => setModal({ open: false, enterprise: null })} onSave={handleSave} />
     </AdminLayout>
   );
