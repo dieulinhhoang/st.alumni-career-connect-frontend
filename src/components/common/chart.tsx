@@ -18,7 +18,7 @@ type PieDatum = {
   value: number
 }
 
-const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6']
+const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#f6e45c']
 
 const Chart: React.FC<Props> = ({ apiURL, collapsed }) => {
   const container1 = useRef<HTMLDivElement>(null)

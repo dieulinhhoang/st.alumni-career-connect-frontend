@@ -26,7 +26,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 setMobileMenuOpen(false);
             }
         };
-        
+
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -70,37 +70,37 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link> },
             ],
         },
-       
-        
+
+
         { type: 'divider' },
-    {
-        key: 'system-grp', label: 'HỆ THỐNG', type: 'group',
-        children: [
-             { 
-                key: '/admin/resources', 
-                icon: <AppstoreOutlined />, 
-                label: <Link to="/admin/resources">Tài nguyên</Link> 
-            },
-             { 
-                key: '/admin/roles', 
-                icon: <SafetyCertificateOutlined />, 
-                label: <Link to="/admin/roles">Vai trò</Link> 
-            },
-             { 
-                key: '/admin/users', 
-                icon: <UsergroupAddOutlined />, 
-                label: <Link to="/admin/users">Người dùng</Link> 
-            },
-        ],
-    },
+        {
+            key: 'system-grp', label: 'HỆ THỐNG', type: 'group',
+            children: [
+                {
+                    key: '/admin/resources',
+                    icon: <AppstoreOutlined />,
+                    label: <Link to="/admin/resources">Tài nguyên</Link>
+                },
+                {
+                    key: '/admin/roles',
+                    icon: <SafetyCertificateOutlined />,
+                    label: <Link to="/admin/roles">Vai trò</Link>
+                },
+                {
+                    key: '/admin/users',
+                    icon: <UsergroupAddOutlined />,
+                    label: <Link to="/admin/users">Người dùng</Link>
+                },
+            ],
+        },
     ];
 
 
     const renderMenu = () => (
-        <Menu 
-            theme="light" 
-            mode="inline" 
-            selectedKeys={[location.pathname]} 
+        <Menu
+            theme="light"
+            mode="inline"
+            selectedKeys={[location.pathname]}
             items={menuItems}
             onClick={() => {
                 if (isMobile) {
@@ -131,9 +131,9 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                     color: #9ca3af !important;
                 }
                 .ant-menu-light .ant-menu-item-selected {
-                    background: linear-gradient(90deg, #9f7aea 0%, #7f5af0 100%) !important;
-                    color: #ffffff !important;
-                    box-shadow: 0 4px 12px rgba(127, 90, 240, 0.3);
+background: linear-gradient(90deg, #1565c0 0%, #5888e0 100%) !important;
+               color: #ffffff !important;
+                    box-shadow: 0 4px 12px rgba(90, 160, 240, 0.3);
                 }
                 .ant-menu-light .ant-menu-item-selected .anticon,
                 .ant-menu-light .ant-menu-item-selected a {
@@ -202,26 +202,26 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                     }}
                 >
                     {/* Logo */}
-                    <div style={{ 
-                        height: 64, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        padding: '0 20px', 
+                    <div style={{
+                        height: 64,
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 20px',
                         borderBottom: '1px solid #f3f4f6',
                         justifyContent: collapsed ? 'center' : 'flex-start'
                     }}>
-                        <Avatar 
-                            shape="square" 
-                            size={32} 
-                            src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" 
-                            style={{ borderRadius: 8, flexShrink: 0 }} 
+                        <Avatar
+                            shape="square"
+                            size={32}
+                            src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg"
+                            style={{ borderRadius: 8, flexShrink: 0 }}
                         />
                         {!collapsed && (
-                            <span style={{ 
-                                marginLeft: 10, 
-                                fontWeight: 800, 
+                            <span style={{
+                                marginLeft: 10,
+                                fontWeight: 800,
                                 fontSize: 18,
-                                color: '#111827', 
+                                color: '#111827',
                                 letterSpacing: -0.3,
                                 whiteSpace: 'nowrap'
                             }}>
@@ -245,11 +245,11 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 headerStyle={{ padding: '16px 20px', borderBottom: '1px solid #f3f4f6' }}
                 title={
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar 
-                            shape="square" 
-                            size={32} 
-                            src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg" 
-                            style={{ borderRadius: 8 }} 
+                        <Avatar
+                            shape="square"
+                            size={32}
+                            src="https://dtntmuongcha.dienbien.edu.vn/uploads/news/2023_03/3.jpg"
+                            style={{ borderRadius: 8 }}
                         />
                         <span style={{ marginLeft: 10, fontWeight: 800, fontSize: 18, color: '#111827' }}>
                             Bảng điều khiển
@@ -260,7 +260,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                 {renderMenu()}
             </Drawer>
 
-            <Layout style={{ 
+            <Layout style={{
                 marginLeft: (!isMobile && !collapsed) ? 256 : (!isMobile && collapsed) ? 80 : 0,
                 transition: 'all 0.2s'
             }}>
@@ -286,15 +286,15 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                                 style={{ fontSize: 15, width: 36, height: 36, color: '#6b7280' }}
                             />
                         )}
-                        
+
                         {/* Desktop collapse button */}
                         {!isMobile && (
                             <Button
                                 type="text"
                                 icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                                onClick={() => { 
-                                    setCollapsed(!collapsed); 
-                                    onCollapse?.(!collapsed); 
+                                onClick={() => {
+                                    setCollapsed(!collapsed);
+                                    onCollapse?.(!collapsed);
                                 }}
                                 style={{ fontSize: 15, width: 36, height: 36, color: '#6b7280' }}
                             />
@@ -346,11 +346,11 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: any }> = 
                     </Dropdown>
                 </Header>
 
-                <Content style={{ 
-                    margin: 24, 
-                    background: '#fff', 
-                    borderRadius: 14, 
-                    padding: 24, 
+                <Content style={{
+                    margin: 24,
+                    background: '#fff',
+                    borderRadius: 14,
+                    padding: 24,
                     border: '1px solid #f3f4f6',
                     overflowX: 'auto'
                 }}>
