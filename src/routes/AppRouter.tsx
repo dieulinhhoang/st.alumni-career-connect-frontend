@@ -20,6 +20,7 @@ import { BatchList } from '../pages/admin/Alumni/BatchList';
 import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
  import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
 import ReportsPage from '../pages/admin/Reports/ReportsPage';
+import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -253,7 +254,15 @@ const routes = [
                     </Suspense>
                 )
             },
-        ]
+            {
+                path :'/survey/:id',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                          <SurveyFillPage />
+                    </Suspense>
+                )
+            }
+        ]  
     }
 ];
 

@@ -10,7 +10,7 @@ let batchesStore: SurveyBatch[] = [
     formSnapshot: MOCK_FORMS[0],
     status: 'active',
     startDate: '2026-03-18T08:30:00',
-    endDate: '2026-03-31T17:00:00',
+    endDate: '2026-07-31T17:00:00',
     year: 2025,
     graduationPeriod: 'DSSVTN ngành MMT&TTDL và KHDL&TTNT KSVL cho kiến định 2026',
     totalStudents: 13,
