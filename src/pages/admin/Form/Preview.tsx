@@ -8,15 +8,10 @@ function todayLabel() {
   return `Ngày ${String(d.getDate()).padStart(2, '0')} / ${String(d.getMonth() + 1).padStart(2, '0')} / ${d.getFullYear()}`
 }
 
-function getAccent(themeId?: string): string {
-  if (!themeId) return '#8b5cf6'
-  if (themeId.startsWith('#')) return themeId
-  const map: Record<string, string> = {
-    academic: '#8b5cf6', modern: '#2563eb', nature: '#16a34a',
-    sunset: '#ea580c', ocean: '#0d9488', rose: '#e11d48',
-    slate: '#475569', midnight: '#4338ca',
-  }
-  return map[themeId] ?? '#8b5cf6'
+const ACCENT = '#1D9E75'
+
+function getAccent(_themeId?: string): string {
+  return ACCENT
 }
 
 //  Shared input style 
@@ -351,7 +346,7 @@ function SectionHeader({ title, accent }: { title: string; accent: string }) {
     </div>
   )
 }
-  
+
 //  Map Form → render data 
 
 function mapForm(form: Form) {
@@ -744,10 +739,10 @@ export function SurveyPreview({
                   onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                 >
                   {submitSuccess
-                    ? '✓ Đã lưu'
+                    ? ' Đã lưu'
                     : submitting
-                      ? '⏳ Đang gửi…'
-                      : `✉ ${submitLabel}`
+                      ? ' Đang gửi…'
+                      : ` ${submitLabel}`
                   }
                 </button>
               )}

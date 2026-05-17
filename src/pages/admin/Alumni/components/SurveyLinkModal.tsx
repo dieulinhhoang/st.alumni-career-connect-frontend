@@ -21,7 +21,7 @@ export const SurveyLinkModal: React.FC<Props> = ({
   const [copied, setCopied] = useState(false);
   if (!batchId) return null;
 
-  const url = getSurveyUrl(batchId);
+  const url = getSurveyUrl(batchId, batchTitle);
 
   const copy = async () => {
     try {

@@ -21,6 +21,7 @@ import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDe
  import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
 import ReportsPage from '../pages/admin/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
+import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -255,10 +256,17 @@ const routes = [
                 )
             },
             {
-                path :'/survey/:id',
+                path :'/survey/:slug',
                 element: (
                     <Suspense fallback={<Loader />}>
                           <SurveyFillPage />
+                    </Suspense>
+                )
+            },{
+                path:'/admin/statistics/indicators',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                          <StatIndicatorConfig />
                     </Suspense>
                 )
             }

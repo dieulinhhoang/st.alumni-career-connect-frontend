@@ -1,3 +1,5 @@
+import { toSlug } from "../../components/common/utils";
+
 export const GRADUATION_OPTIONS = [
   'DSSVTN ngành MMT&TTDL và KHDL&TTNT KSVL cho kiểm định 2026',
 ];
@@ -45,5 +47,5 @@ export const STATUS_CFG: Record<string, { color: string; bg: string; label: stri
   draft:  { color: '#92400e', bg: '#fef9c3', label: 'Nháp'      },
 };
 
-export const getSurveyUrl = (batchId: number | string) =>
-  `${window.location.origin}/survey/${batchId}`;
+export const getSurveyUrl = (batchId: number | string , batchTitle: string) =>
+  `${window.location.origin}/survey/${toSlug(batchTitle)}`;
