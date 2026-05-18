@@ -1,5 +1,5 @@
 // src/feature/alumni/api.ts
-import api from '../../../libs/api';
+import {api} from '../../libs/api';
 import type { SurveyBatch, CreateBatchPayload, UpdateBatchPayload, BatchStats } from './types';
 
 export async function getBatches(): Promise<SurveyBatch[]> {
