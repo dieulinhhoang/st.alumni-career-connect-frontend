@@ -36,8 +36,14 @@ export interface Question {
   order: number;               // order within the section
 
   // new fields:
-  visibleWhen?: ConditionalRule; // condition for the question to be shown
-  reportFieldKey?: string;       // map to report field (employmentstatus, trainedfield...)
+  visibleWhen?: ConditionalRule;      // condition for the question to be shown
+
+  // Thống kê & báo cáo — tự sinh, admin không nhập thủ công
+  reportFieldKey?: string;            // key nội bộ tự sinh
+  showInChart?: boolean;              // hiển thị trong biểu đồ thống kê
+  chartType?: 'pie' | 'column';       // loại biểu đồ
+  reportTemplate?: 'mau01' | 'mau03'; // mẫu báo cáo Excel
+  excelColumn?: string;               // dataIndex cột trong mẫu (vd: 'kvNhaNuoc')
 }
 
 // SURVEY HEADER / FOOTER / SECTION
