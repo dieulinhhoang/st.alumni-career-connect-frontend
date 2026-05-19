@@ -1,5 +1,5 @@
 import type { Graduation, GraduationStudent, PaginatedResponse } from "./type";
-import api from "../../libs/api";
+import {api} from "../../libs/api";
 
 /**
  * Fetch list of graduation ceremonies with pagination

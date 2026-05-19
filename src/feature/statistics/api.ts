@@ -3,7 +3,7 @@ import type {
   StatisticalQuestion,
   FormStatisticsDetail,
 } from './types';
-import api from '../../libs/api';
+import {api} from "../../libs/api";
 
 /**
  * Fetch list of survey forms

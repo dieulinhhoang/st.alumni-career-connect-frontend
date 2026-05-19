@@ -424,6 +424,21 @@ const mockUniversityNotifications = [
   { id: 'not3', title: 'Thay doi lich giang giang vien', date: '2025-02-25', priority: 'low', read: true }
 ];
 
+// ====== Forms ======
+const mockForms: MockForm[] = [
+  { id: 1, name: 'Khao sat viec lam sau tot nghiep' },
+  { id: 2, name: 'Danh gia nang luc sinh vien' },
+  { id: 3, name: 'Feedback tu doanh nghiep' }
+];
+
+const mockFormQuestions: MockFormQuestion[] = [
+  { id: 'q1', title: 'Trang thai viec lam sau tot nghiep', chartType: 'pie' },
+  { id: 'q2', title: 'Muc luong ca nhan', chartType: 'bar' },
+  { id: 'q3', title: 'Linh vuc cong tac hien tai', chartType: 'column' },
+  { id: 'q4', title: 'Nhu cau dao tao them', chartType: 'bar' },
+  { id: 'q5', title: 'Muc do hai long voi chuong trinh dao tao', chartType: 'line' }
+];
+
 // ====== Dashboard ======
 const mockDashboardWidgets = {
   quickActions: [

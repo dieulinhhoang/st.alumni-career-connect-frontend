@@ -3,7 +3,7 @@ import type {
 	FacultyKey,
 } from "./type";
 import { FACULTY_COLOR_MAP } from "./type";
-import api from "../../libs/api";
+import {api} from "../../libs/api";
 
 // Enterprise API
 

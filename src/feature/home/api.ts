@@ -6,7 +6,7 @@ import type {
   JobPosting,
   AlumniProfile,
 } from "./type";
-import api from "../../libs/api";
+import {api} from "../../libs/api";
 
 // ============ Stats ============
 export const statsApi = {

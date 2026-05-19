@@ -1,5 +1,5 @@
 import type { Faculty, Major, ClassItem } from "./types";
-import api from "../../libs/api";
+import {api} from "../../libs/api";
 
 /**
  * Fetch list of all faculties.

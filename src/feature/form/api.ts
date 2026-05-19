@@ -13,7 +13,7 @@ import type {
 	FontOption,
 	RadiusOption,
 } from "./types";
-import api from "../../libs/api";
+import {api} from "../../libs/api";
 
 // AI Question Bank interface (kept for TypeScript definitions)
 export interface BankQuestion {

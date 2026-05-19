@@ -13,20 +13,23 @@ export default function FacultyListPage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { data: faculties, loading } = useFaculties();
 
-  const filtered = faculties.filter(f =>
-    f.name.toLowerCase().includes(search.toLowerCase()) ||
-    f.abbr.toLowerCase().includes(search.toLowerCase())
-  );
+ const filtered = Array.isArray(faculties)
+  ? faculties.filter(f =>
+      f?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      f?.abbr?.toLowerCase().includes(search.toLowerCase())
+    )
+  : [];
+// console.log("Kiểu dữ liệu của faculties:", typeof faculties, faculties);
 
-  const totalStudents = faculties.reduce((s, f) => s + f.students, 0);
-  const totalMajors   = faculties.reduce((s, f) => s + f.majors, 0);
+    const totalStudents = (faculties ?? []).reduce((s, f) => s + f.students, 0);
+    const totalMajors   = (faculties ?? []).reduce((s, f) => s + f.majors, 0);
 
   const isEmpty = !loading && filtered.length === 0;
-  const isNoFaculties = isEmpty && faculties.length === 0 && search === "";
+  const isNoFaculties = isEmpty && (faculties ?? []).length === 0 && search === "";
   const isNoResults   = isEmpty && !isNoFaculties;
-
   return (
     <AdminLayout>
+      
             <div className="stats-page">
 
       <style>{`

@@ -8,7 +8,7 @@ import type {
 	FacultySubmissionRow,
 	ReportMeta,
 } from './types';
-import api from '../../libs/api';
+import {api} from "../../libs/api";
 
 export type ReportApiResponse = {
 	currentUser: CurrentUser;
