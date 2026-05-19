@@ -85,6 +85,11 @@ interface MockAlumniProfile {
  id: string; studentCode: string; fullName: string; major: string;
  graduationYear: number; currentPosition: string; currentCompany: string; email?: string;
 }
+interface MockReport {
+ id: string; title: string; type: string; status: string; createdBy: string;
+ createdAt: string; totalStudents?: number; passedRate?: number;
+ employmentRate?: number; totalEnterprises?: number; score?: number;
+}
 // ============ MOCK DATA ============
 // ====== Roles ======
 const mockRoles: MockRole[] = [
@@ -317,7 +322,6 @@ const mockAlumniProfiles: MockAlumniProfile[] = [
   currentPosition: 'Chuyen vien moi truong', currentCompany: 'KPMG Vietnam' }
 ];
 
-
 // ====== Home / Dashboard Stats ======
 const mockHomeStats = {
   totalAlumni: 12540,
@@ -350,6 +354,51 @@ const mockReports: MockReport[] = [
   { id: 'r4', title: 'Danh gia chuong trinh dao tao CNTT', type: 'program', status: 'completed', createdBy: 'Dean', createdAt: '2024-12-10', totalStudents: 450, score: 4.2 },
   { id: 'r5', title: 'Thong ke hoat dong co so vat chat', type: 'facility', status: 'draft', createdBy: 'Admin', createdAt: '2025-03-10' }
 ];
+
+// ====== Mock report response (matches ReportApiResponse) ======
+const mockReportApiResponse = {
+  currentUser: {
+    id: 'u1',
+    name: 'Administrator',
+    scope: 'school' as const,
+    facultyName: '',
+    majorName: '',
+  },
+  stats: {
+    totalGraduates: 1200,
+    submitted: 960,
+    submissionRate: 80,
+    employed: 835,
+    employmentRate: 87,
+    relevantJobRate: 68,
+    avgSalary: '14.2 triệu',
+  },
+  majorRows: [
+    { major: 'Cong nghe thong tin', totalGraduates: 320, submitted: 280, employed: 245, employmentRate: 87.5 },
+    { major: 'Kinh te', totalGraduates: 240, submitted: 200, employed: 168, employmentRate: 84 },
+    { major: 'Nong nghiep', totalGraduates: 310, submitted: 240, employed: 192, employmentRate: 80 },
+    { major: 'Moi truong', totalGraduates: 180, submitted: 140, employed: 105, employmentRate: 75 },
+  ],
+  graduateRows: [
+    { id: 'sv001', name: 'Nguyen Van An', major: 'CNTT', graduationYear: 2024, status: 'employed', company: 'FPT Software', position: 'Backend Developer' },
+    { id: 'sv002', name: 'Tran Thi Binh', major: 'KT', graduationYear: 2024, status: 'employed', company: 'Agribank', position: 'Chuyen vien tin dung' },
+    { id: 'sv003', name: 'Le Minh Cuong', major: 'NN', graduationYear: 2024, status: 'employed', company: 'Masan Group', position: 'Ky su nong nghiep' },
+  ],
+  responseRows: [
+    { surveyId: 's1', surveyName: 'Khao sat 2024', responses: 960, completionRate: 80 },
+  ],
+  facultyRows: [
+    { facultyName: 'Khoa CNTT', totalGraduates: 320, submitted: 280, submissionRate: 87.5 },
+    { facultyName: 'Khoa Kinh te', totalGraduates: 240, submitted: 200, submissionRate: 83.3 },
+    { facultyName: 'Khoa Nong nghiep', totalGraduates: 310, submitted: 240, submissionRate: 77.4 },
+    { facultyName: 'Khoa Moi truong', totalGraduates: 180, submitted: 140, submissionRate: 77.8 },
+  ],
+  reportMeta: {
+    generatedAt: new Date().toISOString(),
+    surveyName: 'Khao sat viec lam 2024',
+    surveyId: 's1',
+  },
+};
 
 const mockReportTemplates = [
   { id: 't1', name: 'Template bao cao tot nghiep', type: 'graduation', fields: ['studentName', 'faculty', 'gpa', 'job'] },
@@ -458,65 +507,115 @@ const mockDashboardWidgets = {
   ]
 };
 
+// ====== Survey Batches (for batches.filter) ======
+const mockSurveyBatches: MockSurveyBatch[] = [
+  {
+    id: 1, title: 'Dot khao sat thang 6/2024', description: 'Khao sat viec lam sinh vien tot nghiep 2024',
+    formId: 1, formSnapshot: null, status: 'completed', startDate: '2024-06-01', endDate: '2024-06-30',
+    year: 2024, graduationPeriod: '2024', totalStudents: 512, responses: [], createdAt: '2024-05-15T00:00:00', updatedAt: '2024-07-01T00:00:00'
+  },
+  {
+    id: 2, title: 'Dot khao sat thang 12/2024', description: 'Khao sat viec lam sinh vien tot nghiep T12/2024',
+    formId: 1, formSnapshot: null, status: 'active', startDate: '2024-12-01', endDate: '2024-12-31',
+    year: 2024, graduationPeriod: '2024-2', totalStudents: 248, responses: [], createdAt: '2024-11-20T00:00:00', updatedAt: '2024-12-15T00:00:00'
+  },
+  {
+    id: 3, title: 'Dot khao sat thang 6/2025', description: 'Khao sat viec lam sinh vien tot nghiep 2025',
+    formId: 1, formSnapshot: null, status: 'draft', startDate: '2025-06-01', endDate: '2025-06-30',
+    year: 2025, graduationPeriod: '2025', totalStudents: 0, responses: [], createdAt: '2025-05-01T00:00:00', updatedAt: '2025-05-01T00:00:00'
+  },
+];
+
 // ====== Mock API Handler ======
+// FIX: mock handler returns data trực tiếp (không bọc { data: ... })
+// vì src/libs/api.ts Proxy wrapper đã bọc thành { data: mockData } rồi.
 export function mockApiHandler(
+  method: string,
   path: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET',
   body?: any,
-  _id?: string
+  params?: any
 ): any {
-  // ----- ROUTES -----
-  const routes: Record<string, any> = {
+  // Strip query string nếu có
+  const cleanPath = path.split('?')[0];
+
+  // Dynamic routes: /graduations/:id/students
+  const gradStudentsMatch = cleanPath.match(/^\/graduations\/(\d+)\/students$/);
+  if (gradStudentsMatch) return mockGradStudents;
+
+  // Dynamic routes: /enterprises/:id/jobs
+  const enterpriseJobsMatch = cleanPath.match(/^\/enterprises\/(\d+|[^/]+)\/jobs$/);
+  if (enterpriseJobsMatch) {
+    const eid = enterpriseJobsMatch[1];
+    return (mockJobs as any)[eid] ?? [];
+  }
+
+  // Dynamic routes: /forms/:id
+  const formByIdMatch = cleanPath.match(/^\/forms\/(\d+)$/);
+  if (formByIdMatch) {
+    const fid = parseInt(formByIdMatch[1]);
+    return mockForms.find(f => f.id === fid) ?? null;
+  }
+
+  // Static routes
+  const routes: Record<string, () => any> = {
     // Roles
-    '/roles': () => ({ data: mockRoles }),
-    '/roles/me': () => ({ data: mockRoles[0] }),
+    '/roles': () => mockRoles,
+    '/roles/me': () => mockRoles[0],
 
     // Users
-    '/users': () => ({ data: mockUsers }),
-    '/users/me': () => ({ data: mockUsers[0] }),
+    '/users': () => mockUsers,
+    '/users/me': () => mockUsers[0],
 
     // Resources
-    '/resources': () => ({ data: mockResources }),
+    '/resources': () => mockResources,
 
     // Faculty
-    '/faculties': () => ({ data: mockFaculties }),
-    '/majors': () => ({ data: mockMajors }),
-    '/classes': () => ({ data: mockClasses }),
+    '/faculties': () => mockFaculties,
+    '/majors': () => mockMajors,
+    '/classes': () => mockClasses,
 
     // Enterprise
-    '/enterprises': () => ({ data: mockHomeEnterprises }),
-    '/jobs': () => ({ data: mockJobs }),
-    '/job-postings': () => ({ data: mockJobPostings }),
-    '/alumni/profiles': () => ({ data: mockAlumniProfiles }),
+    '/enterprises': () => mockHomeEnterprises,
+    '/jobs': () => mockJobs,
+    '/job-postings': () => mockJobPostings,
+    '/alumni/profiles': () => mockAlumniProfiles,
 
     // Graduation
-    '/graduations': () => ({ data: mockGraduations }),
-    '/grad-students': () => ({ data: mockGradStudents }),
+    '/graduations': () => mockGraduations,
+    '/grad-students': () => mockGradStudents,
+
+    // Survey Batches
+    '/survey-batches': () => mockSurveyBatches,
+    '/batches': () => mockSurveyBatches,
 
     // Home / Dashboard
-    '/home/stats': () => ({ data: mockHomeStats }),
-    '/dashboard/widgets': () => ({ data: mockDashboardWidgets }),
+    '/home/stats': () => mockHomeStats,
+    '/dashboard/widgets': () => mockDashboardWidgets,
 
-    // Reports
-    '/reports': () => ({ data: mockReports }),
-    '/report-templates': () => ({ data: mockReportTemplates }),
+    // Reports — POST /reports trả ReportApiResponse
+    '/reports': () => method === 'POST' ? mockReportApiResponse : mockReports,
+    '/report-templates': () => mockReportTemplates,
 
     // Statistics
-    '/statistics': () => ({ data: mockStatistics }),
+    '/statistics': () => mockStatistics,
 
     // University
-    '/university': () => ({ data: mockUniversity }),
-    '/university/calendar': () => ({ data: mockUniversityCalendar }),
-    '/university/notifications': () => ({ data: mockUniversityNotifications }),
+    '/university': () => mockUniversity,
+    '/university/calendar': () => mockUniversityCalendar,
+    '/university/notifications': () => mockUniversityNotifications,
 
     // Forms
-    '/forms': () => ({ data: mockForms }),
-    '/form-questions': () => ({ data: mockFormQuestions })
+    '/forms': () => mockForms,
+    '/form-questions': () => mockFormQuestions,
+    '/question-type-options': () => [],
+    '/themes': () => [],
+    '/fonts': () => [],
+    '/radius-options': () => [],
   };
 
-  const handler = routes[path];
+  const handler = routes[cleanPath];
   if (handler) return handler();
-  return { data: null };
+  return null;
 }
 
 // ====== Exports ======
@@ -533,6 +632,7 @@ export {
   mockClasses,
   mockGraduations,
   mockGradStudents,
+  mockSurveyBatches,
   mockForms,
   mockFormQuestions,
   mockHomeStats,

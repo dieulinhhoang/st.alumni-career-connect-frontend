@@ -13,9 +13,9 @@ import type {
 	FontOption,
 	RadiusOption,
 } from "./types";
-import {api} from "../../libs/api";
+import { api } from "../../libs/api";
 
-// AI Question Bank interface (kept for TypeScript definitions)
+// ====== Question Bank ======
 export interface BankQuestion {
 	id: string;
 	category: string;
@@ -24,9 +24,19 @@ export interface BankQuestion {
 	options?: Array<{ id: string; label: string }>;
 }
 
+export const QUESTION_BANK: BankQuestion[] = [
+	{ id: 'bq1', category: 'Việc làm', title: 'Tình trạng việc làm hiện tại', type: 'single_choice' },
+	{ id: 'bq2', category: 'Việc làm', title: 'Mức thu nhập bình quân hàng tháng', type: 'single_choice' },
+	{ id: 'bq3', category: 'Đào tạo', title: 'Công việc có phù hợp với ngành đào tạo không?', type: 'single_choice' },
+	{ id: 'bq4', category: 'Kỹ năng', title: 'Kỹ năng mềm cần bổ sung thêm', type: 'multiple_choice' },
+	{ id: 'bq5', category: 'Việc làm', title: 'Khu vực làm việc hiện tại', type: 'single_choice' },
+	{ id: 'bq6', category: 'Đào tạo', title: 'Mức độ hài lòng với chương trình đào tạo', type: 'single_choice' },
+	{ id: 'bq7', category: 'Kỹ năng', title: 'Kỹ năng chuyên môn được đào tạo có đáp ứng yêu cầu công việc?', type: 'single_choice' },
+	{ id: 'bq8', category: 'Việc làm', title: 'Thời gian tìm được việc làm sau tốt nghiệp', type: 'single_choice' },
+];
+
 /**
  * Fetch all forms with optional filtering and pagination.
- * @param params - Query parameters for filtering forms
  */
 export async function getForms(
 	params?: GetFormsParams
@@ -37,7 +47,6 @@ export async function getForms(
 
 /**
  * Fetch a single form by ID.
- * @param id - Form ID
  */
 export async function getFormById(id: number): Promise<Form> {
 	const res = await api.get(`/forms/${id}`);
@@ -46,7 +55,6 @@ export async function getFormById(id: number): Promise<Form> {
 
 /**
  * Create a new form.
- * @param payload - Form creation data
  */
 export async function createForm(payload: CreateFormPayload): Promise<Form> {
 	const res = await api.post("/forms", payload);
@@ -55,8 +63,6 @@ export async function createForm(payload: CreateFormPayload): Promise<Form> {
 
 /**
  * Update an existing form.
- * @param id - Form ID
- * @param payload - Form update data
  */
 export async function updateForm(
 	id: number,
@@ -68,7 +74,6 @@ export async function updateForm(
 
 /**
  * Delete a form.
- * @param id - Form ID
  */
 export async function deleteForm(id: number): Promise<void> {
 	await api.delete(`/forms/${id}`);
@@ -76,7 +81,6 @@ export async function deleteForm(id: number): Promise<void> {
 
 /**
  * Duplicate an existing form.
- * @param id - Form ID to duplicate
  */
 export async function duplicateForm(id: number): Promise<Form> {
 	const res = await api.post(`/forms/${id}/duplicate`);
@@ -85,7 +89,6 @@ export async function duplicateForm(id: number): Promise<Form> {
 
 /**
  * Generate a form using AI based on a prompt.
- * @param prompt - AI generation prompt
  */
 export async function generateFormWithAI(prompt: string): Promise<AIFormResult> {
 	const res = await api.post("/forms/generate-ai", { prompt });
@@ -97,7 +100,7 @@ export async function generateFormWithAI(prompt: string): Promise<AIFormResult> 
  */
 export async function fetchAllForms(): Promise<Form[]> {
 	const res = await api.get("/forms");
-	return res.data?.items ?? res.data ?? [];
+	return Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
 }
 
 /**
