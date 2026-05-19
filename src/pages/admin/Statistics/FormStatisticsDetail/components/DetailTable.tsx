@@ -6,7 +6,8 @@ interface Props {
 }
 
 export function DetailTable({ detail }: Props) {
-  const maxValue = Math.max(...detail.data.map((d) => d.value), 1)
+  const data = Array.isArray(detail?.data) ? detail.data : []
+  const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.value), 1) : 1
 
   const columns = [
     {
@@ -71,7 +72,7 @@ export function DetailTable({ detail }: Props) {
     <div className="stats-table-card">
       <div className="stats-table-head">
         <span className="stats-table-head__title">Bảng thống kê chi tiết</span>
-        <span className="stats-table-head__count">{detail.data.length} nhóm</span>
+        <span className="stats-table-head__count">{data.length} nhóm</span>
       </div>
 
       <CustomTable
@@ -79,9 +80,9 @@ export function DetailTable({ detail }: Props) {
         rowKey="label"
         columns={columns}
         data={{
-          data: [...detail.data].sort((a, b) => b.value - a.value),
+          data: [...data].sort((a, b) => b.value - a.value),
           page: {
-            total_elements: detail.data.length,
+            total_elements: data.length,
           },
         }}
         pagination={false}
