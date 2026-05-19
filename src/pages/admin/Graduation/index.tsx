@@ -109,7 +109,7 @@ export default function GraduationList() {
 
   return (
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 

@@ -38,7 +38,7 @@ export default function FormStatisticsDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
         <div className="stats-header">
           <div className="stats-header__left">
             <h1 className="stats-header__title">Biểu đồ thống kê</h1>

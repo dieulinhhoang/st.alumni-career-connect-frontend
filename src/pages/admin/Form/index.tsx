@@ -208,7 +208,7 @@ export default function SurveyPage() {
   return (
 
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
 
         <ListView
           forms={forms}

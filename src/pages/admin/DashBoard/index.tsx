@@ -53,7 +53,7 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-            <div className="stats-page">
+            <div className="">
 
       {/* Page header — giữ gradient như cũ */}
       <div style={{

@@ -134,7 +134,7 @@ export const BatchList: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
 
         <div style={{ padding: 24 }}>
           {/* Toolbar */}

@@ -30,7 +30,7 @@ export default function FacultyListPage() {
   return (
     <AdminLayout>
       
-            <div className="stats-page">
+            <div className="">
 
       <style>{`
         @keyframes pulse {

@@ -129,7 +129,7 @@ export default function Enterprise() {
 
   return (
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>

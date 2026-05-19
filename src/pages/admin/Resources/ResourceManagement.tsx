@@ -161,7 +161,7 @@ const ResourceManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout>
-        <div className="stats-page">
+        <div className="">
         <ResourceListView
           query={query}
           setQuery={setQuery}

@@ -169,7 +169,7 @@ const UserManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout >
-        <div className="stats-page">
+        <div className="">
         <UserListView
           query={query}
           setQuery={setQuery}
