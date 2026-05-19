@@ -1,22 +1,48 @@
 import { useState } from 'react'
-import { Button, Input, Tooltip, Tag, Space } from 'antd'
+import { Tooltip, Tag } from 'antd'
 import {
   EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined,
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
-  AppstoreOutlined, UnorderedListOutlined, CalendarOutlined,
 } from '@ant-design/icons'
 import type { Form } from '../../../feature/form/types'
 import CustomTable from '../../../components/common/customTable'
 
-const ACCENT_MAP: Record<string, string> = {
-  blue: '#2563eb', green: '#16a34a', red: '#dc2626', purple: '#7c3aed',
-  orange: '#ea580c', teal: '#0d9488', brown: '#78716c', gray: '#6b7280',
+//  Design tokens 
+const T = {
+  accent:      '#0f766e',
+  accentHover: '#0d6b63',
+  accentSoft:  '#f0fdfa',
+  accentMid:   '#99f6e4',
+  text:        '#0d1117',
+  textSub:     '#536178',
+  muted:       '#94a3b8',
+  border:      '#e2e8f0',
+  borderFocus: '#0f766e',
+  surface:     '#ffffff',
+  bg:          '#f8fafc',
+  bgAlt:       '#f1f5f9',
+  danger:      '#dc2626',
+  dangerSoft:  '#fef2f2',
+  ai:          '#b45309',
+  aiSoft:      '#fffbeb',
+  aiBorder:    '#fcd34d',
+  shadow:      '0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(0,0,0,0.04)',
 }
-const getAccent = (id?: string) => ACCENT_MAP[id as string] ?? '#2563eb'
+
+const ACCENT_MAP: Record<string, { base: string; soft: string }> = {
+  blue:   { base: '#2563eb', soft: '#eff6ff' },
+  green:  { base: '#0f766e', soft: '#f0fdfa' },
+  red:    { base: '#dc2626', soft: '#fef2f2' },
+  purple: { base: '#7c3aed', soft: '#f5f3ff' },
+  orange: { base: '#ea580c', soft: '#fff7ed' },
+  teal:   { base: '#0d9488', soft: '#f0fdfa' },
+  brown:  { base: '#78716c', soft: '#fafaf9' },
+  gray:   { base: '#475569', soft: '#f8fafc' },
+}
+
+const getAccent = (id?: string) => ACCENT_MAP[id as string] ?? ACCENT_MAP.blue
 const fmt = (d?: string) =>
   d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
-
-type ViewMode = 'grid' | 'table'
 
 interface ListViewProps {
   forms: Form[]
@@ -28,154 +54,267 @@ interface ListViewProps {
   onDelete: (id: number) => void
 }
 
-export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete }: ListViewProps) {
-  const [search, setSearch] = useState('')
-  const [viewMode, setViewMode] = useState<ViewMode>('table')
-  const filtered = forms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+const ActionBtn = ({
+  icon, label, onClick, danger = false,
+}: {
+  icon: React.ReactNode
+  label: string
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+  danger?: boolean
+}) => (
+  <Tooltip title={label} mouseEnterDelay={0.4}>
+    <button
+      onClick={onClick}
+      aria-label={label}
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: 30, height: 30, borderRadius: 7,
+        border: 'none', background: 'transparent',
+        color: danger ? T.danger : T.muted,
+        cursor: 'pointer', fontSize: 13,
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = danger ? T.dangerSoft : T.accentSoft
+        e.currentTarget.style.color      = danger ? T.danger     : T.accent
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent'
+        e.currentTarget.style.color      = danger ? T.danger : T.muted
+      }}
+    >
+      {icon}
+    </button>
+  </Tooltip>
+)
 
-  //  table columns
+export default function ListView({
+  forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete,
+}: ListViewProps) {
+  const [search, setSearch] = useState('')
+  const filtered = forms.filter((f) =>
+    f.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  //  Columns 
   const columns = [
     {
-      title: 'STT', key: 'index', width: 50,
-      render: (_: any, __: Form, index: number) => <span style={{ color: '#9ca3af' }}>{index + 1}</span>,
-    },
-    {
-      title: 'Tên form', dataIndex: 'name', key: 'name',
-      render: (text: string, record: Form) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 8, background: `${getAccent(record.themeId)}1a`, color: getAccent(record.themeId), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <FileOutlined />
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, color: '#111827', marginBottom: 2 }}>{text}</div>
-            <div style={{ fontSize: 12, color: '#6b7280' }}>{record.description || 'Chưa có mô tả'}</div>
-          </div>
-        </div>
+      title: 'STT',
+      key: 'index',
+      width: 48,
+      align: 'center' as const,
+      render: (_: any, __: Form, i: number) => (
+        <span style={{ fontSize: 12, color: T.muted, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
+          {String(i + 1).padStart(2, '0')}
+        </span>
       ),
     },
     {
-      title: 'Số câu hỏi', dataIndex: 'questions', key: 'questions', width: 110,
-      render: (qs: any[]) => <Tag>{qs.length} câu</Tag>,
+      title: 'Form',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: Form) => {
+        const ac = getAccent(record.themeId as string)
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+              background: ac.soft, color: ac.base,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: `1.5px solid ${ac.base}22`, fontSize: 14,
+            }}>
+              <FileOutlined />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontWeight: 600, fontSize: 14, color: T.text,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                letterSpacing: '-0.15px',
+              }}>
+                {text}
+              </div>
+              <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
+                {record.description || 'Chưa có mô tả'}
+              </div>
+            </div>
+          </div>
+        )
+      },
     },
     {
-      title: 'Ngày tạo', dataIndex: 'createdat', key: 'createdat', width: 130,
-      render: (date: string) => <Space size={4}><CalendarOutlined /><span>{fmt(date)}</span></Space>,
+      title: 'Câu hỏi',
+      dataIndex: 'questions',
+      key: 'questions',
+      width: 110,
+      align: 'center' as const,
+      render: (qs: any[]) => (
+        <Tag style={{
+          background: T.accentSoft, color: T.accent,
+          border: `1px solid ${T.accentMid}`,
+          borderRadius: 20, fontSize: 12, fontWeight: 600,
+          padding: '1px 10px', margin: 0,
+        }}>
+          {qs.length} câu
+        </Tag>
+      ),
     },
     {
-      title: 'Thao tác', key: 'actions', width: 160,
+      title: 'Ngày tạo',
+      dataIndex: 'createdat',
+      key: 'createdat',
+      width: 120,
+      align: 'center' as const,
+      render: (date: string) => (
+        <span style={{ fontSize: 13, color: T.textSub, fontVariantNumeric: 'tabular-nums' }}>
+          {fmt(date)}
+        </span>
+      ),
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 136,
+      align: 'center' as const,
       render: (_: any, record: Form) => (
-        <Space>
-          <Tooltip title="Xem trước"><Button type="text" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onPreview(record) }} aria-label="Xem trước" /></Tooltip>
-          <Tooltip title="Chỉnh sửa"><Button type="text" icon={<EditOutlined />} onClick={(e) => { e.stopPropagation(); onEdit(record) }} aria-label="Chỉnh sửa" /></Tooltip>
-          <Tooltip title="Nhân bản"><Button type="text" icon={<CopyOutlined />} onClick={(e) => { e.stopPropagation(); onDup(record) }} aria-label="Nhân bản" /></Tooltip>
-          <Tooltip title="Xóa"><Button type="text" danger icon={<DeleteOutlined />} onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} aria-label="Xóa" /></Tooltip>
-        </Space>
+       <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+    <ActionBtn icon={<EyeOutlined />}    label="Xem trước" onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
+    <ActionBtn icon={<EditOutlined />}   label="Chỉnh sửa" onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
+    <ActionBtn icon={<CopyOutlined />}   label="Nhân bản"  onClick={(e) => { e.stopPropagation(); onDup(record) }} />
+    <ActionBtn icon={<DeleteOutlined />} label="Xóa"       onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} danger />
+  </div>
       ),
     },
   ]
 
-  //  render
   return (
-    <div className="page">
-      {/* Header */}
-      <div className="topbar">
+    <div style={{
+      padding: '28px 32px 48px', 
+      minHeight: '100vh', fontFamily: "'Geist', 'DM Sans', sans-serif",
+    }}>
+
+      {/*  Page header  */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 24,
+      }}>
         <div>
-          <div className="eyebrow" style={{ marginBottom: 4 }}>Quản lý</div>
-          <div className="page-title">Form khảo sát</div>
+          <p style={{
+            margin: 0, fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: T.accent, marginBottom: 5,
+          }}>
+            Quản lý
+          </p>
+          <h2 style={{
+            margin: 0, fontSize: 22, fontWeight: 700,
+            color: T.text, letterSpacing: '-0.5px', lineHeight: 1,
+          }}>
+            Form khảo sát
+          </h2>
+          <p style={{ margin: '5px 0 0', fontSize: 13, color: T.muted }}>
+            {forms.length} form · Tạo và quản lý bộ câu hỏi khảo sát
+          </p>
         </div>
-        <Space>
-          <Button icon={<ThunderboltOutlined />} onClick={onAI} className="btn-gold">Tạo bằng AI</Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>Form mới</Button>
-        </Space>
-      </div>
 
-      {/* Toolbar */}
-      <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Input
-          placeholder="Tìm kiếm form..."
-          prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ maxWidth: 380 }}
-          allowClear
-        />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Tooltip title="Chế độ lưới">
-            <Button type={viewMode === 'grid' ? 'primary' : 'default'} icon={<AppstoreOutlined />}
-              onClick={() => setViewMode('grid')} aria-pressed={viewMode === 'grid'} aria-label="Chế độ lưới" />
-          </Tooltip>
-          <Tooltip title="Chế độ danh sách">
-            <Button type={viewMode === 'table' ? 'primary' : 'default'} icon={<UnorderedListOutlined />}
-              onClick={() => setViewMode('table')} aria-pressed={viewMode === 'table'} aria-label="Chế độ danh sách" />
-          </Tooltip>
-          <Tag color="blue">{filtered.length} form</Tag>
+          {/* AI button */}
+          <button
+            onClick={onAI}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              height: 36, padding: '0 14px', borderRadius: 8,
+              border: `1.5px solid ${T.aiBorder}`, background: T.aiSoft,
+              color: T.ai, fontWeight: 600, fontSize: 13,
+              cursor: 'pointer', transition: 'box-shadow 0.15s',
+              fontFamily: 'inherit', letterSpacing: '-0.1px',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 12px #f59e0b22' }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
+          >
+            <ThunderboltOutlined style={{ fontSize: 13 }} />
+            Tạo bằng AI
+          </button>
+
+          {/* New form button */}
+          <button
+            onClick={onCreate}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              height: 36, padding: '0 16px', borderRadius: 8,
+              border: 'none', background: T.accent,
+              color: '#fff', fontWeight: 600, fontSize: 13,
+              cursor: 'pointer', letterSpacing: '-0.1px',
+              boxShadow: '0 2px 8px rgba(15,118,110,0.28)',
+              transition: 'box-shadow 0.15s, background 0.15s',
+              fontFamily: 'inherit',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = T.accentHover
+              e.currentTarget.style.boxShadow  = '0 4px 16px rgba(15,118,110,0.36)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = T.accent
+              e.currentTarget.style.boxShadow  = '0 2px 8px rgba(15,118,110,0.28)'
+            }}
+          >
+            <PlusOutlined style={{ fontSize: 13 }} />
+            Form mới
+          </button>
         </div>
       </div>
 
-      {/* Grid view */}
-      {viewMode === 'grid' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-          {/* AI card */}
-          <div className="ai-card" onClick={onAI} role="button" aria-label="Tạo form bằng AI" tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAI() }}>
-            <div className="ai-title">Tạo form thông minh<br />bằng trí tuệ nhân tạo</div>
-            <div className="ai-desc">Upload PDF hoặc nhập mô tả — AI phân tích và sinh câu hỏi tự động.</div>
-            <div className="ai-cta">Bắt đầu ngay</div>
+      {/*  Card wrapper  */}
+      <div style={{
+        background: T.surface,
+        // border: `1px solid ${T.border}`, overflow: 'hidden',
+        // boxShadow: T.shadow,
+      }}>
+
+        {/*  Toolbar  */}
+        <div style={{
+          padding: '10px 16px',
+          borderBottom: `1px solid ${T.border}`,
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: T.surface,
+        }}>
+          {/* Search input */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <SearchOutlined style={{
+              position: 'absolute', left: 10, fontSize: 12,
+              color: T.muted, zIndex: 1, pointerEvents: 'none',
+            }} />
+            <input
+              placeholder="Tìm kiếm form..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                height: 32, paddingLeft: 30, paddingRight: 10, width: 220,
+                border: `1.5px solid ${T.border}`, borderRadius: 8,
+                fontSize: 13, color: T.text, background: T.bg,
+                outline: 'none', transition: 'border 0.15s, background 0.15s',
+                fontFamily: 'inherit',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = T.borderFocus
+                e.currentTarget.style.background  = '#fff'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = T.border
+                e.currentTarget.style.background  = T.bg
+              }}
+            />
           </div>
 
-          {/* New blank card */}
-          <div className="new-card" onClick={onCreate} role="button" aria-label="Tạo form mới" tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onCreate() }}>
-            <div className="new-ring"><PlusOutlined /></div>
-            <span>Tạo form mới</span>
-          </div>
-
-          {/* Form cards */}
-          {filtered.map((form) => {
-            const accent = getAccent(form.themeId as string)
-            return (
-              <div key={form.id} className="form-card" onClick={() => onPreview(form)}
-                role="button" aria-label={`Xem trước form: ${form.name}`} tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onPreview(form) }}>
-                <div className="form-card-accent" style={{ background: accent }} />
-                <div className="form-card-body">
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                    <div className="form-icon" style={{ background: `${accent}1a`, color: accent }}><FileOutlined /></div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="form-name">{form.name}</div>
-                      <div className="form-desc">{form.description || 'Chưa có mô tả'}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <Tag>{form.questions.length} câu hỏi</Tag>
-                    <Tag icon={<CalendarOutlined />}>{fmt(form.createdat)}</Tag>
-                  </div>
-                </div>
-                <div className="form-card-actions" onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title="Xem trước">
-                    <button className="fa-btn" onClick={() => onPreview(form)} aria-label="Xem trước"><EyeOutlined /></button>
-                  </Tooltip>
-                  <span className="fa-sep" />
-                  <Tooltip title="Chỉnh sửa">
-                    <button className="fa-btn" onClick={() => onEdit(form)} aria-label="Chỉnh sửa"><EditOutlined /></button>
-                  </Tooltip>
-                  <span className="fa-sep" />
-                  <Tooltip title="Nhân bản">
-                    <button className="fa-btn" onClick={() => onDup(form)} aria-label="Nhân bản"><CopyOutlined /></button>
-                  </Tooltip>
-                  <span className="fa-sep" />
-                  <Tooltip title="Xóa">
-                    <button className="fa-btn danger" onClick={() => onDelete(form.id as number)} aria-label="Xóa"><DeleteOutlined /></button>
-                  </Tooltip>
-                </div>
-              </div>
-            )
-          })}
+          {/* Count */}
+          <span style={{
+            marginLeft: 'auto', fontSize: 12, color: T.muted,
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {filtered.length} / {forms.length} form
+          </span>
         </div>
-      )}
 
-      {/* Table view */}
-      {viewMode === 'table' && (
+        {/*  Table  */}
         <CustomTable
           columns={columns}
           data={{ data: filtered }}
@@ -183,7 +322,7 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
             pageSize: 10,
             total: filtered.length,
             showTotal: (total: number, range: [number, number]) =>
-              `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
+              `Hiển thị ${range[0]}–${range[1]} trong ${total} form`,
             position: ['bottomCenter'],
           }}
           onRow={(record: Form) => ({
@@ -192,7 +331,7 @@ export default function ListView({ forms, onCreate, onAI, onEdit, onPreview, onD
           })}
           rowKey="id"
         />
-      )}
+      </div>
     </div>
   )
 }
