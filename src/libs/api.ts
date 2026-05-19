@@ -2,6 +2,20 @@
 import axios from 'axios';
 import { errorInterceptor, requestInterceptor, successInterceptor } from './interceptors';
 
+export default function AuthCallback() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = new URLSearchParams(location.search).get('token');
+    if (token) {
+      localStorage.setItem('app_token', token);
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/login?error=auth_failed');
+    }
+  }, []);
+  return <p>Đang xử lý đăng nhập...</p>;
+}
+
 // ============ MOCK DATA ============
 // Bật/tắt mock mode (true = dùng mock, false = gọi API thật)
 const USE_MOCK = true;
