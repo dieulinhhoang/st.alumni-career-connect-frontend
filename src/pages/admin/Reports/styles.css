@@ -84,7 +84,7 @@
   font-weight: 500;
 }
 
-/* ── KPI grid – pastel graduation palette ── */
+/*  KPI grid  */
 .rp-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -93,32 +93,29 @@
 }
 
 .rp-kpi-card {
-  border-radius: 12px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e8eaed;
   padding: 16px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-  /* no border, color comes from background */
-  border: none;
+  transition: box-shadow 0.15s ease;
 }
 
 .rp-kpi-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
 }
 
 .rp-kpi-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 18px;
   flex-shrink: 0;
-  /* semi-transparent white overlay for icon circle */
-  background: rgba(255,255,255,0.55) !important;
 }
 
 .rp-kpi-body {
@@ -128,8 +125,7 @@
 
 .rp-kpi-label {
   font-size: 12px;
-  color: inherit;
-  opacity: 0.72;
+  color: #6b7280;
   margin-bottom: 2px;
 }
 
@@ -137,13 +133,11 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1.15;
-  /* color passed via inline style from KpiGrid */
 }
 
 .rp-kpi-sub {
   font-size: 11px;
-  color: inherit;
-  opacity: 0.6;
+  color: #9ca3af;
   margin-top: 2px;
 }
 
@@ -187,7 +181,7 @@
   padding: 4px 0;
 }
 
-/*  Sheet header  */
+/*  Sheet header: org trái, title giữa  */
 .rp-sheet-header {
   display: flex;
   flex-direction: column;
@@ -240,56 +234,34 @@
   line-height: 1.5;
 }
 
-/* ── Formal table – no border ── */
-.rp-formal-table .ant-table {
-  border: none !important;
-}
-
-.rp-formal-table .ant-table-container {
-  border: none !important;
-  border-inline-start: none !important;
-}
-
+/*  Formal table  */
 .rp-formal-table .ant-table-thead > tr > th {
-  background: #f7f8fc;
+  background: #f0f4ff;
   font-weight: 600;
   font-size: 12px;
   text-align: center;
   white-space: nowrap;
-  /* remove cell border – use row separator only */
-  border-color: transparent;
+  border-color: #d1d9f0;
   color: #374151;
-  box-shadow: none;
 }
 
 .rp-formal-table .ant-table-tbody > tr > td {
   font-size: 12px;
-  border-color: transparent;
-}
-
-/* Subtle row separator only */
-.rp-formal-table .ant-table-tbody > tr {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.rp-formal-table .ant-table-tbody > tr:last-child {
-  border-bottom: none;
+  border-color: #e8eaed;
 }
 
 .rp-formal-table .ant-table-tbody > tr:hover > td {
   background: #f8f9ff;
 }
 
-/* ── Summary row – dòng vàng nhẹ, chữ bình thường + đậm ── */
+/*  Summary row  */
 .rp-summary-row > td {
-  background-color: #fffbf0 !important;
+  background-color: #fff8e6 !important;
   font-weight: 600;
-  font-size: 12px;
-  border-color: transparent !important;
-  color: #92640a;
+  border-color: #f0d080 !important;
 }
 
-/*  Sheet footer  */
+/*  Sheet footer / signature  */
 .rp-sheet-footer {
   display: flex;
   justify-content: flex-end;
@@ -316,28 +288,6 @@
   letter-spacing: 0.5px;
   color: #1a1a2e;
   margin-top: 56px;
-}
-
-/* ── Feedback input inside table ── */
-.rp-feedback-input {
-  width: 100%;
-  font-size: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 3px 7px;
-  outline: none;
-  background: #fff;
-  color: #374151;
-  transition: border-color 0.15s;
-}
-
-.rp-feedback-input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99,102,241,0.1);
-}
-
-.rp-feedback-input::placeholder {
-  color: #9ca3af;
 }
 
 /*  Responsive  */
