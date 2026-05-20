@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { MOCK_FORMS, THEMES } from '../../../feature/form/constants'
+import { MOCK_FORMS } from '../../../feature/form/constants'
 import type { Form, Section, Question } from '../../../feature/form/types'
 import { BuilderView } from './builder/BuilderView'
 import PreviewView from './Preview'
@@ -8,6 +8,7 @@ import { DeleteModal } from './Deletemodal'
 import { AIView } from './Aiview'
 import './survey.css'
 import AdminLayout from '../../../components/layout/AdminLayout'
+
 const DRAFT_KEY = 'survey_draftlist'
 
 function loadDraft(): Form | null {
@@ -22,58 +23,6 @@ function saveDraft(forms: Form[]) {
 }
 function clearDraft() {
   try { localStorage.removeItem(DRAFT_KEY) } catch { }
-}
-
-//  ThemePicker modal 
-interface ThemePickerProps {
-  formName: string
-  currentThemeId: string
-  onSelect: (themeId: string) => void
-  onSkip: () => void
-}
-function ThemePicker({ formName, currentThemeId, onSelect, onSkip }: ThemePickerProps) {
-  const [selected, setSelected] = useState(currentThemeId)
-  const th = THEMES.find((t) => t.id === selected) ?? THEMES[0]
-  return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <div style={{ marginBottom: 22 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#f0fdfa,#ccfbf1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 14 }}>🎨</div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#0d1117', marginBottom: 6, letterSpacing: '-.02em' }}>Chọn giao diện</div>
-          <div style={{ fontSize: 13.5, color: '#6b7280', lineHeight: 1.65 }}>
-            Chọn màu sắc cho <strong style={{ color: '#374151' }}>{formName}</strong>. Bạn có thể thay đổi sau trong trình biên soạn.
-          </div>
-        </div>
-
-        <div className="theme-grid-modal">
-          {THEMES.map((t) => (
-            <div key={t.id} className={`theme-swatch-modal${selected === t.id ? ' active' : ''}`}
-              onClick={() => setSelected(t.id)} role="radio" aria-checked={selected === t.id} aria-label={t.name}
-              style={selected === t.id ? { borderColor: t.accent } : {}}>
-              <div className="theme-swatch-modal-top" style={{ background: t.header }} />
-              <div className="theme-swatch-modal-bot" style={{ background: t.bg }} />
-              <div style={{ width: 20, height: 5, borderRadius: 3, background: t.accent, opacity: 0.7 }} />
-              <div className="theme-swatch-modal-label" style={selected === t.id ? { color: t.accent } : {}}>{t.name}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Preview strip */}
-        <div style={{ padding: '12px 14px', borderRadius: 8, marginBottom: 22, background: th.bg ?? '#f1f3f4', border: '1px solid #e8eaed', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 8, background: th.accent, flexShrink: 0 }} />
-          <div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#111827' }}>{th.name}</div>
-            <div style={{ fontSize: 12, color: '#6b7280', fontFamily: 'monospace' }}>{th.accent}</div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost" onClick={onSkip}>Bỏ qua</button>
-          <button className="btn btn-primary" onClick={() => onSelect(selected)}>Áp dụng</button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 //  DraftBanner 
@@ -112,7 +61,6 @@ export default function SurveyPage() {
   const [view, setView] = useState<ViewType>('list')
   const [activeForm, setActiveForm] = useState<Form | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Form | undefined>(undefined)
-  const [pendingThemeForm, setPendingThemeForm] = useState<Form | null>(null)
   const [draftAvailable, setDraftAvailable] = useState<Form[] | null>(loadDraft)
   const hasUserEdited = useRef(false)
 
@@ -143,34 +91,9 @@ export default function SurveyPage() {
   const handleSaveFromAI = (partial: Omit<Form, 'id' | 'createdat' | 'themeId'>) => {
     hasUserEdited.current = true
     const newForm = { ...partial, id: Date.now(), createdat: new Date().toISOString().slice(0, 10), themeId: 'blue' } as Form
-    // Show theme picker before adding to list
-    setPendingThemeForm(newForm)
-    setView('list')
-  }
-
-  const handleThemeSelected = (themeId: string) => {
-    if (!pendingThemeForm) return
-    hasUserEdited.current = true
-    const finalForm = { ...pendingThemeForm, themeId }
-    setForms((prev) => {
-      const exists = prev.some((f) => f.id === finalForm.id)
-      if (exists) return prev.map((f) => (f.id === finalForm.id ? finalForm : f))
-      return [finalForm, ...prev]
-    })
-    setPendingThemeForm(null)
-    setActiveForm(finalForm)
+    setForms((prev) => [newForm, ...prev])
+    setActiveForm(newForm)
     setView('builder')
-  }
-
-  const handleThemeSkip = () => {
-    if (!pendingThemeForm) return
-    hasUserEdited.current = true
-    setForms((prev) => {
-      const exists = prev.some((f) => f.id === pendingThemeForm.id)
-      if (exists) return prev.map((f) => (f.id === pendingThemeForm.id ? pendingThemeForm : f))
-      return [pendingThemeForm, ...prev]
-    })
-    setPendingThemeForm(null)
   }
 
   const handleDelete = (id: number) => setDeleteTarget(forms.find((f) => f.id === id))
@@ -206,10 +129,8 @@ export default function SurveyPage() {
   )
 
   return (
-
     <AdminLayout>
       <div className="">
-
         <ListView
           forms={forms}
           onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
@@ -219,16 +140,6 @@ export default function SurveyPage() {
           onDup={handleDup}
           onDelete={handleDelete}
         />
-
-        {/* Theme picker overlay (after AI generation) */}
-        {pendingThemeForm && (
-          <ThemePicker
-            formName={pendingThemeForm.name}
-            currentThemeId={pendingThemeForm.themeId ?? 'blue'}
-            onSelect={handleThemeSelected}
-            onSkip={handleThemeSkip}
-          />
-        )}
 
         {/* Delete confirmation */}
         {deleteTarget && (

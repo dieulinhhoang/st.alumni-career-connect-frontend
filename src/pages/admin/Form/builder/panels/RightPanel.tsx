@@ -15,75 +15,112 @@ interface LogicRule {
   targetQuestionId: string
 }
 
-const TABS = [
-  { key: 'bank',   icon: <AppstoreOutlined />,    label: 'Thư viện' },
-  { key: 'theme',  icon: <BgColorsOutlined />,    label: 'Giao diện' },
-  { key: 'logic',  icon: <NodeIndexOutlined />,   label: 'Logic' },
-] as const
-
-type Tab = typeof TABS[number]['key']
+type Tab = 'bank' | 'theme' | 'logic'
 
 interface RightPanelProps {
   questions: Question[]
   sections: Section[]
-  accent: string
-  activeTheme: string
   logoSize: number
   logicRules: LogicRule[]
   onAddBlank: (type: string) => void
   onDropFromBank: (question: Question) => void
-  onThemeChange: (key: string, color: string) => void
   onLogoSizeChange: (size: number) => void
   onLogicRulesChange: (rules: LogicRule[]) => void
   defaultTab?: Tab
 }
 
-export function RightPanel({
-  questions, sections, accent, activeTheme, logoSize, logicRules,
-  onAddBlank, onDropFromBank, onThemeChange, onLogoSizeChange, onLogicRulesChange,
-  defaultTab = 'bank',
-}: RightPanelProps) {
-  const [activeTab, setActiveTab] = useState<Tab>(defaultTab)
+const TABS = [
+  { key: 'bank'  as Tab, icon: <AppstoreOutlined />,  label: 'Thư viện'  },
+  { key: 'theme' as Tab, icon: <BgColorsOutlined />,  label: 'Giao diện' },
+  { key: 'logic' as Tab, icon: <NodeIndexOutlined />, label: 'Logic'     },
+]
 
-  const tabBtn = (tab: typeof TABS[number]) => {
-    const isActive = activeTab === tab.key
-    return (
-      <Tooltip key={tab.key} title={tab.label} placement="bottom">
-        <button
-          onClick={() => setActiveTab(tab.key)}
-          aria-label={tab.label}
-          aria-selected={isActive}
-          role="tab"
-          style={{ flex: 1, height: 40, border: 'none', background: isActive ? '#fff' : 'transparent', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2, color: isActive ? accent : '#94a3b8', transition: 'all .15s', fontSize: 11, fontWeight: isActive ? 700 : 500, fontFamily: 'inherit', boxShadow: isActive ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>
-          <span style={{ fontSize: 15 }}>{tab.icon}</span>
-          <span>{tab.label}</span>
-        </button>
-      </Tooltip>
-    )
-  }
+const STRIP_W        = 44   // tab icon strip
+const PANEL_CONTENT_W = 256 // sliding content
+
+export function RightPanel({
+  questions, logoSize, logicRules,
+  onAddBlank, onDropFromBank, onLogoSizeChange, onLogicRulesChange,
+  defaultTab,
+}: RightPanelProps) {
+  const [activeTab, setActiveTab] = useState<Tab | null>(defaultTab ?? null)
+  const isOpen = activeTab !== null
+
+  const toggle = (key: Tab) =>
+    setActiveTab(prev => (prev === key ? null : key))
 
   return (
-    <div style={{ width: 260, flexShrink: 0, height: '100%', display: 'flex', flexDirection: 'column', borderLeft: '1px solid #eaecf0', background: '#fafbfc', overflow: 'hidden' }}>
-      {/* Tab bar */}
-      <div role="tablist" aria-label="Panel tabs" style={{ display: 'flex', gap: 4, padding: '6px 8px', borderBottom: '1px solid #eaecf0', background: '#f3f4f6' }}>
-        {TABS.map(tabBtn)}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'row',
+      height: '100%',
+      flexShrink: 0,
+      borderLeft: '1px solid #e4e6ea',
+      background: '#fff',
+      overflow: 'hidden',
+    }}>
+
+      {/* ── Sliding content panel ── */}
+      <div style={{
+        width: isOpen ? PANEL_CONTENT_W : 0,
+        minWidth: 0,
+        overflow: 'hidden',
+        transition: 'width .2s ease',
+        background: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <div style={{ width: PANEL_CONTENT_W, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {activeTab === 'bank'  && <BankPanel onAddBlank={onAddBlank} onDropFromBank={onDropFromBank} />}
+          {activeTab === 'theme' && <div style={{ flex: 1, overflowY: 'auto' }}><ThemePanel logoSize={logoSize} onLogoSizeChange={onLogoSizeChange} /></div>}
+          {activeTab === 'logic' && <div style={{ flex: 1, overflowY: 'auto' }}><LogicPanel questions={questions} logicRules={logicRules} onRulesChange={onLogicRulesChange} /></div>}
+        </div>
       </div>
 
-      {/* Panel content */}
-      <div role="tabpanel" aria-label={TABS.find((t) => t.key === activeTab)?.label} style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {activeTab === 'bank' && (
-          <BankPanel accent={accent} onAddBlank={onAddBlank} onDropFromBank={onDropFromBank} />
-        )}
-        {activeTab === 'theme' && (
-          <div style={{ overflowY: 'auto', flex: 1 }}>
-            <ThemePanel accent={accent} activeTheme={activeTheme} logoSize={logoSize} onThemeChange={onThemeChange} onLogoSizeChange={onLogoSizeChange} />
-          </div>
-        )}
-        {activeTab === 'logic' && (
-          <div style={{ overflowY: 'auto', flex: 1 }}>
-            <LogicPanel questions={questions} logicRules={logicRules} accent={accent} onRulesChange={onLogicRulesChange} />
-          </div>
-        )}
+      {/* ── Icon-only tab strip ── */}
+      <div style={{
+        width: STRIP_W,
+        flexShrink: 0,
+        borderLeft: '1px solid #e4e6ea',
+        background: '#f8fafc',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        paddingTop: 6,
+        gap: 2,
+      }}>
+        {TABS.map(tab => {
+          const active = activeTab === tab.key
+          return (
+            <Tooltip key={tab.key} title={tab.label} placement="left">
+              <button
+                onClick={() => toggle(tab.key)}
+                aria-label={tab.label}
+                aria-pressed={active}
+                style={{
+                  width: 36,
+                  height: 36,
+                  border: 'none',
+                  borderRadius: 8,
+                  background: active ? '#e2e8f0' : 'transparent',
+                  color: active ? '#1e293b' : '#94a3b8',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 17,
+                  transition: 'all .15s',
+                  outline: 'none',
+                  padding: 0,
+                }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#475569' } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' } }}
+              >
+                {tab.icon}
+              </button>
+            </Tooltip>
+          )
+        })}
       </div>
     </div>
   )

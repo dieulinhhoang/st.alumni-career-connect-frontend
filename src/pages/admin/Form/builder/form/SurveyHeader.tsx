@@ -41,7 +41,6 @@ export function SurveyHeader({
     <div
       style={{
         background: '#fff',
-        borderBottom: '1px solid #e2e8f0',
         padding: `${isSmall ? 16 : 24}px ${isSmall ? 14 : 20}px`,
       }}
     >
@@ -124,7 +123,7 @@ export function SurveyHeader({
                   color: '#64748b',
                 }}
               />
-              <InlineInput
+              {/* <InlineInput
                 value={header.fax ?? ''}
                 onChange={(v) => update('fax', v)}
                 placeholder="Fax"
@@ -134,7 +133,7 @@ export function SurveyHeader({
                   color: '#64748b',
                   marginTop: 4,
                 }}
-              />
+              /> */}
             </>
           ) : (
             <>

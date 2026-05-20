@@ -169,8 +169,7 @@ export function PDFCanvas({
       )} */}
 
       {/* Title + Description */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: `${isSmall ? 24 : 36}px ${px}px ${isSmall ? 20 : 28}px`, textAlign: 'center' }}>
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: accent, margin: '0 auto 20px' }} />
+      <div style={{ background: '#fff', padding: `${isSmall ? 24 : 36}px ${px}px ${isSmall ? 20 : 28}px`, textAlign: 'center' }}>
         {editable && onTitleChange
           ? <InlineInput value={surveyTitle} onChange={onTitleChange} placeholder="TÊN FORM KHẢO SÁT" style={{ fontSize: isSmall ? 16 : 20, fontWeight: 700, textAlign: 'center', color: '#0f172a' }} />
           : <h2 style={{ margin: 0, fontSize: isSmall ? 18 : isMedium ? 20 : 22, fontWeight: 800, color: '#0f172a', wordBreak: 'break-word' }}>{surveyTitle || 'TÊN FORM KHẢO SÁT'}</h2>
@@ -190,13 +189,16 @@ export function PDFCanvas({
                     ))}
                   </ClickToEditBlock>
                 </div>
-                <FloatingEditPopup open={descPopupOpen} anchorEl={descBlockRef.current} onClose={() => setDescPopupOpen(false)} title="Mô tả / Lời dẫn" accent={accent} width={400}>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8 }}>Nội dung mô tả</div>
-                  <RichTextEditor value={descDraft} onChange={setDescDraft} placeholder="Nhập mô tả cho khảo sát..." minHeight={180} />
+                <FloatingEditPopup open={descPopupOpen} anchorEl={descBlockRef.current} onClose={() => setDescPopupOpen(false)} title="Mô tả " accent={accent} width={620}>
+                  <RichTextEditor value={descDraft} onChange={setDescDraft} placeholder="Nhập mô tả cho khảo sát..." minHeight={260} />
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
                     <button onClick={() => setDescPopupOpen(false)} style={{ height: 32, padding: '0 14px', border: '1px solid #e2e8f0', borderRadius: 7, background: '#fff', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: '#6b7280', fontFamily: 'inherit' }}>Hủy</button>
-                    <button onClick={() => { onDescriptionParagraphsChange(descDraft.split('\n').filter(Boolean)); setDescPopupOpen(false) }}
-                      style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 7, background: accent, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#fff', fontFamily: 'inherit' }}>Lưu</button>
+                    <button onClick={() => {
+                      const doc = new DOMParser().parseFromString(descDraft, 'text/html')
+                      const paras = Array.from(doc.querySelectorAll('p, h3, li')).map(el => el.textContent ?? '').filter(Boolean)
+                      onDescriptionParagraphsChange(paras.length ? paras : [descDraft])
+                      setDescPopupOpen(false)
+                    }} style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 7, background: accent, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#fff', fontFamily: 'inherit' }}>Lưu</button>
                   </div>
                 </FloatingEditPopup>
               </>
@@ -253,15 +255,14 @@ export function PDFCanvas({
           >{submitLabel}</button>
         </div>
       )}
-       {!headerOnly && (
-  <FooterBlock
-    footer={footer}
-    accent={accent}
-    editable={editable}
-    onFooterChange={onFooterChange}
-  />
-)}
+      {!headerOnly && (
+        <FooterBlock
+          footer={footer}
+          accent={accent}
+          editable={editable}
+          onFooterChange={onFooterChange}
+        />
+      )}
     </div>
   )
 }
-  

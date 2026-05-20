@@ -17,7 +17,7 @@ import {
 import type { Question, Section, QuestionType } from '../../../../../feature/form/types'
 
 //  Cột của từng mẫu 
-// Lấy từ Mau01Table.tsx và Mau03Table.tsx
+//  Mau01Table.tsx và Mau03Table.tsx
 
 export const MAU01_COLUMNS: { value: string; label: string }[] = [
   { value: 'coViecLam',     label: 'Có việc làm' },
@@ -275,16 +275,15 @@ export function EditableQuestionCard({
     <div
       onClick={onActivate}
       style={{
-        background: '#fff', borderRadius: 12,
-        border: `1px solid ${isActive ? accent : '#e5e7eb'}`,
-        boxShadow: isActive ? `0 4px 16px ${accent}18` : '0 1px 3px rgba(0,0,0,.06)',
+        background: '#fff', borderRadius: 0,
+        border: 'none',
+        borderBottom: '1px solid #e8eaed',
+        boxShadow: 'none',
         padding: 18, marginBottom: 12, transition: 'all .18s ease',
         position: 'relative', overflow: 'hidden',
       }}
     >
-      {isActive && (
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: accent, borderRadius: '12px 0 0 12px' }} />
-      )}
+
 
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -299,7 +298,7 @@ export function EditableQuestionCard({
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onUpdate({ title: e.target.value })}
                   placeholder="Câu hỏi"
-                  style={{ flex: 1, border: 'none', borderBottom: `2px solid ${isActive ? accent : '#d1d5db'}`, outline: 'none', padding: '10px 0 8px', fontSize: 16, fontWeight: 600, background: 'transparent', color: '#0f172a' }}
+                  style={{ flex: 1, border: 'none', borderBottom: '2px solid #d1d5db', outline: 'none', padding: '10px 0 8px', fontSize: 16, fontWeight: 600, background: 'transparent', color: '#0f172a' }}
                 />
               </div>
             </div>
@@ -360,9 +359,9 @@ export function EditableQuestionCard({
                   </div>
                 ))}
                 <button type="button" onClick={(e) => { e.stopPropagation(); onAddOption() }}
-                  style={{ border: 'none', background: 'transparent', color: accent, cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
+                  style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
                   + Thêm tùy chọn
-                </button>
+                </button> 
               </div>
             )}
           </div>
@@ -374,14 +373,14 @@ export function EditableQuestionCard({
               Bắt buộc
             </Checkbox>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <ActionIcon title="Đưa lên"   icon={<ArrowUpOutlined />}   onClick={onMoveUp}    disabled={index === 0} />
-              <ActionIcon title="Đưa xuống" icon={<ArrowDownOutlined />} onClick={onMoveDown}  disabled={index === total - 1} />
+              {/* <ActionIcon title="Đưa lên"   icon={<ArrowUpOutlined />}   onClick={onMoveUp}    disabled={index === 0} />
+              <ActionIcon title="Đưa xuống" icon={<ArrowDownOutlined />} onClick={onMoveDown}  disabled={index === total - 1} /> */}
               <ActionIcon title="Nhân bản"  icon={<CopyOutlined />}      onClick={onDuplicate} />
               <ActionIcon title="Xóa"       icon={<DeleteOutlined />}    onClick={onRemove}    danger />
             </div>
           </div>
 
-          {/*  Thống kê & Báo cáo — chỉ hiện với loại có options  */}
+          {/*  Thống kê & Báo cáo — chỉ hiện với loại có options  Điện thoại: 024.62617586  Fax: 024.62617586*/}
           {isChartable && (
             <StatConfig question={question} accent={accent} onUpdate={onUpdate} />
           )}
