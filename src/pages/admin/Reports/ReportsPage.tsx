@@ -42,7 +42,7 @@ export default function ReportsPage() {
 
   return (
     <AdminLayout>
-      <div className="rp-page">
+      <div>
         <PageHeader
           title={isSchoolView ? 'Tổng hợp báo cáo cấp trường' : 'Báo cáo tình hình việc làm sinh viên'}
           subtitle={

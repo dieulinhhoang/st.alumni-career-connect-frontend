@@ -37,7 +37,9 @@ export const PageHeader: React.FC<Props> = ({
   const isFacultyLike = scope === 'faculty' || scope === 'major';
 
   return (
-    <div className="rp-page-header">
+    <div className="rp-page-header">  {/* ← wrapper bị thiếu */}
+
+      {/* TRÁI: title + subtitle + nút nộp */}
       <div className="rp-page-header__left">
         <h1 className="rp-page-header__title">{title}</h1>
         <span className="rp-page-header__subtitle">{subtitle}</span>
@@ -45,7 +47,6 @@ export const PageHeader: React.FC<Props> = ({
         {isFacultyLike && (
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
             <SubmissionPill status={submissionStatus} />
-
             {submissionStatus === 'draft' && (
               <Button size="small" type="primary" icon={<SendOutlined />} onClick={onSubmit}>
                 Nộp báo cáo lên trường
@@ -68,6 +69,7 @@ export const PageHeader: React.FC<Props> = ({
         )}
       </div>
 
+      {/* PHẢI: filter Vai trò / Đợt KS / Phạm vi */}
       <div className="rp-page-header__right">
         <div className="rp-filter-row">
           <div className="rp-filter-item">
@@ -94,6 +96,7 @@ export const PageHeader: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
     </div>
   );
 };
