@@ -337,7 +337,8 @@ const UserListView: React.FC<UserListViewProps> = ({
                                 paddingInline: 18,
                                 height: 40,
                                 fontSize: 14,
-                                fontWeight: 500
+                                fontWeight: 500,
+                                background: '#1D9E75', borderColor: '#1D9E75', 
                             }}
                         >
                             Thêm mới

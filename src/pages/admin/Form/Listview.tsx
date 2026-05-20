@@ -242,10 +242,11 @@ export default function ListView({
               display: 'inline-flex', alignItems: 'center', gap: 6,
               height: 36, padding: '0 16px', borderRadius: 8,
               border: 'none', background: T.accent,
-              color: '#fff', fontWeight: 600, fontSize: 13,
+              color : '#fff',
+              background: '#1D9E75', borderColor: '#1D9E75' , fontWeight: 600, fontSize: 13,
               cursor: 'pointer', letterSpacing: '-0.1px',
-              boxShadow: '0 2px 8px rgba(15,118,110,0.28)',
-              transition: 'box-shadow 0.15s, background 0.15s',
+              // boxShadow: '0 2px 8px rgba(15,118,110,0.28)',
+              // transition: 'box-shadow 0.15s, background 0.15s',
               fontFamily: 'inherit',
             }}
             onMouseEnter={(e) => {
