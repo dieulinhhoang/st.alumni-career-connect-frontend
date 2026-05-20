@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Table, Button, Space, Empty } from 'antd';
+import { Table, Button, Space, Empty, Tooltip } from 'antd';
+import { ClockCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { FacultySubmissionRow, SubmissionStatus } from '../../../../feature/reports/types';
 import { SubmissionPill } from './SubmissionPill';
@@ -7,10 +8,13 @@ import { DEFAULT_DEADLINE } from '../../../../feature/reports/constants';
 
 interface Props {
   rows: FacultySubmissionRow[];
+  /** Called when admin clicks "Xem" on a faculty row */
+  onViewFaculty?: (facultyCode: string) => void;
 }
 
-export const ProgressTable: React.FC<Props> = ({ rows }) => {
+export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
   const [statusMap, setStatusMap] = useState<Record<string, SubmissionStatus>>({});
+  const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
 
   const getStatus = (row: FacultySubmissionRow): SubmissionStatus =>
     statusMap[row.key] ?? row.status ?? 'draft';
@@ -26,17 +30,47 @@ export const ProgressTable: React.FC<Props> = ({ rows }) => {
       title: 'Trạng thái', dataIndex: 'status', width: 130,
       render: (_, row) => <SubmissionPill status={getStatus(row)} />,
     },
-    { title: 'Người nộp',       dataIndex: 'submittedBy', width: 130, render: (v: string | null) => v ?? 'Chưa nộp' },
-    { title: 'Thời gian nộp',   dataIndex: 'submittedAt', width: 140, render: (v: string | null) => v ?? 'Chưa nộp' },
-    { title: 'Hạn nộp',         dataIndex: 'deadline',    width: 120, render: (v: string | null) => v ?? DEFAULT_DEADLINE },
-    { title: 'Phản hồi từ trường', dataIndex: 'feedback', width: 160, render: (v: string | null) => v ?? 'Chưa có' },
     {
-      title: 'Thao tác', key: 'actions', width: 260,
+      title: 'Người nộp', dataIndex: 'submittedBy', width: 130,
+      render: (v: string | null) => v ?? '—',
+    },
+    {
+      title: 'Thời gian nộp', dataIndex: 'submittedAt', width: 140,
+      render: (v: string | null) => v ?? '—',
+    },
+    {
+      title: 'Hạn nộp', dataIndex: 'deadline', width: 120,
+      render: (v: string | null) => v ?? DEFAULT_DEADLINE,
+    },
+    {
+      title: 'Phản hồi từ trường',
+      dataIndex: 'feedback',
+      width: 200,
+      render: (v: string | null, row) => (
+        <input
+          className="rp-feedback-input"
+          defaultValue={v ?? ''}
+          placeholder="Nhập phản hồi…"
+          onChange={(e) =>
+            setFeedbackMap((prev) => ({ ...prev, [row.key]: e.target.value }))
+          }
+          title={feedbackMap[row.key] ?? v ?? ''}
+        />
+      ),
+    },
+    {
+      title: 'Thao tác', key: 'actions', width: 240,
       render: (_, row) => {
         const status = getStatus(row);
         return (
           <Space size="small">
-            <Button type="link" size="small">Xem</Button>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => onViewFaculty?.(row.facultyCode)}
+            >
+              Xem
+            </Button>
             {status === 'submitted' && (
               <>
                 <Button size="small" type="primary" onClick={() => updateStatus(row.key, 'approved')}>Duyệt</Button>
@@ -46,7 +80,11 @@ export const ProgressTable: React.FC<Props> = ({ rows }) => {
             {status === 'returned' && (
               <Button size="small" onClick={() => updateStatus(row.key, 'submitted')}>Đã nộp lại</Button>
             )}
-            {status === 'draft' && <span style={{ color: '#999' }}>Chờ nộp</span>}
+            {status === 'draft' && (
+              <Tooltip title="Chờ khoa nộp">
+                <ClockCircleOutlined style={{ color: '#9ca3af', fontSize: 15 }} />
+              </Tooltip>
+            )}
           </Space>
         );
       },
@@ -56,8 +94,8 @@ export const ProgressTable: React.FC<Props> = ({ rows }) => {
   const dataSource = rows.map((row) => ({
     ...row,
     deadline: row.deadline ?? DEFAULT_DEADLINE,
-    submittedBy: row.submittedBy ?? 'Chưa nộp',
-    feedback: row.feedback ?? 'Chưa có',
+    submittedBy: row.submittedBy ?? null,
+    feedback: row.feedback ?? null,
     status: getStatus(row),
   }));
 
@@ -67,7 +105,7 @@ export const ProgressTable: React.FC<Props> = ({ rows }) => {
       <Table
         size="small"
         pagination={false}
-        bordered
+        bordered={false}
         className="rp-formal-table"
         scroll={{ x: 'max-content' }}
         columns={columns}
@@ -82,7 +120,7 @@ export const ProgressTable: React.FC<Props> = ({ rows }) => {
             <Table.Summary.Cell index={3} align="right">
               <strong>{pageRows.length} khoa</strong>
             </Table.Summary.Cell>
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <Table.Summary.Cell key={i} index={4 + i} align="right">-</Table.Summary.Cell>
             ))}
           </Table.Summary.Row>

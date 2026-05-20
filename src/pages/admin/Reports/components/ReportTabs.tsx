@@ -1,14 +1,5 @@
 import React from 'react';
-import { Tabs, Button, Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
-import {
-  FileTextOutlined,
-  TeamOutlined,
-  PieChartOutlined,
-  SendOutlined,
-  DownloadOutlined,
-  EllipsisOutlined,
-} from '@ant-design/icons';
+import { Tabs } from 'antd';
 import type {
   MajorSummaryRow,
   GraduateRow,
@@ -20,17 +11,20 @@ import { Mau01Table } from './Mau01Table';
 import { Mau02Table } from './Mau02Table';
 import { Mau03Table } from './Mau03Table';
 import { ProgressTable } from './ProgressTable';
+import { DownloadToolbar } from './DownloadToolbar';
 
 interface Props {
   majorRows: MajorSummaryRow[];
   graduateRows: GraduateRow[];
   responseRows: ResponseRow[];
   facultyRows: FacultySubmissionRow[];
-  reportMeta: ReportMeta | null;
+  reportMeta: ReportMeta;
   orgLine1: string;
   orgLine2: string;
   signLabel: string;
   onDownload: (mau: 'mau01' | 'mau02' | 'mau03') => void;
+  /** Switch to faculty scope view when admin clicks "Xem" in ProgressTable */
+  onViewFaculty?: (facultyCode: string) => void;
 }
 
 export const ReportTabs: React.FC<Props> = ({
@@ -43,77 +37,51 @@ export const ReportTabs: React.FC<Props> = ({
   orgLine2,
   signLabel,
   onDownload,
+  onViewFaculty,
 }) => {
-  const downloadMenu: MenuProps = {
-    items: [
-      { key: 'mau01', icon: <DownloadOutlined />, label: 'Mẫu 1 ' },
-      { key: 'mau02', icon: <DownloadOutlined />, label: 'Mẫu 2 ' },
-      { key: 'mau03', icon: <DownloadOutlined />, label: 'Mẫu 3 ' },
-    ],
-    onClick: ({ key }) => onDownload(key as 'mau01' | 'mau02' | 'mau03'),
-  };
-
-  const tabBarExtra = (
-    <Dropdown menu={downloadMenu} trigger={['click']} placement="bottomRight">
-      <Button size="small" icon={<DownloadOutlined />} title="Tải báo cáo">
-        <EllipsisOutlined />
-      </Button>
-    </Dropdown>
-  );
+  const sharedProps = { orgLine1, orgLine2, signLabel };
 
   return (
     <div className="rp-table-card">
       <Tabs
-        defaultActiveKey="mau01"
         className="rp-tabs"
-        tabBarExtraContent={{ right: tabBarExtra }}
         items={[
           {
-            key: 'mau01',
-            label: <span><FileTextOutlined /> Mẫu 1 </span>,
+            key: 'progress',
+            label: 'Tiến độ nộp',
             children: (
-              <Mau01Table
-                rows={majorRows}
-                orgLine1={orgLine1}
-                orgLine2={orgLine2}
-                title={reportMeta?.mau01Title ?? ''}
-                note={reportMeta?.mau01Note}
-                signLabel={signLabel}
-              />
+              <ProgressTable rows={facultyRows} onViewFaculty={onViewFaculty} />
+            ),
+          },
+          {
+            key: 'mau01',
+            label: reportMeta.mau01Title,
+            children: (
+              <>
+                <DownloadToolbar onDownload={() => onDownload('mau01')} />
+                <Mau01Table rows={majorRows} {...sharedProps} />
+              </>
             ),
           },
           {
             key: 'mau02',
-            label: <span><TeamOutlined /> Mẫu 2 </span>,
+            label: reportMeta.mau02Title,
             children: (
-              <Mau02Table
-                rows={graduateRows}
-                orgLine1={orgLine1}
-                orgLine2={orgLine2}
-                title={reportMeta?.mau02Title ?? ''}
-                note={reportMeta?.mau02Note}
-                signLabel={signLabel}
-              />
+              <>
+                <DownloadToolbar onDownload={() => onDownload('mau02')} />
+                <Mau02Table rows={graduateRows} {...sharedProps} />
+              </>
             ),
           },
           {
             key: 'mau03',
-            label: <span><PieChartOutlined /> Mẫu 3 </span>,
+            label: reportMeta.mau03Title,
             children: (
-              <Mau03Table
-                rows={responseRows}
-                orgLine1={orgLine1}
-                orgLine2={orgLine2}
-                title={reportMeta?.mau03Title ?? ''}
-                note={reportMeta?.mau03Note}
-                signLabel={signLabel}
-              />
+              <>
+                <DownloadToolbar onDownload={() => onDownload('mau03')} />
+                <Mau03Table rows={responseRows} {...sharedProps} />
+              </>
             ),
-          },
-          {
-            key: 'progress',
-            label: <span><SendOutlined /> Tiến độ nộp báo cáo</span>,
-            children: <ProgressTable rows={facultyRows} />,
           },
         ]}
       />

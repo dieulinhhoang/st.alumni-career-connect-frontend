@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Spin } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import type { FilterState, SubmissionStatus } from '../../../feature/reports/types';
 import { useReportData } from '../../../feature/reports/hooks/useReportData';
@@ -11,6 +12,7 @@ import { ReportTabs } from './components/ReportTabs';
 import './styles.css';
 
 export default function ReportsPage() {
+  const navigate = useNavigate();
   const [userIndex, setUserIndex] = useState(0);
   const [filters, setFilters] = useState<FilterState>({ surveyId: '2026-1' });
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('draft');
@@ -18,9 +20,8 @@ export default function ReportsPage() {
   const { currentUser, stats, majorRows, graduateRows, responseRows, facultyRows, reportMeta, loading } =
     useReportData(filters, userIndex);
 
-  const isSchoolView    = currentUser.scope === 'school';
-  const isFacultyLike   = currentUser.scope === 'faculty' || currentUser.scope === 'major';
-  const kpiItems        = useKpiItems(isSchoolView, stats, facultyRows);
+  const isSchoolView  = currentUser.scope === 'school';
+  const kpiItems      = useKpiItems(isSchoolView, stats, facultyRows);
 
   const scopeLabel =
     currentUser.scope === 'school'
@@ -38,6 +39,15 @@ export default function ReportsPage() {
   const handleDownload = (mau: 'mau01' | 'mau02' | 'mau03') => {
     console.log('Download', mau, filters.surveyId, currentUser.scope);
     // TODO: call real API
+  };
+
+  /**
+   * When admin clicks "Xem" on a faculty row, navigate to the faculty-scoped
+   * reports view.  We pass facultyCode via search params so the page can
+   * pre-select the right user/scope.
+   */
+  const handleViewFaculty = (facultyCode: string) => {
+    navigate(`/admin/reports?scope=faculty&facultyCode=${encodeURIComponent(facultyCode)}`);
   };
 
   return (
@@ -74,6 +84,7 @@ export default function ReportsPage() {
             orgLine2={orgLine2}
             signLabel={signLabel}
             onDownload={handleDownload}
+            onViewFaculty={handleViewFaculty}
           />
         </Spin>
       </div>
