@@ -185,9 +185,12 @@ export function Navbar() {
         </div>
 
         <div className="nav-main">
-          <Link to="admin/dashboard" className="nav-sso">
+          <a
+            href={`${import.meta.env.VITE_API_URL}/auth/sso/redirect`}
+            className="nav-sso"
+          >
             Đăng nhập SSO
-          </Link>
+          </a>
 
           <button
             className="nav-hamburger"
@@ -202,15 +205,15 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="nav-mobile" data-open={String(menuOpen)}>
-        <Link
-          to="admin/dashboard"
-          className="nav-mobile-sso"
-          onClick={() => setMenuOpen(false)}
-        >
-          Đăng nhập SSO
-        </Link>
-      </div>
+    <div className="nav-mobile" data-open={String(menuOpen)}>
+  <a
+    href={`${import.meta.env.VITE_API_URL}/auth/sso/redirect`}
+    className="nav-mobile-sso"
+    onClick={() => setMenuOpen(false)}
+  >
+    Đăng nhập SSO
+  </a>
+</div>
     </header>
   );
 }
