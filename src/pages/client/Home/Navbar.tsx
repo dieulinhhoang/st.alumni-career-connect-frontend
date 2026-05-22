@@ -1,5 +1,3 @@
-// Navbar.tsx
-
 import { useState } from "react";
 import { useScrolled } from "../../../feature/home/hooks/index.ts";
 import { Link } from "react-router-dom";
@@ -15,6 +13,26 @@ export function Navbar() {
   const scrolled = useScrolled();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const buildSsoUrl = () => {
+    const returnUrl =
+      window.location.pathname +
+      window.location.search +
+      window.location.hash;
+
+    return `${import.meta.env.VITE_API_URL}/auth/sso/redirect?returnUrl=${encodeURIComponent(
+      returnUrl || "/"
+    )}`;
+  };
+
+  const handleSsoLogin = () => {
+    window.location.href = buildSsoUrl();
+  };
+
+  const handleMobileSsoLogin = () => {
+    setMenuOpen(false);
+    window.location.href = buildSsoUrl();
+  };
+
   return (
     <header
       style={{
@@ -23,7 +41,9 @@ export function Navbar() {
         left: 0,
         right: 0,
         zIndex: 100,
-        background: scrolled ? "rgba(253, 251, 247, 0.98)" : "rgba(253, 251, 247, 0.96)",
+        background: scrolled
+          ? "rgba(253, 251, 247, 0.98)"
+          : "rgba(253, 251, 247, 0.96)",
         backdropFilter: "blur(14px)",
         borderBottom: `1px solid ${borderSoft}`,
         boxShadow: scrolled ? "0 10px 30px rgba(15, 23, 42, 0.15)" : "none",
@@ -32,9 +52,9 @@ export function Navbar() {
     >
       <style>{`
         .nav-inner {
-          padding: 0 1.5rem;          /* = hero padding 1.5rem */
+          padding: 0 1.5rem;
           height: 60px;
-          max-width: 1200px;          /* = hero max-width gần giống */
+          max-width: 1200px;
           margin: 0 auto;
           display: flex;
           align-items: center;
@@ -44,7 +64,7 @@ export function Navbar() {
 
         @media (max-width: 768px) {
           .nav-inner {
-            padding: 0 1.25rem;       /* = hero mobile 1.25rem */
+            padding: 0 1.25rem;
           }
         }
 
@@ -133,7 +153,7 @@ export function Navbar() {
         .nav-mobile {
           display: none;
           flex-direction: column;
-          padding: 8px 1.5rem 14px;     /* khớp container */
+          padding: 8px 1.5rem 14px;
           border-top: 1px solid ${borderSoft};
           background: rgba(253, 251, 247, 0.98);
         }
@@ -185,12 +205,13 @@ export function Navbar() {
         </div>
 
         <div className="nav-main">
-          <a
-            href={`${import.meta.env.VITE_API_URL}/auth/sso/redirect`}
+          <button
+            type="button"
             className="nav-sso"
+            onClick={handleSsoLogin}
           >
             Đăng nhập SSO
-          </a>
+          </button>
 
           <button
             className="nav-hamburger"
@@ -205,15 +226,15 @@ export function Navbar() {
         </div>
       </div>
 
-    <div className="nav-mobile" data-open={String(menuOpen)}>
-  <a
-    href={`${import.meta.env.VITE_API_URL}/auth/sso/redirect`}
-    className="nav-mobile-sso"
-    onClick={() => setMenuOpen(false)}
-  >
-    Đăng nhập SSO
-  </a>
-</div>
+      <div className="nav-mobile" data-open={String(menuOpen)}>
+        <button
+          type="button"
+          className="nav-mobile-sso"
+          onClick={handleMobileSsoLogin}
+        >
+          Đăng nhập SSO
+        </button>
+      </div>
     </header>
   );
 }
