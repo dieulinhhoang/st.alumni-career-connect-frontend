@@ -14,7 +14,15 @@ import {
 
 const UserManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
-  const [query, setQuery] = useState({ page: 0, size: 10 })
+  const [query, setQuery] = useState({
+  page: 0,
+  size: 10,
+  sso_id: '',
+  fullName: '',
+  code: '',
+  status: '',
+  type: '',
+  })
 
   const [ssoId, setSsoId] = useState('')
   const [fullName, setFullName] = useState('')
@@ -148,11 +156,11 @@ console.log('List Data:', listData) // Debug log to check the data structure
             onDelete={handleDelete}
             onToggleStatus={onToggleStatus}
             onTableChange={(p: any) =>
-              setQuery({
-                ...query,
+              setQuery((prev) => ({
+                ...prev,
                 page: (p.current ?? 1) - 1,
-                size: p.pageSize,
-              })
+                size: p.pageSize ?? 10,
+              }))
             }
           />
 
