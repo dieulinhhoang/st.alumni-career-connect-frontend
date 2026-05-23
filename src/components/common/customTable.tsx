@@ -1,4 +1,4 @@
-import { Table } from "antd";
+import { Table } from 'antd'
 
 export default function CustomTable({
   columns,
@@ -13,37 +13,37 @@ export default function CustomTable({
   return (
     <div
       style={{
-        width: "100%",
-        overflowX: "auto",
+        width: '100%',
+        overflowX: 'auto',
       }}
     >
       <Table
         {...props}
-        className={`custom-responsive-table ${props.className || ""}`}
+        className={`custom-responsive-table ${props.className || ''}`}
         columns={columns}
-        dataSource={data?.data || []}
+        dataSource={Array.isArray(data) ? data : []}
         onChange={handleTableChange}
         tableLayout="auto"
         scroll={
           scroll || {
-            x: "max-content",
+            x: 'max-content',
           }
         }
         scrollToFirstRowOnChange
         pagination={
           pagination ?? {
-            total: data?.page?.total_elements || 0,
+            total: filter?.total ?? 0,
             pageSize: filter?.size || 10,
             current: (filter?.page ?? 0) + 1,
             showSizeChanger: true,
             showTotal: (total: number, range: [number, number]) =>
               `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
-            position: ["bottomCenter"],
-            pageSizeOptions: ["10", "20", "50", "100"],
+            position: ['bottomCenter'],
+            pageSizeOptions: ['10', '20', '50', '100'],
           }
         }
         locale={{
-          emptyText: "Không có dữ liệu",
+          emptyText: 'Không có dữ liệu',
         }}
         size="middle"
         style={{
@@ -52,5 +52,5 @@ export default function CustomTable({
         }}
       />
     </div>
-  );
+  )
 }

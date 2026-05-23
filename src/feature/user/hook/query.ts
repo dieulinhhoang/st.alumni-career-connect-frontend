@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
  
 import { message } from 'antd'
-import { changeUserPasswordAPI, createUserAPI, deleteUserAPI, getListUserAPI, getUserDetailAPI, updateUserAPI, updateUserSuspendAPI } from '../api'
+import {  createUserAPI, deleteUserAPI, getListUserAPI, getUserDetailAPI, updateUserAPI, updateUserSuspendAPI } from '../api'
 import type { ICreateUserBody, IUpdateUserBody, IUser, IUserListResponse, IUserQuery } from '../type'
 import { getListRoleAPI } from '../../role/api'
 import type { IRole } from '../../role/type'
@@ -63,18 +63,18 @@ export const useGetRolesUser = (params: any) => {
     })
 }
 
-export const useChangeUserPassword = () => {
-    const qc = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
-            changeUserPasswordAPI(id, newPassword),
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: ['users'] })
-            qc.invalidateQueries({ queryKey: ['user-detail'] })
-            message.success('Đổi mật khẩu thành công')
-        }
-    })
-}
+// export const useChangeUserPassword = () => {
+//     const qc = useQueryClient();
+//     return useMutation({
+//         mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
+//             changeUserPasswordAPI(id, newPassword),
+//         onSuccess: () => {
+//             qc.invalidateQueries({ queryKey: ['users'] })
+//             qc.invalidateQueries({ queryKey: ['user-detail'] })
+//             message.success('Đổi mật khẩu thành công')
+//         }
+//     })
+// }
 
 export const useIsSuspended  = () => {
     const qc = useQueryClient();

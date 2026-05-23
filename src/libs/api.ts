@@ -4,7 +4,7 @@ import { errorInterceptor, requestInterceptor, successInterceptor } from './inte
 import { mockApiHandler } from './mock';
 
 // ============ CONFIG ============
-const USE_MOCK = true; // true = dùng mock, false = gọi API thật
+const USE_MOCK = false; // true = dùng mock, false = gọi API thật
 
 // ============ AXIOS ============
 const axiosRequestConfig = {
