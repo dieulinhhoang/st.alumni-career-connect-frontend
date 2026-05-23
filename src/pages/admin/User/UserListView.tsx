@@ -1,12 +1,23 @@
-import { Button, Card, Col, Form, Input, Row, Select, Space, Switch, Tooltip } from 'antd'
+import React from 'react'
 import {
-  PlusOutlined,
+  Button,
+  Card,
+  Form,
+  Input,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Tooltip,
+} from 'antd'
+import {
   EditOutlined,
   EyeOutlined,
 } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+
 import type { IUser, IUserQuery } from '../../../feature/user/type'
 import FilterContainer from '../../../components/common/FilterContainer'
-import CustomTable from '../../../components/common/customTable'
 
 interface UserListViewProps {
   query: IUserQuery
@@ -26,40 +37,35 @@ const UserListView: React.FC<UserListViewProps> = ({
   setQuery,
   listData,
   loading,
-  onCreate,
   onEdit,
   onView,
-  onDelete,
   onTableChange,
   onToggleStatus,
 }) => {
-  const canCreate = true
   const canUpdate = true
-  const canDelete = true
   const canView = true
 
-  const columns = [
+  const columns: ColumnsType<IUser> = [
     {
       title: 'STT',
       width: 70,
-      align: 'center' as const,
+      align: 'center',
       render: (_: any, __: IUser, index: number) =>
         index + 1 + query.page * query.size,
     },
-    // {
-    //   title: 'SSO ID',
-    //   dataIndex: 'sso_id',
-    //   render: (sso_id: string, record: IUser) => (
-    //     <span style={{ fontWeight: 600, color: record.status === 'inactive' ? 'rgba(182, 176, 173, 0.9)' : '#111827' }}>
-    //       {sso_id}
-    //     </span>
-    //   ),
-    // },
     {
       title: 'Họ và tên',
       dataIndex: 'fullName',
       render: (fullName: string, record: IUser) => (
-        <span style={{ color: record.status === 'inactive' ? 'rgba(182, 176, 173, 0.9)' : '#111827' }}>
+        <span
+          style={{
+            color:
+              record.status === 'inactive'
+                ? 'rgba(182, 176, 173, 0.9)'
+                : '#111827',
+            fontWeight: 500,
+          }}
+        >
           {fullName || '-'}
         </span>
       ),
@@ -68,7 +74,14 @@ const UserListView: React.FC<UserListViewProps> = ({
       title: 'Mã người dùng',
       dataIndex: 'code',
       render: (code: string, record: IUser) => (
-        <span style={{ color: record.status === 'inactive' ? 'rgba(182, 176, 173, 0.9)' : '#111827' }}>
+        <span
+          style={{
+            color:
+              record.status === 'inactive'
+                ? 'rgba(182, 176, 173, 0.9)'
+                : '#111827',
+          }}
+        >
           {code || '-'}
         </span>
       ),
@@ -77,7 +90,14 @@ const UserListView: React.FC<UserListViewProps> = ({
       title: 'Loại người dùng',
       dataIndex: 'type',
       render: (type: string, record: IUser) => (
-        <span style={{ color: record.status === 'inactive' ? 'rgba(182, 176, 173, 0.9)' : '#111827' }}>
+        <span
+          style={{
+            color:
+              record.status === 'inactive'
+                ? 'rgba(182, 176, 173, 0.9)'
+                : '#111827',
+          }}
+        >
           {type || '-'}
         </span>
       ),
@@ -86,7 +106,7 @@ const UserListView: React.FC<UserListViewProps> = ({
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      align: 'center' as const,
+      align: 'center',
       render: (status: string, record: IUser) => (
         <Switch
           checked={status === 'active'}
@@ -98,9 +118,9 @@ const UserListView: React.FC<UserListViewProps> = ({
     {
       title: 'Hành động',
       width: 140,
-      align: 'center' as const,
+      align: 'center',
       render: (_: any, record: IUser) => {
-        if (!canView && !canUpdate && !canDelete) return null
+        if (!canView && !canUpdate) return null
 
         return (
           <Space size={12}>
@@ -112,7 +132,6 @@ const UserListView: React.FC<UserListViewProps> = ({
                     <EyeOutlined
                       style={{
                         fontSize: 18,
-                        cursor: 'pointer',
                         color: 'rgba(60,173,54,0.85)',
                       }}
                     />
@@ -130,7 +149,6 @@ const UserListView: React.FC<UserListViewProps> = ({
                     <EditOutlined
                       style={{
                         fontSize: 18,
-                        cursor: 'pointer',
                         color:
                           record.status === 'inactive'
                             ? 'rgba(182, 176, 173, 0.9)'
@@ -143,19 +161,6 @@ const UserListView: React.FC<UserListViewProps> = ({
                 />
               </Tooltip>
             )}
-
-            {/* Khi cần thì mở lại delete
-            {canDelete && (
-              <Popconfirm
-                title="Xóa người dùng?"
-                onConfirm={() => onDelete(String(record.id))}
-              >
-                <Button type="text" danger>
-                  Xóa
-                </Button>
-              </Popconfirm>
-            )}
-            */}
           </Space>
         )
       },
@@ -206,29 +211,12 @@ const UserListView: React.FC<UserListViewProps> = ({
       >
         {() => (
           <>
-            <Form.Item name="sso_id" style={{ marginBottom: 12 }}>
-              <Input placeholder="SSO ID" style={inputStyle} />
-            </Form.Item>
-
             <Form.Item name="fullName" style={{ marginBottom: 12 }}>
               <Input placeholder="Họ và tên" style={inputStyle} />
             </Form.Item>
 
             <Form.Item name="code" style={{ marginBottom: 12 }}>
               <Input placeholder="Mã người dùng" style={inputStyle} />
-            </Form.Item>
-
-            <Form.Item name="type" style={{ marginBottom: 12 }}>
-              <Select
-                allowClear
-                placeholder="Loại người dùng"
-                style={inputStyle}
-                options={[
-                  { label: 'Quản trị viên', value: 'admin' },
-                  { label: 'Cán bộ', value: 'officer' },
-                  { label: 'Giảng viên', value: 'teacher' },
-                ]}
-              />
             </Form.Item>
 
             <Form.Item name="status" style={{ marginBottom: 12 }}>
@@ -246,28 +234,7 @@ const UserListView: React.FC<UserListViewProps> = ({
         )}
       </FilterContainer>
 
-      <Row justify="end" align="middle" style={{ marginBottom: 16, marginTop: 4 }}>
-        {canCreate && (
-          <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={onCreate}
-              style={{
-                borderRadius: 8,
-                paddingInline: 18,
-                height: 40,
-                fontSize: 14,
-                fontWeight: 500,
-                background: '#1677ff',
-                borderColor: '#1677ff',
-              }}
-            >
-              Thêm mới
-            </Button>
-          </Col>
-        )}
-      </Row>
+      <br />
 
       <Card
         style={{
@@ -276,18 +243,20 @@ const UserListView: React.FC<UserListViewProps> = ({
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         }}
       >
-        <CustomTable
-            columns={columns}
-            data={listData?.items ?? []}
-            filter={{
-                ...query,
-                total: listData?.total ?? listData?.items?.length ?? 0,
-            }}
-            loading={loading}
-            handleTableChange={onTableChange}
-            minHeight={430}
-            rowKey="id"
-            />
+        <Table
+          columns={columns}
+          dataSource={listData?.items ?? []}
+          loading={loading}
+          rowKey="id"
+          pagination={{
+            current: query.page + 1,
+            pageSize: query.size,
+            total: listData?.total ?? 0,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50'],
+          }}
+          onChange={onTableChange}
+        />
       </Card>
     </>
   )

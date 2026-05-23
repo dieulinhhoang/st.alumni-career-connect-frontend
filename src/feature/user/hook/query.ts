@@ -56,12 +56,12 @@ export const useDeleteUser = () => {
     })
 }
 
-export const useGetRolesUser = (params: any) => {
-    return useQuery<IRole[]>({
-        queryKey: ['roles-user', params],
-        queryFn: () => getListRoleAPI(params).then(res => res.data),
-    })
-}
+// export const useGetRolesUser = (params: any) => {
+//     return useQuery<IRole[]>({
+//         queryKey: ['roles-user', params],
+//         queryFn: () => getListRoleAPI(params).then(res => res.data),
+//     })
+// }
 
 // export const useChangeUserPassword = () => {
 //     const qc = useQueryClient();

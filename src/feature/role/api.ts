@@ -1,37 +1,41 @@
-import { api } from '../../libs/api';
+import axios from 'axios'
 import {
   IRole,
   IRoleListResponse,
   IRoleQuery,
   ICreateRoleBody,
-  IResourceItem
-} from './type';
+  IUpdateRoleBody,
+} from './type'
 
-export const getListRoleAPI = async (params: IRoleQuery): Promise<IRoleListResponse> => {
-  const { data } = await api.get(`/roles`, { params });
-  return data;
-};
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
+
+export const getListRoleAPI = async (
+  params: IRoleQuery,
+): Promise<IRoleListResponse> => {
+  const { data } = await api.get('/role', { params })
+  return data
+}
 
 export const createRoleAPI = async (body: ICreateRoleBody): Promise<IRole> => {
-  const { data } = await api.post(`/roles/`, body);
-  return data.data;
-};
+  const { data } = await api.post('/role', body)
+  return data
+}
 
-export const deleteRoleAPI = async (id: string): Promise<any> => {
-  const { data } = await api.delete(`/roles/${id}`);
-  return data;
-};
+export const deleteRoleAPI = async (id: string): Promise<void> => {
+  await api.delete(`/role/${id}`)
+}
 
-export const updateRoleAPI = async (id: string, body: ICreateRoleBody): Promise<void> => {
-  await api.put(`/roles/${id}`, body);
-};
+export const updateRoleAPI = async (
+  id: string,
+  body: IUpdateRoleBody,
+): Promise<IRole> => {
+  const { data } = await api.put(`/role/${id}`, body)
+  return data
+}
 
-export const getRoleDetailAPI = async (id: string): Promise<any> => {
-  const { data } = await api.get(`/roles/${id}`);
-  return data;
-};
-
-export const getResourceListAPI = async (): Promise<IResourceItem[]> => {
-  const { data } = await api.get('/resources');
-  return data.data;
-};
+export const getRoleDetailAPI = async (id: string): Promise<IRole> => {
+  const { data } = await api.get(`/role/${id}`)
+  return data
+}
