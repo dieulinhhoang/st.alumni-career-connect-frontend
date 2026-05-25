@@ -3,125 +3,108 @@ import type {
 	FacultyKey,
 } from "./type";
 import { FACULTY_COLOR_MAP } from "./type";
-import {api} from "../../libs/api";
-
-// Enterprise API
+import { api } from "../../libs/api";
 
 /**
- * Fetch list of all enterprises.
+ * Normalize raw BE response → typed array.
+ * Accepts: raw array | { items } | { data } | { results }
  */
+function normalizeList<T>(raw: unknown): T[] {
+	if (Array.isArray(raw)) return raw as T[];
+	if (raw && typeof raw === "object") {
+		const obj = raw as Record<string, unknown>;
+		if (Array.isArray(obj.items)) return obj.items as T[];
+		if (Array.isArray(obj.data)) return obj.data as T[];
+		if (Array.isArray(obj.results)) return obj.results as T[];
+	}
+	return [];
+}
+
+/**
+ * Normalize raw BE response → single entity.
+ * Accepts: raw object | { data: object }
+ */
+function normalizeEntity<T>(raw: unknown): T {
+	if (raw && typeof raw === "object") {
+		const obj = raw as Record<string, unknown>;
+		if (obj.data && typeof obj.data === "object") return obj.data as T;
+	}
+	return raw as T;
+}
+
+// ─── Enterprise API ───────────────────────────────────────────────────────────
+
 export async function fetchEnterprises(): Promise<Enterprise[]> {
 	const res = await api.get("/enterprises");
-	return res.data ?? [];
+	return normalizeList<Enterprise>(res.data);
 }
 
-/**
- * Fetch a single enterprise by ID.
- * @param id - Enterprise ID
- */
 export async function fetchEnterpriseById(id: string): Promise<Enterprise | null> {
 	const res = await api.get(`/enterprises/${id}`);
-	return res.data ?? null;
+	if (!res.data) return null;
+	return normalizeEntity<Enterprise>(res.data);
 }
 
-/**
- * Create a new enterprise.
- * @param payload - Enterprise form values
- */
 export async function createEnterprise(payload: EnterpriseFormValues): Promise<Enterprise> {
 	const res = await api.post("/enterprises", payload);
-	return res.data;
+	return normalizeEntity<Enterprise>(res.data);
 }
 
-/**
- * Update an existing enterprise.
- * @param id - Enterprise ID
- * @param payload - Partial enterprise fields to update
- */
 export async function updateEnterprise(
 	id: string,
 	payload: Partial<Enterprise>
 ): Promise<Enterprise> {
 	const res = await api.put(`/enterprises/${id}`, payload);
-	return res.data;
+	return normalizeEntity<Enterprise>(res.data);
 }
 
-/**
- * Verify an enterprise profile.
- * @param id - Enterprise ID
- */
 export async function verifyEnterprise(id: string): Promise<Enterprise> {
 	const res = await api.post(`/enterprises/${id}/verify`);
-	return res.data;
+	return normalizeEntity<Enterprise>(res.data);
 }
 
-/**
- * Set the partner status for an enterprise.
- * @param id - Enterprise ID
- * @param status - active | inactive
- */
 export async function setPartnerStatus(
 	id: string,
 	status: "active" | "inactive"
 ): Promise<Enterprise> {
 	const res = await api.patch(`/enterprises/${id}/partner-status`, { status });
-	return res.data;
+	return normalizeEntity<Enterprise>(res.data);
 }
 
-// Job API
+// ─── Job API ──────────────────────────────────────────────────────────────────
 
-/**
- * Fetch jobs for a specific enterprise.
- * @param enterpriseId - Enterprise ID
- */
 export async function fetchJobsByEnterprise(enterpriseId: string): Promise<Job[]> {
 	const res = await api.get("/jobs", { params: { enterprise_id: enterpriseId } });
-	return res.data ?? [];
+	return normalizeList<Job>(res.data);
 }
 
-/**
- * Create a new job for an enterprise.
- * @param enterpriseId - Enterprise ID
- * @param payload - Job form values
- */
 export async function createJob(
 	enterpriseId: string,
 	payload: JobFormValues
 ): Promise<Job> {
 	const res = await api.post("/jobs", { ...payload, enterpriseId });
-	return res.data;
+	return normalizeEntity<Job>(res.data);
 }
 
-/**
- * Update a job.
- * @param enterpriseId - Enterprise ID
- * @param jobId - Job ID
- * @param payload - Partial job fields to update
- */
 export async function updateJob(
 	enterpriseId: string,
 	jobId: string,
 	payload: Partial<Job>
 ): Promise<Job> {
 	const res = await api.put(`/jobs/${jobId}`, payload);
-	return res.data;
+	return normalizeEntity<Job>(res.data);
 }
 
-/**
- * Delete a job.
- * @param enterpriseId - Enterprise ID
- * @param jobId - Job ID
- */
 export async function deleteJob(enterpriseId: string, jobId: string): Promise<void> {
 	await api.delete(`/jobs/${jobId}`);
 }
 
-// Faculty API
+// ─── Faculty Color ────────────────────────────────────────────────────────────
 
 /**
- * Fetch faculty color mapping.
+ * Trả về faculty color map từ constant local.
+ * Endpoint /faculty-colors không tồn tại trong BE — dùng constant thay thế.
  */
-export async function fetchFacultyColors(): Promise<Record<FacultyKey, string>> {
-	const res = await api.get("/faculty-colors");
-	return res.data ?? { ...FACULTY_COLOR_MAP };
+export function getFacultyColors(): Record<FacultyKey, string> {
+	return { ...FACULTY_COLOR_MAP };
 }
