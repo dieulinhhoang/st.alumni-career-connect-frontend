@@ -1,5 +1,10 @@
-import { api } from "../../libs/api";
-import type { Faculty, FacultyListResponse, FacultyQuery } from "./types";
+import axios from "axios";
+import type { Faculty, FacultyListResponse, FacultyQuery, Major } from "./types";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
+
 
 /**
  * Lấy danh sách khoa có phân trang.
@@ -9,16 +14,18 @@ import type { Faculty, FacultyListResponse, FacultyQuery } from "./types";
 export async function fetchFaculties(
   query: FacultyQuery = {}
 ): Promise<FacultyListResponse> {
+  console.log("API Request - fetchFaculties with query:", query); // Debug log to check the query parameters
   const res = await api.get("/faculty", { params: query });
   return res.data;
 }
 
 /**
  * Lấy toàn bộ khoa (không phân trang) — dùng cho Select / dropdown.
- * Gọi với size lớn để lấy hết.
- */
+  */
 export async function fetchAllFaculties(): Promise<Faculty[]> {
+
   const res = await api.get("/faculty", { params: { page: 0, size: 999 } });
+  
   return res.data?.items ?? [];
 }
 
@@ -29,5 +36,14 @@ export async function fetchAllFaculties(): Promise<Faculty[]> {
  */
 export async function fetchFacultyById(id: number): Promise<Faculty> {
   const res = await api.get(`/faculty/${id}`);
+  return res.data;
+}
+export async function fetchFacultyBySlug(slug: string): Promise<Faculty> {
+  const res = await api.get(`/faculties/${slug}`);
+  return res.data;
+}
+
+export async function fetchMajorBySlug(slug: string): Promise<Major> {
+  const res = await api.get(`/majors/${slug}`);
   return res.data;
 }

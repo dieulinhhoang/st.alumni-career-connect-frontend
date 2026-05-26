@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchFaculties, fetchAllFaculties, fetchFacultyById } from "../api";
-import type { Faculty, FacultyListResponse, FacultyQuery } from "../types";
+import { fetchFaculties, fetchAllFaculties, fetchFacultyById, fetchFacultyBySlug, fetchMajorBySlug } from "../api";
+import type { Faculty, FacultyListResponse, FacultyQuery, Major } from "../types";
 
-// ─────────────────────────────────────────────────────────────────────────────
 // useFacultyList — danh sách có phân trang + tìm kiếm
-// Dùng cho trang quản trị, bảng danh sách khoa
-// ─────────────────────────────────────────────────────────────────────────────
 interface FacultyListState {
   data: FacultyListResponse | null;
   loading: boolean;
@@ -42,9 +39,7 @@ export function useFacultyList(query: FacultyQuery = {}) {
   return { ...state, reload: load };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // useFaculties — lấy toàn bộ khoa, dùng cho Select / dropdown
-// ─────────────────────────────────────────────────────────────────────────────
 export function useFaculties() {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,9 +69,7 @@ export function useFaculties() {
   return { faculties, loading, error };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // useFacultyDetail — chi tiết 1 khoa theo ID
-// ─────────────────────────────────────────────────────────────────────────────
 export function useFacultyDetail(id: number | null) {
   const [faculty, setFaculty] = useState<Faculty | null>(null);
   const [loading, setLoading] = useState(false);
@@ -106,4 +99,30 @@ export function useFacultyDetail(id: number | null) {
   }, [id]);
 
   return { faculty, loading, error };
+}
+
+
+
+ // useMajorDetail — chi tiết 1 ngành theo SLUG
+ export function useMajorDetail(slug: string) {
+  const [major, setMajor] = useState<Major | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetchMajorBySlug(slug)             
+      .then((data) => {
+        if (!cancelled) { setMajor(data); setLoading(false); }
+      })
+      .catch(() => {
+        if (!cancelled) { setError("Không tìm thấy ngành."); setLoading(false); }
+      });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  return { major, loading, error };
 }

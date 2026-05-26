@@ -27,3 +27,20 @@ export interface FacultyQuery {
   name?: string;    // tìm kiếm theo tên (LIKE %name%)
   status?: number;  // lọc theo status (0 hoặc 1)
 }
+export interface Major {
+  id: string;
+  slug: string;
+  facultySlug: string;
+  name: string;
+  code: string;
+  khoa: number[];
+  classes: number;
+  students: number;
+}
+export interface ClassItem {
+  id: string;
+  name: string;
+  khoa: number;
+  students: number;
+  advisor: string;
+}
