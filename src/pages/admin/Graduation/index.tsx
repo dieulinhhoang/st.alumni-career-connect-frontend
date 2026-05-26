@@ -34,7 +34,7 @@ function StatCard({ label, value, color }: { label: string; value: React.ReactNo
   );
 }
 
-//  Pill badge ─
+//  Pill badge 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>
@@ -43,7 +43,7 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-//  Main ─
+//  Main 
 export default function GraduationList() {
   const navigate = useNavigate();
   const [page, setPage]         = useState(1);

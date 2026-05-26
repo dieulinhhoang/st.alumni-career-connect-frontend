@@ -3,7 +3,11 @@ import type {
 	FacultyKey,
 } from "./type";
 import { FACULTY_COLOR_MAP } from "./type";
-import { api } from "../../libs/api";
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
 
 /**
  * Normalize raw BE response → typed array.
@@ -32,7 +36,7 @@ function normalizeEntity<T>(raw: unknown): T {
 	return raw as T;
 }
 
-// ─── Enterprise API ───────────────────────────────────────────────────────────
+//  Enterprise API 
 
 export async function fetchEnterprises(): Promise<Enterprise[]> {
 	const res = await api.get("/enterprises");
@@ -71,7 +75,7 @@ export async function setPartnerStatus(
 	return normalizeEntity<Enterprise>(res.data);
 }
 
-// ─── Job API ──────────────────────────────────────────────────────────────────
+//  Job API 
 
 export async function fetchJobsByEnterprise(enterpriseId: string): Promise<Job[]> {
 	const res = await api.get("/jobs", { params: { enterprise_id: enterpriseId } });
@@ -99,7 +103,7 @@ export async function deleteJob(enterpriseId: string, jobId: string): Promise<vo
 	await api.delete(`/jobs/${jobId}`);
 }
 
-// ─── Faculty Color ────────────────────────────────────────────────────────────
+//  Faculty Color 
 
 /**
  * Trả về faculty color map từ constant local.

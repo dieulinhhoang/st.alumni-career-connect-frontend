@@ -390,7 +390,7 @@
   font-weight: 500;
 }
 
-/* ── KPI grid – pastel graduation palette ── */
+/*  KPI grid – pastel graduation palette  */
 .rp-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -540,7 +540,7 @@
   line-height: 1.5;
 }
 
-/* ── Formal table – no border ── */
+/*  Formal table – no border  */
 .rp-formal-table .ant-table {
   border: none !important;
 }
@@ -580,7 +580,7 @@
   background: #f8f9ff;
 }
 
-/* ── Summary row – dòng vàng nhẹ, chữ bình thường + đậm ── */
+/*  Summary row – dòng vàng nhẹ, chữ bình thường + đậm  */
 .rp-summary-row > td {
   background-color: #fffbf0 !important;
   font-weight: 600;
@@ -618,7 +618,7 @@
   margin-top: 56px;
 }
 
-/* ── Feedback input inside table ── */
+/*  Feedback input inside table  */
 .rp-feedback-input {
   width: 100%;
   font-size: 12px;
@@ -654,7 +654,7 @@
     align-items: flex-start;
   }
 }
-/* ── KPI grid – neutral grey cards ── */
+/*  KPI grid – neutral grey cards  */
 .rp-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

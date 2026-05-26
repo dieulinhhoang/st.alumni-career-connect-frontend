@@ -1,4 +1,4 @@
-// ─── LoadingScreen ────────────────────────────────────────────────────────────
+//  LoadingScreen 
 export function LoadingScreen() {
   return (
     <div style={{
@@ -13,25 +13,25 @@ export function LoadingScreen() {
       `}</style>
 
       <div style={{ textAlign:'center', animation:'iso-fadeup .5s ease both' }}>
-        {/* ── Isometric clipboard đang load ── */}
+        {/*  Isometric clipboard đang load  */}
         <svg width="240" height="220" viewBox="0 0 240 220" fill="none" xmlns="http://www.w3.org/2000/svg"
           style={{ display:'block', margin:'0 auto', animation:'iso-float 2.6s ease-in-out infinite' }}>
 
           {/* Bóng */}
           <ellipse cx="120" cy="210" rx="56" ry="7" fill="#a7f3d0" opacity=".6"/>
 
-          {/* ── Mặt trên clipboard (top face) ── */}
+          {/*  Mặt trên clipboard (top face)  */}
           <polygon points="120,18 200,62 120,106 40,62" fill="#1D9E75"/>
           {/* Shine top */}
           <polygon points="120,18 160,40 120,62 80,40" fill="#34d399" opacity=".35"/>
 
-          {/* ── Mặt phải (right face) ── */}
+          {/*  Mặt phải (right face)  */}
           <polygon points="200,62 200,152 120,196 120,106" fill="#0d7a5a"/>
 
-          {/* ── Mặt trái (left face) ── */}
+          {/*  Mặt trái (left face)  */}
           <polygon points="40,62 40,152 120,196 120,106" fill="#15896a"/>
 
-          {/* ── Dòng kẻ isometric trên mặt trên ── */}
+          {/*  Dòng kẻ isometric trên mặt trên  */}
           {/* dòng 1 */}
           <polygon points="96,52 136,30 148,37 108,59" fill="#fff" opacity=".5"/>
           {/* dòng 2 */}
@@ -40,12 +40,12 @@ export function LoadingScreen() {
           <polygon points="96,72 118,60 130,67 108,79" fill="#fff" opacity=".9"
             style={{ animation:'iso-blink 1s ease-in-out infinite' }}/>
 
-          {/* ── Kẹp clipboard trên đỉnh ── */}
+          {/*  Kẹp clipboard trên đỉnh  */}
           <polygon points="108,18 132,18 136,26 120,34 104,26" fill="#0d7a5a"/>
           <polygon points="112,14 128,14 132,22 120,28 108,22" fill="#94a3b8"/>
           <polygon points="115,12 125,12 128,18 120,22 112,18" fill="#cbd5e1"/>
 
-          {/* ── Spinner nhỏ góc phải ── */}
+          {/*  Spinner nhỏ góc phải  */}
           <g transform="translate(194,46)">
             <circle cx="0" cy="0" r="16" fill="#f0fdf9" stroke="#a7f3d0" strokeWidth="2"/>
             <circle cx="0" cy="0" r="11" fill="none" stroke="#1D9E75" strokeWidth="3"
@@ -66,7 +66,7 @@ export function LoadingScreen() {
 }
 
 
-// ─── ErrorScreen ──────────────────────────────────────────────────────────────
+//  ErrorScreen 
 export function ErrorScreen() {
   return (
     <div style={{
@@ -82,7 +82,7 @@ export function ErrorScreen() {
 
       <div style={{ textAlign:'center', maxWidth:420, animation:'err-fadeup .5s ease both' }}>
 
-        {/* ── Isometric scene: robot bối rối bên cạnh màn hình lỗi ── */}
+        {/*  Isometric scene: robot bối rối bên cạnh màn hình lỗi  */}
         <svg width="340" height="260" viewBox="0 0 340 260" fill="none" xmlns="http://www.w3.org/2000/svg"
           style={{ width:'100%', maxWidth:340, display:'block', margin:'0 auto 4px' }}>
 

@@ -54,7 +54,7 @@ export function FloatingPopup({
   // Chỉ tiêu đang được chọn (nếu có)
   const selectedIndicator = indicators.find((ind) => ind.key === question.reportFieldKey)
 
-  // ── Positioning ──
+  //  Positioning 
   const calcPos = useCallback(() => {
     if (!anchorEl || !popupRef.current) return
     const card = anchorEl.getBoundingClientRect()
@@ -84,7 +84,7 @@ export function FloatingPopup({
     document.addEventListener('mousedown', handler); return () => document.removeEventListener('mousedown', handler)
   }, [anchorEl, onClose])
 
-  // ── Khi chọn chỉ tiêu → tự điền reportFieldKey ──
+  //  Khi chọn chỉ tiêu → tự điền reportFieldKey 
   const handleIndicatorChange = (key: string | undefined) => {
     onUpdate({ reportFieldKey: key || undefined })
   }
@@ -187,7 +187,7 @@ export function FloatingPopup({
           </div>
         )}
 
-        {/* ── Chỉ tiêu thống kê ── chỉ hiện với loại có thể thống kê */}
+        {/*  Chỉ tiêu thống kê  chỉ hiện với loại có thể thống kê */}
         {isChartable && (
           <div style={{ borderTop: '1px solid #f0f2f5', paddingTop: 12 }}>
             <div style={LBL}>Chỉ tiêu thống kê</div>

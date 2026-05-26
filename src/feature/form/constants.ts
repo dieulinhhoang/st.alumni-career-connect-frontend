@@ -72,7 +72,7 @@ export const MOCK_FORMS: Form[] = [
       { id: "sec-solution", title: "Giải pháp",            order: 4 },
     ],
     questions: [
-      // ── THÔNG TIN CÁ NHÂN ──────────────────────────────────────────
+      //  THÔNG TIN CÁ NHÂN 
       {
         id: "q01", type: "short", title: "Mã sinh viên",
         required: true, options: [],
@@ -127,7 +127,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "email",
       },
 
-      // ── TÌNH HÌNH VIỆC LÀM ─────────────────────────────────────────
+      //  TÌNH HÌNH VIỆC LÀM 
       {
         id: "q09", type: "radio", title: "Tình trạng việc làm hiện tại",
         required: true,
@@ -273,7 +273,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "recruitmenttype",
       },
 
-      // ── KỸ NĂNG & KHÓA HỌC ────────────────────────────────────────
+      //  KỸ NĂNG & KHÓA HỌC 
       {
         id: "q22", type: "checkbox",
         title: "Kỹ năng mềm cần thiết trong công việc (có thể chọn nhiều)",
@@ -308,7 +308,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "trainingcourses",
       },
 
-      // ── GIẢI PHÁP ──────────────────────────────────────────────────
+      //  GIẢI PHÁP 
       {
         id: "q24", type: "checkbox",
         title: "Giải pháp giúp tăng tỷ lệ có việc làm đúng ngành (có thể chọn nhiều)",

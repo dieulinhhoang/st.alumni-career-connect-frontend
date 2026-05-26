@@ -60,7 +60,7 @@ export function RightPanel({
       overflow: 'hidden',
     }}>
 
-      {/* ── Sliding content panel ── */}
+      {/*  Sliding content panel  */}
       <div style={{
         width: isOpen ? PANEL_CONTENT_W : 0,
         minWidth: 0,
@@ -77,7 +77,7 @@ export function RightPanel({
         </div>
       </div>
 
-      {/* ── Icon-only tab strip ── */}
+      {/*  Icon-only tab strip  */}
       <div style={{
         width: STRIP_W,
         flexShrink: 0,
