@@ -1,72 +1,51 @@
-import { UserActionInfo } from '@/Global/globalType'
-
 export interface IUser {
-    _id: string
-    userName: string
-    fullName: string
-    email: string
-    mobile: string
-    address?: string
-    age?: number
-    sex?: string
-    bod?: string
-    isSupperAdmin: boolean
-    roles: string[]
-    isSuspended: boolean
-    isDeleted: boolean
-    createdBy?: UserActionInfo
-    updatedBy?: UserActionInfo
-    createdAt: string
-    updatedAt: string
+  id: number
+  sso_id: string
+  fullName?: string | null
+  code?: string | null
+  accessToken?: string | null
+  status: string
+  type: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface IUserListResponse {
-    data: IUser[]
-    page: {
-        total_pages: number
-        has_next: boolean
-        has_previous: boolean
-        current_page: number
-        total_elements: number
-    }
+  data: IUser[]
+  page: {
+    total_pages: number
+    has_next: boolean
+    has_previous: boolean
+    current_page: number
+    total_elements: number
+  }
 }
 
-// (param ?page=&size=&userName=&fullName=&email=&mobile=)
 export interface IUserQuery {
-    page: number
-    size: number
-    userName?: string
-    fullName?: string
-    email?: string
-    mobile?: string
-    address?: string
-    roleId?: string
-   
+  page: number
+  size: number
+  sso_id?: string
+  fullName?: string
+  code?: string
+  status?: string
+  type?: string
 }
 
 export interface ICreateUserBody {
-    userName: string
-    fullName: string
-    email: string
-    mobile: string
-    address?: string
-    age?: number
-    sex?: string
-    bod?: string
-    password: string
-    roleIds?: string[]
+  sso_id: string
+  fullName: string
+  code?: string
+  status?: string
+  type?: string
 }
 
 export interface IUpdateUserBody {
-    fullName?: string
-    email?: string
-    mobile?: string
-    address?: string
-    sex?: number
-    bod?: string
-    roleIds?: string[]
+  fullName?: string
+  code?: string
+  status?: string
+  type?: string
 }
 
-export interface IChangePasswordBody {
-    newPassword: string
+export interface IToggleSuspendUserBody {
+  isSuspended: boolean
 }

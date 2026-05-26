@@ -145,7 +145,7 @@
 .rp-table-card {
   background: #fff;
   border-radius: 10px;
-  border: 1px solid #e8eaed;
+  /* border: 1px solid #e8eaed; */
   padding: 0 20px 20px;
 }
 
@@ -303,4 +303,404 @@
   .rp-page-header__right {
     align-items: flex-start;
   }
+}
+/*  Page layout  */
+.rp-page {
+  padding: 24px;
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+
+/*  Page header  */
+.rp-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8eaed;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.rp-page-header__left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-page-header__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.rp-page-header__subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.rp-page-header__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/*  Filter row  */
+.rp-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.rp-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-filter-label {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.rp-filter-label--large {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+}
+
+/*  Scope badge  */
+.rp-scope-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #f3f4ff;
+  color: #4338ca;
+  font-size: 12px;
+  border: 1px solid #e0e3ff;
+}
+
+.rp-scope-badge--large {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── KPI grid – pastel graduation palette ── */
+.rp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rp-kpi-card {
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  /* no border, color comes from background */
+  border: none;
+}
+
+.rp-kpi-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.rp-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+  /* semi-transparent white overlay for icon circle */
+  background: rgba(255,255,255,0.55) !important;
+}
+
+.rp-kpi-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-kpi-label {
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.72;
+  margin-bottom: 2px;
+}
+
+.rp-kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  /* color passed via inline style from KpiGrid */
+}
+
+.rp-kpi-sub {
+  font-size: 11px;
+  color: inherit;
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+/*  Table card & toolbar  */
+
+.rp-tabs .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.rp-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px 0;
+  gap: 8px;
+}
+
+.rp-table-toolbar__label {
+  font-size: 13px;
+  color: #555;
+}
+
+.rp-table-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+/*  Sheet (per-mẫu wrapper)  */
+.rp-sheet {
+  padding: 4px 0;
+}
+
+/*  Sheet header  */
+.rp-sheet-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.rp-sheet-header__org-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.rp-sheet-header__org-line {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #374151;
+  letter-spacing: 0.3px;
+}
+
+.rp-sheet-header__org-line--bold {
+  font-weight: 700;
+}
+
+.rp-sheet-header__title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #1a1a2e;
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/*  Sheet note  */
+.rp-sheet-note {
+  font-size: 11px;
+  color: #6b7280;
+  font-style: italic;
+  background: #fafafa;
+  border-left: 3px solid #d1d5db;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* ── Formal table – no border ── */
+.rp-formal-table .ant-table {
+  border: none !important;
+}
+
+.rp-formal-table .ant-table-container {
+  border: none !important;
+  border-inline-start: none !important;
+}
+
+.rp-formal-table .ant-table-thead > tr > th {
+  background: #f7f8fc;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  /* remove cell border – use row separator only */
+  border-color: transparent;
+  color: #374151;
+  box-shadow: none;
+}
+
+.rp-formal-table .ant-table-tbody > tr > td {
+  font-size: 12px;
+  border-color: transparent;
+}
+
+/* Subtle row separator only */
+.rp-formal-table .ant-table-tbody > tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rp-formal-table .ant-table-tbody > tr:last-child {
+  border-bottom: none;
+}
+
+.rp-formal-table .ant-table-tbody > tr:hover > td {
+  background: #f8f9ff;
+}
+
+/* ── Summary row – dòng vàng nhẹ, chữ bình thường + đậm ── */
+.rp-summary-row > td {
+  background-color: #fffbf0 !important;
+  font-weight: 600;
+  font-size: 12px;
+  border-color: transparent !important;
+  color: #131313;
+}
+
+/*  Sheet footer  */
+.rp-sheet-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e8eaed;
+}
+
+.rp-sheet-footer__sign-block {
+  text-align: center;
+  min-width: 220px;
+}
+
+.rp-sheet-footer__date {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.rp-sheet-footer__sign {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #1a1a2e;
+  margin-top: 56px;
+}
+
+/* ── Feedback input inside table ── */
+.rp-feedback-input {
+  width: 100%;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 3px 7px;
+  outline: none;
+  background: #fff;
+  color: #374151;
+  transition: border-color 0.15s;
+}
+
+.rp-feedback-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.1);
+}
+
+.rp-feedback-input::placeholder {
+  color: #9ca3af;
+}
+
+/*  Responsive  */
+@media (max-width: 768px) {
+  .rp-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rp-page-header {
+    flex-direction: column;
+  }
+
+  .rp-page-header__right {
+    align-items: flex-start;
+  }
+}
+/* ── KPI grid – neutral grey cards ── */
+.rp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rp-kpi-card {
+  background: #f3f4f6;
+  border-radius: 10px;
+  border: none;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.15s ease;
+}
+
+.rp-kpi-card:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.rp-kpi-icon {
+  display: none; /* ẩn icon, chỉ hiện số + label như ảnh */
+}
+
+.rp-kpi-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rp-kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  /* color vẫn pass inline từ useKpiItems */
+}
+
+.rp-kpi-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+  margin-bottom: 0;
+  opacity: 1;
+}
+
+.rp-kpi-sub {
+  display: none; /* ảnh không có sub text */
 }

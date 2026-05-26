@@ -1,50 +1,33 @@
-import type { Faculty, Major, ClassItem } from "./types";
-import {api} from "../../libs/api";
+import { api } from "../../libs/api";
+import type { Faculty, FacultyListResponse, FacultyQuery } from "./types";
 
 /**
- * Fetch list of all faculties.
+ * Lấy danh sách khoa có phân trang.
+ * Dùng cho trang quản trị / danh sách.
+ * @param query - page, size, name (tìm kiếm), status (lọc)
  */
-export async function fetchFaculties(): Promise<Faculty[]> {
-	const res = await api.get("/faculties");
-	return res.data ?? [];
+export async function fetchFaculties(
+  query: FacultyQuery = {}
+): Promise<FacultyListResponse> {
+  const res = await api.get("/faculty", { params: query });
+  return res.data;
 }
 
 /**
- * Fetch a single faculty by slug.
- * @param slug - Faculty slug
+ * Lấy toàn bộ khoa (không phân trang) — dùng cho Select / dropdown.
+ * Gọi với size lớn để lấy hết.
  */
-export async function fetchFacultyBySlug(slug: string): Promise<Faculty | null> {
-	const res = await api.get(`/faculties/${slug}`);
-	return res.data ?? null;
+export async function fetchAllFaculties(): Promise<Faculty[]> {
+  const res = await api.get("/faculty", { params: { page: 0, size: 999 } });
+  return res.data?.items ?? [];
 }
 
 /**
- * Fetch all majors belonging to a faculty.
- * @param facultySlug - Faculty slug
+ * Lấy 1 khoa theo ID (số).
+ * BE: GET /faculty/:id
+ * @param id - Faculty ID (number)
  */
-export async function fetchMajorsByFacultySlug(
-	facultySlug: string
-): Promise<Major[]> {
-	const res = await api.get("/majors", { params: { faculty_slug: facultySlug } });
-	return res.data ?? [];
-}
-
-/**
- * Fetch a single major by slug.
- * @param majorSlug - Major slug
- */
-export async function fetchMajorBySlug(majorSlug: string): Promise<Major | null> {
-	const res = await api.get(`/majors/${majorSlug}`);
-	return res.data ?? null;
-}
-
-/**
- * Fetch all classes belonging to a major.
- * @param majorSlug - Major slug
- */
-export async function fetchClassesByMajorSlug(
-	majorSlug: string
-): Promise<ClassItem[]> {
-	const res = await api.get("/classes", { params: { major_slug: majorSlug } });
-	return res.data ?? [];
+export async function fetchFacultyById(id: number): Promise<Faculty> {
+  const res = await api.get(`/faculty/${id}`);
+  return res.data;
 }

@@ -1,112 +1,109 @@
-import { useState, useEffect } from "react";
-import { fetchFaculties } from "../api";
-import type { Faculty } from "../types";
+import { useState, useEffect, useCallback } from "react";
+import { fetchFaculties, fetchAllFaculties, fetchFacultyById } from "../api";
+import type { Faculty, FacultyListResponse, FacultyQuery } from "../types";
 
-interface State {
-  data: Faculty[];
+// ─────────────────────────────────────────────────────────────────────────────
+// useFacultyList — danh sách có phân trang + tìm kiếm
+// Dùng cho trang quản trị, bảng danh sách khoa
+// ─────────────────────────────────────────────────────────────────────────────
+interface FacultyListState {
+  data: FacultyListResponse | null;
   loading: boolean;
   error: string | null;
 }
 
+export function useFacultyList(query: FacultyQuery = {}) {
+  const [state, setState] = useState<FacultyListState>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const queryKey = JSON.stringify(query);
+
+  const load = useCallback(() => {
+    setState((s) => ({ ...s, loading: true, error: null }));
+    fetchFaculties(JSON.parse(queryKey) as FacultyQuery)
+      .then((data) => setState({ data, loading: false, error: null }))
+      .catch(() =>
+        setState((s) => ({
+          ...s,
+          loading: false,
+          error: "Không thể tải danh sách khoa.",
+        }))
+      );
+  }, [queryKey]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { ...state, reload: load };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// useFaculties — lấy toàn bộ khoa, dùng cho Select / dropdown
+// ─────────────────────────────────────────────────────────────────────────────
 export function useFaculties() {
-  const [state, setState] = useState<State>({ data: [], loading: true, error: null });
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setState(s => ({ ...s, loading: true, error: null }));
-
-    fetchFaculties()
-      .then(data => { if (!cancelled) setState({ data, loading: false, error: null }); })
-      .catch(() => { if (!cancelled) setState(s => ({ ...s, loading: false, error: "Không thể tải danh sách khoa." })); });
-
-    return () => { cancelled = true; };
+    setLoading(true);
+    fetchAllFaculties()
+      .then((data) => {
+        if (!cancelled) {
+          setFaculties(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError("Không thể tải danh sách khoa.");
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  return state;
+  return { faculties, loading, error };
 }
 
-
-// 
-// src/features/faculty/hooks/useFacultyDetail.ts
-
-import { fetchFacultyBySlug, fetchMajorsByFacultySlug } from "../api";
-import type { Major } from "../types";
-
-interface FacultyDetailState {
-  faculty: Faculty | null;
-  majors: Major[];
-  loading: boolean;
-  error: string | null;
-}
-
-export function useFacultyDetail(slug: string) {
-  const [state, setState] = useState<FacultyDetailState>({
-    faculty: null,
-    majors: [],
-    loading: true,
-    error: null,
-  });
+// ─────────────────────────────────────────────────────────────────────────────
+// useFacultyDetail — chi tiết 1 khoa theo ID
+// ─────────────────────────────────────────────────────────────────────────────
+export function useFacultyDetail(id: number | null) {
+  const [faculty, setFaculty] = useState<Faculty | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!id) return;
     let cancelled = false;
-    setState(s => ({ ...s, loading: true, error: null }));
-
-    Promise.all([fetchFacultyBySlug(slug), fetchMajorsByFacultySlug(slug)])
-      .then(([faculty, majors]) => {
-        if (cancelled) return;
-        if (!faculty) setState(s => ({ ...s, loading: false, error: "Không tìm thấy khoa." }));
-        else setState({ faculty, majors, loading: false, error: null });
+    setLoading(true);
+    setError(null);
+    fetchFacultyById(id)
+      .then((data) => {
+        if (!cancelled) {
+          setFaculty(data);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        if (!cancelled) setState(s => ({ ...s, loading: false, error: "Không thể tải dữ liệu." }));
+        if (!cancelled) {
+          setError("Không tìm thấy khoa.");
+          setLoading(false);
+        }
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
-    return () => { cancelled = true; };
-  }, [slug]);
-
-  return state;
-}
-
-
-// 
-// src/features/faculty/hooks/useMajorDetail.ts
-
-import { fetchMajorBySlug, fetchClassesByMajorSlug } from "../api";
-import type { ClassItem } from "../types";
-
-interface MajorDetailState {
-  major: Major | null;
-  classes: ClassItem[];
-  loading: boolean;
-  error: string | null;
-}
-
-export function useMajorDetail(majorSlug: string) {
-  const [state, setState] = useState<MajorDetailState>({
-    major: null,
-    classes: [],
-    loading: true,
-    error: null,
-  });
-
-  useEffect(() => {
-    if (!majorSlug) return;
-    let cancelled = false;
-    setState(s => ({ ...s, loading: true, error: null }));
-
-    Promise.all([fetchMajorBySlug(majorSlug), fetchClassesByMajorSlug(majorSlug)])
-      .then(([major, classes]) => {
-        if (cancelled) return;
-        if (!major) setState(s => ({ ...s, loading: false, error: "Không tìm thấy ngành." }));
-        else setState({ major, classes, loading: false, error: null });
-      })
-      .catch(() => {
-        if (!cancelled) setState(s => ({ ...s, loading: false, error: "Không thể tải dữ liệu." }));
-      });
-
-    return () => { cancelled = true; };
-  }, [majorSlug]);
-
-  return state;
+  return { faculty, loading, error };
 }

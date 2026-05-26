@@ -1,27 +1,17 @@
-import type { BaseResponse } from '../../global/globalType'
-import { api } from '../../libs/api'
-import type { LoginRequest } from './type'
-import type { LoginResponse } from './type'
- import type { ProfileInfo } from './type'
+import { api } from "../../libs/api";
 
-export const loginAPI = async (params: LoginRequest): Promise<LoginResponse> => {
-  const { data } = await api.post('/v1.0/auth/login', params)
-  return data.data
-}
+const BE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-export const refreshTokenAPI = async (refreshToken: string): Promise<LoginResponse> => {
-  const { data } = await api.get('/v1.0/auth/refresh', {
-    headers: {
-      Authorization: `Bearer ${refreshToken}`,
-      'Content-Type': 'application/json'
-    },
-    // Custom flag to tell interceptor not to override Authorization header
-    metadata: { isRefreshToken: true }
-  } as any)
-  return data.data
-}
+// Redirect sang BE để bắt đầu SSO
+export const loginWithSSO = () => {
+  window.location.href = `${BE_URL}/auth/sso/redirect`;
+};
 
-export const getProfileAPI = async (): Promise<BaseResponse<ProfileInfo>> => {
-  const { data } = await api.get('/v1.0/auth/profile')
-  return data.data
-}
+// Lấy profile sau khi đã có token
+export const getProfileAPI = async () => {
+  const token = localStorage.getItem('accessToken');
+  const { data } = await api.get('/auth/profile', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return data;
+};

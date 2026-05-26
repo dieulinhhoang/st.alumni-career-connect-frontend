@@ -22,6 +22,7 @@ import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDe
 import ReportsPage from '../pages/admin/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
+import AuthCallback from '../pages/admin/Auth/AuthCallback';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -269,6 +270,15 @@ const routes = [
                           <StatIndicatorConfig />
                     </Suspense>
                 )
+            },{
+                
+                path: '/auth/callback',
+                element: (
+                    <Suspense fallback={<Loader />}>
+                          <AuthCallback />
+                    </Suspense>
+                 )
+
             }
         ]  
     }

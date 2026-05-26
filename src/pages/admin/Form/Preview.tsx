@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Form, Question, Section } from '../../../feature/form/types'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 
 
-// ── Utility ───────────────────────────────────────────────────
+//  Utility 
 
 
 function todayLabel() {
@@ -11,7 +12,7 @@ function todayLabel() {
 }
 
 
-// ── Design tokens ─────────────────────────────────────────────
+//  Design tokens 
 const C = {
   text:      '#111827',
   sub:       '#6b7280',
@@ -317,7 +318,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
 }
 
 
-// ── Section header ─────────────────────────────────────────────
+//  Section header 
 
 
 function SectionHeader({ title }: { title: string }) {
@@ -326,7 +327,6 @@ function SectionHeader({ title }: { title: string }) {
       display: 'flex', alignItems: 'center', gap: 10,
       margin: '32px 0 20px',
     }}>
-      <div style={{ width: 3, height: 18, borderRadius: 2, background: C.accent, flexShrink: 0 }} />
       <span style={{ fontSize: 13.5, fontWeight: 700, color: C.text, letterSpacing: '-0.01em' }}>
         {title}
       </span>
@@ -489,37 +489,10 @@ export function SurveyPreview({
       background: compact ? 'transparent' : C.bg,
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       fontSize: 14,
-      color: C.text,
+      color: C.text,  
     }}>
+ 
 
-      {/* Top bar */}
-      {!compact && (
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 20,
-          background: C.surface,
-          borderBottom: `1px solid ${C.border}`,
-          height: 46,
-          display: 'flex', alignItems: 'center',
-          padding: '0 20px',
-          gap: 8,
-        }}>
-          {onBack && (
-            <button
-              onClick={onBack}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                height: 30, padding: '0 12px', borderRadius: 6,
-                border: `1px solid ${C.border}`, background: C.surface,
-                color: C.sub, fontSize: 13, fontWeight: 500,
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              ← Quay lại
-            </button>
-          )}
-          <span style={{ fontSize: 12, color: C.muted, marginLeft: 4 }}>Xem trước</span>
-        </div>
-      )}
 
       {/* Form card */}
       <div style={{ maxWidth: 780, margin: '0 auto', padding: compact ? '0' : '28px 16px 72px' }}>
@@ -594,7 +567,6 @@ export function SurveyPreview({
                 borderRadius: 6, padding: '10px 14px', marginBottom: 20,
                 fontSize: 13, color: C.danger, display: 'flex', alignItems: 'center', gap: 8,
               }}>
-                <span>⚠</span>
                 Vui lòng điền vào {errors.size} trường bắt buộc còn thiếu.
               </div>
             )}
@@ -643,7 +615,7 @@ export function SurveyPreview({
                   color: C.sub, fontSize: 13, fontWeight: 500,
                   cursor: 'pointer', fontFamily: 'inherit',
                 }}>
-                  ← Quay lại
+                  ← 
                 </button>
               )}
 

@@ -102,14 +102,13 @@ const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
       height: 64,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: collapsed ? 'center' : 'flex-start',
+      justify: collapsed ? 'center' : 'flex-start',
       padding: collapsed ? 0 : '0 16px',
       borderBottom: '1px solid rgba(255,255,255,0.06)',
       gap: 10,
       flexShrink: 0,
     }}
   >
-    {/* Thay src bằng đường dẫn logo VNUA thật của bạn */}
     <div
       style={{
         width: 36,
@@ -266,7 +265,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
           minHeight: '100vh',
         }}
       >
-        {/* Header – KHÔNG còn thanh tìm kiếm */}
+        {/* Header */}
         <Header
           style={{
             padding: '0 24px',
@@ -300,7 +299,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
                 </span>
               </>
             ) : (
-              <Tooltip title={collapsed } placement="bottom">
+              /* Đã sửa lỗi title của Tooltip truyền trực tiếp boolean */
+              <Tooltip title={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"} placement="bottom">
                 <Button
                   type="text"
                   icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -355,7 +355,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
 
         {/* Content */}
         <Content style={{ margin: 24 }}>
-          {/* Breadcrumb tiếng Việt */}
+          {/* Breadcrumb tiếng Việt - Đã bọc Link điều hướng về Dashboard */}
           <div
             style={{
               marginBottom: 16,
@@ -367,8 +367,21 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
               color: '#94a3b8',
             }}
           >
-            <HomeOutlined style={{ fontSize: 13, color: '#94a3b8' }} />
-            <span style={{ color: '#64748b' }}>Trang quản trị</span>
+            <Link 
+              to="/admin/dashboard" 
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 6, 
+                color: '#64748b',
+                textDecoration: 'none',
+                transition: 'color 0.2s'
+              }}
+              className="breadcrumb-link-hover"
+            >
+              <HomeOutlined style={{ fontSize: 13 }} />
+              <span>Trang quản trị</span>
+            </Link>
             <span>/</span>
             <span style={{ color: '#0f172a', fontWeight: 700 }}>{pageLabel}</span>
           </div>
