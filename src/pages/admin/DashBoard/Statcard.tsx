@@ -96,11 +96,11 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
         >
           {value}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</div>
+        <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.4 }}>{label}</div>
       </div>
 
       {/* Row 3: Sub-text + thin accent line */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {/* <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div
           style={{
             width: 3,
@@ -112,7 +112,7 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
           }}
         />
         <span style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.4 }}>{sub}</span>
-      </div>
+      </div> */}
     </div>
   );
 }

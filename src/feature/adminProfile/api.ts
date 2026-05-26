@@ -1,11 +1,9 @@
 import { api } from '../../libs/api'
 import type { IAdminProfile, IUpdateAdminProfileBody } from './type'
-
-// bản tạm: lấy user id = 1 làm admin
+// ban tam: Lay user id = 1 lam admin
 export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
-  const { data } = await api.get('/v1.0/users/1')
+  const { data } = await api.get('/users/1')
   const user = data?.data ?? data
-
   const roles = Array.isArray(user?.roles)
     ? user.roles
         .map((role: any) =>
@@ -13,7 +11,6 @@ export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
         )
         .filter(Boolean)
     : []
-
   return {
     _id: user._id,
     userName: user.userName,
@@ -25,12 +22,11 @@ export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
     bod: user.bod,
     isSupperAdmin: user.isSupperAdmin,
     roles,
-    roleName: roles[0] || 'Quản trị viên',
+    roleName: roles[0] || 'Quan tri vien',
   }
 }
-
 export const updateAdminProfileAPI = async (
   body: IUpdateAdminProfileBody,
 ): Promise<void> => {
-  await api.put('/v1.0/users/1', body)
+  await api.put('/users/1', body)
 }

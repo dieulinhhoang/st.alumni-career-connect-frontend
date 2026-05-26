@@ -10,17 +10,44 @@ import CustomTable from "../../../components/common/customTable";
 
 const { Text } = Typography;
 
-const pill = (bg: string, color: string): React.CSSProperties => ({
-  display: "inline-flex", alignItems: "center", gap: 4,
-  padding: "2px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
-  background: bg, color, border: `1.5px solid ${color}30`,
-});
+//  Design tokens 
+const T = {
+  accent:  "#16a34a",   // green-600
+  warning: "#f59e0b",   // amber
+  text:    "#1e2433",
+  sub:     "#8791a6",
+  muted:   "#adb5c4",
+  border:  "#eceef2",
+  surface: "#ffffff",
+  bg:      "#f7f8fa",
+};
 
+//  Stat card (same style as Enterprise) 
+function StatCard({ label, value, color }: { label: string; value: React.ReactNode; color: string }) {
+  return (
+    <div style={{ background: "#f4f5f7", borderRadius: 12, padding: "18px 22px" }}>
+      <div style={{ fontSize: 26, fontWeight: 700, color, letterSpacing: "-0.5px", lineHeight: 1 }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 13, color: T.sub, marginTop: 6, fontWeight: 400 }}>{label}</div>
+    </div>
+  );
+}
+
+//  Pill badge ─
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>
+      {children}
+    </span>
+  );
+}
+
+//  Main ─
 export default function GraduationList() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-
+  const [page, setPage]         = useState(1);
+  const [search, setSearch]     = useState("");
   const [pageSize, setPageSize] = useState(10);
 
   const { data: graduations, meta, loading, error } = useGraduations(page);
@@ -35,139 +62,157 @@ export default function GraduationList() {
     );
   }, [graduations, search]);
 
-
-  const totalStudentsCurrentPage = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
-
-  const stats = [
-    { label: "Tổng đợt", value: meta.total, color: "#6366f1" },
-    { label: "Sinh viên ", value: totalStudentsCurrentPage.toLocaleString(), color: "#10b981" },
-  ];
+  const totalStudents = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
 
   const listData = {
     data: filtered,
     page: {
       total_elements: search.trim() ? filtered.length : meta.total,
-      current_page: meta.current_page,
-      total_pages: meta.total_pages,
-    }
+      current_page:   meta.current_page,
+      total_pages:    meta.total_pages,
+    },
   };
 
   const columns = [
     {
       title: "STT", key: "stt", width: 55, align: "center" as const,
       render: (_: any, __: Graduation, i: number) => (
-        <span style={{ fontSize: 12, color: "#9ca3af" }}>
+        <span style={{ fontSize: 13, color: T.muted, fontWeight: 500 }}>
           {(meta.current_page - 1) * meta.per_page + i + 1}
         </span>
       ),
     },
     {
       title: "Đợt tốt nghiệp", dataIndex: "name", key: "name",
-      render: (v: string) => <span style={{ fontWeight: 600, fontSize: 15, color: "#111827" }}>{v}</span>,
+      render: (v: string) => (
+        <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{v}</span>
+      ),
     },
     {
-      title: "Năm tốt nghiệp", dataIndex: "school_year", key: "school_year",
-      width: 140, align: "center" as const,
-      render: (v: any) => <span style={pill("#f5f3ff", "#6d28d9")}>{v}</span>,
+      title: "Năm", dataIndex: "school_year", key: "school_year",
+      width: 100, align: "center" as const,
+      render: (v: any) => <Pill>{v}</Pill>,
     },
     {
       title: "Sinh viên", dataIndex: "student_count", key: "student_count",
-      width: 120, align: "center" as const,
-      render: (v: any) => <span style={{ fontWeight: 700, fontSize: 15, color: "#6d28d9" }}>{v?.toLocaleString() ?? "—"}</span>,
+      width: 110, align: "center" as const,
+      render: (v: any) => (
+        <span style={{ fontWeight: 700, fontSize: 13, color: T.muted }}>
+          {v != null ? v.toLocaleString() : "—"}
+        </span>
+      ),
     },
     {
       title: "Số quyết định", dataIndex: "certification", key: "certification",
-      width: 170,
-      render: (v: any) => v ? <span style={pill("#fffbeb", "#d97706")}>{v}</span> : <Text type="secondary">—</Text>,
+      width: 160,
+      render: (v: any) =>
+        v
+          ? <span style={{ fontSize: 13, color: T.accent, fontWeight: 500 }}>{v}</span>
+          : <span style={{ color: "#d1d5db" }}>—</span>,
     },
     {
       title: "Ngày quyết định", dataIndex: "certification_date", key: "certification_date",
-      width: 150, align: "center" as const,
+      width: 148, align: "center" as const,
       render: (v: any) => (
-        <Text type="secondary" style={{ fontSize: 15 }}>
-          {v ? new Date(v).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
+        <Text style={{ fontSize: 13, color: T.sub }}>
+          {v
+            ? new Date(v).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
+            : <span style={{ color: "#d1d5db" }}>—</span>}
         </Text>
       ),
     },
     {
-      title: "Ngày cập nhật", dataIndex: "updated_at", key: "updated_at",
-      width: 170, align: "center" as const,
+      title: "Cập nhật", dataIndex: "updated_at", key: "updated_at",
+      width: 150, align: "center" as const,
       render: (v: any) => (
-        <Text type="secondary" style={{ fontSize: 15 }}>
-          {v ? new Date(v).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
+        <Text style={{ fontSize: 12, color: T.muted }}>
+          {v
+            ? new Date(v).toLocaleString("vi-VN", {
+                hour: "2-digit", minute: "2-digit",
+                day: "2-digit", month: "2-digit", year: "numeric",
+              })
+            : <span style={{ color: "#d1d5db" }}>—</span>}
         </Text>
       ),
     },
   ];
 
-  const handleTableChange = (pagination: any) => {
-    const newPage = pagination.current || 1;
-    const newSize = pagination.pageSize || pageSize;
-    setPage(newPage);
-    setPageSize(newSize);
-  };
-
   return (
     <AdminLayout>
-      <div className="stats-page">
 
+      <div style={{ padding: "24px 28px 32px",  minHeight: "100vh" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* Header + Stats */}
-          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", padding: "20px 24px", boxShadow: "0 1px 4px #0000000a" }}>
+          {/*  Header  */}
+          <div>
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: -0.5 }}>Đợt tốt nghiệp</div>
-              <div style={{ fontSize: 12.5, color: "#9ca3af", marginTop: 2 }}>Quản lý danh sách các đợt tốt nghiệp</div>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: T.text, letterSpacing: "-0.3px" }}>
+                Đợt tốt nghiệp
+              </h2>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: T.sub }}>
+                Quản lý danh sách các đợt tốt nghiệp
+              </p>
             </div>
             <Row gutter={[12, 12]}>
-              {stats.map(s => (
-                <Col key={s.label} xs={12} sm={6}>
-                  <div style={{ background: s.color + "0d", border: `1.5px solid ${s.color}20`, borderRadius: 10, padding: "12px 16px" }}>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: s.color, letterSpacing: -1 }}>{s.value}</div>
-                    <div style={{ fontSize: 11.5, color: s.color, opacity: 0.75, fontWeight: 500, marginTop: 2 }}>{s.label}</div>
-                  </div>
-                </Col>
-              ))}
+              <Col xs={12} sm={6}>
+                <StatCard label="Tổng đợt tốt nghiệp" value={meta.total} color={T.accent} />
+              </Col>
+              <Col xs={12} sm={6}>
+                <StatCard label="Sinh viên" value={totalStudents.toLocaleString()} color={T.warning} />
+              </Col>
             </Row>
           </div>
 
-          {error && <Alert type="error" message={error} showIcon />}
+          {error && <Alert type="error" message={error} showIcon style={{ borderRadius: 8 }} />}
 
-          {/* Table */}
-          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", boxShadow: "0 1px 4px #0000000a", overflow: "hidden" }}>
+          {/*  Table card  */}
+          <div style={{
+            background: T.surface,
+            
+          }}>
+            {/* Filter bar */}
             <div style={{
-              padding: "14px 20px", borderBottom: "1px solid #f5f5f5",
-              display: "flex", gap: 10, alignItems: "center",
-              flexWrap: "wrap",
+              padding: "12px 20px",
+              borderBottom: `1px solid ${T.border}`,
+              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+              background: "#fafafa",
             }}>
               <Input
-                prefix={<SearchOutlined style={{ color: "#9ca3af", fontSize: 12 }} />}
+                prefix={<SearchOutlined style={{ color: T.muted, fontSize: 12 }} />}
                 placeholder="Tìm kiếm đợt tốt nghiệp..."
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1); }}
+                style={{ width: 240, height: 34, fontSize: 13 }}
+                variant="filled"
                 allowClear
-                style={{ flex: "1 1 200px", maxWidth: 300, borderRadius: 8, height: 34 }}
               />
-              <span style={{ marginLeft: "auto", fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
-                {search.trim() ? `${filtered.length} kết quả` : `${meta.total} đợt`}
+              <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
+                {search.trim() ? filtered.length : meta.total} đợt
               </span>
             </div>
 
-            <CustomTable
-              columns={columns}
-              data={listData}
-              filter={{ page: page - 1, size: pageSize }}
-              loading={loading}
-              handleTableChange={handleTableChange}
-              rowKey="id"
-              onRow={(record: Graduation) => ({
-                onClick: () => navigate(
-                  `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
-                  { state: { graduationName: record.name } }
-                ),
-                style: { cursor: "pointer" },
-              })}
-            />
+            {/* Table */}
+            <div >
+              <CustomTable
+                columns={columns}
+                data={listData}
+                filter={{ page: page - 1, size: pageSize }}
+                loading={loading}
+                handleTableChange={(p: any) => {
+                  setPage(p.current || 1);
+                  setPageSize(p.pageSize || pageSize);
+                }}
+                rowKey="id"
+                onRow={(record: Graduation) => ({
+                  onClick: () =>
+                    navigate(
+                      `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
+                      { state: { graduationName: record.name } }
+                    ),
+                  style: { cursor: "pointer" },
+                })}
+              />
+            </div>
           </div>
 
         </div>

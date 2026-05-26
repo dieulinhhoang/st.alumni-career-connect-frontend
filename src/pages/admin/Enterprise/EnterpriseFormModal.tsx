@@ -36,7 +36,7 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
     }
   };
 
-  const accentColor = enterprise?.color ?? "#7c3aed";
+  const accentColor =  "#226cc0";
 
   return (
     <Modal
@@ -102,7 +102,7 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
           <Select mode="multiple" allowClear placeholder="Chọn khoa liên kết">
             {ALL_FACULTIES.map(k => (
               <Select.Option key={k} value={k}>
-                <span style={{ color: FACULTY_COLOR_MAP?.[k] ?? "#6d28d9" }}>●</span>{" "}
+                <span style={{ color: FACULTY_COLOR_MAP?.[k] ?? "#2863d9" }}>●</span>{" "}
                 {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
               </Select.Option>
             ))}

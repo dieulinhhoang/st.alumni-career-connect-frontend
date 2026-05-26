@@ -64,8 +64,9 @@ export const BatchList: React.FC = () => {
   const [linkBatch, setLinkBatch] = useState<SurveyBatch | null>(null);
 
   const getMenuItems = useMenuItems(navigate, deleteBatch);
+  const safeBatches = Array.isArray(batches) ? batches : []; // Đảm bảo batches luôn là mảng để tránh lỗi khi gọi filter/map/etc.
 
-  const filtered = batches.filter(b => {
+  const filtered = safeBatches.filter(b => {
     const q = search.toLowerCase();
     return (
       b.title.toLowerCase().includes(q) &&
@@ -133,7 +134,7 @@ export const BatchList: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="stats-page">
+      <div className="">
 
         <div style={{ padding: 24 }}>
           {/* Toolbar */}

@@ -3,7 +3,7 @@
    Palette: Slate navy + Teal accent + warm neutrals
    ================================================ */
 
-.stats-page {
+. {
   --st-teal:        #0d7a7f;
   --st-teal-light:  #e6f4f5;
   --st-teal-mid:    #1a9ea5;

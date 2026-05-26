@@ -1,89 +1,101 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Form, Question, Section } from '../../../feature/form/types'
 
-//  Utility 
+
+// ── Utility ───────────────────────────────────────────────────
+
 
 function todayLabel() {
   const d = new Date()
   return `Ngày ${String(d.getDate()).padStart(2, '0')} / ${String(d.getMonth() + 1).padStart(2, '0')} / ${d.getFullYear()}`
 }
 
-const ACCENT = '#1D9E75'
 
-function getAccent(_themeId?: string): string {
-  return ACCENT
+// ── Design tokens ─────────────────────────────────────────────
+const C = {
+  text:      '#111827',
+  sub:       '#6b7280',
+  muted:     '#9ca3af',
+  border:    '#e5e7eb',
+  bg:        '#f9fafb',
+  surface:   '#ffffff',
+  accent:    '#374151',
+  danger:    '#dc2626',
+  dangerBg:  '#fef2f2',
 }
 
-//  Shared input style 
 
 const baseInput: React.CSSProperties = {
   width: '100%',
-  padding: '9px 13px',
-  borderRadius: 7,
-  border: '1px solid #e9e4f0',
+  padding: '9px 12px',
+  borderRadius: 6,
+  border: `1px solid ${C.border}`,
   fontSize: 14,
-  color: '#1f1b2e',
-  background: '#fff',
+  color: C.text,
+  background: C.surface,
   fontFamily: 'inherit',
   outline: 'none',
   lineHeight: 1.55,
   boxSizing: 'border-box',
-  transition: 'border-color .13s, box-shadow .13s',
+  transition: 'border-color .12s, box-shadow .12s',
 }
+
 
 const errorBorder: React.CSSProperties = {
-  borderColor: '#f87171',
-  boxShadow: '0 0 0 3px #f8717122',
+  borderColor: C.danger,
+  boxShadow: `0 0 0 3px ${C.danger}18`,
 }
 
-function applyFocus(e: React.FocusEvent<HTMLElement>, accent: string) {
+
+function applyFocus(e: React.FocusEvent<HTMLElement>) {
   const el = e.target as HTMLElement
-  el.style.borderColor = accent
-  el.style.boxShadow = `0 0 0 3px ${accent}22`
+  el.style.borderColor = '#6b7280'
+  el.style.boxShadow = '0 0 0 3px rgba(107,114,128,0.12)'
 }
+
+
 function removeFocus(e: React.FocusEvent<HTMLElement>) {
   const el = e.target as HTMLElement
-  el.style.borderColor = '#e9e4f0'
+  el.style.borderColor = C.border
   el.style.boxShadow = 'none'
 }
 
-//  Question label 
 
 function QLabel({ num, title, required, multi }: {
   num: number; title: string; required?: boolean; multi?: boolean
 }) {
   return (
-    <div style={{ fontSize: 14, fontWeight: 600, color: '#1f1b2e', marginBottom: 10, lineHeight: 1.6 }}>
+    <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 10, lineHeight: 1.6 }}>
       <span style={{ marginRight: 5 }}>{num}.</span>
       <span>{title}</span>
       {multi && (
-        <span style={{ fontWeight: 400, color: '#6b638c', marginLeft: 5, fontSize: 13 }}>
+        <span style={{ fontWeight: 400, color: C.sub, marginLeft: 5, fontSize: 13 }}>
           (Có thể chọn nhiều lựa chọn)
         </span>
       )}
-      {required && <span style={{ color: '#e87979', marginLeft: 3 }}>*</span>}
+      {required && <span style={{ color: C.danger, marginLeft: 3 }}>*</span>}
     </div>
   )
 }
 
+
 function ErrorHint({ msg }: { msg?: string }) {
   if (!msg) return null
   return (
-    <div style={{ fontSize: 12, color: '#ef4444', marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div style={{ fontSize: 12, color: C.danger, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
       <span>⚠</span> {msg}
     </div>
   )
 }
 
-//  Controlled field components 
 
 interface FieldProps {
-  accent: string
   hasError?: boolean
   readOnly?: boolean
 }
 
-function ShortField({ placeholder, accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function ShortField({ placeholder, value, onChange, hasError, readOnly }: FieldProps & {
   placeholder?: string
   value?: string
   onChange?: (v: string) => void
@@ -96,13 +108,14 @@ function ShortField({ placeholder, accent, value, onChange, hasError, readOnly }
       value={value ?? ''}
       onChange={e => onChange?.(e.target.value)}
       style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-      onFocus={e => applyFocus(e, accent)}
+      onFocus={applyFocus}
       onBlur={removeFocus}
     />
   )
 }
 
-function LongField({ accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function LongField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: string
   onChange?: (v: string) => void
 }) {
@@ -114,96 +127,81 @@ function LongField({ accent, value, onChange, hasError, readOnly }: FieldProps &
       value={value ?? ''}
       onChange={e => onChange?.(e.target.value)}
       style={{ ...baseInput, resize: 'vertical', ...(hasError ? errorBorder : {}) } as React.CSSProperties}
-      onFocus={e => applyFocus(e, accent)}
+      onFocus={applyFocus}
       onBlur={removeFocus}
     />
   )
 }
 
-function EmailField({ accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function EmailField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: string
   onChange?: (v: string) => void
 }) {
   return (
-    <input type="email"
-      readOnly={readOnly}
-      placeholder="Nhập email"
-      value={value ?? ''}
-      onChange={e => onChange?.(e.target.value)}
+    <input type="email" readOnly={readOnly} placeholder="Nhập email"
+      value={value ?? ''} onChange={e => onChange?.(e.target.value)}
       style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-      onFocus={e => applyFocus(e, accent)}
-      onBlur={removeFocus}
+      onFocus={applyFocus} onBlur={removeFocus}
     />
   )
 }
 
-function TelField({ accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function TelField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: string
   onChange?: (v: string) => void
 }) {
   return (
-    <input type="tel"
-      readOnly={readOnly}
-      placeholder="Nhập số điện thoại"
-      value={value ?? ''}
-      onChange={e => onChange?.(e.target.value)}
+    <input type="tel" readOnly={readOnly} placeholder="Nhập số điện thoại"
+      value={value ?? ''} onChange={e => onChange?.(e.target.value)}
       style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-      onFocus={e => applyFocus(e, accent)}
-      onBlur={removeFocus}
+      onFocus={applyFocus} onBlur={removeFocus}
     />
   )
 }
 
-function DateField({ accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function DateField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: string
   onChange?: (v: string) => void
 }) {
   return (
-    <input type="date"
-      readOnly={readOnly}
-      value={value ?? ''}
-      onChange={e => onChange?.(e.target.value)}
+    <input type="date" readOnly={readOnly}
+      value={value ?? ''} onChange={e => onChange?.(e.target.value)}
       style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer', ...(hasError ? errorBorder : {}) }}
-      onFocus={e => applyFocus(e, accent)}
-      onBlur={removeFocus}
+      onFocus={applyFocus} onBlur={removeFocus}
     />
   )
 }
+
 
 interface AddressValue { address?: string; city?: string }
 
-function AddressField({ accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function AddressField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: AddressValue
   onChange?: (v: AddressValue) => void
 }) {
   const v: AddressValue = value ?? {}
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <input
-        type="text"
-        readOnly={readOnly}
-        placeholder="Địa chỉ"
-        value={v.address ?? ''}
-        onChange={e => onChange?.({ ...v, address: e.target.value })}
+      <input type="text" readOnly={readOnly} placeholder="Địa chỉ"
+        value={v.address ?? ''} onChange={e => onChange?.({ ...v, address: e.target.value })}
         style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-        onFocus={e => applyFocus(e, accent)}
-        onBlur={removeFocus}
+        onFocus={applyFocus} onBlur={removeFocus}
       />
-      <input
-        type="text"
-        readOnly={readOnly}
-        placeholder="Tỉnh / Thành phố"
-        value={v.city ?? ''}
-        onChange={e => onChange?.({ ...v, city: e.target.value })}
+      <input type="text" readOnly={readOnly} placeholder="Tỉnh / Thành phố"
+        value={v.city ?? ''} onChange={e => onChange?.({ ...v, city: e.target.value })}
         style={{ ...baseInput }}
-        onFocus={e => applyFocus(e, accent)}
-        onBlur={removeFocus}
+        onFocus={applyFocus} onBlur={removeFocus}
       />
     </div>
   )
 }
 
-function RadioField({ options, qId, accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function RadioField({ options, qId, value, onChange, hasError, readOnly }: FieldProps & {
   options: string[]
   qId: string
   value?: string
@@ -212,26 +210,24 @@ function RadioField({ options, qId, accent, value, onChange, hasError, readOnly 
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 8,
-      ...(hasError ? { padding: '8px 10px', borderRadius: 7, border: '1px solid #f87171', background: '#fff5f5' } : {}),
+      ...(hasError ? { padding: '8px 10px', borderRadius: 6, border: `1px solid ${C.danger}`, background: C.dangerBg } : {}),
     }}>
       {options.map((opt, i) => (
         <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
           <input
-            type="radio"
-            name={qId}
-            disabled={readOnly}
-            checked={value === opt}
-            onChange={() => onChange?.(opt)}
-            style={{ marginTop: 3, accentColor: accent, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+            type="radio" name={qId} disabled={readOnly}
+            checked={value === opt} onChange={() => onChange?.(opt)}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 14, color: '#3c3752', lineHeight: 1.55 }}>{opt}</span>
+          <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
     </div>
   )
 }
 
-function CheckboxField({ options, accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function CheckboxField({ options, value, onChange, hasError, readOnly }: FieldProps & {
   options: string[]
   value?: string[]
   onChange?: (v: string[]) => void
@@ -246,25 +242,24 @@ function CheckboxField({ options, accent, value, onChange, hasError, readOnly }:
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 8,
-      ...(hasError ? { padding: '8px 10px', borderRadius: 7, border: '1px solid #f87171', background: '#fff5f5' } : {}),
+      ...(hasError ? { padding: '8px 10px', borderRadius: 6, border: `1px solid ${C.danger}`, background: C.dangerBg } : {}),
     }}>
       {options.map((opt, i) => (
         <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
           <input
-            type="checkbox"
-            disabled={readOnly}
-            checked={checked.has(opt)}
-            onChange={() => toggle(opt)}
-            style={{ marginTop: 3, accentColor: accent, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+            type="checkbox" disabled={readOnly}
+            checked={checked.has(opt)} onChange={() => toggle(opt)}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 14, color: '#3c3752', lineHeight: 1.55 }}>{opt}</span>
+          <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
     </div>
   )
 }
 
-function SelectField({ options, accent, value, onChange, hasError, readOnly }: FieldProps & {
+
+function SelectField({ options, value, onChange, hasError, readOnly }: FieldProps & {
   options: string[]
   value?: string
   onChange?: (v: string) => void
@@ -274,11 +269,8 @@ function SelectField({ options, accent, value, onChange, hasError, readOnly }: F
       disabled={readOnly}
       value={value ?? ''}
       onChange={e => onChange?.(e.target.value)}
-      style={{
-        ...baseInput, cursor: readOnly ? 'default' : 'pointer',
-        ...(hasError ? errorBorder : {}),
-      } as React.CSSProperties}
-      onFocus={e => applyFocus(e, accent)}
+      style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer', ...(hasError ? errorBorder : {}) } as React.CSSProperties}
+      onFocus={applyFocus}
       onBlur={removeFocus}
     >
       <option value="">-- Chọn --</option>
@@ -287,67 +279,61 @@ function SelectField({ options, accent, value, onChange, hasError, readOnly }: F
   )
 }
 
-//  Single question 
 
-function QuestionItem({
-  q, num, accent, value, onChange, hasError, readOnly,
-}: {
+function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
   q: Question
   num: number
-  accent: string
   value: any
   onChange: (v: any) => void
   hasError: boolean
   readOnly: boolean
 }) {
   const opts = (q.options ?? []).map(o => (typeof o === 'string' ? o : (o as any).label)) as string[]
-  const isMulti = q.type === 'checkbox'
-  const fp: FieldProps = { accent, hasError, readOnly }
+  const fp: FieldProps = { hasError, readOnly }
 
   const renderInput = () => {
     switch (q.type) {
-      case 'short':    return <ShortField {...fp} placeholder={q.placeholder} value={value as string} onChange={onChange} />
-      case 'long':     return <LongField  {...fp} value={value as string} onChange={onChange} />
-      case 'email':    return <EmailField {...fp} value={value as string} onChange={onChange} />
-      case 'tel':      return <TelField   {...fp} value={value as string} onChange={onChange} />
-      case 'date':     return <DateField  {...fp} value={value as string} onChange={onChange} />
-      case 'address':  return <AddressField {...fp} value={value as AddressValue} onChange={onChange} />
-      case 'radio':    return <RadioField  {...fp} options={opts} qId={q.id} value={value as string} onChange={onChange} />
-      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value as string[]} onChange={onChange} />
+      case 'short':    return <ShortField    {...fp} placeholder={q.placeholder} value={value} onChange={onChange} />
+      case 'long':     return <LongField     {...fp} value={value} onChange={onChange} />
+      case 'email':    return <EmailField    {...fp} value={value} onChange={onChange} />
+      case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
+      case 'date':     return <DateField     {...fp} value={value} onChange={onChange} />
+      case 'address':  return <AddressField  {...fp} value={value} onChange={onChange} />
+      case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} />
+      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} />
       case 'select':
-      case 'dropdown': return <SelectField {...fp} options={opts} value={value as string} onChange={onChange} />
-      default:         return <ShortField {...fp} value={value as string} onChange={onChange} />
+      case 'dropdown': return <SelectField   {...fp} options={opts} value={value} onChange={onChange} />
+      default:         return <ShortField    {...fp} value={value} onChange={onChange} />
     }
   }
 
   return (
     <div style={{ marginBottom: 24 }}>
-      <QLabel num={num} title={q.title} required={q.required} multi={isMulti} />
+      <QLabel num={num} title={q.title} required={q.required} multi={q.type === 'checkbox'} />
       {renderInput()}
       {hasError && <ErrorHint msg="Vui lòng điền vào trường bắt buộc này" />}
     </div>
   )
 }
 
-//  Section header 
 
-function SectionHeader({ title, accent }: { title: string; accent: string }) {
+// ── Section header ─────────────────────────────────────────────
+
+
+function SectionHeader({ title }: { title: string }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10,
       margin: '32px 0 20px',
-      paddingBottom: 10,
-      borderBottom: `2px solid ${accent}33`,
     }}>
-      <div style={{ width: 4, height: 22, borderRadius: 2, background: accent, flexShrink: 0 }} />
-      <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1f1b2e', letterSpacing: '-.01em' }}>
+      <div style={{ width: 3, height: 18, borderRadius: 2, background: C.accent, flexShrink: 0 }} />
+      <span style={{ fontSize: 13.5, fontWeight: 700, color: C.text, letterSpacing: '-0.01em' }}>
         {title}
       </span>
     </div>
   )
 }
 
-//  Map Form → render data 
 
 function mapForm(form: Form) {
   const sections: Section[] =
@@ -396,52 +382,40 @@ function mapForm(form: Form) {
   return { sections, questions, header, footer, descParagraphs }
 }
 
-//  Visibility evaluation 
 
 function isVisible(q: Question, answers: Record<string, any>): boolean {
   if (!q.visibleWhen) return true
   const { questionId, operator, value } = q.visibleWhen
   const current = answers[questionId]
   switch (operator) {
-    case 'equals':
-      return String(current) === String(value)
-    case 'not_equals':
-      return String(current) !== String(value)
+    case 'equals':     return String(current) === String(value)
+    case 'not_equals': return String(current) !== String(value)
     case 'includes':
       if (Array.isArray(current)) return current.includes(value as string)
       return String(current).includes(String(value))
-    default:
-      return true
+    default: return true
   }
 }
 
-//  Validation 
 
 function isEmpty(val: any): boolean {
   if (val === undefined || val === null) return true
   if (typeof val === 'string') return val.trim() === ''
   if (Array.isArray(val)) return val.length === 0
-  if (typeof val === 'object') {
-    // AddressValue
-    return !val.address?.trim() && !val.city?.trim()
-  }
+  if (typeof val === 'object') return !val.address?.trim() && !val.city?.trim()
   return false
 }
 
-//  SurveyPreview 
 
 export interface SurveyPreviewProps {
   form: Form | null
   onBack?: () => void
-  /** Pre-fill answers (view/edit mode) */
   initialValues?: Record<string, any>
-  /** If provided, submit button is active and calls this with collected answers */
   onSubmit?: (answers: Record<string, any>) => void | Promise<void>
-  /** Override submit button label, default "Gửi" */
   submitLabel?: string
-  /** Hide the sticky "Xem trước" top bar (used when embedded in admin page) */
   compact?: boolean
 }
+
 
 export function SurveyPreview({
   form,
@@ -451,172 +425,134 @@ export function SurveyPreview({
   submitLabel = 'Gửi',
   compact = false,
 }: SurveyPreviewProps) {
-  //  Font injection 
-  useEffect(() => {
-    const id = 'dm-sans-font'
-    if (!document.getElementById(id)) {
-      const link = document.createElement('link')
-      link.id = id
-      link.rel = 'stylesheet'
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap'
-      document.head.appendChild(link)
-    }
-  }, [])
-
-  //  Answer state 
-  const [answers, setAnswers] = useState<Record<string, any>>(initialValues ?? {})
-  const [errors,  setErrors]  = useState<Set<string>>(new Set())
-  const [submitting, setSubmitting] = useState(false)
+  const [answers,       setAnswers]       = useState<Record<string, any>>(initialValues ?? {})
+  const [errors,        setErrors]        = useState<Set<string>>(new Set())
+  const [submitting,    setSubmitting]    = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  // Sync when initialValues changes (e.g. parent loads data async)
-  useEffect(() => {
-    if (initialValues) setAnswers(initialValues)
-  }, [initialValues])
+  useEffect(() => { if (initialValues) setAnswers(initialValues) }, [initialValues])
 
   const setAnswer = useCallback((qId: string, val: any) => {
     setAnswers(prev => ({ ...prev, [qId]: val }))
     setErrors(prev => {
       if (!prev.has(qId)) return prev
-      const next = new Set(prev)
-      next.delete(qId)
-      return next
+      const next = new Set(prev); next.delete(qId); return next
     })
   }, [])
 
-  //  Early returns 
   if (!form) return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', height: '100vh', color: '#9ca3af', gap: 12,
-      fontFamily: "'DM Sans', sans-serif",
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: '100vh', color: C.muted, fontSize: 13, fontFamily: 'inherit',
     }}>
-      <span style={{ fontSize: 13, fontWeight: 500 }}>Chưa có nội dung xem trước</span>
+      Chưa có nội dung xem trước
     </div>
   )
 
-  const accent = getAccent(form.themeId)
   const { sections, questions, header, footer, descParagraphs } = mapForm(form)
 
-  //  Visibility-filtered questions 
-  const visibleQuestionIds = new Set(
-    questions.filter(q => isVisible(q, answers)).map(q => q.id)
-  )
+  const visibleIds = new Set(questions.filter(q => isVisible(q, answers)).map(q => q.id))
 
-  // Group by section, keep only visible questions
   const bySection = sections
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map(sec => ({
       section: sec,
-      qs: questions
-        .filter(q => q.sectionId === sec.id && visibleQuestionIds.has(q.id))
-        .sort((a, b) => a.order - b.order),
+      qs: questions.filter(q => q.sectionId === sec.id && visibleIds.has(q.id)).sort((a, b) => a.order - b.order),
     }))
     .filter(g => g.qs.length > 0)
 
   const showSectionHeaders = bySection.length > 1
-
-  // Is this read-only (no onSubmit) — but NOT in preview mode (onBack only)
   const isViewOnly = !onSubmit
 
-  //  Submit handler 
   const handleSubmit = async () => {
     if (!onSubmit || submitting) return
-
-    // Validate required visible questions
     const errs = new Set<string>()
     questions.forEach(q => {
-      if (q.required && visibleQuestionIds.has(q.id) && isEmpty(answers[q.id])) {
-        errs.add(q.id)
-      }
+      if (q.required && visibleIds.has(q.id) && isEmpty(answers[q.id])) errs.add(q.id)
     })
-
     if (errs.size > 0) {
       setErrors(errs)
-      // Scroll to first error
       const firstId = questions.find(q => errs.has(q.id))?.id
-      if (firstId) {
-        document.getElementById(`q-${firstId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
+      if (firstId) document.getElementById(`q-${firstId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
-
     setSubmitting(true)
-    try {
-      await onSubmit(answers)
-      setSubmitSuccess(true)
-    } finally {
-      setSubmitting(false)
-    }
+    try { await onSubmit(answers); setSubmitSuccess(true) }
+    finally { setSubmitting(false) }
   }
 
-  // Global question counter
   let num = 0
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: compact ? 'transparent' : '#f5f2fa',
-      fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+      background: compact ? 'transparent' : C.bg,
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      fontSize: 14,
+      color: C.text,
     }}>
 
-      {/* Sticky top bar — hidden in compact mode */}
+      {/* Top bar */}
       {!compact && (
         <div style={{
           position: 'sticky', top: 0, zIndex: 20,
-          background: '#fff', borderBottom: '1px solid #e9e4f0',
-          height: 50, display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', padding: '0 20px',
-          boxShadow: '0 1px 3px rgba(31,27,46,.05)',
+          background: C.surface,
+          borderBottom: `1px solid ${C.border}`,
+          height: 46,
+          display: 'flex', alignItems: 'center',
+          padding: '0 20px',
+          gap: 8,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#9ca3af' }}>
-              Xem trước
-            </span>
-          </div>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 7,
-            background: `linear-gradient(135deg, ${accent} 0%, #a78bfa 100%)`,
-            color: '#fff', padding: '5px 14px', borderRadius: 20,
-            fontSize: 11.5, fontWeight: 700, letterSpacing: '.05em',
-            boxShadow: `0 4px 14px ${accent}55`,
-          }}>
-            ✦ CHẾ ĐỘ XEM TRƯỚC
-          </div>
+          {onBack && (
+            <button
+              onClick={onBack}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                height: 30, padding: '0 12px', borderRadius: 6,
+                border: `1px solid ${C.border}`, background: C.surface,
+                color: C.sub, fontSize: 13, fontWeight: 500,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              ← Quay lại
+            </button>
+          )}
+          <span style={{ fontSize: 12, color: C.muted, marginLeft: 4 }}>Xem trước</span>
         </div>
       )}
 
       {/* Form card */}
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: compact ? '0' : '32px 16px 80px' }}>
+      <div style={{ maxWidth: 780, margin: '0 auto', padding: compact ? '0' : '28px 16px 72px' }}>
         <div style={{
-          background: '#fff',
-          borderRadius: compact ? 0 : 16,
-          boxShadow: compact ? 'none' : '0 6px 28px rgba(31,27,46,.09), 0 2px 6px rgba(31,27,46,.04)',
+          background: C.surface,
+          borderRadius: compact ? 0 : 10,
+          border: compact ? 'none' : `1px solid ${C.border}`,
+          boxShadow: compact ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: compact ? '28px 32px 36px' : '36px 52px 44px' }}>
+          <div style={{ padding: compact ? '24px 28px 32px' : '36px 48px 44px' }}>
 
             {/* Institutional header */}
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 24,
-              marginBottom: 28, paddingBottom: 24,
+              display: 'flex', alignItems: 'center', gap: 20,
+              marginBottom: 24, paddingBottom: 24,
             }}>
               <img
                 src={header.logoUrl}
                 alt="Logo"
-                style={{ width: 110, height: 110, objectFit: 'contain', flexShrink: 0 }}
+                style={{ width: 90, height: 90, objectFit: 'contain', flexShrink: 0 }}
               />
               <div style={{ flex: 1, textAlign: 'right' }}>
-                <div style={{ fontSize: 12, fontStyle: 'italic', color: '#6b638c', marginBottom: 8 }}>
+                <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6, fontStyle: 'italic' }}>
                   {todayLabel()}
                 </div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, textTransform: 'uppercase', color: '#1f1b2e', letterSpacing: '.04em', marginBottom: 4 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', color: C.text, letterSpacing: '0.04em', marginBottom: 3 }}>
                   {header.ministry}
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', color: '#1f1b2e', letterSpacing: '.03em', marginBottom: 8 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, textTransform: 'uppercase', color: C.text, letterSpacing: '0.03em', marginBottom: 6 }}>
                   {header.academy}
                 </div>
-                <div style={{ fontSize: 12, fontStyle: 'italic', color: '#6b638c', lineHeight: 1.7 }}>
+                <div style={{ fontSize: 11.5, color: C.sub, lineHeight: 1.7, fontStyle: 'italic' }}>
                   <div>{header.address}</div>
                   <div>Điện thoại: {header.phone} – Fax: {header.phone}</div>
                 </div>
@@ -624,10 +560,10 @@ export function SurveyPreview({
             </div>
 
             {/* Survey title */}
-            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <h2 style={{
-                fontSize: 20, fontWeight: 800, color: '#1f1b2e',
-                letterSpacing: '-.01em', lineHeight: 1.5, margin: 0,
+                fontSize: 18, fontWeight: 700, color: C.text,
+                letterSpacing: '-0.01em', lineHeight: 1.5, margin: 0,
                 textTransform: 'uppercase',
               }}>
                 {form.name}
@@ -636,16 +572,16 @@ export function SurveyPreview({
 
             {/* Description */}
             {descParagraphs.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <p style={{ fontSize: 15, fontStyle: 'italic', fontWeight: 700, color: '#1f1b2e', lineHeight: 1.8, marginBottom: 12 }}>
+              <div style={{ marginBottom: 28, paddingLeft: 16 }}>
+                <p style={{ fontSize: 14, fontStyle: 'italic', fontWeight: 600, color: C.text, lineHeight: 1.7, marginBottom: 10 }}>
                   Thân gửi Anh/Chị cựu sinh viên của {header.academy}!
                 </p>
                 {descParagraphs.map((p, i) => (
-                  <p key={i} style={{ fontSize: 15, fontStyle: 'italic', color: '#1f1b2e', lineHeight: 1.85, textIndent: 36, marginBottom: 10 }}>
+                  <p key={i} style={{ fontSize: 14, fontStyle: 'italic', color: C.sub, lineHeight: 1.85, textIndent: 28, marginBottom: 8 }}>
                     {p}
                   </p>
                 ))}
-                <p style={{ fontSize: 14.5, fontStyle: 'italic', color: '#3c3752', marginTop: 10 }}>
+                <p style={{ fontSize: 13.5, fontStyle: 'italic', color: C.sub, marginTop: 8 }}>
                   Trân trọng cảm ơn sự cộng tác của các Anh/Chị!
                 </p>
               </div>
@@ -654,9 +590,9 @@ export function SurveyPreview({
             {/* Error banner */}
             {errors.size > 0 && (
               <div style={{
-                background: '#fff5f5', border: '1px solid #fca5a5',
-                borderRadius: 8, padding: '10px 16px', marginBottom: 20,
-                fontSize: 13, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 8,
+                background: C.dangerBg, border: `1px solid #fca5a5`,
+                borderRadius: 6, padding: '10px 14px', marginBottom: 20,
+                fontSize: 13, color: C.danger, display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 <span>⚠</span>
                 Vui lòng điền vào {errors.size} trường bắt buộc còn thiếu.
@@ -666,17 +602,13 @@ export function SurveyPreview({
             {/* Questions */}
             {bySection.map(({ section, qs }) => (
               <div key={section.id}>
-                {showSectionHeaders && (
-                  <SectionHeader title={section.title} accent={accent} />
-                )}
+                {showSectionHeaders && <SectionHeader title={section.title} />}
                 {qs.map(q => {
                   num++
                   return (
                     <div key={q.id} id={`q-${q.id}`}>
                       <QuestionItem
-                        q={q}
-                        num={num}
-                        accent={accent}
+                        q={q} num={num}
                         value={answers[q.id]}
                         onChange={v => setAnswer(q.id, v)}
                         hasError={errors.has(q.id)}
@@ -689,61 +621,51 @@ export function SurveyPreview({
             ))}
 
             {/* Footer */}
-            <div style={{ textAlign: 'center', padding: '28px 0 20px', marginTop: 16, borderTop: '1px solid #e9e4f0' }}>
-              <p style={{ fontWeight: 700, color: '#1f1b2e', marginBottom: 5, fontSize: 14 }}>
+            <div style={{
+              textAlign: 'center', padding: '24px 0 16px',
+              marginTop: 16,
+            }}>
+              <p style={{ fontWeight: 600, color: C.text, marginBottom: 4, fontSize: 14 }}>
                 {footer.primaryText}
               </p>
-              <p style={{ fontStyle: 'italic', color: '#6b638c', fontSize: 13 }}>
+              <p style={{ fontStyle: 'italic', color: C.sub, fontSize: 13 }}>
                 {footer.secondaryText}
               </p>
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-              {onBack && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+              {onBack && compact && (
                 <button onClick={onBack} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 7,
-                  height: 38, padding: '0 18px', borderRadius: 8,
-                  border: '1px solid #e9e4f0', background: '#fff', color: '#3c3752',
-                  fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                  boxShadow: '0 2px 8px rgba(31,27,46,.06)',
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  height: 36, padding: '0 16px', borderRadius: 6,
+                  border: `1px solid ${C.border}`, background: C.surface,
+                  color: C.sub, fontSize: 13, fontWeight: 500,
+                  cursor: 'pointer', fontFamily: 'inherit',
                 }}>
                   ← Quay lại
                 </button>
               )}
 
-              {/* Submit button — only shown when onSubmit is provided */}
               {onSubmit && (
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || submitSuccess}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7,
-                    height: 38, padding: '0 22px', borderRadius: 8,
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    height: 36, padding: '0 20px', borderRadius: 6,
                     border: 'none',
-                    background: submitSuccess
-                      ? '#16a34a'
-                      : submitting
-                        ? `${accent}99`
-                        : accent,
+                    background: submitSuccess ? '#374151' : submitting ? '#9ca3af' : '#111827',
                     color: '#fff',
-                    fontSize: 13.5, fontWeight: 700, cursor: submitting || submitSuccess ? 'default' : 'pointer',
+                    fontSize: 13.5, fontWeight: 600,
+                    cursor: submitting || submitSuccess ? 'default' : 'pointer',
                     fontFamily: 'inherit',
-                    boxShadow: `0 4px 16px ${accent}55`,
-                    transition: 'all .15s',
-                    opacity: submitting ? 0.8 : 1,
+                    transition: 'background .15s, opacity .15s',
                   }}
-                  onMouseEnter={e => {
-                    if (!submitting && !submitSuccess) e.currentTarget.style.opacity = '0.85'
-                  }}
-                  onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                  onMouseEnter={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#374151' }}
+                  onMouseLeave={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#111827' }}
                 >
-                  {submitSuccess
-                    ? ' Đã lưu'
-                    : submitting
-                      ? ' Đang gửi…'
-                      : ` ${submitLabel}`
-                  }
+                  {submitSuccess ? '✓ Đã lưu' : submitting ? 'Đang gửi…' : submitLabel}
                 </button>
               )}
             </div>

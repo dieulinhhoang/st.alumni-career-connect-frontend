@@ -169,7 +169,7 @@ const RoleManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout>
-        <div className="stats-page">
+        <div className="">
 
           {view === 'list' ? (
             <RoleListView

@@ -1,3 +1,5 @@
+import {api} from "../../libs/api";
+
 import type { DotEntry, KhoaItem, EnterpriseItem, ChartMode, ChartModeConfig } from "./type";
 
 //  Khoa list 
@@ -193,4 +195,69 @@ export function getFilteredDotData(
   const resolved = resolveKhoaNganh(khoaOrFilter, nganh);
   const key = `${resolved.khoa}|${resolved.nganh}|all`;
   return DETAIL_DATA[key] ?? DETAIL_DATA["all|all|all"];
+}
+
+// ================= API functions using centralized api =================
+
+export interface DashboardWidget {
+  id: string;
+  title: string;
+  type: "stat" | "chart" | "list" | "table";
+  data?: Record<string, unknown>;
+}
+
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+}
+
+/**
+ * Fetch dashboard widgets from API (mock when USE_MOCK = true)
+ */
+export async function fetchDashboardWidgets(): Promise<DashboardWidget[]> {
+  const res = await api.get("/dashboard/widgets");
+  return res.data as DashboardWidget[];
+}
+
+/**
+ * Fetch chart data for dashboard
+ * @param khoaFilter - khoa filter (string or object with khoa/nganh)
+ * @param mode - chart mode ("coviec" | "tinhhinh" | "khuvuc")
+ */
+export async function fetchDashboardChartData(
+  khoaFilter: string | { khoa?: string; nganh?: string } = "all",
+  mode: string = "coviec"
+): Promise<ChartDataPoint[]> {
+  const res = await api.get("/dashboard/chart-data", {
+    params: {
+      khoa: typeof khoaFilter === "string" ? khoaFilter : khoaFilter.khoa ?? "all",
+      nganh: typeof khoaFilter === "object" ? khoaFilter.nganh ?? "all" : "all",
+      mode,
+    },
+  });
+  return res.data as ChartDataPoint[];
+}
+
+/**
+ * Fetch list of khoa (departments) from API, fallback to constants
+ */
+export async function fetchKhoaList(): Promise<KhoaItem[]> {
+  try {
+    const res = await api.get("/khoa");
+    return res.data as KhoaItem[];
+  } catch {
+    return KHOA_LIST;
+  }
+}
+
+/**
+ * Fetch list of enterprises from API, fallback to constants
+ */
+export async function fetchEnterpriseList(): Promise<EnterpriseItem[]> {
+  try {
+    const res = await api.get("/enterprises");
+    return res.data as EnterpriseItem[];
+  } catch {
+    return ENTERPRISE_LIST;
+  }
 }

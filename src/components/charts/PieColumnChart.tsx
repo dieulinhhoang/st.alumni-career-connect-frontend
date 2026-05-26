@@ -6,13 +6,13 @@ import { COLOR } from '../../pages/admin/DashBoard/theme'
 const { Text } = Typography
 
 export const CHART_COLORS = [
-  '#6366f1',
-  '#06b6d4',
-  '#10b981',
-  '#f59e0b',
-  '#f43f5e',
-  '#8b5cf6',
-  '#ec4899',
+  '#0dac64', // VNUA green đậm [web:34]
+  '#edf512', // green nhạt hơn (tự pha)
+  '#f59e0b', // vàng cam “quả chín” [web:34]
+  '#457be6', // green FITA hay dùng ở site mới [web:36]
+  '#e9e90e', // cyan nhạt bổ trợ
+  '#6366f1', // indigo (dùng phụ)
+  '#f97316', // cam đậm hơn
 ]
 
 export interface PieColumnChartData {

@@ -19,36 +19,41 @@ interface KpiConfig {
 }
 
 export function StatsOverview({ detail }: Props) {
-  const topOption = detail.data.reduce((a, b) => (a.percent > b.percent ? a : b), detail.data[0])
+  const data = Array.isArray(detail?.data) ? detail.data : []
+
+  const topOption =
+    data.length > 0
+      ? data.reduce((a, b) => (a.percent > b.percent ? a : b))
+      : { label: '', value: 0, percent: 0 }
 
   const kpis: KpiConfig[] = [
     {
       icon: <FileTextOutlined />,
       iconClass: 'stats-kpi-icon--teal',
       label: 'Tổng phản hồi',
-      value: detail.totalResponses.toLocaleString('vi-VN'),
+      value: detail?.totalResponses ?? 0,
       sub: 'lượt tham gia khảo sát',
     },
     {
       icon: <CheckCircleOutlined />,
       iconClass: 'stats-kpi-icon--blue',
       label: 'Tỷ lệ hoàn thành',
-      value: `${detail.completionRate}%`,
+      value: `${detail?.completionRate ?? 0}%`,
       sub: 'phiếu hoàn chỉnh',
     },
     {
       icon: <PieChartOutlined />,
       iconClass: 'stats-kpi-icon--amber',
       label: 'Số nhóm trả lời',
-      value: detail.data.length,
+      value: data.length,
       sub: 'lựa chọn khác nhau',
     },
     {
       icon: <TrophyOutlined />,
       iconClass: 'stats-kpi-icon--purple',
       label: 'Nhóm nổi bật',
-      value: topOption ? `${topOption.percent}%` : '—',
-      sub: topOption?.label ?? '',
+      value: data.length > 0 ? `${topOption.percent ?? 0}%` : '—',
+      sub: data.length > 0 ? topOption.label ?? '' : '',
     },
   ]
 

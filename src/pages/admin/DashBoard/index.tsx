@@ -53,21 +53,66 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-            <div className="stats-page">
+            <div className="">
 
       {/* Page header — giữ gradient như cũ */}
-      <div style={{
-        marginBottom: 24,
-        background: "linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)",
-        borderRadius: 20, padding: "20px 24px",
-        position: "relative", overflow: "hidden",
-        border: "1px solid #e8e5ff",
-      }}>
-        <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "rgba(99,102,241,0.06)" }} />
-        <div style={{ position: "absolute", bottom: -20, right: 80, width: 80, height: 80, borderRadius: "50%", background: "rgba(139,92,246,0.05)" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, position: "relative" }}>
+            {/* Page header — đổi sang xanh VNUA */}
+      <div
+        style={{
+          marginBottom: 24,
+          background:
+            "linear-gradient(135deg, #e0f2e9 0%, #f1f8f4 40%, #ffffff 100%)",
+          borderRadius: 20,
+          padding: "20px 24px",
+          position: "relative",
+          overflow: "hidden",
+          border: "1px solid #cce3d7",
+        }}
+      >
+        {/* các vòng tròn nền nhạt */}
+        <div
+          style={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: 160,
+            height: 160,
+            borderRadius: "50%",
+            background: "rgba(0,114,63,0.06)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -20,
+            right: 80,
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "rgba(0,114,63,0.04)",
+          }}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+            position: "relative",
+          }}
+        >
           <div>
-            <Title level={4} style={{ margin: 0, color: "#1e1b4b", fontWeight: 800, fontSize: 20 }}>
+            <Title
+              level={4}
+              style={{
+                margin: 0,
+                color: "#064e3b",
+                fontWeight: 800,
+                fontSize: 20,
+              }}
+            >
               Tổng quan hệ thống
             </Title>
             <Text style={{ fontSize: 13, color: COLOR.textMuted }}>
@@ -75,13 +120,37 @@ export function DashBoard() {
               <strong style={{ color: COLOR.primary }}>{LATEST_DOT}</strong>
             </Text>
           </div>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "#fff", borderRadius: 100, padding: "6px 14px",
-            border: "1px solid #e8e5ff", boxShadow: "0 1px 4px rgba(99,102,241,0.1)",
-          }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 0 2px rgba(74,222,128,0.4)" }} />
-            <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>Dữ liệu cập nhật</Text>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: "#ffffff",
+              borderRadius: 100,
+              padding: "6px 14px",
+              border: "1px solid #d1fae5",
+              boxShadow: "0 1px 4px rgba(22,163,74,0.14)",
+            }}
+          >
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "#22c55e",
+                boxShadow: "0 0 0 2px rgba(34,197,94,0.45)",
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: COLOR.primary,
+                fontWeight: 600,
+              }}
+            >
+              Dữ liệu cập nhật
+            </Text>
           </div>
         </div>
       </div>
