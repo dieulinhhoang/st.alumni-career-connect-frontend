@@ -1,8 +1,7 @@
-import axios from "axios";
+import api from "../../libs/api";
 
- const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
+ 
+ 
 const BE_URL = import.meta.env.VITE_API_URL ;
 
 // Redirect sang BE để bắt đầu SSO

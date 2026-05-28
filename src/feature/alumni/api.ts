@@ -1,9 +1,7 @@
-import axios from 'axios';
+ import api from '../../libs/api';
 import type { SurveyBatch, CreateBatchPayload, UpdateBatchPayload, BatchStats } from './types';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
+ 
 
 export async function getBatches(): Promise<SurveyBatch[]> {
   const res = await api.get('/alumni/batches');

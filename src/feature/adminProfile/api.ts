@@ -1,9 +1,6 @@
-import axios from 'axios'
+ import api from '../../libs/api'
 import type { IAdminProfile, IUpdateAdminProfileBody } from './type'
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
-
+ 
 export const getAdminProfileAPI = async (): Promise<IAdminProfile> => {
   const { data } = await api.get('/users/1')
   const user = data?.data ?? data

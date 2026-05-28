@@ -1,10 +1,7 @@
-import axios from "axios";
+ import api from "../../libs/api";
 import type { Faculty, FacultyListResponse, FacultyQuery, Major } from "./types";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
-
+ 
 
 /**
  * Lấy danh sách khoa có phân trang.

@@ -1,14 +1,11 @@
+import api from "../../libs/api";
 import type {
 	Enterprise, Job, EnterpriseFormValues, JobFormValues,
 	FacultyKey,
 } from "./type";
 import { FACULTY_COLOR_MAP } from "./type";
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
-
+ 
+ 
 /**
  * Normalize raw BE response → typed array.
  * Accepts: raw array | { items } | { data } | { results }
@@ -40,6 +37,7 @@ function normalizeEntity<T>(raw: unknown): T {
 
 export async function fetchEnterprises(): Promise<Enterprise[]> {
 	const res = await api.get("/enterprises");
+	console.log("API Request - fetchEnterprises, received data:", res.data); // Debug log to check the response data
 	return normalizeList<Enterprise>(res.data);
 }
 
