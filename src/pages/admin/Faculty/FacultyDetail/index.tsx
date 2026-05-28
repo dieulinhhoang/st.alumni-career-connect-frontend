@@ -1,42 +1,63 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Select, Button, Tag, Typography } from "antd";
+import { Button, Table, Tag, Typography } from "antd";
 import { ArrowLeftOutlined, BookOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../../../../components/layout/AdminLayout";
-import { useFacultyDetail } from "../../../../feature/faculty/hooks/useFaculties";
-import type { Major } from "../../../../feature/faculty/types";
+import { useFacultyDetailBySlug } from "../../../../feature/faculty/hooks/useFaculties";
 import CustomTable from "../../../../components/common/customTable";
 
 const { Title, Text } = Typography;
-const ALL_KHOA = [2021, 2022, 2023, 2024];
+
+type MajorRow = {
+  id: string;
+  code: string;
+  name: string;
+  slug?: string | null;
+};
 
 export default function FacultyDetailPage() {
   const { facultySlug = "" } = useParams<{ facultySlug: string }>();
   const navigate = useNavigate();
-  const [khoaFilter, setKhoaFilter] = useState<number | "all">("all");
 
-  const { faculty, majors, loading } = useFacultyDetail(facultySlug);
+  const { data: faculty, loading, error } = useFacultyDetailBySlug(facultySlug);
 
-  const filtered = khoaFilter === "all"
-    ? majors
-    : majors.filter(m => m.khoa.includes(khoaFilter as number));
+  const majors: MajorRow[] = useMemo(() => {
+    const raw = Array.isArray((faculty as any)?.majors) ? (faculty as any).majors : [];
+    return raw.map((m: any) => ({
+      id: String(m.id),
+      code: m.code ?? "",
+      name: m.name ?? "",
+      slug: m.slug ?? null,
+    }));
+  }, [faculty]);
 
-  const columns: ColumnsType<Major> = [
+  const color = (faculty as any)?.color ?? "#7c3aed";
+
+  const columns: ColumnsType<MajorRow> = [
     {
       title: "Tên ngành",
       dataIndex: "name",
       key: "name",
-      render: (v) => (
+      render: (value) => (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: (faculty?.color ?? "#7c3aed") + "15",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <BookOutlined style={{ color: faculty?.color ?? "#7c3aed", fontSize: 13 }} />
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: `${color}15`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <BookOutlined style={{ color, fontSize: 13 }} />
           </div>
-          <div style={{ fontWeight: 600, fontSize: 14, color: "#1e1b4b" }}>{v}</div>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "#1e1b4b" }}>
+            {value}
+          </div>
         </div>
       ),
     },
@@ -44,115 +65,113 @@ export default function FacultyDetailPage() {
       title: "Mã ngành",
       dataIndex: "code",
       key: "code",
-      width: 120,
-      render: v => <Tag color="purple" style={{ fontSize: 11 }}>{v}</Tag>,
-    },
-    {
-      title: "Sinh viên",
-      dataIndex: "students",
-      key: "students",
-      width: 110,
-      align: "center",
-      render: v => (
-        <span style={{ fontWeight: 600, fontSize: 13, color: "#374151" }}>
-          {v.toLocaleString()}
-        </span>
-      ),
+      width: 140,
+      render: (value) => <Tag color="purple">{value || "--"}</Tag>,
     },
   ];
 
-  if (loading) return (
-    <AdminLayout>
-      <div style={{ textAlign: "center", padding: 60, color: "#9ca3af" }}>Đang tải...</div>
-    </AdminLayout>
-  );
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div style={{ textAlign: "center", padding: 60, color: "#9ca3af" }}>
+          Đang tải...
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  if (!faculty) return (
-    <AdminLayout>
-      <div style={{ textAlign: "center", padding: 60 }}>
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🏫</div>
-        <div>Không tìm thấy khoa</div>
-        <Button style={{ marginTop: 16 }} onClick={() => navigate("/admin/faculties")}>Quay lại</Button>
-      </div>
-    </AdminLayout>
-  );
-
-  const color = faculty.color;
+  if (error || !faculty) {
+    return (
+      <AdminLayout>
+        <div style={{ textAlign: "center", padding: 60 }}>
+          <div>{error ?? "Không tìm thấy khoa"}</div>
+          <Button style={{ marginTop: 16 }} onClick={() => navigate("/admin/faculties")}>
+            Quay lại
+          </Button>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
       <div>
-        {/* Back */}
         <Button
-          icon={<ArrowLeftOutlined />} type="text"
+          icon={<ArrowLeftOutlined />}
+          type="text"
           style={{ marginBottom: 16, padding: "0 4px", color: "#6b7280" }}
           onClick={() => navigate("/admin/faculties")}
-        >Quay lại danh sách khoa</Button>
+        >
+          Quay lại danh sách khoa
+        </Button>
 
-       
-        <div style={{
-          borderRadius: 16,
-          border: `1px solid ${color}25`,
-          overflow: "hidden",
-          marginBottom: 20,
-          background: "white",
-        }}>
-          {/* Gradient banner */}
-          <div style={{
-            height: 90,
-            background: `linear-gradient(135deg, ${color}35 0%, ${color}60 100%)`,
-          }} />
+        <div
+          style={{
+            borderRadius: 16,
+            border: `1px solid ${color}25`,
+            overflow: "hidden",
+            marginBottom: 20,
+            background: "white",
+          }}
+        >
+          <div
+            style={{
+              height: 90,
+              background: `linear-gradient(135deg, ${color}35 0%, ${color}60 100%)`,
+            }}
+          />
 
-          {/* Avatar + Info — padding starts here, avatar pulled up with negative marginTop */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            padding: "0 24px 20px",
-          }}>
-            <div style={{
-              width: 64,
-              height: 64,
-              borderRadius: 14,
-              background: "white",
-              border: `2px solid ${color}30`,
+          <div
+            style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              marginTop: -32, // avatar overlaps banner bottom by ~half its height
-              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-            }}>
-              <span style={{ fontWeight: 900, fontSize: 13, color }}>{faculty.abbr}</span>
+              gap: 16,
+              padding: "0 24px 20px",
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 14,
+                background: "white",
+                border: `2px solid ${color}30`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                marginTop: -32,
+                boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+              }}
+            >
+              <span style={{ fontWeight: 900, fontSize: 13, color }}>
+                {(faculty as any)?.abbr ?? "--"}
+              </span>
             </div>
+
             <div style={{ paddingTop: 12 }}>
-              <Title level={4} style={{ margin: 0, color: "#1e1b4b" }}>{faculty.name}</Title>
+              <Title level={4} style={{ margin: 0, color: "#1e1b4b" }}>
+                {(faculty as any)?.name ?? "Không có tên khoa"}
+              </Title>
               <Text type="secondary" style={{ fontSize: 13 }}>
-                {majors.length} ngành đào tạo &nbsp;|&nbsp; {majors.reduce((s, m) => s + m.students, 0).toLocaleString()} sinh viên
+                {majors.length} ngành đào tạo
               </Text>
             </div>
           </div>
         </div>
 
-        {/* Filter */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-          <Text style={{ fontSize: 13, color: "#6b7280" }}>Lọc theo khóa:</Text>
-          <Select value={khoaFilter} onChange={setKhoaFilter} style={{ width: 140 }}>
-            <Select.Option value="all">Tất cả khóa</Select.Option>
-            {ALL_KHOA.map(k => <Select.Option key={k} value={k}>Khóa {k}</Select.Option>)}
-          </Select>
-          <Text type="secondary" style={{ fontSize: 12 }}>{filtered.length} ngành</Text>
-        </div>
-
-        {/* Table */}
-        <CustomTable
+        <Table
           columns={columns}
-          data={{ data: filtered }}
+          dataSource={majors}
           rowKey="id"
           pagination={false}
-          onRow={(record: Major) => ({
-            style: { cursor: "pointer" },
-            onClick: () => navigate(`/admin/faculties/${facultySlug}/${record.slug}`),
+          onRow={(record: MajorRow) => ({
+            style: { cursor: record.slug ? "pointer" : "default" },
+            onClick: () => {
+              if (record.slug) {
+                navigate(`/admin/faculties/${facultySlug}/${record.slug}`);
+              }
+            },
           })}
         />
       </div>

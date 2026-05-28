@@ -1,5 +1,8 @@
-import { api } from '../../libs/api'
+import axios from 'axios'
 import type { ICreateResource, IResource, IResourceQuery, IUpdateResource } from './type'
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
 
 export const getListResourceAPI = async (
   query?: IResourceQuery

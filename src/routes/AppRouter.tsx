@@ -1,4 +1,6 @@
 import { lazy, Suspense } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+
 import StudentList from '../pages/admin/ManageUsers/StudentList';
 import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
@@ -18,7 +20,7 @@ import { BatchResults } from '../pages/admin/Alumni/BatchResults';
 import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
 import { BatchList } from '../pages/admin/Alumni/BatchList';
 import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
- import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
+import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
 import ReportsPage from '../pages/admin/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
@@ -28,260 +30,165 @@ const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
 const SurveyPage = lazy(() => import('../pages/admin/Form/index'));
 
+//  Guards 
+const isLoggedIn = () => !!localStorage.getItem('accessToken');
 
+const ProtectedRoute = () =>
+  isLoggedIn() ? <Outlet /> : <Navigate to="/" replace />;
 
+//  Routes 
 const routes = [
-    {
-        path: '/',
+  {
+    path: '/',
+    children: [
+
+      // PUBLIC
+      {
+        path: '',
+        element: <Suspense fallback={<Loader />}><STAlumni /></Suspense>
+      },
+      {
+        path: '/auth/callback',
+        element: <Suspense fallback={<Loader />}><AuthCallback /></Suspense>
+      },
+      {
+        path: '/survey/:slug',
+        element: <Suspense fallback={<Loader />}><SurveyFillPage /></Suspense>
+      },
+
+      // PROTECTED
+      {
+        element: <ProtectedRoute />,
         children: [
-            {
-                path: '',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <STAlumni />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/dashboard',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <DashBoard />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/statistics',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                                         <FormStatisticsDetailPage />,
-                    </Suspense>
-                )
-            },
+          {
+            path: '/admin/dashboard',
+            element: <Suspense fallback={<Loader />}><DashBoard /></Suspense>
+          },
 
-            //  Survey / Form 
-            {
-                // SurveyPage tự điều hướng nội bộ giữa list / builder / ai / preview / theme
-                path: '/admin/allforms',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <SurveyPage />
-                    </Suspense>
-                )
-            },
+          // Statistics
+          {
+            path: '/admin/statistics',
+            element: <Suspense fallback={<Loader />}><FormStatisticsDetailPage /></Suspense>
+          },
+          {
+            path: '/admin/statistics/indicators',
+            element: <Suspense fallback={<Loader />}><StatIndicatorConfig /></Suspense>
+          },
 
-            // Reports
-            {
-                path: '/admin/reports',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <ReportsPage />
-                    </Suspense>
-                )
-            },
+          // Forms
+          {
+            path: '/admin/allforms',
+            element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
+          },
 
-             {
-                path: '/admin/alumni/batches',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <BatchList />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/alumni/batches/create',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <BatchCreate />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/alumni/batches/:id/results',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <BatchResults />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/alumni/batches/:id/responses/:responseId/edit',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <ResponseDetail />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/alumni/batches/:id/responses',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <BatchResults  />
-                    </Suspense>
-                )
-            },
-             {
-                path: '/admin/alumni/batches/:id/edit-form',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <SurveyPage />  
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/alumni/batches/:id/responses/:responseId',
-                element: (
-                <Suspense fallback={<Loader />}>
-                    <ResponseDetail />
-                </Suspense>
-                ),
-            },
-                        //  Users 
-            {
-                path: '/admin/studentlist',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <StudentList />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/stafflist',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <StaffList />
-                    </Suspense>
-                )
-            },
+          // Reports
+          {
+            path: '/admin/reports',
+            element: <Suspense fallback={<Loader />}><ReportsPage /></Suspense>
+          },
 
-            //  Enterprises 
-            {
-                path: '/admin/enterprises',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <Enterprise />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/enterprises/:slug',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <EnterpriseDetail />
-                    </Suspense>
-                )
-            },
+          // Alumni batches
+          {
+            path: '/admin/alumni/batches',
+            element: <Suspense fallback={<Loader />}><BatchList /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/create',
+            element: <Suspense fallback={<Loader />}><BatchCreate /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/:id/results',
+            element: <Suspense fallback={<Loader />}><BatchResults /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/:id/responses',
+            element: <Suspense fallback={<Loader />}><BatchResults /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/:id/responses/:responseId',
+            element: <Suspense fallback={<Loader />}><ResponseDetail /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/:id/responses/:responseId/edit',
+            element: <Suspense fallback={<Loader />}><ResponseDetail /></Suspense>
+          },
+          {
+            path: '/admin/alumni/batches/:id/edit-form',
+            element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
+          },
 
-            //  Faculties 
-            {
-                path: '/admin/faculties',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <Faculties />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/faculties/:facultySlug',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <FacultyDetail />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/faculties/:facultySlug/:majorSlug',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <MajorDetail />
-                    </Suspense>
-                )
-            },
+          // Users
+          {
+            path: '/admin/studentlist',
+            element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
+          },
+          {
+            path: '/admin/stafflist',
+            element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
+          },
+          {
+            path: '/admin/users',
+            element: <Suspense fallback={<Loader />}><UserManagement /></Suspense>
+          },
+          {
+            path: '/admin/roles',
+            element: <Suspense fallback={<Loader />}><RoleManagement /></Suspense>
+          },
+          {
+            path: '/admin/resources',
+            element: <Suspense fallback={<Loader />}><ResourceManagement /></Suspense>
+          },
 
-            //  Graduation 
-            {
-                path: '/admin/graduation',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <GraduationList />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/graduation/:id/:slug/students',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <GraduationStudents />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/graduation/:id/:slug/students/:studentId/:studentSlug',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <StudentDetail />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/resources',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <ResourceManagement />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/roles',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <RoleManagement />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/admin/users',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <UserManagement />
-                    </Suspense>
-                )
-            },
-            // Profile
-            {
-                path: '/admin/profile',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                        <AdminProfile />
-                    </Suspense>
-                )
-            },
-            {
-                path :'/survey/:slug',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                          <SurveyFillPage />
-                    </Suspense>
-                )
-            },{
-                path:'/admin/statistics/indicators',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                          <StatIndicatorConfig />
-                    </Suspense>
-                )
-            },{
-                
-                path: '/auth/callback',
-                element: (
-                    <Suspense fallback={<Loader />}>
-                          <AuthCallback />
-                    </Suspense>
-                 )
+          // Enterprises
+          {
+            path: '/admin/enterprises',
+            element: <Suspense fallback={<Loader />}><Enterprise /></Suspense>
+          },
+          {
+            path: '/admin/enterprises/:slug',
+            element: <Suspense fallback={<Loader />}><EnterpriseDetail /></Suspense>
+          },
 
-            }
-        ]  
-    }
+          // Faculties
+          {
+            path: '/admin/faculties',
+            element: <Suspense fallback={<Loader />}><Faculties /></Suspense>
+          },
+          {
+            path: '/admin/faculties/:facultySlug',
+            element: <Suspense fallback={<Loader />}><FacultyDetail /></Suspense>
+          },
+          {
+            path: '/admin/faculties/:facultySlug/:majorSlug',
+            element: <Suspense fallback={<Loader />}><MajorDetail /></Suspense>
+          },
+
+          // Graduation
+          {
+            path: '/admin/graduation',
+            element: <Suspense fallback={<Loader />}><GraduationList /></Suspense>
+          },
+          {
+            path: '/admin/graduation/:id/:slug/students',
+            element: <Suspense fallback={<Loader />}><GraduationStudents /></Suspense>
+          },
+          {
+            path: '/admin/graduation/:id/:slug/students/:studentId/:studentSlug',
+            element: <Suspense fallback={<Loader />}><StudentDetail /></Suspense>
+          },
+
+          // Profile
+          {
+            path: '/admin/profile',
+            element: <Suspense fallback={<Loader />}><AdminProfile /></Suspense>
+          },
+        ],
+      },
+
+      // FALLBACK
+      { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
 ];
 
 export default routes;

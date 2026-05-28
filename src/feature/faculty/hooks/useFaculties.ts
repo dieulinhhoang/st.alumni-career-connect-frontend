@@ -126,3 +126,44 @@ export function useFacultyDetail(id: number | null) {
 
   return { major, loading, error };
 }
+
+
+export function useFacultyDetailBySlug(slug: string) {
+  const [data, setData] = useState<Faculty | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!slug) {
+      setData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetchFacultyBySlug(slug)
+      .then((res) => {
+        if (!cancelled) {
+          setData(res);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setData(null);
+          setError("Không tìm thấy khoa.");
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  return { data, loading, error };
+}

@@ -1,9 +1,14 @@
 import { useSurveyStats, useEnterprises } from "../../../feature/home/hooks/index.ts";
-import { Navbar }          from "./Navbar.tsx";
-import { HeroSection }     from "./Herosection";
-import { StatsSection }    from "./Statssection";
-import { PartnersSection } from "./Partnerssection";
-import { Footer }          from "./Footer";
+import { Navbar }              from "./Navbar.tsx";
+import { HeroSection }         from "./Herosection";
+import { StatsSection }        from "./Statssection";
+import { FeaturesSection }     from "./Featuressection";
+import { StepsSection }        from "./Stepssection";
+import { NewsSection }         from "./Newssection";
+import { PartnersSection }     from "./Partnerssection";
+import { TestimonialsSection } from "./Testimonialssection";
+import { CtaSection }          from "./Ctasection";
+import { Footer }              from "./Footer";
 
 export default function HomePage() {
   const { data: stats }        = useSurveyStats();
@@ -33,21 +38,39 @@ export default function HomePage() {
           background-attachment: fixed;
         }
 
+        /* Keep section backgrounds transparent so page-bg shows through */
         .hero-wrapper,
         #stats,
+        #features,
+        #steps,
+        #news,
         #partners,
         .ft {
           background: transparent !important;
+        }
+
+        /* Sections with their own opaque bg keep them */
+        #testimonials,
+        #cta {
+          /* intentional — these have their own dark backgrounds */
         }
       `}</style>
 
       <div className="page-bg">
         <Navbar />
+
         {stats && <HeroSection stats={stats} />}
         {stats && <StatsSection stats={stats} />}
-        {/* <FeaturesSection /> */}
+
+        <FeaturesSection />
+        <StepsSection />
+
         {enterprises.length > 0 && <PartnersSection partnerLogos={enterprises} />}
-        {/* <CtaSection /> */}
+
+        <NewsSection />
+        <TestimonialsSection />
+        <CtaSection />
+
         <Footer />
       </div>
     </>

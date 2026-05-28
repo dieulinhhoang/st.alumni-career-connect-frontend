@@ -1,11 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Row,
-  Col,
-  Input,
-  Typography,
-} from "antd";
+import { Row, Col, Input, Typography } from "antd";
 import {
   RightOutlined,
   BookOutlined,
@@ -17,14 +12,11 @@ import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 
 const { Title, Text } = Typography;
 
-// Brand colors 
-const BRAND_GREEN = "#056f38";   // xanh logo
-const BRAND_YELLOW = "#FFC20E";  // vàng logo
-const BRAND_ORANGE = "#614525";  // cam logo
+const BRAND_GREEN = "#056f38";
+const BRAND_YELLOW = "#FFC20E";
+const BRAND_ORANGE = "#614525";
 
-// dùng xanh logo làm main cho list khoa
 const PRIMARY = BRAND_GREEN;
-
 const CARD_BG = "#f9fafb";
 const CARD_BORDER = "#e5e7eb";
 const TEXT_MAIN = "#0f172a";
@@ -34,7 +26,7 @@ export default function FacultyListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const { data: faculties, loading } = useFaculties();
+  const { faculties, loading, error } = useFaculties();
 
   const list = Array.isArray(faculties) ? faculties : [];
 
@@ -51,9 +43,9 @@ export default function FacultyListPage() {
     [list, search]
   );
 
-  const totalStudents = list.reduce((s, f) => s + (f.students || 0), 0);
-  const totalMajors = list.reduce((s, f) => s + (f.majors || 0), 0);
-
+  // const totalStudents = list.reduce((s, f) => s + Number(f.students || 0), 0);
+  const getMajorCount = (faculty: any) =>
+  Number(faculty?.majorCount ?? 0);
   const isEmpty = !loading && filtered.length === 0;
   const isNoFaculties = isEmpty && list.length === 0 && search === "";
   const isNoResults = isEmpty && !isNoFaculties;
@@ -68,7 +60,6 @@ export default function FacultyListPage() {
       `}</style>
 
       <div style={{ padding: 4 }}>
-        {/* Header */}
         <div
           style={{
             marginBottom: 20,
@@ -89,7 +80,7 @@ export default function FacultyListPage() {
 
           <Input
             allowClear
-            placeholder="Tìm kiếm "
+            placeholder="Tìm kiếm"
             prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -100,16 +91,31 @@ export default function FacultyListPage() {
           />
         </div>
 
-        {/* Stats – 3 màu logo (xanh, vàng, cam) */}
+        {error && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: "12px 16px",
+              borderRadius: 12,
+              background: "#fff1f2",
+              border: "1px solid #fecdd3",
+              color: "#be123c",
+              fontSize: 13,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
           {[
             { label: "Tổng số khoa", value: list.length, color: BRAND_GREEN },
-            { label: "Ngành đào tạo", value: totalMajors, color: BRAND_YELLOW },
-            {
-              label: "Tổng sinh viên",
-              value: totalStudents.toLocaleString(),
-              color: BRAND_ORANGE,
-            },
+            { label: "Ngành đào tạo", value: list.reduce((sum, f) => sum + getMajorCount(f), 0), color: BRAND_YELLOW },
+            // {
+            //   label: "Tổng sinh viên",
+            //   value: totalStudents.toLocaleString(),
+            //   color: BRAND_ORANGE,
+            // },
           ].map((s) => (
             <Col key={s.label} xs={24} sm={8}>
               <div
@@ -149,7 +155,6 @@ export default function FacultyListPage() {
           ))}
         </Row>
 
-        {/* List khoa – primary xanh VNUA + nền xám */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
@@ -165,19 +170,18 @@ export default function FacultyListPage() {
                 />
               ))
             : filtered.map((f) => {
-                const isHovered = hoveredId === f.id;
+                const isHovered = hoveredId === String(f.id);
+
                 return (
                   <div
                     key={f.id}
                     onClick={() => navigate(`/admin/faculties/${f.slug}`)}
-                    onMouseEnter={() => setHoveredId(f.id)}
+                    onMouseEnter={() => setHoveredId(String(f.id))}
                     onMouseLeave={() => setHoveredId(null)}
                     style={{
                       background: "#ffffff",
                       borderRadius: 14,
-                      border: `1px solid ${
-                        isHovered ? CARD_BORDER : "#e5e7eb"
-                      }`,
+                      border: `1px solid ${isHovered ? CARD_BORDER : "#e5e7eb"}`,
                       padding: "18px 20px",
                       cursor: "pointer",
                       transition: "all 0.18s ease",
@@ -189,18 +193,6 @@ export default function FacultyListPage() {
                         : "0 1px 3px rgba(15,23,42,0.03)",
                     }}
                   >
-                    {/* thanh dọc primary xanh VNUA */}
-                    {/* <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: 3,
-                        height: "100%",
-                        borderRadius: "14px 0 0 14px",
-                        background: PRIMARY,
-                      }}
-                    /> */}
                     <div
                       style={{
                         display: "flex",
@@ -220,7 +212,7 @@ export default function FacultyListPage() {
                             width: 44,
                             height: 44,
                             borderRadius: 12,
-                            background: "#f0fdf4", // xanh rất nhạt
+                            background: "#f0fdf4",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -238,6 +230,7 @@ export default function FacultyListPage() {
                             {f.abbr}
                           </span>
                         </div>
+
                         <div>
                           <div
                             style={{
@@ -249,6 +242,7 @@ export default function FacultyListPage() {
                           >
                             {f.name}
                           </div>
+
                           <div
                             style={{
                               display: "flex",
@@ -265,21 +259,14 @@ export default function FacultyListPage() {
                               }}
                             >
                               <BookOutlined style={{ fontSize: 11 }} />
-                              {f.majors} ngành
+                              {getMajorCount(f)} ngành
                             </span>
-                            <span
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                              }}
-                            >
-                              <TeamOutlined style={{ fontSize: 11 }} />
-                              {f.students.toLocaleString()} sinh viên
-                            </span>
+
+                            
                           </div>
                         </div>
                       </div>
+
                       <RightOutlined
                         style={{
                           fontSize: 12,

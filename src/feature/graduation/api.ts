@@ -1,6 +1,8 @@
+import axios from "axios";
 import type { Graduation, GraduationStudent, PaginatedResponse } from "./type";
-import { api } from "../../libs/api";
-
+ const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
 /**
  * Normalize a raw BE response into a typed array.
  * Accepts: array trực tiếp | { items } | { data } | { results }

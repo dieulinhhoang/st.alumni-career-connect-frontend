@@ -1,3 +1,4 @@
+import axios from "axios";
 import type {
   ApiResponse,
   PaginatedResponse,
@@ -6,9 +7,10 @@ import type {
   JobPosting,
   AlumniProfile,
 } from "./type";
-import {api} from "../../libs/api";
-
-// ============ Stats ============
+ const api = axios.create({
+   baseURL: import.meta.env.VITE_API_URL,
+ })
+//  Stats 
 export const statsApi = {
   getOverall: async (): Promise<ApiResponse<SurveyStats>> => {
     const res = await api.get("/home/stats");
@@ -24,7 +26,7 @@ export const statsApi = {
   },
 };
 
-// ============ Enterprises ============
+//  Enterprises 
 export const enterpriseApi = {
   list: async (
     page = 1,
@@ -52,7 +54,7 @@ export const enterpriseApi = {
   },
 };
 
-// ============ Jobs ============
+//  Jobs 
 export const jobsApi = {
   list: async (params?: {
     page?: number;
@@ -80,7 +82,7 @@ export const jobsApi = {
   },
 };
 
-// ============ Alumni ============
+//  Alumni 
 export const alumniApi = {
   getProfile: async (studentCode: string): Promise<ApiResponse<AlumniProfile>> => {
     const res = await api.get("/alumni/profiles", { params: { student_code: studentCode } });

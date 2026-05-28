@@ -8,7 +8,7 @@ import type {
 	FacultySubmissionRow,
 	ReportMeta,
 } from './types';
-import {api} from "../../libs/api";
+import axios from 'axios';
 
 export type ReportApiResponse = {
 	currentUser: CurrentUser;
@@ -19,7 +19,9 @@ export type ReportApiResponse = {
 	facultyRows: FacultySubmissionRow[];
 	reportMeta: ReportMeta;
 };
-
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
 /**
  * Fetch comprehensive report data for the alumni survey.
  * @param filters - Filter criteria for the report

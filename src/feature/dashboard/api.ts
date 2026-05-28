@@ -1,7 +1,9 @@
-import {api} from "../../libs/api";
-
+ 
+import axios from "axios";
 import type { DotEntry, KhoaItem, EnterpriseItem, ChartMode, ChartModeConfig } from "./type";
-
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+})
 //  Khoa list 
 
 export const KHOA_LIST: KhoaItem[] = [
