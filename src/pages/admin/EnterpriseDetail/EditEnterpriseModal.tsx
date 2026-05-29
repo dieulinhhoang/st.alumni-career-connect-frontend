@@ -16,15 +16,12 @@ interface Props {
   onSave: (data: EnterpriseFormValues) => Promise<void>;
 }
 
-function normalizeFacultyValue(enterprise: Enterprise | null): string | undefined {
-  if (!enterprise) return undefined;
-
-  const raw = enterprise.faculty;
-
-  if (!raw) return undefined;
-  if (typeof raw === "string") return raw;
-
-  return raw.id ?? raw.code ?? raw.name ?? undefined;
+/** Trả về mảng id (string) của các khoa đang liên kết */
+function normalizeFacultyIds(enterprise: Enterprise | null): string[] {
+  if (!enterprise) return [];
+  const faculties = enterprise.faculties;
+  if (!Array.isArray(faculties) || faculties.length === 0) return [];
+  return faculties.map((f) => String(f.id));
 }
 
 export function EnterpriseFormModal({
@@ -41,7 +38,7 @@ export function EnterpriseFormModal({
     () =>
       faculties.map((f) => ({
         label: f.name,
-        value: f.id,
+        value: String(f.id),
       })),
     [faculties],
   );
@@ -57,7 +54,8 @@ export function EnterpriseFormModal({
       abbr: enterprise?.abbr ?? "",
       industry: enterprise?.industry ?? undefined,
       size: enterprise?.size ?? undefined,
-      faculty: normalizeFacultyValue(enterprise),
+      // faculties là mảng id string, khớp đúng với value của options
+      faculties: normalizeFacultyIds(enterprise),
       email: enterprise?.email ?? "",
       phone: enterprise?.phone ?? "",
       website: enterprise?.website ?? "",
@@ -73,7 +71,7 @@ export function EnterpriseFormModal({
     try {
       await onSave({
         ...values,
-        faculty: values.faculty ?? null,
+        faculties: values.faculties ?? [],
       });
       form.resetFields();
       onClose();
@@ -152,11 +150,13 @@ export function EnterpriseFormModal({
           </Col>
         </Row>
 
-        <Form.Item name="faculty" label="Khoa đối tác">
+        {/* FIX: name="faculties", mode="multiple", value là id string khớp options */}
+        <Form.Item name="faculties" label="Khoa đối tác">
           <Select
+            mode="multiple"
             allowClear
             showSearch
-            placeholder="Chọn khoa liên kết"
+            placeholder="Chọn khoa liên kết (có thể chọn nhiều)"
             options={facultyOptions}
             optionFilterProp="label"
             notFoundContent="Không có khoa"
