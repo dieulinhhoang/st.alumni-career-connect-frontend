@@ -83,15 +83,8 @@ function StatCard({ label, value, color }: { label: string; value: number; color
   );
 }
 
-/** Trả về mảng các id (string) của các khoa liên kết với enterprise */
-function getEnterpriseFacultyIds(enterprise: Enterprise): string[] {
-  if (!Array.isArray(enterprise.faculties) || enterprise.faculties.length === 0) return [];
-  return enterprise.faculties.map((f) => String(f.id));
-}
-
 function getEnterpriseFacultyLabel(enterprise: Enterprise, faculties: Faculty[]): string {
   if (!Array.isArray(enterprise.faculties) || enterprise.faculties.length === 0) return "-";
-  // Ưu tiên dùng tên đã có trong enterprise.faculties, fallback sang lookup
   return enterprise.faculties
     .map((ef) => {
       if (ef.name) return ef.name;
@@ -104,50 +97,47 @@ function getEnterpriseFacultyLabel(enterprise: Enterprise, faculties: Faculty[])
 export default function EnterprisePage() {
   const navigate = useNavigate();
 
-  const {
-    enterprises,
-    loading,
-    addEnterprise,
-    editEnterprise,
-    togglePartnerStatus,
-  } = useEnterprises();
-
-  const { faculties = [], loading: facultiesLoading } = useFaculties();
-
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
-  const [facultyFilter, setFacultyFilter] = useState("all");
+  const [facultyFilter, setFacultyFilter] = useState<string | undefined>(undefined);
   const [query, setQuery] = useState({ page: 1, size: 8 });
   const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>({
     open: false,
     enterprise: null,
   });
 
+  const {
+    enterprises,
+    loading,
+    total,
+    setFacultyId,
+    setPage,
+    addEnterprise,
+    editEnterprise,
+    togglePartnerStatus,
+  } = useEnterprises({ page: query.page - 1, size: query.size });
+
+  const { faculties = [], loading: facultiesLoading } = useFaculties();
+
   const faded = (r: Enterprise) => r.partnerStatus === "inactive";
 
+  // Client-side filter chỉ cho search text và industry (nhẹ, không cần server round-trip)
+  // facultyId đã được xử lý server-side qua useEnterprises hook
   const filtered = useMemo(() => {
     return enterprises.filter((e) => {
       const keyword = search.trim().toLowerCase();
-
       const matchSearch =
         !keyword ||
         e.name.toLowerCase().includes(keyword) ||
         e.email.toLowerCase().includes(keyword);
-
       const matchIndustry =
         industry === "Tất cả ngành" || e.industry === industry;
-
-      // FIX: đọc từ enterprise.faculties[], kiểm tra includes thay vì so sánh đơn
-      const facultyIds = getEnterpriseFacultyIds(e);
-      const matchFaculty =
-        facultyFilter === "all" || facultyIds.includes(String(facultyFilter));
-
-      return matchSearch && matchIndustry && matchFaculty;
+      return matchSearch && matchIndustry;
     });
-  }, [enterprises, search, industry, facultyFilter]);
+  }, [enterprises, search, industry]);
 
   const stats = [
-    { label: "Tổng doanh nghiệp", value: enterprises.length, color: T.accent },
+    { label: "Tổng doanh nghiệp", value: total, color: T.accent },
     {
       label: "Đang hoạt động",
       value: enterprises.filter((e) => e.partnerStatus === "active").length,
@@ -173,16 +163,13 @@ export default function EnterprisePage() {
     } else {
       await addEnterprise(values);
     }
-
     setModal({ open: false, enterprise: null });
   };
 
   const handleToggle = (id: string, checked: boolean) => {
     const ent = enterprises.find((e) => e.id === id);
     if (!ent) return;
-
     const newStatus: PartnerStatus = checked ? "active" : "inactive";
-
     if (!checked) {
       Modal.confirm({
         title: "Ngưng hợp tác đối tác?",
@@ -194,7 +181,6 @@ export default function EnterprisePage() {
       });
       return;
     }
-
     togglePartnerStatus(id, newStatus);
   };
 
@@ -387,12 +373,15 @@ export default function EnterprisePage() {
                 ]}
               />
 
-              {/* FIX: filter khoa dùng id string, match với getEnterpriseFacultyIds */}
+              {/* Faculty filter — server-side qua setFacultyId */}
               <Select
-                value={facultyFilter === "all" ? undefined : facultyFilter}
+                value={facultyFilter}
                 onChange={(value) => {
-                  setFacultyFilter(value ?? "all");
+                  const newVal = value ?? undefined;
+                  setFacultyFilter(newVal);
+                  setFacultyId(newVal);
                   setQuery((prev) => ({ ...prev, page: 1 }));
+                  setPage(0);
                 }}
                 loading={facultiesLoading}
                 allowClear
@@ -413,14 +402,16 @@ export default function EnterprisePage() {
                 ))}
               </Select>
 
-              {(search || industry !== "Tất cả ngành" || facultyFilter !== "all") && (
+              {(search || industry !== "Tất cả ngành" || facultyFilter !== undefined) && (
                 <Button
                   type="text"
                   onClick={() => {
                     setSearch("");
                     setIndustry("Tất cả ngành");
-                    setFacultyFilter("all");
+                    setFacultyFilter(undefined);
+                    setFacultyId(undefined);
                     setQuery((prev) => ({ ...prev, page: 1 }));
+                    setPage(0);
                   }}
                   style={{
                     height: 34,
@@ -435,7 +426,7 @@ export default function EnterprisePage() {
               )}
 
               <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
-                {filtered.length} / {enterprises.length} doanh nghiệp
+                {filtered.length} / {total} doanh nghiệp
               </span>
             </div>
 
@@ -447,16 +438,15 @@ export default function EnterprisePage() {
               pagination={{
                 current: query.page,
                 pageSize: query.size,
-                total: filtered.length,
+                total: total,
                 showSizeChanger: true,
                 pageSizeOptions: [8, 10, 20, 50],
               }}
               onChange={(pagination: TablePaginationConfig) => {
-                setQuery((prev) => ({
-                  ...prev,
-                  page: pagination.current || 1,
-                  size: pagination.pageSize || prev.size,
-                }));
+                const newPage = pagination.current || 1;
+                const newSize = pagination.pageSize || query.size;
+                setQuery({ page: newPage, size: newSize });
+                setPage(newPage - 1);
               }}
               scroll={{ x: 760 }}
               rowClassName={(_record, index) => `ent-row${index % 2 === 1 ? " row-stripe" : ""}`}
