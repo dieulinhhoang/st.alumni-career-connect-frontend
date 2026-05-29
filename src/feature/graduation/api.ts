@@ -1,8 +1,20 @@
 import axios from "axios";
 import type { Graduation, GraduationStudent, PaginatedResponse } from "./type";
- const api = axios.create({
+
+const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-})
+});
+
+// Gắn JWT token vào mọi request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 /**
  * Normalize a raw BE response into a typed array.
  * Accepts: array trực tiếp | { items } | { data } | { results }

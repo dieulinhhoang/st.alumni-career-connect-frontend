@@ -69,7 +69,7 @@ export default function GraduationList() {
     page: {
       total_elements: search.trim() ? filtered.length : meta.total,
       current_page:   meta.current_page,
-      total_pages:    meta.total_pages,
+      total_pages:    meta.last_page,   // ✅ fix: dùng last_page thay vì total_pages (không tồn tại)
     },
   };
 
