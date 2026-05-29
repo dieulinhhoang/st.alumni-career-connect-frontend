@@ -20,7 +20,8 @@ export interface Enterprise {
   jobs: number;
   verified: boolean;
   joinedDate: string;
-  faculty?: string | Faculty | null;
+  // BE findOne trả về faculties[] (từ enterpriseFaculties relation)
+  faculties?: Faculty[];
   partnerStatus: PartnerStatus;
   size: string;
   address: string;
@@ -39,10 +40,13 @@ export interface Job {
   faculty?: string | Faculty | null;
 }
 
+// faculties là mảng id string gửi lên BE
 export type EnterpriseFormValues = Omit<
   Enterprise,
-  "id" | "color" | "jobs" | "verified" | "joinedDate" | "partnerStatus"
->;
+  "id" | "color" | "jobs" | "verified" | "joinedDate" | "partnerStatus" | "faculties"
+> & {
+  faculties?: string[];
+};
 
 export type JobFormValues = Omit<Job, "id" | "postedAt">;
 
