@@ -45,14 +45,6 @@ const IconClipboard = () => (
   </svg>
 );
 
-/** Lấy id khoa đầu tiên (dùng cho JobFormModal enterpriseFaculty) */
-function getPrimaryFacultyValue(enterprise: Enterprise): string | undefined {
-  if (Array.isArray(enterprise.faculties) && enterprise.faculties.length > 0) {
-    return String(enterprise.faculties[0].id);
-  }
-  return undefined;
-}
-
 export default function EnterpriseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -66,7 +58,8 @@ export default function EnterpriseDetailPage() {
     });
   }, [slug]);
 
-  const { data: faculties = [] } = useFaculties();
+  // FIX: useFaculties trả về { faculties, loading } — không phải { data }
+  const { faculties = [] } = useFaculties();
 
   const {
     enterprise: ent,
@@ -121,9 +114,7 @@ export default function EnterpriseDetailPage() {
   const displayJobs =
     jobTab === "active" ? activeJobs : jobTab === "closed" ? closedJobs : jobs;
 
-  // FIX: đọc từ ent.faculties[] thay vì ent.faculty đơn
   const enterpriseFaculties = Array.isArray(ent.faculties) ? ent.faculties : [];
-  const primaryFacultyValue = getPrimaryFacultyValue(ent);
 
   const handleTogglePartner = () => {
     if (ent.partnerStatus === "active") {
@@ -332,7 +323,6 @@ export default function EnterpriseDetailPage() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
               </Card>
 
-              {/* FIX: render từ ent.faculties[] thay vì ent.faculty đơn */}
               <Card
                 style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Khoa đối tác</span>}
@@ -468,12 +458,12 @@ export default function EnterpriseDetailPage() {
         onSave={edit as (v: EnterpriseFormValues) => Promise<void>}
       />
 
+      {/* FIX: bỏ prop enterpriseFaculty không có trong interface JobFormModal */}
       <JobFormModal
         open={jobModal.open}
         job={jobModal.job}
         entColor={ent.color}
         faculties={faculties}
-        enterpriseFaculty={primaryFacultyValue}
         onClose={() => setJobModal({ open: false, job: null })}
         onSave={handleSaveJob}
       />

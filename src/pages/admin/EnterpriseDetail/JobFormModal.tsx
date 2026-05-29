@@ -24,7 +24,8 @@ function normalizeFacultyValue(job: Job | null): string | undefined {
   if (!raw) return undefined;
   if (typeof raw === "string") return raw;
 
-  return raw.id ?? raw.code ?? raw.name ?? undefined;
+  // FIX: wrap String() để đảm bảo luôn là string, khớp với value của options
+  return String(raw.id ?? raw.code ?? raw.name ?? "") || undefined;
 }
 
 function normalizeDeadline(deadline?: string | null) {
@@ -44,11 +45,12 @@ export function JobFormModal({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
+  // FIX: value là String(f.id) để khớp với normalizeFacultyValue
   const facultyOptions = useMemo(
     () =>
       faculties.map((f) => ({
         label: f.name,
-        value: f.id,
+        value: String(f.id),
       })),
     [faculties],
   );
@@ -175,7 +177,7 @@ export function JobFormModal({
             placeholder="Chọn khoa liên quan"
             options={facultyOptions}
             optionFilterProp="label"
-            notFoundContent="Không có khoa phù hợp"
+            notFoundContent={faculties.length === 0 ? "Đang tải khoa..." : "Không có khoa phù hợp"}
           />
         </Form.Item>
 
