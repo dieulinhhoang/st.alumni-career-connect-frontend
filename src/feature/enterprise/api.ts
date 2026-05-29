@@ -50,8 +50,8 @@ function normalizeEnterprise(raw: unknown): Enterprise {
 }
 
 // Enterprise API
-export async function fetchEnterprises(): Promise<Enterprise[]> {
-  const res = await api.get("/enterprises");
+export async function fetchEnterprises(params?: { facultyId?: string; page?: number; size?: number }): Promise<Enterprise[]> {
+  const res = await api.get("/enterprises", { params });
   return normalizeList<Enterprise>(res.data);
 }
 
