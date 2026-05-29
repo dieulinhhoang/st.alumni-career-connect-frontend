@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card, Col, Row, Tag, Button, Badge, Divider, Space, Modal, Spin,
@@ -20,13 +20,14 @@ import {
   type JobFormValues,
   type PartnerStatus,
   type EnterpriseFormValues,
-  type Faculty,
 } from "../../../feature/enterprise/type";
 
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 import { JobFormModal } from "./JobFormModal";
 import { JobCard } from "./JobCard";
 import { EnterpriseFormModal } from "./EditEnterpriseModal";
+
+const DEFAULT_FACULTY_COLOR = "#6d28d9";
 
 const IconBuilding = () => (
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -44,51 +45,12 @@ const IconClipboard = () => (
   </svg>
 );
 
-function getEnterpriseFacultyValue(enterprise: Enterprise): string | undefined {
-  const raw = enterprise.faculty;
-
-  if (!raw) return undefined;
-  if (typeof raw === "string") return raw;
-
-  return raw.id ?? raw.code ?? raw.name ?? undefined;
-}
-
-function getEnterpriseFacultyLabel(
-  enterprise: Enterprise,
-  faculties: Faculty[],
-): string {
-  const raw = enterprise.faculty;
-
-  if (!raw) return "Chưa có khoa liên kết";
-
-  if (typeof raw === "object") {
-    return raw.name ?? raw.code ?? raw.id ?? "Chưa có khoa liên kết";
+/** Lấy id khoa đầu tiên (dùng cho JobFormModal enterpriseFaculty) */
+function getPrimaryFacultyValue(enterprise: Enterprise): string | undefined {
+  if (Array.isArray(enterprise.faculties) && enterprise.faculties.length > 0) {
+    return String(enterprise.faculties[0].id);
   }
-
-  const matched = faculties.find(
-    (f) => f.id === raw || f.code === raw || f.name === raw,
-  );
-
-  return matched?.name ?? raw;
-}
-
-function getEnterpriseFacultyColor(
-  enterprise: Enterprise,
-  faculties: Faculty[],
-): string {
-  const raw = enterprise.faculty;
-
-  if (!raw) return "#6b7280";
-
-  if (typeof raw === "object") {
-    return raw.color ?? "#6d28d9";
-  }
-
-  const matched = faculties.find(
-    (f) => f.id === raw || f.code === raw || f.name === raw,
-  );
-
-  return matched?.color ?? "#6d28d9";
+  return undefined;
 }
 
 export default function EnterpriseDetailPage() {
@@ -159,9 +121,9 @@ export default function EnterpriseDetailPage() {
   const displayJobs =
     jobTab === "active" ? activeJobs : jobTab === "closed" ? closedJobs : jobs;
 
-  const facultyLabel = getEnterpriseFacultyLabel(ent, faculties);
-  const facultyColor = getEnterpriseFacultyColor(ent, faculties);
-  const facultyValue = getEnterpriseFacultyValue(ent);
+  // FIX: đọc từ ent.faculties[] thay vì ent.faculty đơn
+  const enterpriseFaculties = Array.isArray(ent.faculties) ? ent.faculties : [];
+  const primaryFacultyValue = getPrimaryFacultyValue(ent);
 
   const handleTogglePartner = () => {
     if (ent.partnerStatus === "active") {
@@ -370,27 +332,34 @@ export default function EnterpriseDetailPage() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
               </Card>
 
+              {/* FIX: render từ ent.faculties[] thay vì ent.faculty đơn */}
               <Card
                 style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Khoa đối tác</span>}
               >
-                {!facultyValue ? (
+                {enterpriseFaculties.length === 0 ? (
                   <span style={{ color: "#9ca3af", fontSize: 13 }}>Chưa có khoa liên kết</span>
                 ) : (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    <span
-                      style={{
-                        padding: "5px 14px",
-                        borderRadius: 100,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        background: `${facultyColor}15`,
-                        color: facultyColor,
-                        border: `1px solid ${facultyColor}30`,
-                      }}
-                    >
-                      {facultyLabel}
-                    </span>
+                    {enterpriseFaculties.map((f) => {
+                      const color = f.color ?? DEFAULT_FACULTY_COLOR;
+                      return (
+                        <span
+                          key={f.id}
+                          style={{
+                            padding: "5px 14px",
+                            borderRadius: 100,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            background: `${color}15`,
+                            color: color,
+                            border: `1px solid ${color}30`,
+                          }}
+                        >
+                          {f.name}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </Card>
@@ -504,7 +473,7 @@ export default function EnterpriseDetailPage() {
         job={jobModal.job}
         entColor={ent.color}
         faculties={faculties}
-        enterpriseFaculty={facultyValue}
+        enterpriseFaculty={primaryFacultyValue}
         onClose={() => setJobModal({ open: false, job: null })}
         onSave={handleSaveJob}
       />

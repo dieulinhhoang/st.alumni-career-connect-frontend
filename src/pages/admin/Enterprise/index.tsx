@@ -83,31 +83,22 @@ function StatCard({ label, value, color }: { label: string; value: number; color
   );
 }
 
-// FIX: ép String để tránh type mismatch giữa number và string khi so sánh
-function getEnterpriseFacultyValue(enterprise: Enterprise): string | undefined {
-  const raw = enterprise.faculty;
-
-  if (!raw) return undefined;
-  if (typeof raw === "string") return raw;
-
-  const id = raw.id ?? raw.code ?? raw.name ?? undefined;
-  return id !== undefined ? String(id) : undefined;
+/** Trả về mảng các id (string) của các khoa liên kết với enterprise */
+function getEnterpriseFacultyIds(enterprise: Enterprise): string[] {
+  if (!Array.isArray(enterprise.faculties) || enterprise.faculties.length === 0) return [];
+  return enterprise.faculties.map((f) => String(f.id));
 }
 
 function getEnterpriseFacultyLabel(enterprise: Enterprise, faculties: Faculty[]): string {
-  const raw = enterprise.faculty;
-
-  if (!raw) return "-";
-
-  if (typeof raw === "object") {
-    return raw.name ?? raw.code ?? raw.id ?? "-";
-  }
-
-  const matched = faculties.find(
-    (f) => f.id === raw || f.code === raw || f.name === raw,
-  );
-
-  return matched?.name ?? raw;
+  if (!Array.isArray(enterprise.faculties) || enterprise.faculties.length === 0) return "-";
+  // Ưu tiên dùng tên đã có trong enterprise.faculties, fallback sang lookup
+  return enterprise.faculties
+    .map((ef) => {
+      if (ef.name) return ef.name;
+      const matched = faculties.find((f) => String(f.id) === String(ef.id));
+      return matched?.name ?? `Khoa #${ef.id}`;
+    })
+    .join(", ");
 }
 
 export default function EnterprisePage() {
@@ -146,10 +137,10 @@ export default function EnterprisePage() {
       const matchIndustry =
         industry === "Tất cả ngành" || e.industry === industry;
 
-      const facultyValue = getEnterpriseFacultyValue(e);
-      // FIX: ép cả hai về String để so sánh chính xác
+      // FIX: đọc từ enterprise.faculties[], kiểm tra includes thay vì so sánh đơn
+      const facultyIds = getEnterpriseFacultyIds(e);
       const matchFaculty =
-        facultyFilter === "all" || String(facultyValue) === String(facultyFilter);
+        facultyFilter === "all" || facultyIds.includes(String(facultyFilter));
 
       return matchSearch && matchIndustry && matchFaculty;
     });
@@ -249,6 +240,16 @@ export default function EnterprisePage() {
       key: "industry",
       width: 155,
       render: (value: string, r) => <span style={chip(faded(r))}>{value}</span>,
+    },
+    {
+      title: "Khoa",
+      key: "faculties",
+      width: 180,
+      render: (_value, r) => (
+        <span style={{ fontSize: 12, color: T.sub }}>
+          {getEnterpriseFacultyLabel(r, faculties)}
+        </span>
+      ),
     },
     {
       title: "Việc làm",
@@ -386,6 +387,7 @@ export default function EnterprisePage() {
                 ]}
               />
 
+              {/* FIX: filter khoa dùng id string, match với getEnterpriseFacultyIds */}
               <Select
                 value={facultyFilter === "all" ? undefined : facultyFilter}
                 onChange={(value) => {
