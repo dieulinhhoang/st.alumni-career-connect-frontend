@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Col, Row, Input, Select, Button, Modal, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { toSlug } from "../../../components/common/utils";
@@ -83,13 +83,15 @@ function StatCard({ label, value, color }: { label: string; value: number; color
   );
 }
 
+// FIX: ép String để tránh type mismatch giữa number và string khi so sánh
 function getEnterpriseFacultyValue(enterprise: Enterprise): string | undefined {
   const raw = enterprise.faculty;
 
   if (!raw) return undefined;
   if (typeof raw === "string") return raw;
 
-  return raw.id ?? raw.code ?? raw.name ?? undefined;
+  const id = raw.id ?? raw.code ?? raw.name ?? undefined;
+  return id !== undefined ? String(id) : undefined;
 }
 
 function getEnterpriseFacultyLabel(enterprise: Enterprise, faculties: Faculty[]): string {
@@ -119,8 +121,8 @@ export default function EnterprisePage() {
     togglePartnerStatus,
   } = useEnterprises();
 
-const { faculties = [], loading: facultiesLoading } = useFaculties();
-console.log("faculties in page:", faculties);
+  const { faculties = [], loading: facultiesLoading } = useFaculties();
+
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
   const [facultyFilter, setFacultyFilter] = useState("all");
@@ -145,8 +147,9 @@ console.log("faculties in page:", faculties);
         industry === "Tất cả ngành" || e.industry === industry;
 
       const facultyValue = getEnterpriseFacultyValue(e);
+      // FIX: ép cả hai về String để so sánh chính xác
       const matchFaculty =
-        facultyFilter === "all" || facultyValue === facultyFilter;
+        facultyFilter === "all" || String(facultyValue) === String(facultyFilter);
 
       return matchSearch && matchIndustry && matchFaculty;
     });
@@ -160,7 +163,7 @@ console.log("faculties in page:", faculties);
       color: T.success,
     },
     {
-      label: "Tạm ngừng",
+      label: "Tạm ngưng",
       value: enterprises.filter((e) => e.partnerStatus === "inactive").length,
       color: T.danger,
     },
@@ -191,7 +194,7 @@ console.log("faculties in page:", faculties);
 
     if (!checked) {
       Modal.confirm({
-        title: "Ngừng hợp tác đối tác?",
+        title: "Ngưng hợp tác đối tác?",
         content: `"${ent.name}" sẽ bị hủy kích hoạt.`,
         okText: "Hủy kích hoạt",
         okType: "danger",
@@ -247,14 +250,6 @@ console.log("faculties in page:", faculties);
       width: 155,
       render: (value: string, r) => <span style={chip(faded(r))}>{value}</span>,
     },
-    // {
-    //   title: "Khoa",
-    //   key: "faculty",
-    //   width: 170,
-    //   render: (_value, r) => (
-    //     <span style={chip(faded(r))}>{getEnterpriseFacultyLabel(r, faculties)}</span>
-    //   ),
-    // },
     {
       title: "Việc làm",
       dataIndex: "jobs",
@@ -276,28 +271,6 @@ console.log("faculties in page:", faculties);
         </span>
       ),
     },
-    // {
-    //   title: "",
-    //   key: "actions",
-    //   align: "center",
-    //   width: 60,
-    //   render: (_value, r) => (
-    //     <Button
-    //       size="small"
-    //       icon={<EditOutlined style={{ fontSize: 13 }} />}
-    //       style={{
-    //         borderRadius: 6,
-    //         borderColor: T.border,
-    //         color: T.sub,
-    //         background: T.surface,
-    //       }}
-    //       onClick={(e) => {
-    //         e.stopPropagation();
-    //         setModal({ open: true, enterprise: r });
-    //       }}
-    //     />
-    //   ),
-    // },
   ];
 
   return (
@@ -413,30 +386,31 @@ console.log("faculties in page:", faculties);
                 ]}
               />
 
-<Select
-  value={facultyFilter === "all" ? undefined : facultyFilter}
-  onChange={(value) => {
-    setFacultyFilter(value ?? "all");
-    setQuery((prev) => ({ ...prev, page: 1 }));
-  }}
-  loading={facultiesLoading}
-  allowClear
-  showSearch
-  placeholder="Chọn khoa liên kết"
-  style={{ width: 190, height: 34, fontSize: 13 }}
-  optionFilterProp="children"
-  notFoundContent={facultiesLoading ? "Đang tải..." : "Không có khoa"}
-  getPopupContainer={(trigger) => trigger.parentElement!}
->
-  {(faculties ?? []).map((f: any) => (
-    <Select.Option
-      key={String(f.id ?? f.facultyId)}
-      value={String(f.id ?? f.facultyId)}
-    >
-      {f.name ?? f.facultyName ?? `Khoa #${f.id ?? ""}`}
-    </Select.Option>
-  ))}
-</Select>
+              <Select
+                value={facultyFilter === "all" ? undefined : facultyFilter}
+                onChange={(value) => {
+                  setFacultyFilter(value ?? "all");
+                  setQuery((prev) => ({ ...prev, page: 1 }));
+                }}
+                loading={facultiesLoading}
+                allowClear
+                showSearch
+                placeholder="Chọn khoa liên kết"
+                style={{ width: 190, height: 34, fontSize: 13 }}
+                optionFilterProp="children"
+                notFoundContent={facultiesLoading ? "Đang tải..." : "Không có khoa"}
+                getPopupContainer={(trigger) => trigger.parentElement!}
+              >
+                {(faculties ?? []).map((f: any) => (
+                  <Select.Option
+                    key={String(f.id ?? f.facultyId)}
+                    value={String(f.id ?? f.facultyId)}
+                  >
+                    {f.name ?? f.facultyName ?? `Khoa #${f.id ?? ""}`}
+                  </Select.Option>
+                ))}
+              </Select>
+
               {(search || industry !== "Tất cả ngành" || facultyFilter !== "all") && (
                 <Button
                   type="text"
