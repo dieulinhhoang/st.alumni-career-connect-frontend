@@ -1,34 +1,67 @@
 import { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Row, Col } from "antd";
 import {
-  ALL_FACULTIES, ENTERPRISE_SIZES, FACULTY_VI_NAME, FACULTY_COLOR_MAP, INDUSTRIES,
-  type Enterprise, type EnterpriseFormValues,
+  ENTERPRISE_SIZES,
+  INDUSTRIES,
+  type Enterprise,
+  type EnterpriseFormValues,
+  type Faculty,
 } from "../../../feature/enterprise/type";
 
 interface Props {
   open: boolean;
   enterprise: Enterprise | null;
+  faculties: Faculty[];
   onClose: () => void;
   onSave: (data: EnterpriseFormValues) => Promise<void>;
 }
 
-export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props) {
-  const [form] = Form.useForm();
+function normalizeFacultyValue(enterprise: Enterprise | null): string | undefined {
+  const raw = (enterprise as any)?.faculty;
+  if (!raw) return undefined;
+  if (typeof raw === "string") return raw;
+  return String(raw.id ?? raw.code ?? raw.name ?? "");
+}
+
+export function EnterpriseFormModal({
+  open,
+  enterprise,
+  faculties,
+  onClose,
+  onSave,
+}: Props) {
+  const [form] = Form.useForm<EnterpriseFormValues>();
   const [saving, setSaving] = useState(false);
 
-   useEffect(() => {
-    if (open) {
-      form.setFieldsValue(enterprise ?? {});
-    } else {
+  useEffect(() => {
+    if (!open) {
       form.resetFields();
+      return;
     }
+
+    form.setFieldsValue({
+      name: enterprise?.name ?? "",
+      abbr: enterprise?.abbr ?? "",
+      industry: enterprise?.industry ?? undefined,
+      size: enterprise?.size ?? undefined,
+      faculty: normalizeFacultyValue(enterprise),
+      email: enterprise?.email ?? "",
+      phone: enterprise?.phone ?? "",
+      website: enterprise?.website ?? "",
+      address: enterprise?.address ?? "",
+      description: enterprise?.description ?? "",
+    });
   }, [open, enterprise, form]);
 
   const handleOk = async () => {
     const values = await form.validateFields();
+
     setSaving(true);
     try {
-      await onSave(values);
+      await onSave({
+        ...values,
+        faculty: values.faculty ?? null,
+      });
       form.resetFields();
       onClose();
     } finally {
@@ -36,11 +69,11 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
     }
   };
 
-  const accentColor =  "#226cc0";
+  const accentColor = "#226cc0";
 
   return (
     <Modal
-      title={enterprise ? " Chỉnh sửa doanh nghiệp" : " Thêm doanh nghiệp"}
+      title={enterprise ? "Chỉnh sửa doanh nghiệp" : "Thêm doanh nghiệp"}
       open={open}
       onOk={handleOk}
       onCancel={onClose}
@@ -49,9 +82,12 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
       width={600}
       confirmLoading={saving}
       okButtonProps={{ style: { background: accentColor, border: "none" } }}
-      destroyOnClose
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+      <Form<EnterpriseFormValues>
+        form={form}
+        layout="vertical"
+        style={{ marginTop: 16 }}
+      >
         <Row gutter={16}>
           <Col xs={24} sm={14}>
             <Form.Item
@@ -62,13 +98,14 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
               <Input placeholder="VD: FPT Software" />
             </Form.Item>
           </Col>
+
           <Col xs={24} sm={10}>
             <Form.Item
               name="abbr"
               label="Tên viết tắt"
               rules={[{ required: true, message: "Nhập tên viết tắt" }]}
             >
-              <Input placeholder="FPT" maxLength={6} />
+              <Input placeholder="FPT" maxLength={10} />
             </Form.Item>
           </Col>
         </Row>
@@ -80,30 +117,44 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
               label="Ngành nghề"
               rules={[{ required: true, message: "Chọn ngành nghề" }]}
             >
-              <Select placeholder="Chọn ngành nghề">
-                {INDUSTRIES.map(i => (
-                  <Select.Option key={i} value={i}>{i}</Select.Option>
-                ))}
-              </Select>
+              <Select
+                placeholder="Chọn ngành nghề"
+                options={INDUSTRIES.map((item) => ({
+                  label: item,
+                  value: item,
+                }))}
+              />
             </Form.Item>
           </Col>
+
           <Col xs={24} sm={12}>
             <Form.Item name="size" label="Quy mô nhân sự">
-              <Select placeholder="Chọn quy mô">
-                {ENTERPRISE_SIZES.map(s => (
-                  <Select.Option key={s} value={s}>{s}</Select.Option>
-                ))}
-              </Select>
+              <Select
+                placeholder="Chọn quy mô"
+                options={ENTERPRISE_SIZES.map((item) => ({
+                  label: item,
+                  value: item,
+                }))}
+              />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item name="faculties" label="Khoa đối tác">
-          <Select mode="multiple" allowClear placeholder="Chọn khoa liên kết">
-            {ALL_FACULTIES.map(k => (
-              <Select.Option key={k} value={k}>
-                <span style={{ color: FACULTY_COLOR_MAP?.[k] ?? "#2863d9" }}>●</span>{" "}
-                {FACULTY_VI_NAME[k as keyof typeof FACULTY_VI_NAME] ?? k}
+        <Form.Item name="faculty" label="Khoa đối tác">
+          <Select
+            allowClear
+            showSearch
+            placeholder="Chọn khoa liên kết"
+            optionFilterProp="children"
+            notFoundContent="Không có khoa"
+            getPopupContainer={(trigger) => trigger.parentElement!}
+          >
+            {(faculties ?? []).map((f: any) => (
+              <Select.Option
+                key={String(f.id ?? f.facultyId)}
+                value={String(f.id ?? f.facultyId)}
+              >
+                {f.name ?? f.facultyName ?? `Khoa #${f.id ?? ""}`}
               </Select.Option>
             ))}
           </Select>
@@ -119,6 +170,7 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
               <Input placeholder="hr@company.com" />
             </Form.Item>
           </Col>
+
           <Col xs={24} sm={12}>
             <Form.Item name="phone" label="Số điện thoại">
               <Input placeholder="024 xxxx xxxx" />
@@ -129,9 +181,11 @@ export function EnterpriseFormModal({ open, enterprise, onClose, onSave }: Props
         <Form.Item name="website" label="Website">
           <Input placeholder="https://company.com" />
         </Form.Item>
+
         <Form.Item name="address" label="Địa chỉ">
           <Input placeholder="Số nhà, đường, quận, thành phố" />
         </Form.Item>
+
         <Form.Item name="description" label="Mô tả doanh nghiệp">
           <Input.TextArea rows={3} placeholder="Giới thiệu ngắn về doanh nghiệp..." />
         </Form.Item>

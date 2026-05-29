@@ -1,8 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-
-import StudentList from '../pages/admin/ManageUsers/StudentList';
-import StaffList from '../pages/admin/ManageUsers/StaffList';
 import STAlumni from '../pages/client/Home/Home';
 import Enterprise from '../pages/admin/Enterprise/index';
 import EnterpriseDetail from '../pages/admin/EnterpriseDetail/index';
@@ -117,15 +114,15 @@ const routes = [
             element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
           },
 
-          // Users
-          {
-            path: '/admin/studentlist',
-            element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
-          },
-          {
-            path: '/admin/stafflist',
-            element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
-          },
+          // // Users
+          // {
+          //   path: '/admin/studentlist',
+          //   element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
+          // },
+          // {
+          //   path: '/admin/stafflist',
+          //   element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
+          // },
           {
             path: '/admin/users',
             element: <Suspense fallback={<Loader />}><UserManagement /></Suspense>

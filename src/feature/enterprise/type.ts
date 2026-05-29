@@ -1,7 +1,13 @@
- export type PartnerStatus = "active" | "inactive";
-export type JobStatus     = "active" | "closed";
+export type PartnerStatus = "active" | "inactive";
+export type JobStatus = "active" | "closed";
 
- 
+export interface Faculty {
+  id: string;
+  name: string;
+  code?: string;
+  color?: string | null;
+}
+
 export interface Enterprise {
   id: string;
   name: string;
@@ -14,7 +20,7 @@ export interface Enterprise {
   jobs: number;
   verified: boolean;
   joinedDate: string;
-  faculties: string[];
+  faculty?: string | Faculty | null;
   partnerStatus: PartnerStatus;
   size: string;
   address: string;
@@ -30,51 +36,16 @@ export interface Job {
   deadline: string | null;
   status: JobStatus;
   postedAt: string;
-  faculties: string[];
+  faculty?: string | Faculty | null;
 }
 
- 
-export type EnterpriseFormValues = Omit<Enterprise, "id" | "color" | "jobs" | "verified" | "joinedDate" | "partnerStatus">;
+export type EnterpriseFormValues = Omit<
+  Enterprise,
+  "id" | "color" | "jobs" | "verified" | "joinedDate" | "partnerStatus"
+>;
 
 export type JobFormValues = Omit<Job, "id" | "postedAt">;
 
- 
-/** Key dùng trong API / data — KHÔNG đổi */
-export const ALL_FACULTIES = [
-  "Faculty of IT",
-  "Faculty of Economics",
-  "Faculty of Agriculture",
-  "Faculty of Environment",
-  "Faculty of Veterinary Medicine",
-  "Faculty of Food Technology",
-  "Faculty of Mech. & Elec. Engineering",
-] as const;
-
-export type FacultyKey = typeof ALL_FACULTIES[number];
-
-/** Màu theo khoa — đến từ API (facultyApi) */
-export const FACULTY_COLOR_MAP: Record<FacultyKey, string> = {
-  "Faculty of IT":                        "#7c3aed",
-  "Faculty of Economics":                 "#059669",
-  "Faculty of Agriculture":               "#d97706",
-  "Faculty of Environment":               "#0284c7",
-  "Faculty of Veterinary Medicine":       "#db2777",
-  "Faculty of Food Technology":           "#ea580c",
-  "Faculty of Mech. & Elec. Engineering": "#0891b2",
-};
-
-/** Tên hiển thị tiếng Việt */
-export const FACULTY_VI_NAME: Record<FacultyKey, string> = {
-  "Faculty of IT":                        "Khoa CNTT",
-  "Faculty of Economics":                 "Khoa Kinh tế",
-  "Faculty of Agriculture":               "Khoa Nông nghiệp",
-  "Faculty of Environment":               "Khoa Môi trường",
-  "Faculty of Veterinary Medicine":       "Khoa Thú y",
-  "Faculty of Food Technology":           "Khoa Công nghệ Thực phẩm",
-  "Faculty of Mech. & Elec. Engineering": "Khoa Cơ - Điện",
-};
-
- 
 export const INDUSTRIES = [
   "Công nghệ thông tin",
   "Ngân hàng & Tài chính",
@@ -100,7 +71,14 @@ export const ENTERPRISE_SIZES = [
 ] as const;
 
 export const JOB_LOCATIONS = [
-  "Hà Nội", "TP.HCM", "Đà Nẵng", "Hải Phòng",
-  "Cần Thơ", "Nghệ An", "Bình Dương", "Đồng Nai",
-  "Toàn quốc", "Làm từ xa",
+  "Hà Nội",
+  "TP.HCM",
+  "Đà Nẵng",
+  "Hải Phòng",
+  "Cần Thơ",
+  "Nghệ An",
+  "Bình Dương",
+  "Đồng Nai",
+  "Toàn quốc",
+  "Làm từ xa",
 ] as const;

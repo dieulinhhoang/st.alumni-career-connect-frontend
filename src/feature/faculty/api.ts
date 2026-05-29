@@ -22,7 +22,7 @@ export async function fetchFaculties(
 export async function fetchAllFaculties(): Promise<Faculty[]> {
  
   const res = await api.get("/faculty", { params: { page: 0, size: 999 } });
-  console.log("API Request - fetchAllFaculties, received data:", res.data); // Debug log to check the response data
+  // console.log("API Request - fetchAllFaculties, received data:", res.data); // Debug log to check the response data
   return res.data?.items ?? [];
 }
 

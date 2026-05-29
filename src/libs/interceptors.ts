@@ -16,7 +16,7 @@ export const requestInterceptor = (config: InternalAxiosRequestConfig): Internal
     config.headers['Content-Type'] = 'application/json'
   }
 
-  config.baseURL = import.meta.env.VITE_BASE_URL_API
+  config.baseURL = import.meta.env.VITE_API_URL  ;
   return config
 }
 
