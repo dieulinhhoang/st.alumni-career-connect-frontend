@@ -5,6 +5,7 @@ import {
   ClockCircleOutlined,
   EditOutlined,
   DeleteOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import type { Job, Faculty } from "../../../feature/enterprise/type";
 
@@ -16,38 +17,78 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-function getJobFacultyLabel(job: Job, faculties: Faculty[] = []) {
-  const raw = job.faculty;
-
-  if (!raw) return null;
-
-  if (typeof raw === "object") {
-    return raw.name ?? raw.code ?? raw.id ?? null;
+// Helpers định dạng ngày giờ vietnam
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr; // raw string nếu parse fail
+    return d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
   }
+}
 
+function formatTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr;
+    return d.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const datePart = formatDate(dateStr);
+  const timePart = formatTime(dateStr);
+  return datePart && timePart ? `${datePart} ${timePart}` : datePart || dateStr;
+}
+
+// Kiểm tra job có quá hạn nộp không
+function isJobExpired(job: Job): boolean {
+  if (!job.deadline || job.status === "closed") return false;
+  try {
+    const deadlineDate = new Date(job.deadline);
+    if (Number.isNaN(deadlineDate.getTime())) return false;
+    return deadlineDate < new Date();
+  } catch {
+    return false;
+  }
+}
+
+function getJobFacultyLabel(job: Job, faculties: Faculty[] = []): string | null {
+  const raw = job.faculty;
+  if (!raw) return null;
+  if (typeof raw === "object") {
+    return (raw as Faculty).name ?? (raw as Faculty).code ?? String((raw as Faculty).id ?? null);
+  }
   const matched = faculties.find(
-    (f) => f.id === raw || f.code === raw || f.name === raw,
+    (f) => String(f.id) === String(raw) || f.code === raw || f.name === raw,
   );
-
   return matched?.name ?? raw;
 }
 
-function getJobFacultyColor(job: Job, faculties: Faculty[] = []) {
+function getJobFacultyColor(job: Job, faculties: Faculty[] = []): string {
   const raw = job.faculty;
-
   if (!raw) return "#6d28d9";
-
   if (typeof raw === "object") {
-    return raw.color ?? "#6d28d9";
+    return (raw as Faculty).color ?? "#6d28d9";
   }
-
   const matched = faculties.find(
-    (f) => f.id === raw || f.code === raw || f.name === raw,
+    (f) => String(f.id) === String(raw) || f.code === raw || f.name === raw,
   );
-
   return matched?.color ?? "#6d28d9";
 }
-
 export function JobCard({
   job,
   entColor,
@@ -57,6 +98,7 @@ export function JobCard({
 }: Props) {
   const facultyLabel = getJobFacultyLabel(job, faculties);
   const facultyColor = getJobFacultyColor(job, faculties);
+  const expired = isJobExpired(job);
 
   return (
     <div
@@ -67,8 +109,10 @@ export function JobCard({
         borderRadius: 12,
         background: "white",
         transition: "box-shadow 0.2s",
-        opacity: job.status === "closed" ? 0.7 : 1,
-        borderLeft: `3px solid ${job.status === "active" ? entColor : "#d9d9d9"}`,
+        opacity: job.status === "closed" || expired ? 0.7 : 1,
+        borderLeft: `3px solid ${
+          expired ? "#ef4444" : job.status === "active" ? entColor : "#d9d9d9"
+        }`,
       }}
     >
       <div
@@ -94,7 +138,6 @@ export function JobCard({
           >
             {job.title}
           </div>
-
           <div
             style={{
               display: "flex",
@@ -108,19 +151,16 @@ export function JobCard({
               <EnvironmentOutlined />
               {job.location}
             </span>
-
             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
               <DollarOutlined />
               {job.salary}
             </span>
-
             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
               <ClockCircleOutlined />
-              Đăng {job.postedAt}
+              Đăng {formatDateTime(job.postedAt)}
             </span>
           </div>
         </div>
-
         <div
           style={{
             display: "flex",
@@ -130,18 +170,16 @@ export function JobCard({
             flexShrink: 0,
           }}
         >
-          <Tag color={job.status === "active" ? "success" : "default"} style={{ margin: 0 }}>
-            {job.status === "active" ? "Đang tuyển" : "Đã đóng"}
+          <Tag color={expired ? "error" : job.status === "active" ? "success" : "default"} style={{ margin: 0 }}>
+            {expired ? "Hết hạn nộp" : job.status === "active" ? "Đang tuyển" : "Đã đóng"}
           </Tag>
-
           {job.deadline && (
-            <span style={{ fontSize: 11, color: "#ef4444", whiteSpace: "nowrap" }}>
-              Hạn: {job.deadline}
+            <span style={{ fontSize: 11, color: expired ? "#ef4444" : "#d97706", whiteSpace: "nowrap" }}>
+              {expired ? "✨" : "⏱"} Hạn: {formatDate(job.deadline)}
             </span>
           )}
         </div>
       </div>
-
       <div
         style={{
           display: "flex",
@@ -158,7 +196,6 @@ export function JobCard({
             </Tag>
           ))}
         </div>
-
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {facultyLabel && (
             <span
@@ -176,7 +213,6 @@ export function JobCard({
           )}
         </div>
       </div>
-
       <div
         style={{
           display: "flex",
@@ -194,27 +230,26 @@ export function JobCard({
         >
           Chỉnh sửa
         </Button>
-
         <Button
           size="small"
           icon={<DeleteOutlined />}
           danger
           style={{ fontSize: 11, borderRadius: 6 }}
-          onClick={() =>
-            Modal.confirm({
-              title: "Xóa tin tuyển dụng?",
-              content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
-              okText: "Xóa",
-              okType: "danger",
-              cancelText: "Hủy",
-              onOk: () => onDelete(job.id),
-            })
+          onClick={
+            () =>
+              Modal.confirm({
+                title: "Xóa tin tuyển dụng?",
+                content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
+                okText: "Xóa",
+                okType: "danger",
+                cancelText: "Hủy",
+                onOk: () => onDelete(job.id),
+              })
           }
         >
           Xóa
         </Button>
       </div>
-
       <style>{`
         .job-card:hover {
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -222,4 +257,4 @@ export function JobCard({
       `}</style>
     </div>
   );
-}
+} 
