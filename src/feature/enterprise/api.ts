@@ -67,9 +67,9 @@ export async function setPartnerStatus(
   return normalizeEntity<Enterprise>(res.data);
 }
 
-// Job API
+// Job API — FIX: dùng enterpriseId (camelCase) để khớp với BE query param
 export async function fetchJobsByEnterprise(enterpriseId: string): Promise<Job[]> {
-  const res = await api.get("/jobs", { params: { enterprise_id: enterpriseId } });
+  const res = await api.get("/jobs", { params: { enterpriseId } });
   return normalizeList<Job>(res.data);
 }
 
@@ -81,12 +81,13 @@ export async function createJob(
   return normalizeEntity<Job>(res.data);
 }
 
+// FIX: đổi PUT → PATCH để khớp với @Patch(':id') của BE
 export async function updateJob(
   enterpriseId: string,
   jobId: string,
   payload: Partial<Job>,
 ): Promise<Job> {
-  const res = await api.put(`/jobs/${jobId}`, { ...payload, enterpriseId });
+  const res = await api.patch(`/jobs/${jobId}`, { ...payload, enterpriseId });
   return normalizeEntity<Job>(res.data);
 }
 
@@ -94,9 +95,8 @@ export async function deleteJob(enterpriseId: string, jobId: string): Promise<vo
   await api.delete(`/jobs/${jobId}`, { data: { enterpriseId } });
 }
 
-// Faculty API  
+// Faculty API — FIX: dùng GET /faculty?page=0&size=999 và lấy items, bỏ /faculty/list
 export async function fetchFaculties(): Promise<Faculty[]> {
-  const res = await api.get("/faculty/list");
-  console.log("Fetched faculties:", res.data);
-  return res.data && Array.isArray(res.data) ? (res.data as Faculty[]) : [];
- }
+  const res = await api.get("/faculty", { params: { page: 0, size: 999 } });
+  return res.data?.items ?? [];
+}
