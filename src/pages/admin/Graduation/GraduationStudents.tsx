@@ -96,6 +96,7 @@ export default function GraduationStudentsPage() {
       title: "Họ tên",
       dataIndex: "full_name",
       key: "full_name",
+      width: 220,
       render: (value: string) => (
         <span >{value ?? ""}</span>
       ),
