@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../libs/api";
 import type {
 	Form,
 	Question,
@@ -14,9 +14,7 @@ import type {
 	FontOption,
 	RadiusOption,
 } from "./types";
- const api = axios.create({
-   baseURL: import.meta.env.VITE_API_URL,
- })
+
 // ====== Question Bank ======
 export interface BankQuestion {
 	id: string;
@@ -25,17 +23,6 @@ export interface BankQuestion {
 	type: QuestionType;
 	options?: Array<{ id: string; label: string }>;
 }
-
-// export const QUESTION_BANK: BankQuestion[] = [
-// 	{ id: 'bq1', category: 'Việc làm', title: 'Tình trạng việc làm hiện tại', type: 'single_choice' },
-// 	{ id: 'bq2', category: 'Việc làm', title: 'Mức thu nhập bình quân hàng tháng', type: 'single_choice' },
-// 	{ id: 'bq3', category: 'Đào tạo', title: 'Công việc có phù hợp với ngành đào tạo không?', type: 'single_choice' },
-// 	{ id: 'bq4', category: 'Kỹ năng', title: 'Kỹ năng mềm cần bổ sung thêm', type: 'multiple_choice' },
-// 	{ id: 'bq5', category: 'Việc làm', title: 'Khu vực làm việc hiện tại', type: 'single_choice' },
-// 	{ id: 'bq6', category: 'Đào tạo', title: 'Mức độ hài lòng với chương trình đào tạo', type: 'single_choice' },
-// 	{ id: 'bq7', category: 'Kỹ năng', title: 'Kỹ năng chuyên môn được đào tạo có đáp ứng yêu cầu công việc?', type: 'single_choice' },
-// 	{ id: 'bq8', category: 'Việc làm', title: 'Thời gian tìm được việc làm sau tốt nghiệp', type: 'single_choice' },
-// ];
 
 /**
  * Fetch all forms with optional filtering and pagination.
