@@ -1,8 +1,9 @@
 export interface IResource {
-  _id: string
-  code: string
-  name: string
-  actions: string[]
+  id?: string | number
+  _id?: string
+  code?: string
+  name?: string
+  actions?: string[]
 }
 
 export interface IResourceQuery {

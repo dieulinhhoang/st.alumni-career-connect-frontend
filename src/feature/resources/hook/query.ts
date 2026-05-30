@@ -19,8 +19,12 @@ export const useGetListResources = (query: IResourceQuery) => {
     queryKey: ['resources', query],
     queryFn: () => getListResourceAPI(query),
     select: (res: any) => ({
-      data: Array.isArray(res?.data) ? res.data : [],
-      page: res?.page ?? { total_elements: 0 },
+      data: Array.isArray(res?.data) ? res.data : Array.isArray(res?.items) ? res.items : [],
+      page: res?.page ?? {
+        total_elements: res?.total ?? 0,
+        current_page: 1,
+        total_pages: res?.totalPages ?? 0,
+      },
     }),
   })
 }

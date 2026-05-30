@@ -8,15 +8,13 @@ import {
   Space,
   Popconfirm,
   Tooltip,
-  Form
+  Form,
+  Table,
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
 import type { IResource, IResourceQuery } from '../../../feature/resources/type'
-import { havePermission } from '../../../global/hooks/usePermission'
-import { PermissionEnum } from '../../../feature/auth/type'
 import FilterContainer from '../../../components/common/FilterContainer'
-import CustomTable from '../../../components/common/customTable'
- 
 
 interface ResourceListViewProps {
   query: IResourceQuery
@@ -25,12 +23,20 @@ interface ResourceListViewProps {
   loading: boolean
   onCreate: () => void
   onEdit: (resource: IResource) => void
-  onDelete: (id: string) => void
+  onDelete: (id: string | number) => void
   onTableChange: (pagination: any) => void
 }
 
 const normalize = (s = '') =>
-  s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+type ResourceRow = IResource & {
+  _id: string
+  id?: string | number
+  code: string
+  name: string
+  actions: string[]
+}
 
 const ResourceListView: React.FC<ResourceListViewProps> = ({
   query,
@@ -42,68 +48,113 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
   onDelete,
   onTableChange
 }) => {
-  // const canCreate = havePermission(PermissionEnum.RESOURCE_CREATE)
-  // const canUpdate = havePermission(PermissionEnum.RESOURCE_UPDATE)
-  // const canDelete = havePermission(PermissionEnum.RESOURCE_DELETE)
-const canCreate = true
-const canUpdate = true
-const canDelete = true
-  const columns = [
+  const canCreate = true
+  const canUpdate = true
+  const canDelete = true
+
+  const inputStyle: React.CSSProperties = {
+    height: 38,
+    borderRadius: 8,
+    border: '1px solid #e5e7eb',
+    background: '#fafafa',
+    minWidth: 220
+  }
+
+  const rows: ResourceRow[] = React.useMemo(() => {
+    const source = Array.isArray(listData?.data)
+      ? listData.data
+      : Array.isArray(listData?.items)
+      ? listData.items
+      : []
+
+    return source.map((r: any) => ({
+      ...r,
+      _id: String(r._id ?? r.id ?? ''),
+      id: r.id,
+      code: r.code ?? r.name ?? '',
+      name: r.name ?? '',
+      actions: Array.isArray(r.actions) ? r.actions : []
+    }))
+  }, [listData])
+
+  const filteredRows = React.useMemo(() => {
+    const codeKw = normalize(query.code || '')
+    const actionKw = normalize((query as any).action || '')
+    const nameKw = normalize((query as any).name || '')
+
+    return rows.filter((r) => {
+      const okCode = !codeKw || normalize(r.code).includes(codeKw)
+      const okName = !nameKw || normalize(r.name || r.code).includes(nameKw)
+      const okAction =
+        !actionKw ||
+        (r.actions || []).some((a) => normalize(a).includes(actionKw))
+
+      return okCode && okName && okAction
+    })
+  }, [rows, query.code, (query as any).action, (query as any).name])
+
+  const columns: ColumnsType<ResourceRow> = [
     {
       title: 'STT',
       width: 70,
-      align: 'center' as const,
-      render: (_: any, __: IResource, index: number) =>
+      align: 'center',
+      render: (_value, _record, index) =>
         index + 1 + (query.page || 0) * (query.size || 10)
     },
     {
       title: 'Mã tài nguyên',
       dataIndex: 'code',
-      render: (code: string, item: IResource) => (
-        <div>
-          <div style={{ fontWeight: 600, color: '#111827' }}>{code}</div>
-        </div>
+      key: 'code',
+      render: (code: string) => (
+        <div style={{ fontWeight: 600, color: '#111827' }}>{code || '—'}</div>
       )
     },
     {
       title: 'Tên tài nguyên',
       dataIndex: 'name',
-      render: (name: string, item: IResource) => (
-        <div>
-          <div style={{ fontWeight: 600, color: '#111827' }}>
-            {item.name?.trim() || item.code}
-          </div>
+      key: 'name',
+      render: (_name: string, item) => (
+        <div style={{ fontWeight: 600, color: '#111827' }}>
+          {item.name?.trim() || item.code || '—'}
         </div>
       )
     },
     {
       title: 'Chức năng',
       dataIndex: 'actions',
+      key: 'actions',
       render: (actions: string[]) => (
         <Space wrap>
-          {(actions || []).map((action) => (
-            <span
-              key={action}
-              style={{
-                padding: '2px 8px',
-                borderRadius: 6,
-                background: '#f3f4f6',
-                fontSize: 12,
-                color: '#374151'
-              }}
-            >
-              {action}
-            </span>
-          ))}
+          {(actions || []).length > 0 ? (
+            actions.map((action) => (
+              <span
+                key={action}
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  background: '#f3f4f6',
+                  fontSize: 12,
+                  color: '#374151'
+                }}
+              >
+                {action}
+              </span>
+            ))
+          ) : (
+            <span style={{ color: '#9ca3af' }}>—</span>
+          )}
         </Space>
       )
     },
     {
       title: 'Hành động',
+      key: 'action',
       width: 120,
-      align: 'center' as const,
-      render: (_: any, record: IResource) => {
+      align: 'center',
+      render: (_value, record) => {
         if (!canUpdate && !canDelete) return null
+
+        const recordId = record.id ?? record._id
 
         return (
           <Space size={14}>
@@ -121,7 +172,10 @@ const canDelete = true
             )}
 
             {canDelete && (
-              <Popconfirm title="Xoá tài nguyên?" onConfirm={() => onDelete(record._id)}>
+              <Popconfirm
+                title="Xoá tài nguyên?"
+                onConfirm={() => onDelete(recordId)}
+              >
                 <DeleteOutlined
                   style={{
                     fontSize: 18,
@@ -137,56 +191,17 @@ const canDelete = true
     }
   ]
 
-  const inputStyle: React.CSSProperties = {
-    height: 38,
-    borderRadius: 8,
-    border: '1px solid #e5e7eb',
-    background: '#fafafa',
-    minWidth: 220
-  }
-
-  const filteredListData = React.useMemo(() => {
-    const payload = listData ?? { data: [], page: { total_elements: 0 } }
-    const items: IResource[] = Array.isArray(payload.data) ? payload.data : []
-
-    const codeKw = normalize(query.code || '')
-    const actionKw = normalize((query as any).action || '')
-    const nameKw = normalize((query as any).name || '')
-    if (!codeKw && !actionKw && !nameKw) return payload
-
-    const filtered = items.filter((r) => {
-      const okCode = !codeKw || normalize(r.code).includes(codeKw)
-      const displayName = r.name || r.code || ''
-      const okName = !nameKw || normalize(displayName).includes(nameKw)
-      const okAction =
-        !actionKw ||
-        (r.actions || []).some((a) => {
-          const en = normalize(a)
-          const vi = normalize( '')
-          return en.includes(actionKw) || vi.includes(actionKw)
-        })
-
-      return okCode && okName && okAction
-    })
-
-    return {
-      ...payload,
-      data: filtered,
-      page: { ...(payload.page ?? {}), total_elements: filtered.length }
-    }
-  }, [listData, query.code, (query as any).action, (query as any).name])
-
   return (
     <>
       <FilterContainer
         onFilterChange={(values: any) => {
-          const { code = '', action = '' } = values || {}
+          const { code = '', action = '', name = '' } = values || {}
           setQuery((prev) => ({
             ...prev,
             page: 0,
             code,
             action,
-            name: values.name || ''
+            name
           }))
         }}
         onResetFields={() => {
@@ -210,7 +225,7 @@ const canDelete = true
             </Form.Item>
 
             <Form.Item name="action" style={{ marginBottom: 12 }}>
-              <Input placeholder="Chức năng " style={inputStyle} />
+              <Input placeholder="Chức năng" style={inputStyle} />
             </Form.Item>
           </>
         )}
@@ -229,7 +244,8 @@ const canDelete = true
                 height: 40,
                 fontSize: 14,
                 fontWeight: 500,
-                background: '#1D9E75', borderColor: '#1D9E75', 
+                background: '#1D9E75',
+                borderColor: '#1D9E75'
               }}
             >
               Thêm mới
@@ -245,14 +261,23 @@ const canDelete = true
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
         }}
       >
-        <CustomTable
+        <Table<ResourceRow>
           columns={columns}
-          data={filteredListData}
-          filter={query}
+          dataSource={[...filteredRows]}
           loading={loading}
-          handleTableChange={onTableChange}
-          minHeight={430}
-          rowKey="_id"
+          rowKey={(record) => String(record._id || record.id || record.code)}
+          onChange={onTableChange}
+          pagination={{
+            current: (query.page || 0) + 1,
+            pageSize: query.size || 10,
+            total:
+              listData?.page?.total_elements ??
+              listData?.total ??
+              filteredRows.length,
+            showSizeChanger: true
+          }}
+          scroll={{ x: 900 }}
+          locale={{ emptyText: 'Không có dữ liệu' }}
         />
       </Card>
     </>

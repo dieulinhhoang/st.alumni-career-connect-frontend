@@ -91,7 +91,7 @@ const ResourceModal: React.FC<Props> = ({
           />
         </Form.Item>
 
-        <Form.Item label="Chức năng (Actions)" required>
+        <Form.Item label="Chức năng" required>
           <Space direction="vertical" size={10} style={{ width: '100%' }}>
             {(actions?.length ? actions : ['']).map((a, idx) => (
               <div
