@@ -1,32 +1,46 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Typography, Alert } from "antd";
+import { Col, Row, Input, Typography, Alert, Table } from "antd";
+import type { TablePaginationConfig, ColumnsType } from "antd/es/table";
 import { SearchOutlined } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
-import CustomTable from "../../../components/common/customTable";
 
 const { Text } = Typography;
 
-//  Design tokens 
 const T = {
-  accent:  "#16a34a",   // green-600
-  warning: "#f59e0b",   // amber
-  text:    "#1e2433",
-  sub:     "#8791a6",
-  muted:   "#adb5c4",
-  border:  "#eceef2",
+  accent: "#16a34a",
+  warning: "#f59e0b",
+  text: "#1e2433",
+  sub: "#8791a6",
+  muted: "#adb5c4",
+  border: "#eceef2",
   surface: "#ffffff",
-  bg:      "#f7f8fa",
+  bg: "#f7f8fa",
 };
 
-//  Stat card (same style as Enterprise) 
-function StatCard({ label, value, color }: { label: string; value: React.ReactNode; color: string }) {
+function StatCard({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: React.ReactNode;
+  color: string;
+}) {
   return (
     <div style={{ background: "#f4f5f7", borderRadius: 12, padding: "18px 22px" }}>
-      <div style={{ fontSize: 26, fontWeight: 700, color, letterSpacing: "-0.5px", lineHeight: 1 }}>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 700,
+          color,
+          letterSpacing: "-0.5px",
+          lineHeight: 1,
+        }}
+      >
         {value}
       </div>
       <div style={{ fontSize: 13, color: T.sub, marginTop: 6, fontWeight: 400 }}>{label}</div>
@@ -34,125 +48,161 @@ function StatCard({ label, value, color }: { label: string; value: React.ReactNo
   );
 }
 
-//  Pill badge 
 function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>
-      {children}
-    </span>
-  );
+  return <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>{children}</span>;
 }
 
-//  Main 
 export default function GraduationList() {
   const navigate = useNavigate();
-  const [page, setPage]         = useState(1);
-  const [search, setSearch]     = useState("");
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState(10);
 
-  const { data: graduations, meta, loading, error } = useGraduations(page);
+  const { data: graduations, meta, loading, error } = useGraduations(page, pageSize);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return graduations;
     const q = search.toLowerCase();
-    return graduations.filter(g =>
-      g.name.toLowerCase().includes(q) ||
-      g.school_year?.toString().includes(q) ||
-      g.certification?.toLowerCase().includes(q)
+
+    return graduations.filter((g) =>
+      [g.name, g.school_year?.toString(), g.certification]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
     );
   }, [graduations, search]);
 
-  const totalStudents = graduations.reduce((s, g) => s + (g.student_count ?? 0), 0);
+  const totalStudents = graduations.reduce((sum, g) => sum + (g.student_count ?? 0), 0);
 
-  const listData = {
-    data: filtered,
-    page: {
-      total_elements: search.trim() ? filtered.length : meta.total,
-      current_page:   meta.current_page,
-      total_pages:    meta.last_page,   // ✅ fix: dùng last_page thay vì total_pages (không tồn tại)
-    },
-  };
-
-  const columns = [
+  const columns: ColumnsType<Graduation> = [
     {
-      title: "STT", key: "stt", width: 55, align: "center" as const,
-      render: (_: any, __: Graduation, i: number) => (
+      title: "STT",
+      key: "stt",
+      width: 70,
+      align: "center",
+      render: (_value, _record, index) => (
         <span style={{ fontSize: 13, color: T.muted, fontWeight: 500 }}>
-          {(meta.current_page - 1) * meta.per_page + i + 1}
+          {(page - 1) * pageSize + index + 1}
         </span>
       ),
     },
     {
-      title: "Đợt tốt nghiệp", dataIndex: "name", key: "name",
-      render: (v: string) => (
-        <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{v}</span>
+      title: "Đợt tốt nghiệp",
+      dataIndex: "name",
+      key: "name",
+      render: (value: string) => (
+        <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{value}</span>
       ),
     },
     {
-      title: "Năm", dataIndex: "school_year", key: "school_year",
-      width: 100, align: "center" as const,
-      render: (v: any) => <Pill>{v}</Pill>,
+      title: "Năm",
+      dataIndex: "school_year",
+      key: "school_year",
+      width: 100,
+      align: "center",
+      render: (value: number) => <Pill>{value ?? "—"}</Pill>,
     },
     {
-      title: "Sinh viên", dataIndex: "student_count", key: "student_count",
-      width: 110, align: "center" as const,
-      render: (v: any) => (
+      title: "Sinh viên",
+      dataIndex: "student_count",
+      key: "student_count",
+      width: 110,
+      align: "center",
+      render: (value: number) => (
         <span style={{ fontWeight: 700, fontSize: 13, color: T.muted }}>
-          {v != null ? v.toLocaleString() : "—"}
+          {value != null ? value.toLocaleString() : "—"}
         </span>
       ),
     },
     {
-      title: "Số quyết định", dataIndex: "certification", key: "certification",
+      title: "Số quyết định",
+      dataIndex: "certification",
+      key: "certification",
       width: 160,
-      render: (v: any) =>
-        v
-          ? <span style={{ fontSize: 13, color: T.accent, fontWeight: 500 }}>{v}</span>
-          : <span style={{ color: "#d1d5db" }}>—</span>,
+      render: (value: string) =>
+        value ? (
+          <span style={{ fontSize: 13, color: T.accent, fontWeight: 500 }}>{value}</span>
+        ) : (
+          <span style={{ color: "#d1d5db" }}>—</span>
+        ),
     },
     {
-      title: "Ngày quyết định", dataIndex: "certification_date", key: "certification_date",
-      width: 148, align: "center" as const,
-      render: (v: any) => (
+      title: "Ngày quyết định",
+      dataIndex: "certification_date",
+      key: "certification_date",
+      width: 148,
+      align: "center",
+      render: (value: string) => (
         <Text style={{ fontSize: 13, color: T.sub }}>
-          {v
-            ? new Date(v).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
-            : <span style={{ color: "#d1d5db" }}>—</span>}
+          {value
+            ? new Date(value).toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+            : "—"}
         </Text>
       ),
     },
     {
-      title: "Cập nhật", dataIndex: "updated_at", key: "updated_at",
-      width: 150, align: "center" as const,
-      render: (v: any) => (
+      title: "Cập nhật",
+      dataIndex: "updated_at",
+      key: "updated_at",
+      width: 170,
+      align: "center",
+      render: (value: string) => (
         <Text style={{ fontSize: 12, color: T.muted }}>
-          {v
-            ? new Date(v).toLocaleString("vi-VN", {
-                hour: "2-digit", minute: "2-digit",
-                day: "2-digit", month: "2-digit", year: "numeric",
+          {value
+            ? new Date(value).toLocaleString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
               })
-            : <span style={{ color: "#d1d5db" }}>—</span>}
+            : "—"}
         </Text>
       ),
     },
   ];
 
+  const pagination: TablePaginationConfig = {
+    current: page,
+    pageSize,
+    total: search.trim() ? filtered.length : meta.total,
+    showSizeChanger: true,
+    showTotal: (total, range) => `${range[0]}-${range[1]} / ${total} đợt`,
+    onChange: (nextPage, nextPageSize) => {
+      if (nextPageSize !== pageSize) {
+        setPage(1);
+        setPageSize(nextPageSize || 10);
+        return;
+      }
+      setPage(nextPage);
+    },
+  };
+
   return (
     <AdminLayout>
-
-      <div style={{ padding: "24px 28px 32px",  minHeight: "100vh" }}>
+      <div style={{ padding: "24px 28px 32px", minHeight: "100vh", background: T.bg }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-          {/*  Header  */}
           <div>
             <div style={{ marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: T.text, letterSpacing: "-0.3px" }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: T.text,
+                  letterSpacing: "-0.3px",
+                }}
+              >
                 Đợt tốt nghiệp
               </h2>
               <p style={{ margin: "4px 0 0", fontSize: 13, color: T.sub }}>
                 Quản lý danh sách các đợt tốt nghiệp
               </p>
             </div>
+
             <Row gutter={[12, 12]}>
               <Col xs={12} sm={6}>
                 <StatCard label="Tổng đợt tốt nghiệp" value={meta.total} color={T.accent} />
@@ -165,56 +215,51 @@ export default function GraduationList() {
 
           {error && <Alert type="error" message={error} showIcon style={{ borderRadius: 8 }} />}
 
-          {/*  Table card  */}
-          <div style={{
-            background: T.surface,
-            
-          }}>
-            {/* Filter bar */}
-            <div style={{
-              padding: "12px 20px",
-              borderBottom: `1px solid ${T.border}`,
-              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-              background: "#fafafa",
-            }}>
+          <div style={{ background: T.surface, borderRadius: 12, overflow: "hidden" }}>
+            <div
+              style={{
+                padding: "12px 20px",
+                borderBottom: `1px solid ${T.border}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
+                background: "#fafafa",
+              }}
+            >
               <Input
                 prefix={<SearchOutlined style={{ color: T.muted, fontSize: 12 }} />}
                 placeholder="Tìm kiếm đợt tốt nghiệp..."
                 value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 style={{ width: 240, height: 34, fontSize: 13 }}
                 variant="filled"
                 allowClear
               />
+
               <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
                 {search.trim() ? filtered.length : meta.total} đợt
               </span>
             </div>
 
-            {/* Table */}
-            <div >
-              <CustomTable
-                columns={columns}
-                data={listData}
-                filter={{ page: page - 1, size: pageSize }}
-                loading={loading}
-                handleTableChange={(p: any) => {
-                  setPage(p.current || 1);
-                  setPageSize(p.pageSize || pageSize);
-                }}
-                rowKey="id"
-                onRow={(record: Graduation) => ({
-                  onClick: () =>
-                    navigate(
-                      `/admin/graduation/${record.id}/${toSlug(record.name)}/students`,
-                      { state: { graduationName: record.name } }
-                    ),
-                  style: { cursor: "pointer" },
-                })}
-              />
-            </div>
+            <Table<Graduation>
+              columns={columns}
+              dataSource={filtered}
+              rowKey="id"
+              loading={loading}
+              pagination={pagination}
+              onRow={(record) => ({
+                onClick: () =>
+                  navigate(`/admin/graduation/${record.id}/${toSlug(record.name)}/students`, {
+                    state: { graduationName: record.name },
+                  }),
+                style: { cursor: "pointer" },
+              })}
+            />
           </div>
-
         </div>
       </div>
     </AdminLayout>

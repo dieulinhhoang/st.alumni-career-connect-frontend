@@ -94,5 +94,6 @@ export async function fetchGraduationStudents(
   const res = await api.get("/grad-students", {
     params: { graduation_id: graduationId, page, per_page: perPage },
   });
+  console.log("Raw students response:", res.data);
   return buildPaginated<GraduationStudent>(res.data, page, perPage);
 }
