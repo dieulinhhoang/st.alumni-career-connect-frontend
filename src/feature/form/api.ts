@@ -2,14 +2,12 @@ import api from "../../libs/api";
 import type {
 	Form,
 	Question,
-	QuestionOption,
 	CreateFormPayload,
 	UpdateFormPayload,
 	GetFormsParams,
 	PaginatedResponse,
 	AIFormResult,
 	QuestionTypeOption,
-	QuestionType,
 	Theme,
 	FontOption,
 	RadiusOption,
@@ -20,9 +18,22 @@ export interface BankQuestion {
 	id: string;
 	category: string;
 	title: string;
-	type: QuestionType;
+	type: Question['type'];
 	options?: Array<{ id: string; label: string }>;
 }
+
+/**
+ * Fetch question bank entries with optional search/category filter.
+ */
+export async function getQuestionBank(params?: {
+	search?: string;
+	category?: string;
+}): Promise<BankQuestion[]> {
+	const res = await api.get("/question-bank", { params });
+	return Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+}
+
+// ====== Forms ======
 
 /**
  * Fetch all forms with optional filtering and pagination.
