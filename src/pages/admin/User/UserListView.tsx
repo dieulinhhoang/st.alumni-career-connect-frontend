@@ -7,7 +7,6 @@ import {
   Select,
   Space,
   Switch,
-  Table,
   Tooltip,
 } from 'antd'
 import {
@@ -18,6 +17,7 @@ import type { ColumnsType } from 'antd/es/table'
 
 import type { IUser, IUserQuery } from '../../../feature/user/type'
 import FilterContainer from '../../../components/common/FilterContainer'
+import CustomTable from '../../../components/common/customTable'
 
 interface UserListViewProps {
   query: IUserQuery
@@ -243,11 +243,12 @@ const UserListView: React.FC<UserListViewProps> = ({
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         }}
       >
-        <Table
+        <CustomTable<IUser>
           columns={columns}
-          dataSource={listData?.items ?? []}
+          data={{ items: listData?.items ?? [], total: listData?.total ?? 0 }}
           loading={loading}
           rowKey="id"
+          handleTableChange={onTableChange}
           pagination={{
             current: query.page + 1,
             pageSize: query.size,
@@ -255,7 +256,6 @@ const UserListView: React.FC<UserListViewProps> = ({
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50'],
           }}
-          onChange={onTableChange}
         />
       </Card>
     </>
