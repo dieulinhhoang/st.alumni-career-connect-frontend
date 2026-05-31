@@ -1,56 +1,159 @@
+import React from 'react'
 import { Table } from 'antd'
+import type { TableProps, TablePaginationConfig } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 
-export default function CustomTable({
-  columns,
+// ─── Data format 1: dùng bởi BatchList ─────────────────────────────────────
+// data = { data: T[], page: { total_elements, size, page } }
+interface PagedData<T> {
+  data: T[]
+  page: {
+    total_elements: number
+    size: number
+    page: number
+  }
+}
+
+// ─── Data format 2: dùng bởi UserListView / Enterprise ────────────────────
+// data = { items: T[], total: number }
+interface ListData<T> {
+  items: T[]
+  total: number
+}
+
+type TableData<T> = PagedData<T> | ListData<T> | T[] | null | undefined
+
+function resolveDataSource<T extends object>(data: TableData<T>): T[] {
+  if (!data) return []
+  if (Array.isArray(data)) return data
+  if ('data' in data && Array.isArray(data.data)) return data.data
+  if ('items' in data && Array.isArray(data.items)) return data.items
+  return []
+}
+
+function resolvePagination<T extends object>(
+  data: TableData<T>,
+  overridePagination?: TablePaginationConfig | false,
+): TablePaginationConfig | false {
+  if (overridePagination !== undefined) return overridePagination
+
+  if (!data || Array.isArray(data)) {
+    return {
+      pageSize: 10,
+      showSizeChanger: true,
+      pageSizeOptions: ['10', '20', '50', '100'],
+      showTotal: (total: number, range: [number, number]) =>
+        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
+      position: ['bottomCenter'],
+    }
+  }
+
+  if ('page' in data) {
+    return {
+      total: data.page.total_elements,
+      pageSize: data.page.size,
+      current: data.page.page + 1,
+      showSizeChanger: true,
+      pageSizeOptions: ['10', '20', '50', '100'],
+      showTotal: (total: number, range: [number, number]) =>
+        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
+      position: ['bottomCenter'],
+    }
+  }
+
+  if ('total' in data) {
+    return {
+      total: data.total,
+      pageSize: 10,
+      showSizeChanger: true,
+      pageSizeOptions: ['10', '20', '50', '100'],
+      showTotal: (total: number, range: [number, number]) =>
+        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
+      position: ['bottomCenter'],
+    }
+  }
+
+  return { showSizeChanger: true, position: ['bottomCenter'] }
+}
+
+// ─── Props ─────────────────────────────────────────────────────────────────
+
+interface CustomTableProps<T extends object>
+  extends Omit<TableProps<T>, 'dataSource' | 'columns' | 'pagination'> {
+  /** Dữ liệu bảng — hỗ trợ 3 format: PagedData, ListData, hoặc mảng T[] */
+  data: TableData<T>
+  columns: ColumnsType<T>
+  /** Ghi đè pagination. Truyền `false` để ẩn phân trang. */
+  pagination?: TablePaginationConfig | false
+  /** Chiều cao tối thiểu của bảng (px). Mặc định: 430 */
+  minHeight?: number
+  /** Callback khi thay đổi trang / sort / filter */
+  handleTableChange?: TableProps<T>['onChange']
+  /** Bật zebra striping (hàng chẵn lẻ). Mặc định: true */
+  striped?: boolean
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────
+
+function CustomTable<T extends object>({
   data,
-  handleTableChange,
-  filter,
-  minHeight = 430,
-  scroll,
+  columns,
   pagination,
-  ...props
-}: any) {
+  minHeight = 430,
+  handleTableChange,
+  striped = true,
+  scroll,
+  ...rest
+}: CustomTableProps<T>) {
+  const dataSource = resolveDataSource(data)
+  const resolvedPagination = resolvePagination(data, pagination)
+
   return (
-    <div
-      style={{
-        width: '100%',
-        overflowX: 'auto',
-      }}
-    >
-      <Table
-        {...props}
-        className={`custom-responsive-table ${props.className || ''}`}
+    <div style={{ width: '100%', overflowX: 'auto' }}>
+      <Table<T>
+        {...rest}
+        className={`custom-responsive-table${striped ? ' custom-table-striped' : ''}${rest.className ? ` ${rest.className}` : ''}`}
         columns={columns}
-        dataSource={Array.isArray(data) ? data : []}
+        dataSource={dataSource}
         onChange={handleTableChange}
         tableLayout="auto"
-        scroll={
-          scroll || {
-            x: 'max-content',
-          }
-        }
+        scroll={scroll ?? { x: 'max-content' }}
         scrollToFirstRowOnChange
-        pagination={
-          pagination ?? {
-            total: filter?.total ?? 0,
-            pageSize: filter?.size || 10,
-            current: (filter?.page ?? 0) + 1,
-            showSizeChanger: true,
-            showTotal: (total: number, range: [number, number]) =>
-              `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
-            position: ['bottomCenter'],
-            pageSizeOptions: ['10', '20', '50', '100'],
-          }
+        pagination={resolvedPagination}
+        rowClassName={
+          striped
+            ? (_record: T, index: number) =>
+                index % 2 === 1 ? 'custom-table-row-even' : ''
+            : undefined
         }
-        locale={{
-          emptyText: 'Không có dữ liệu',
-        }}
+        locale={{ emptyText: 'Không có dữ liệu' }}
         size="middle"
-        style={{
-          minHeight,
-          ...props.style,
-        }}
+        style={{ minHeight, ...rest.style }}
       />
+
+      {/* Scoped styles — không cần file CSS riêng */}
+      <style>{`
+        .custom-table-striped .custom-table-row-even > td {
+          background: #f9fafb !important;
+        }
+        .custom-responsive-table .ant-table-thead > tr > th {
+          background: #f4f5f7;
+          font-weight: 600;
+          font-size: 13px;
+          color: #374151;
+          border-bottom: 1px solid #e5e7eb;
+          white-space: nowrap;
+        }
+        .custom-responsive-table .ant-table-tbody > tr:hover > td {
+          background: #f0fdf4 !important;
+          transition: background 0.15s;
+        }
+        .custom-responsive-table .ant-table-pagination {
+          margin-top: 16px;
+        }
+      `}</style>
     </div>
   )
 }
+
+export default CustomTable
