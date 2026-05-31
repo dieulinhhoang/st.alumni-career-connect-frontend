@@ -1,15 +1,13 @@
-// src/libs/api.ts
+// src/libs/mock/api.ts
 import axios from 'axios';
 import { errorInterceptor, requestInterceptor, successInterceptor } from '../interceptors';
-import { mockApiHandler } from '.';
 
- 
 // Bật/tắt mock mode (true = dùng mock, false = gọi API thật)
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // ============ AXIOS ============
 const axiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_URL|| 'http://127.0.0.1:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -23,27 +21,15 @@ axiosInstance.interceptors.request.use(requestInterceptor);
 axiosInstance.interceptors.response.use(successInterceptor, errorInterceptor);
 
 // ============ MOCK WRAPPER ============
-const api = new Proxy(axiosInstance, {
-  get(target, prop) {
-    const original = target[prop as keyof typeof target];
-    if (USE_MOCK && (prop === 'get' || prop === 'post' || prop === 'put' || prop === 'delete')) {
-      return async (url: string, config?: any) => {
-        try {
-          const mockData = await mockApiHandler(
-            (prop as string).toUpperCase(),
-            url,
-            config?.data,
-            prop === 'get' ? config?.params : config?.data
-          );
-          return { data: mockData };
-        } catch (error) {
-          console.error('Mock API error:', error);
-          throw error;
-        }
-      };
-    }
-    return typeof original === 'function' ? original.bind(target) : original;
-  }
-});
+// USE_MOCK = false => dùng axiosInstance thật, không cần Proxy
+const api = USE_MOCK
+  ? new Proxy(axiosInstance, {
+      get(target, prop) {
+        return typeof target[prop as keyof typeof target] === 'function'
+          ? (target[prop as keyof typeof target] as Function).bind(target)
+          : target[prop as keyof typeof target];
+      },
+    })
+  : axiosInstance;
 
 export { api };
