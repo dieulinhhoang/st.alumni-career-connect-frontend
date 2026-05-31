@@ -136,7 +136,19 @@ export async function fetchKhoaList(): Promise<KhoaItem[]> {
   return res.data as KhoaItem[];
 }
 
+/** Normalize response: API có thể trả về array thẳng hoặc paginated object { data/items: [] } */
+function toArray<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.result)) return obj.result as T[];
+  }
+  return [];
+}
+
 export async function fetchEnterpriseList(): Promise<EnterpriseItem[]> {
   const res = await api.get("/enterprises");
-  return res.data as EnterpriseItem[];
+  return toArray<EnterpriseItem>(res.data);
 }
