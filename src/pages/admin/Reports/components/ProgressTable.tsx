@@ -4,7 +4,6 @@ import { EyeOutlined, HistoryOutlined, SendOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { FacultySubmissionRow, SubmissionStatus } from '../../../../feature/reports/types';
 import { SubmissionPill } from './SubmissionPill';
-import { DEFAULT_DEADLINE } from '../../../../feature/reports/constants';
 
 interface Props {
   rows: FacultySubmissionRow[];
@@ -89,7 +88,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
   },
   {
     title: 'Hạn nộp', dataIndex: 'deadline', width: 110,
-    render: (v: string | null) => v ?? DEFAULT_DEADLINE,
+    render: (v: string | null) => v ?? '—',
   },
   {
     title: 'Thao tác', key: 'actions', width: 180,
@@ -139,7 +138,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
 
   const dataSource = rows.map((row) => ({
     ...row,
-    deadline: row.deadline ?? DEFAULT_DEADLINE,
+    deadline: row.deadline ?? null,
     submittedBy: row.submittedBy ?? null,
     status: getStatus(row),
     history: getHistory(row.key),
