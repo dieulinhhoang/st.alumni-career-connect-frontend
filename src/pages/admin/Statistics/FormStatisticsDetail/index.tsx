@@ -50,7 +50,7 @@ export default function FormStatisticsDetailPage() {
 
         <Space direction="vertical" size={20} style={{ width: '100%' }}>
           <FilterBar
-            forms={forms}
+            forms={forms ?? []}
             questions={questions}
             formId={formId}
             questionId={questionId}

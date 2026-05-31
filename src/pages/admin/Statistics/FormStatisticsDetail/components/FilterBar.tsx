@@ -19,25 +19,28 @@ export function FilterBar({
   onChangeForm,
   onChangeQuestion,
 }: Props) {
+  const safeForms = Array.isArray(forms) ? forms : []
+  const safeQuestions = Array.isArray(questions) ? questions : []
+
   const formOptions = useMemo(
     () =>
-      forms.map((f) => ({
+      safeForms.map((f) => ({
         label: f.name,
         value: f.id,
         shortLabel: f.name.length > 24 ? `${f.name.slice(0, 24)}...` : f.name,
       })),
-    [forms]
+    [safeForms]
   )
 
   const questionOptions = useMemo(
     () =>
-      questions.map((q) => ({
+      safeQuestions.map((q) => ({
         label: q.title,
         value: q.id,
         shortLabel:
           q.title.length > 28 ? `${q.title.slice(0, 28)}...` : q.title,
       })),
-    [questions]
+    [safeQuestions]
   )
 
   const selectedForm = formOptions.find((item) => item.value === formId)
