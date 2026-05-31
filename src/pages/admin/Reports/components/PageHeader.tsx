@@ -3,7 +3,8 @@ import { Select, Button } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { SubmissionPill } from './SubmissionPill';
 import type { SubmissionStatus, UserScope } from '../../../../feature/reports/types';
-import { SURVEY_OPTIONS, USER_ROLE_OPTIONS } from '../../../../feature/reports/constants';
+import type { SurveyOption } from '../../../../feature/reports/api';
+import { USER_ROLE_OPTIONS } from '../../../../feature/reports/constants';
 
 const { Option } = Select;
 
@@ -12,6 +13,8 @@ interface Props {
   subtitle: string;
   scopeLabel: string;
   surveyId: string;
+  surveyOptions: SurveyOption[];
+  deadline: string;
   userIndex: number;
   scope: UserScope;
   submissionStatus: SubmissionStatus;
@@ -26,6 +29,8 @@ export const PageHeader: React.FC<Props> = ({
   subtitle,
   scopeLabel,
   surveyId,
+  surveyOptions,
+  deadline,
   userIndex,
   scope,
   submissionStatus,
@@ -37,7 +42,7 @@ export const PageHeader: React.FC<Props> = ({
   const isFacultyLike = scope === 'faculty' || scope === 'major';
 
   return (
-    <div className="rp-page-header">  {/* ← wrapper bị thiếu */}
+    <div className="rp-page-header">
 
       {/* TRÁI: title + subtitle + nút nộp */}
       <div className="rp-page-header__left">
@@ -71,6 +76,11 @@ export const PageHeader: React.FC<Props> = ({
 
       {/* PHẢI: filter Vai trò / Đợt KS / Phạm vi */}
       <div className="rp-page-header__right">
+        {deadline && (
+          <div className="rp-deadline-notice">
+            Hạn nộp: <strong>{deadline}</strong>
+          </div>
+        )}
         <div className="rp-filter-row">
           <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Vai trò</span>
@@ -84,7 +94,7 @@ export const PageHeader: React.FC<Props> = ({
           <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Đợt khảo sát</span>
             <Select value={surveyId} onChange={onSurveyChange} style={{ width: 260 }} size="middle">
-              {SURVEY_OPTIONS.map((o) => (
+              {surveyOptions.map((o) => (
                 <Option key={o.value} value={o.value}>{o.label}</Option>
               ))}
             </Select>
