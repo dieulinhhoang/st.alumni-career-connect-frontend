@@ -104,14 +104,14 @@ const mockRoles: MockRole[] = [
    { resource: 'resources', action: 'create' }, { resource: 'resources', action: 'read' },
    { resource: 'resources', action: 'update' }, { resource: 'resources', action: 'delete' },
   ] },
- { _id: '2', code: 'TEACHER', name: 'Giao vien', description: 'Quan ly hoc sinh va bai giang', isDeleted: false,
+ { _id: '2', code: 'TEACHER', name: 'Giao vien', description: 'Quan ly sinh vien va bai giang', isDeleted: false,
   createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z',
   createdBy: { fullName: 'Admin' }, updatedBy: { fullName: 'Admin' },
   permissions: [
    { resource: 'students', action: 'read' }, { resource: 'students', action: 'update' },
    { resource: 'courses', action: 'read' }, { resource: 'courses', action: 'create' },
   ] },
- { _id: '3', code: 'STUDENT', name: 'Hoc sinh', description: 'Xem thong tin khoa hoc', isDeleted: false,
+ { _id: '3', code: 'STUDENT', name: 'Sinh vien', description: 'Xem thong tin khoa hoc', isDeleted: false,
   createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z',
   createdBy: { fullName: 'Admin' }, updatedBy: { fullName: 'Admin' },
   permissions: [{ resource: 'courses', action: 'read' }]
@@ -119,18 +119,18 @@ const mockRoles: MockRole[] = [
 ];
 // ====== Users ======
 let mockUsers: MockUser[] = [
- { _id: '1', userName: 'admin', fullName: 'Administrator', email: 'admin@example.com',
-  mobile: '0912345678', address: 'Hanoi', age: 30, sex: '0', bod: '1994-01-01',
+ { _id: '1', userName: 'admin', fullName: 'Administrator', email: 'admin@vnua.edu.vn',
+  mobile: '0912345678', address: 'Gia Lam, Ha Noi', age: 30, sex: '0', bod: '1994-01-01',
   isSupperAdmin: true, roles: ['1'], isSuspended: false, isDeleted: false,
   createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z',
   createdBy: { fullName: 'System' }, updatedBy: { fullName: 'System' } },
- { _id: '2', userName: 'teacher1', fullName: 'Nguyen Van A', email: 'teacher1@example.com',
-  mobile: '0987654321', address: 'HCMC', age: 35, sex: '0', bod: '1989-05-15',
+ { _id: '2', userName: 'teacher1', fullName: 'Nguyen Van A', email: 'teacher1@vnua.edu.vn',
+  mobile: '0987654321', address: 'Ha Noi', age: 35, sex: '0', bod: '1989-05-15',
   isSupperAdmin: false, roles: ['2'], isSuspended: false, isDeleted: false,
   createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z',
   createdBy: { fullName: 'Admin' }, updatedBy: { fullName: 'Admin' } },
- { _id: '3', userName: 'student1', fullName: 'Tran Thi B', email: 'student1@example.com',
-  mobile: '0934567890', address: 'Da Nang', age: 20, sex: '1', bod: '2004-03-20',
+ { _id: '3', userName: 'student1', fullName: 'Tran Thi B', email: 'student1@sv.vnua.edu.vn',
+  mobile: '0934567890', address: 'Ha Noi', age: 22, sex: '1', bod: '2002-03-20',
   isSupperAdmin: false, roles: ['3'], isSuspended: false, isDeleted: false,
   createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z',
   createdBy: { fullName: 'Admin' }, updatedBy: { fullName: 'Admin' } }
@@ -140,135 +140,134 @@ const mockResources: MockResource[] = [
  { _id: '1', code: 'users', name: 'Quan ly nguoi dung', actions: ['create','read','update','delete'] },
  { _id: '2', code: 'roles', name: 'Quan ly vai tro', actions: ['create','read','update','delete'] },
  { _id: '3', code: 'resources', name: 'Quan ly tai nguyen', actions: ['create','read','update','delete'] },
- { _id: '4', code: 'students', name: 'Quan ly hoc sinh', actions: ['create','read','update','delete'] },
+ { _id: '4', code: 'students', name: 'Quan ly sinh vien', actions: ['create','read','update','delete'] },
  { _id: '5', code: 'courses', name: 'Quan ly khoa hoc', actions: ['create','read','update','delete'] }
 ];
 // ====== Faculty ======
 const mockFaculties: MockFaculty[] = [
- { id: '1', slug: 'cong-nghe-thong-tin', name: 'Cong nghe thong tin', abbr: 'CNTT', color: '#7c3aed', majors: 5, classes: 24, students: 1200 },
- { id: '2', slug: 'kinh-te', name: 'Kinh te', abbr: 'KT', color: '#0ea5e9', majors: 4, classes: 18, students: 980 },
- { id: '3', slug: 'nong-nghiep', name: 'Nong nghiep', abbr: 'NN', color: '#16a34a', majors: 6, classes: 30, students: 1540 },
- { id: '4', slug: 'cong-nghe-sinh-hoc', name: 'Cong nghe sinh hoc', abbr: 'CNSH', color: '#f59e0b', majors: 3, classes: 14, students: 620 },
- { id: '5', slug: 'quan-ly-dat-dai', name: 'Quan ly dat dai', abbr: 'QLDD', color: '#ef4444', majors: 2, classes: 10, students: 430 },
- { id: '6', slug: 'thu-y', name: 'Thu y', abbr: 'TY', color: '#8b5cf6', majors: 3, classes: 12, students: 510 },
- { id: '7', slug: 'cong-nghe-thuc-pham', name: 'Cong nghe thuc pham', abbr: 'CNTP', color: '#ec4899', majors: 4, classes: 16, students: 720 },
- { id: '8', slug: 'moi-truong', name: 'Moi truong', abbr: 'MT', color: '#14b8a6', majors: 3, classes: 11, students: 490 }
+ { id: '1', slug: 'cong-nghe-thong-tin', name: 'Cong nghe thong tin', abbr: 'CNTT', color: '#7c3aed', majors: 4, classes: 20, students: 1050 },
+ { id: '2', slug: 'kinh-te', name: 'Kinh te', abbr: 'KT', color: '#0ea5e9', majors: 3, classes: 16, students: 890 },
+ { id: '3', slug: 'nong-nghiep', name: 'Nong nghiep', abbr: 'NN', color: '#16a34a', majors: 6, classes: 28, students: 1420 },
+ { id: '4', slug: 'cong-nghe-sinh-hoc', name: 'Cong nghe sinh hoc', abbr: 'CNSH', color: '#f59e0b', majors: 3, classes: 12, students: 580 },
+ { id: '5', slug: 'quan-ly-dat-dai', name: 'Quan ly dat dai', abbr: 'QLDD', color: '#ef4444', majors: 2, classes: 9, students: 400 },
+ { id: '6', slug: 'thu-y', name: 'Thu y', abbr: 'TY', color: '#8b5cf6', majors: 2, classes: 11, students: 490 },
+ { id: '7', slug: 'cong-nghe-thuc-pham', name: 'Cong nghe thuc pham', abbr: 'CNTP', color: '#ec4899', majors: 3, classes: 14, students: 660 },
+ { id: '8', slug: 'moi-truong', name: 'Moi truong', abbr: 'MT', color: '#14b8a6', majors: 3, classes: 10, students: 450 }
 ];
 const mockMajors: MockMajor[] = [
- { id: '1', slug: 'ky-thuat-phan-mem', facultySlug: 'cong-nghe-thong-tin', name: 'Ky thuat phan mem', code: 'KTPM', khoa: [2021,2022,2023,2024], classes: 8, students: 320 },
+ { id: '1', slug: 'cong-nghe-thong-tin', facultySlug: 'cong-nghe-thong-tin', name: 'Cong nghe thong tin', code: 'CNTT', khoa: [2021,2022,2023,2024], classes: 8, students: 320 },
  { id: '2', slug: 'he-thong-thong-tin', facultySlug: 'cong-nghe-thong-tin', name: 'He thong thong tin', code: 'HTTT', khoa: [2021,2022,2023], classes: 6, students: 240 },
- { id: '3', slug: 'an-toan-thong-tin', facultySlug: 'cong-nghe-thong-tin', name: 'An toan thong tin', code: 'ATTT', khoa: [2022,2023,2024], classes: 4, students: 160 },
- { id: '4', slug: 'khoa-hoc-may-tinh', facultySlug: 'cong-nghe-thong-tin', name: 'Khoa hoc may tinh', code: 'KHMT', khoa: [2021,2022,2023,2024], classes: 4, students: 200 },
- { id: '5', slug: 'tri-tue-nhan-tao', facultySlug: 'cong-nghe-thong-tin', name: 'Tri tue nhan tao', code: 'TTNT', khoa: [2023,2024], classes: 2, students: 80 }
+ { id: '3', slug: 'mang-may-tinh', facultySlug: 'cong-nghe-thong-tin', name: 'Mang may tinh va truyen thong du lieu', code: 'MMT', khoa: [2022,2023,2024], classes: 4, students: 160 },
+ { id: '4', slug: 'khoa-hoc-du-lieu', facultySlug: 'cong-nghe-thong-tin', name: 'Khoa hoc du lieu va tri tue nhan tao', code: 'KHDL', khoa: [2023,2024], classes: 2, students: 80 }
 ];
 const mockClasses: MockClass[] = [
- { id: '1', name: 'KTPM66A', khoa: 2021, students: 42, advisor: 'TS. Nguyen Van A' },
- { id: '2', name: 'KTPM66B', khoa: 2021, students: 38, advisor: 'TS. Tran Thi B' },
- { id: '3', name: 'KTPM67A', khoa: 2022, students: 45, advisor: 'PGS. Le Van C' },
- { id: '4', name: 'KTPM67B', khoa: 2022, students: 40, advisor: 'TS. Pham Thi D' },
- { id: '5', name: 'KTPM68A', khoa: 2023, students: 50, advisor: 'TS. Hoang Van E' },
- { id: '6', name: 'KTPM68B', khoa: 2023, students: 47, advisor: 'TS. Vu Thi F' },
- { id: '7', name: 'KTPM69A', khoa: 2024, students: 52, advisor: 'TS. Do Van G' },
- { id: '8', name: 'KTPM69B', khoa: 2024, students: 48, advisor: 'TS. Bui Thi H' }
+ { id: '1', name: 'CNTT66A', khoa: 2021, students: 42, advisor: 'TS. Nguyen Van A' },
+ { id: '2', name: 'CNTT66B', khoa: 2021, students: 38, advisor: 'TS. Tran Thi B' },
+ { id: '3', name: 'CNTT67A', khoa: 2022, students: 45, advisor: 'PGS. Le Van C' },
+ { id: '4', name: 'CNTT67B', khoa: 2022, students: 40, advisor: 'TS. Pham Thi D' },
+ { id: '5', name: 'CNTT68A', khoa: 2023, students: 50, advisor: 'TS. Hoang Van E' },
+ { id: '6', name: 'CNTT68B', khoa: 2023, students: 47, advisor: 'TS. Vu Thi F' },
+ { id: '7', name: 'CNTT69A', khoa: 2024, students: 52, advisor: 'TS. Do Van G' },
+ { id: '8', name: 'CNTT69B', khoa: 2024, students: 48, advisor: 'TS. Bui Thi H' }
 ];
 // ====== Enterprise ======
 const mockEnterprises: MockEnterprise[] = [
  { id: '1', name: 'FPT Software', abbr: 'FPT', color: '#7c3aed', industry: 'Cong nghe thong tin',
   website: 'fpt.com.vn', email: 'hr@fpt.com.vn', phone: '024 7300 7300', jobs: 42, verified: true,
-  joinedDate: '01/2023', faculties: ['Faculty of IT','Faculty of Economics'], partnerStatus: 'active',
-  size: '10.000+', address: 'Ha Noi', description: 'FPT Software cong ty CNTT' },
+  joinedDate: '01/2023', faculties: ['Khoa CNTT','Khoa Kinh te'], partnerStatus: 'active',
+  size: '10.000+', address: 'Ha Noi', description: 'FPT Software cong ty CNTT hang dau Viet Nam' },
  { id: '2', name: 'Vingroup', abbr: 'VIC', color: '#db2777', industry: 'Tap doan da nganh',
   website: 'vingroup.net', email: 'hr@vingroup.net', phone: '024 3974 9999', jobs: 28, verified: true,
-  joinedDate: '03/2023', faculties: ['Faculty of Economics','Faculty of IT'], partnerStatus: 'active',
-  size: '50.000+', address: 'Ha Noi', description: 'Vingroup tap doan kinh te' },
+  joinedDate: '03/2023', faculties: ['Khoa Kinh te','Khoa CNTT'], partnerStatus: 'active',
+  size: '50.000+', address: 'Ha Noi', description: 'Vingroup tap doan kinh te tu nhan lon nhat Viet Nam' },
  { id: '3', name: 'Agribank', abbr: 'AGR', color: '#059669', industry: 'Ngan hang & Tai chinh',
   website: 'agribank.com.vn', email: 'hr@agribank.vn', phone: '1900 558 818', jobs: 15, verified: true,
-  joinedDate: '06/2023', faculties: ['Faculty of Economics'], partnerStatus: 'active',
-  size: '40.000+', address: 'Ha Noi', description: 'Ngan hang Agribank' },
- { id: '4', name: 'VinFast', abbr: 'VF', color: '#0284c7', industry: 'Cong nghiep & San xuat',
-  website: 'vinfastauto.vn', email: 'hr@vinfast.vn', phone: '1900 232 389', jobs: 33, verified: true,
-  joinedDate: '01/2024', faculties: ['Faculty of Mech. & Elec.'], partnerStatus: 'active',
-  size: '20.000+', address: 'Hai Phong', description: 'VinFast nha san xuat o to' },
+  joinedDate: '06/2023', faculties: ['Khoa Kinh te'], partnerStatus: 'active',
+  size: '40.000+', address: 'Ha Noi', description: 'Ngan hang Nong nghiep va Phat trien Nong thon Viet Nam' },
+ { id: '4', name: 'Dabaco Group', abbr: 'DBC', color: '#0284c7', industry: 'Nong nghiep & Chan nuoi',
+  website: 'dabaco.com.vn', email: 'hr@dabaco.com.vn', phone: '0222 382 2555', jobs: 20, verified: true,
+  joinedDate: '01/2024', faculties: ['Khoa Nong nghiep','Khoa Thu y'], partnerStatus: 'active',
+  size: '5.000+', address: 'Bac Ninh', description: 'Tap doan Chan nuoi va Thuc pham Dabaco' },
  { id: '5', name: 'Masan Group', abbr: 'MSN', color: '#d97706', industry: 'Nong nghiep & FMCG',
   website: 'masangroup.com', email: 'hr@masangroup.com', phone: '028 6656 6656', jobs: 19, verified: true,
-  joinedDate: '02/2024', faculties: ['Faculty of Agriculture'], partnerStatus: 'active',
-  size: '30.000+', address: 'TP.HCM', description: 'Masan Group tap doan' },
+  joinedDate: '02/2024', faculties: ['Khoa Nong nghiep'], partnerStatus: 'active',
+  size: '30.000+', address: 'TP.HCM', description: 'Masan Group - tap doan hang tieu dung hang dau' },
  { id: '6', name: 'KPMG Vietnam', abbr: 'KPMG', color: '#ea580c', industry: 'Kiem toan & Tu van',
   website: 'kpmg.com/vn', email: 'hr@kpmg.com.vn', phone: '028 3821 9266', jobs: 11, verified: false,
-  joinedDate: '05/2024', faculties: ['Faculty of Economics'], partnerStatus: 'inactive',
-  size: '1.000+', address: 'TP.HCM', description: 'KPMG cong ty kiem toan' }
+  joinedDate: '05/2024', faculties: ['Khoa Kinh te'], partnerStatus: 'inactive',
+  size: '1.000+', address: 'TP.HCM', description: 'KPMG cong ty kiem toan va tu van quoc te' }
 ];
 const mockJobs: Record<string, MockJob[]> = {
  '1': [
-  { id: 'j1', title: 'Lap trinh vien Backend (Java)', location: 'Ha Noi', salary: '15-25 trie',
-   tags: ['Java','Spring Boot'], deadline: '10/04/2024', status: 'active',
-   postedAt: '10/03/2024', faculties: ['Faculty of IT'] },
-  { id: 'j2', title: 'Lap trinh vien Frontend (React)', location: 'Ha Noi', salary: '12-22 trie',
+  { id: 'j1', title: 'Lap trinh vien Backend (Java)', location: 'Ha Noi', salary: '15-25 trieu',
+   tags: ['Java','Spring Boot'], deadline: '10/04/2025', status: 'active',
+   postedAt: '10/03/2025', faculties: ['Khoa CNTT'] },
+  { id: 'j2', title: 'Lap trinh vien Frontend (React)', location: 'Ha Noi', salary: '12-22 trieu',
    tags: ['React','TypeScript'], deadline: null, status: 'active',
-   postedAt: '11/03/2024', faculties: ['Faculty of IT'] },
-  { id: 'j3', title: 'Ky su DevOps', location: 'TP.HCM', salary: '20-35 trie',
-   tags: ['Docker','Kubernetes'], deadline: '30/04/2024', status: 'active',
-   postedAt: '08/03/2024', faculties: ['Faculty of IT'] }
+   postedAt: '11/03/2025', faculties: ['Khoa CNTT'] },
+  { id: 'j3', title: 'Ky su DevOps', location: 'Ha Noi', salary: '20-35 trieu',
+   tags: ['Docker','Kubernetes'], deadline: '30/04/2025', status: 'active',
+   postedAt: '08/03/2025', faculties: ['Khoa CNTT'] }
  ],
  '2': [
-  { id: 'j7', title: 'Ky su Du lieu', location: 'TP.HCM', salary: '18-30 trie',
-   tags: ['Python','SQL'], deadline: '05/04/2024', status: 'active',
-   postedAt: '08/03/2024', faculties: ['Faculty of IT','Faculty of Economics'] },
-  { id: 'j8', title: 'Product Manager', location: 'TP.HCM', salary: '25-40 trie',
+  { id: 'j7', title: 'Ky su Du lieu', location: 'Ha Noi', salary: '18-30 trieu',
+   tags: ['Python','SQL'], deadline: '05/04/2025', status: 'active',
+   postedAt: '08/03/2025', faculties: ['Khoa CNTT','Khoa Kinh te'] },
+  { id: 'j8', title: 'Product Manager', location: 'Ha Noi', salary: '25-40 trieu',
    tags: ['Product','Agile'], deadline: null, status: 'active',
-   postedAt: '06/03/2024', faculties: ['Faculty of Economics'] }
+   postedAt: '06/03/2025', faculties: ['Khoa Kinh te'] }
  ],
  '4': [
-  { id: 'j10', title: 'Ky su Co khi', location: 'Hai Phong', salary: '14-20 trie',
-   tags: ['AutoCAD','Mechanics'], deadline: null, status: 'active',
-   postedAt: '09/03/2024', faculties: ['Faculty of Mech. & Elec.'] }
+  { id: 'j10', title: 'Ky su Chan nuoi', location: 'Bac Ninh', salary: '12-18 trieu',
+   tags: ['Chan nuoi','Thu y'], deadline: null, status: 'active',
+   postedAt: '09/03/2025', faculties: ['Khoa Thu y','Khoa Nong nghiep'] }
  ]
 };
 // ====== Graduation ======
 const mockGraduations: MockGraduation[] = [
- { id: 1, name: 'DSSVTN nganh MMT&TTDL va KHDL&TTNT KSVL cho kiem dinh 2026',
-  school_year: '2025', student_count: 13, certification: 'QD-123/DHBK',
+ { id: 1, name: 'DSSVTN nganh MMT&TTDL va KHDL&TTNT - KSVL cho kiem dinh 2026',
+  school_year: '2025', student_count: 13, certification: 'QD-123/HVNN',
   certification_date: '2026-01-15T00:00:00', faculty_id: 1,
   created_at: '2026-01-01T00:00:00', updated_at: '2026-03-18T01:12:00' },
  { id: 2, name: 'Dot tot nghiep thang 6 nam 2025 - Khoa CNTT',
   school_year: '2025', student_count: 248, certification: 'QD-456/CNTT',
   certification_date: '2025-06-01T00:00:00', faculty_id: 2,
   created_at: '2025-05-01T00:00:00', updated_at: '2026-02-10T08:30:00' },
- { id: 3, name: 'Dot tot nghiep thang 12 nam 2024 - Toan truong',
-  school_year: '2024', student_count: 512, certification: 'QD-789/DHBK',
+ { id: 3, name: 'Dot tot nghiep thang 12 nam 2024 - Toan hoc vien',
+  school_year: '2024', student_count: 512, certification: 'QD-789/HVNN',
   certification_date: '2024-12-05T00:00:00', faculty_id: 1,
   created_at: '2024-11-01T00:00:00', updated_at: '2025-12-20T14:00:00' }
 ];
 const mockGradStudents: MockGraduationStudent[] = [
- { id: 1, code: '2001215001', full_name: 'Nguyen Van An', first_name: 'An', last_name: 'Nguyen Van',
-  email: 'an.nguyen@student.edu.vn', phone: '0901234567', dob: '2002-05-10', gender: 'male',
+ { id: 1, code: '650215001', full_name: 'Nguyen Van An', first_name: 'An', last_name: 'Nguyen Van',
+  email: 'an.nguyen@sv.vnua.edu.vn', phone: '0901234567', dob: '2002-05-10', gender: 'male',
   citizen_identification: '001202012345', training_industry_id: 1, training_industry_code: '7480201',
   training_industry_name: 'Mang may tinh va truyen thong du lieu', school_year_end: '2025' },
- { id: 2, code: '2001215002', full_name: 'Tran Thi Bich', first_name: 'Bich', last_name: 'Tran Thi',
-  email: 'bich.tran@student.edu.vn', phone: '0912345678', dob: '2002-08-22', gender: 'female',
+ { id: 2, code: '650215002', full_name: 'Tran Thi Bich', first_name: 'Bich', last_name: 'Tran Thi',
+  email: 'bich.tran@sv.vnua.edu.vn', phone: '0912345678', dob: '2002-08-22', gender: 'female',
   citizen_identification: '001202098765', training_industry_id: 1, training_industry_code: '7480201',
   training_industry_name: 'Mang may tinh va truyen thong du lieu', school_year_end: '2025' },
- { id: 3, code: '2001215003', full_name: 'Le Hoang Duy', first_name: 'Duy', last_name: 'Le Hoang',
-  email: 'duy.le@student.edu.vn', phone: '0923456789', dob: '2001-12-03', gender: 'male',
+ { id: 3, code: '650215003', full_name: 'Le Hoang Duy', first_name: 'Duy', last_name: 'Le Hoang',
+  email: 'duy.le@sv.vnua.edu.vn', phone: '0923456789', dob: '2001-12-03', gender: 'male',
   citizen_identification: '001201056789', training_industry_id: 2, training_industry_code: '7480104',
   training_industry_name: 'He thong thong tin', school_year_end: '2025' }
 ];
 // ====== Home/Stats ======
 const mockSurveyStats = {
- totalRespondents: 4218, overallEmploymentRate: 87, avgSalaryMillionVND: 14.2,
- partnerCompanies: 50, stillStudying: 480,
+ totalRespondents: 3840, overallEmploymentRate: 85, avgSalaryMillionVND: 13.5,
+ partnerCompanies: 45, stillStudying: 420,
  byMajor: [
-  { major: 'Cong nghe thong tin', majorCode: 'CNTT', employmentRate: 87, avgSalaryMillionVND: 18.5, respondents: 620 },
-  { major: 'Nong nghiep & Sinh hoc', majorCode: 'NN', employmentRate: 74, avgSalaryMillionVND: 11.2, respondents: 980 },
-  { major: 'Kinh te & Quan tri', majorCode: 'KT', employmentRate: 81, avgSalaryMillionVND: 14.8, respondents: 870 },
-  { major: 'Moi truong & Tai nguyen', majorCode: 'MT', employmentRate: 68, avgSalaryMillionVND: 10.5, respondents: 540 }
+  { major: 'Cong nghe thong tin', majorCode: 'CNTT', employmentRate: 89, avgSalaryMillionVND: 17.2, respondents: 580 },
+  { major: 'Nong nghiep & Sinh hoc', majorCode: 'NN', employmentRate: 76, avgSalaryMillionVND: 10.8, respondents: 920 },
+  { major: 'Kinh te & Quan tri', majorCode: 'KT', employmentRate: 83, avgSalaryMillionVND: 13.5, respondents: 810 },
+  { major: 'Moi truong & Tai nguyen', majorCode: 'MT', employmentRate: 70, avgSalaryMillionVND: 10.2, respondents: 490 }
  ],
  byYear: [
-  { year: 2020, employmentRate: 79 }, { year: 2021, employmentRate: 82 },
-  { year: 2022, employmentRate: 84 }, { year: 2023, employmentRate: 86 }, { year: 2024, employmentRate: 87 }
+  { year: 2020, employmentRate: 78 }, { year: 2021, employmentRate: 80 },
+  { year: 2022, employmentRate: 82 }, { year: 2023, employmentRate: 84 }, { year: 2024, employmentRate: 85 }
  ],
  statusDistribution: {
-  employed_relevant: 1820, employed_irrelevant: 830, seeking: 312, postgrad: 480, self_employed: 540, other: 236
+  employed_relevant: 1680, employed_irrelevant: 790, seeking: 290, postgrad: 420, self_employed: 480, other: 180
  }
 };
 const mockHomeEnterprises: MockEnterprise[] = [
@@ -281,8 +280,8 @@ const mockHomeEnterprises: MockEnterprise[] = [
  { id: '3', name: 'Agribank', abbr: 'AGR', color: '#10b981', industry: 'Ngan hang & Tai chinh',
   website: '', email: '', phone: '', jobs: 15, verified: true, joinedDate: '', faculties: [],
   partnerStatus: '', size: '', address: '', description: '' },
- { id: '4', name: 'VinFast', abbr: 'VF', color: '#0ea5e9', industry: 'Cong nghiep & San xuat',
-  website: '', email: '', phone: '', jobs: 33, verified: true, joinedDate: '', faculties: [],
+ { id: '4', name: 'Dabaco Group', abbr: 'DBC', color: '#0ea5e9', industry: 'Nong nghiep & Chan nuoi',
+  website: '', email: '', phone: '', jobs: 20, verified: true, joinedDate: '', faculties: [],
   partnerStatus: '', size: '', address: '', description: '' },
  { id: '5', name: 'Masan Group', abbr: 'MSN', color: '#f59e0b', industry: 'Nong nghiep & FMCG',
   website: '', email: '', phone: '', jobs: 19, verified: true, joinedDate: '', faculties: [],
@@ -293,65 +292,65 @@ const mockHomeEnterprises: MockEnterprise[] = [
 ];
 const mockJobPostings: MockJobPosting[] = [
  { id: 'j1', enterpriseId: '1', enterpriseName: 'FPT Software', title: 'Backend Developer (Java)',
-  location: 'Ha Noi', salaryRange: '15-25 trie', tags: ['Java','Spring Boot'], postedAt: '2025-03-10', deadline: '2025-04-10' },
+  location: 'Ha Noi', salaryRange: '15-25 trieu', tags: ['Java','Spring Boot'], postedAt: '2025-03-10', deadline: '2025-04-10' },
  { id: 'j2', enterpriseId: '1', enterpriseName: 'FPT Software', title: 'Frontend Developer (React)',
-  location: 'Ha Noi', salaryRange: '12-22 trie', tags: ['React','TypeScript'], postedAt: '2025-03-11' },
+  location: 'Ha Noi', salaryRange: '12-22 trieu', tags: ['React','TypeScript'], postedAt: '2025-03-11' },
  { id: 'j3', enterpriseId: '2', enterpriseName: 'Vingroup', title: 'Ky su phan tich du lieu',
-  location: 'TP.HCM', salaryRange: '18-30 trie', tags: ['Python','SQL'], postedAt: '2025-03-08', deadline: '2025-04-05' },
+  location: 'Ha Noi', salaryRange: '18-30 trieu', tags: ['Python','SQL'], postedAt: '2025-03-08', deadline: '2025-04-05' },
  { id: 'j4', enterpriseId: '3', enterpriseName: 'Agribank', title: 'Chuyen vien tin dung',
-  location: 'Ha Noi', salaryRange: '10-15 trie', tags: ['Tai chinh','Ngan hang'], postedAt: '2025-03-12' },
- { id: 'j5', enterpriseId: '4', enterpriseName: 'VinFast', title: 'Ky su co khi',
-  location: 'Hai Phong', salaryRange: '14-20 trie', tags: ['AutoCAD','Co khi'], postedAt: '2025-03-09' },
+  location: 'Ha Noi', salaryRange: '10-15 trieu', tags: ['Tai chinh','Ngan hang'], postedAt: '2025-03-12' },
+ { id: 'j5', enterpriseId: '4', enterpriseName: 'Dabaco Group', title: 'Ky su chan nuoi',
+  location: 'Bac Ninh', salaryRange: '12-18 trieu', tags: ['Chan nuoi','Thu y'], postedAt: '2025-03-09' },
  { id: 'j6', enterpriseId: '5', enterpriseName: 'Masan Group', title: 'Ky su nong nghiep',
-  location: 'Nghe An', salaryRange: '10-16 trie', tags: ['Nong nghiep','R&D'], postedAt: '2025-03-07' },
+  location: 'Ha Nam', salaryRange: '10-16 trieu', tags: ['Nong nghiep','R&D'], postedAt: '2025-03-07' },
  { id: 'j7', enterpriseId: '6', enterpriseName: 'KPMG Vietnam', title: 'Kiem toan vien',
-  location: 'Ha Noi', salaryRange: '15-22 trie', tags: ['Kiem toan','Excel'], postedAt: '2025-03-05' },
+  location: 'Ha Noi', salaryRange: '15-22 trieu', tags: ['Kiem toan','Excel'], postedAt: '2025-03-05' },
  { id: 'j8', enterpriseId: '2', enterpriseName: 'Vingroup', title: 'Product Manager',
-  location: 'TP.HCM', salaryRange: '25-40 trie', tags: ['Product','Agile'], postedAt: '2025-03-06' },
- { id: 'j9', enterpriseId: '4', enterpriseName: 'VinFast', title: 'Ky su dien tu',
-  location: 'Hai Phong', salaryRange: '16-24 trie', tags: ['Dien tu','PLC'], postedAt: '2025-03-04' }
+  location: 'Ha Noi', salaryRange: '25-40 trieu', tags: ['Product','Agile'], postedAt: '2025-03-06' },
+ { id: 'j9', enterpriseId: '4', enterpriseName: 'Dabaco Group', title: 'Ky su thu y',
+  location: 'Bac Ninh', salaryRange: '11-17 trieu', tags: ['Thu y','Dieu tri'], postedAt: '2025-03-04' }
 ];
 const mockAlumniProfiles: MockAlumniProfile[] = [
- { id: '1', studentCode: 'SV001', fullName: 'Nguyen Van An', major: 'CNTT', graduationYear: 2022,
+ { id: '1', studentCode: '640215001', fullName: 'Nguyen Van An', major: 'CNTT', graduationYear: 2022,
   currentPosition: 'Backend Developer', currentCompany: 'FPT Software', email: 'an.nv@fpt.com' },
- { id: '2', studentCode: 'SV002', fullName: 'Tran Thi Binh', major: 'KT', graduationYear: 2023,
+ { id: '2', studentCode: '640214002', fullName: 'Tran Thi Binh', major: 'KT', graduationYear: 2023,
   currentPosition: 'Chuyen vien tin dung', currentCompany: 'Agribank' },
- { id: '3', studentCode: 'SV003', fullName: 'Le Minh Cuong', major: 'NN', graduationYear: 2021,
+ { id: '3', studentCode: '630213003', fullName: 'Le Minh Cuong', major: 'NN', graduationYear: 2021,
   currentPosition: 'Ky su nong nghiep', currentCompany: 'Masan Group' },
- { id: '4', studentCode: 'SV004', fullName: 'Pham Thi Dung', major: 'MT', graduationYear: 2022,
+ { id: '4', studentCode: '640215004', fullName: 'Pham Thi Dung', major: 'MT', graduationYear: 2022,
   currentPosition: 'Chuyen vien moi truong', currentCompany: 'KPMG Vietnam' }
 ];
 
 // ====== Home / Dashboard Stats ======
 const mockHomeStats = {
-  totalAlumni: 12540,
-  totalEnterprises: 847,
-  totalJobs: 1523,
-  latestRecruitments: 89,
+  totalAlumni: 11280,
+  totalEnterprises: 320,
+  totalJobs: 980,
+  latestRecruitments: 62,
   monthlyAlumniGrowth: [
-    { month: 'Jan', count: 98 },
-    { month: 'Feb', count: 124 },
-    { month: 'Mar', count: 156 },
-    { month: 'Apr', count: 201 },
-    { month: 'May', count: 189 },
-    { month: 'Jun', count: 233 }
+    { month: 'Jan', count: 85 },
+    { month: 'Feb', count: 110 },
+    { month: 'Mar', count: 142 },
+    { month: 'Apr', count: 178 },
+    { month: 'May', count: 165 },
+    { month: 'Jun', count: 210 }
   ],
   facultyDistribution: [
-    { faculty: 'Faculty of IT', count: 3420 },
-    { faculty: 'Faculty of Economics', count: 2890 },
-    { faculty: 'Faculty of Mech. & Elec.', count: 2150 },
-    { faculty: 'Faculty of Agriculture', count: 1780 },
-    { faculty: 'Faculty of Environment', count: 1200 },
-    { faculty: 'Faculty of Languages', count: 1100 }
+    { faculty: 'Khoa CNTT', count: 2850 },
+    { faculty: 'Khoa Nong nghiep', count: 2640 },
+    { faculty: 'Khoa Kinh te', count: 2100 },
+    { faculty: 'Khoa Thu y', count: 1480 },
+    { faculty: 'Khoa CNTP', count: 1210 },
+    { faculty: 'Khoa Moi truong', count: 1000 }
   ]
 };
 
 // ====== Reports ======
 const mockReports: MockReport[] = [
-  { id: 'r1', title: 'Bao cao tong hop nang luc nguoi hoc', type: 'academic', status: 'completed', createdBy: 'Admin', createdAt: '2025-03-01', totalStudents: 1234, passedRate: 92.5 },
-  { id: 'r2', title: 'Thong ke viec lam sau tot nghiep', type: 'employment', status: 'completed', createdBy: 'Admin', createdAt: '2025-02-15', totalStudents: 980, employmentRate: 78.3 },
-  { id: 'r3', title: 'Bao cao hop tac doanh nghiep Q1/2025', type: 'enterprise', status: 'pending', createdBy: 'Admin', createdAt: '2025-01-20', totalEnterprises: 156 },
-  { id: 'r4', title: 'Danh gia chuong trinh dao tao CNTT', type: 'program', status: 'completed', createdBy: 'Dean', createdAt: '2024-12-10', totalStudents: 450, score: 4.2 },
+  { id: 'r1', title: 'Bao cao tong hop nang luc nguoi hoc', type: 'academic', status: 'completed', createdBy: 'Admin', createdAt: '2025-03-01', totalStudents: 1180, passedRate: 91.2 },
+  { id: 'r2', title: 'Thong ke viec lam sau tot nghiep', type: 'employment', status: 'completed', createdBy: 'Admin', createdAt: '2025-02-15', totalStudents: 920, employmentRate: 85.0 },
+  { id: 'r3', title: 'Bao cao hop tac doanh nghiep Q1/2025', type: 'enterprise', status: 'pending', createdBy: 'Admin', createdAt: '2025-01-20', totalEnterprises: 120 },
+  { id: 'r4', title: 'Danh gia chuong trinh dao tao CNTT', type: 'program', status: 'completed', createdBy: 'Truong khoa', createdAt: '2024-12-10', totalStudents: 420, score: 4.1 },
   { id: 'r5', title: 'Thong ke hoat dong co so vat chat', type: 'facility', status: 'draft', createdBy: 'Admin', createdAt: '2025-03-10' }
 ];
 
@@ -365,19 +364,19 @@ const mockReportApiResponse = {
     majorName: '',
   },
   stats: {
-    totalGraduates: 1200,
+    totalGraduates: 1180,
     submitted: 960,
-    submissionRate: 80,
-    employed: 835,
-    employmentRate: 87,
-    relevantJobRate: 68,
-    avgSalary: '14.2 triệu',
+    submissionRate: 81,
+    employed: 816,
+    employmentRate: 85,
+    relevantJobRate: 66,
+    avgSalary: '13.5 triệu',
   },
   majorRows: [
-    { major: 'Cong nghe thong tin', totalGraduates: 320, submitted: 280, employed: 245, employmentRate: 87.5 },
-    { major: 'Kinh te', totalGraduates: 240, submitted: 200, employed: 168, employmentRate: 84 },
-    { major: 'Nong nghiep', totalGraduates: 310, submitted: 240, employed: 192, employmentRate: 80 },
-    { major: 'Moi truong', totalGraduates: 180, submitted: 140, employed: 105, employmentRate: 75 },
+    { major: 'Cong nghe thong tin', totalGraduates: 310, submitted: 276, employed: 246, employmentRate: 89.1 },
+    { major: 'Kinh te', totalGraduates: 230, submitted: 192, employed: 160, employmentRate: 83.3 },
+    { major: 'Nong nghiep', totalGraduates: 300, submitted: 234, employed: 178, employmentRate: 76.1 },
+    { major: 'Moi truong', totalGraduates: 170, submitted: 130, employed: 91, employmentRate: 70.0 },
   ],
   graduateRows: [
     { id: 'sv001', name: 'Nguyen Van An', major: 'CNTT', graduationYear: 2024, status: 'employed', company: 'FPT Software', position: 'Backend Developer' },
@@ -385,13 +384,13 @@ const mockReportApiResponse = {
     { id: 'sv003', name: 'Le Minh Cuong', major: 'NN', graduationYear: 2024, status: 'employed', company: 'Masan Group', position: 'Ky su nong nghiep' },
   ],
   responseRows: [
-    { surveyId: 's1', surveyName: 'Khao sat 2024', responses: 960, completionRate: 80 },
+    { surveyId: 's1', surveyName: 'Khao sat viec lam 2024', responses: 960, completionRate: 81 },
   ],
   facultyRows: [
-    { facultyName: 'Khoa CNTT', totalGraduates: 320, submitted: 280, submissionRate: 87.5 },
-    { facultyName: 'Khoa Kinh te', totalGraduates: 240, submitted: 200, submissionRate: 83.3 },
-    { facultyName: 'Khoa Nong nghiep', totalGraduates: 310, submitted: 240, submissionRate: 77.4 },
-    { facultyName: 'Khoa Moi truong', totalGraduates: 180, submitted: 140, submissionRate: 77.8 },
+    { facultyName: 'Khoa CNTT', totalGraduates: 310, submitted: 276, submissionRate: 89.0 },
+    { facultyName: 'Khoa Kinh te', totalGraduates: 230, submitted: 192, submissionRate: 83.5 },
+    { facultyName: 'Khoa Nong nghiep', totalGraduates: 300, submitted: 234, submissionRate: 78.0 },
+    { facultyName: 'Khoa Moi truong', totalGraduates: 170, submitted: 130, submissionRate: 76.5 },
   ],
   reportMeta: {
     generatedAt: new Date().toISOString(),
@@ -409,68 +408,68 @@ const mockReportTemplates = [
 // ====== Statistics ======
 const mockStatistics = {
   overview: {
-    totalAlumni: 12540,
-    totalStudents: 8920,
-    totalFaculties: 12,
-    totalEnterprises: 847,
-    totalJobsPosted: 1523
+    totalAlumni: 11280,
+    totalStudents: 7650,
+    totalFaculties: 8,
+    totalEnterprises: 320,
+    totalJobsPosted: 980
   },
-  employmentRate: 78.3,
-  averageSalary: 15.5,
+  employmentRate: 85.0,
+  averageSalary: 13.5,
   alumniByBatch: [
-    { year: 2020, count: 1890 },
-    { year: 2021, count: 2120 },
-    { year: 2022, count: 2450 },
-    { year: 2023, count: 2680 },
-    { year: 2024, count: 2900 }
+    { year: 2020, count: 1720 },
+    { year: 2021, count: 1980 },
+    { year: 2022, count: 2200 },
+    { year: 2023, count: 2480 },
+    { year: 2024, count: 2680 }
   ],
   graduatesByFaculty: [
-    { faculty: 'Faculty of IT', graduates: 3420 },
-    { faculty: 'Faculty of Economics', graduates: 2890 },
-    { faculty: 'Faculty of Mech. & Elec.', graduates: 2150 },
-    { faculty: 'Faculty of Agriculture', graduates: 1780 }
+    { faculty: 'Khoa CNTT', graduates: 2850 },
+    { faculty: 'Khoa Nong nghiep', graduates: 2640 },
+    { faculty: 'Khoa Kinh te', graduates: 2100 },
+    { faculty: 'Khoa Thu y', graduates: 1480 }
   ],
   recentStats: [
-    { label: 'Incoming Freshmen', value: 3200, change: '+5.2%' },
-    { label: 'Dropout Rate', value: 2.1, change: '-0.3%' },
-    { label: 'Internship Participation', value: 87, change: '+12%' },
-    { label: 'Career Fair Attendees', value: 156, change: '+8%' }
+    { label: 'Sinh vien nhap hoc', value: 2800, change: '+4.5%' },
+    { label: 'Ti le bo hoc', value: 1.8, change: '-0.2%' },
+    { label: 'Tham gia thuc tap', value: 85, change: '+10%' },
+    { label: 'Tham du Ngay hoi viec lam', value: 130, change: '+6%' }
   ]
 };
 
 // ====== University ======
 const mockUniversity = {
-  name: 'Dai hoc Nong Lam Thanh pho HCM',
-  abbr: 'ULST',
+  name: 'Hoc vien Nong nghiep Viet Nam',
+  abbr: 'VNUA',
   logo: '/assets/logo.png',
-  motto: 'Học tập - Sáng tạo - Phát triển',
-  founded: 1955,
-  address: 'Khu pho 6, Phuong Linh Trung, Thanh pho Thu Duc, TP. Ho Chi Minh',
-  phone: '028 3724 5378',
-  email: 'info@ulst.edu.vn',
-  website: 'https://www.ulst.edu.vn',
-  totalStudents: 28500,
-  totalFaculties: 12,
-  totalPrograms: 48,
-  faculties: ['Faculty of IT', 'Faculty of Economics', 'Faculty of Mech. & Elec.', 'Faculty of Agriculture', 'Faculty of Environment', 'Faculty of Languages'],
+  motto: 'Trí tuệ - Sáng tạo - Hội nhập',
+  founded: 1956,
+  address: 'Xa Gia Lam, Thanh pho Ha Noi',
+  phone: '024 6261 7538',
+  email: 'hcth@vnua.edu.vn',
+  website: 'https://www.vnua.edu.vn',
+  totalStudents: 15000,
+  totalFaculties: 8,
+  totalPrograms: 36,
+  faculties: ['Khoa CNTT', 'Khoa Kinh te', 'Khoa Nong nghiep', 'Khoa Thu y', 'Khoa CNTP', 'Khoa Moi truong', 'Khoa CNSH', 'Khoa QLDD'],
   latestNews: [
-    { id: 'n1', title: 'Ky le tot nghiep thang 6.2025', date: '2025-06-15' },
-    { id: 'n2', title: 'Hoi thao chuyen de AI trong giao duc', date: '2025-05-20' },
-    { id: 'n3', title: 'Hop tac doanh nghiep FPT Software', date: '2025-04-10' }
+    { id: 'n1', title: 'Le tot nghiep dot 2 nam 2025', date: '2025-06-15' },
+    { id: 'n2', title: 'Hoi thao AI trong nong nghiep thong minh', date: '2025-05-20' },
+    { id: 'n3', title: 'Ky ket hop tac voi FPT Software', date: '2025-04-10' }
   ]
 };
 
 const mockUniversityCalendar = [
-  { id: 'c1', event: 'Lop hoc ky moi - Nganh CNTT', date: '2025-06-01', type: 'academic' },
-  { id: 'c2', event: 'Ngay hoi viec lam', date: '2025-06-15', type: 'career' },
+  { id: 'c1', event: 'Hoc ky 2 nam hoc 2024-2025 bat dau', date: '2025-06-01', type: 'academic' },
+  { id: 'c2', event: 'Ngay hoi viec lam VNUA 2025', date: '2025-06-15', type: 'career' },
   { id: 'c3', event: 'Bao ve luan van tot nghiep', date: '2025-06-20', type: 'graduation' },
-  { id: 'c4', event: 'Hoi thao doanh nghiep - KPMG Vietnam', date: '2025-06-25', type: 'enterprise' }
+  { id: 'c4', event: 'Hoi thao doanh nghiep - Dabaco Group', date: '2025-06-25', type: 'enterprise' }
 ];
 
 const mockUniversityNotifications = [
-  { id: 'not1', title: 'Thong bao lich diem ky 2/2025', date: '2025-03-01', priority: 'high', read: false },
-  { id: 'not2', title: 'Dang ky mon hoc phong van xin viec', date: '2025-02-28', priority: 'medium', read: true },
-  { id: 'not3', title: 'Thay doi lich giang giang vien', date: '2025-02-25', priority: 'low', read: true }
+  { id: 'not1', title: 'Thong bao lich thi cuoi ki 2/2024-2025', date: '2025-03-01', priority: 'high', read: false },
+  { id: 'not2', title: 'Dang ky thuc tap he 2025', date: '2025-02-28', priority: 'medium', read: true },
+  { id: 'not3', title: 'Cap nhat lich giang vien khoa CNTT', date: '2025-02-25', priority: 'low', read: true }
 ];
 
 // ====== Forms ======
@@ -499,11 +498,11 @@ const mockDashboardWidgets = {
     { id: 'qa6', label: 'Cau hinh', icon: 'settings', link: '/settings' }
   ],
   activityLog: [
-    { id: 'log1', action: 'Admin updated student record', user: 'Admin', timestamp: '2025-03-01 10:30' },
-    { id: 'log2', action: 'New enterprise registered', user: 'System', timestamp: '2025-03-01 09:15' },
-    { id: 'log3', action: 'Report generated: Employment Stats Q4/2024', user: 'Admin', timestamp: '2025-02-28 16:45' },
-    { id: 'log4', action: 'Faculty data updated', user: 'Dean', timestamp: '2025-02-28 14:20' },
-    { id: 'log5', action: 'New job posting: Backend Developer', user: 'Enterprise', timestamp: '2025-02-27 11:00' }
+    { id: 'log1', action: 'Admin cap nhat ho so sinh vien', user: 'Admin', timestamp: '2025-03-01 10:30' },
+    { id: 'log2', action: 'Doanh nghiep moi dang ky: Dabaco Group', user: 'System', timestamp: '2025-03-01 09:15' },
+    { id: 'log3', action: 'Xuat bao cao: Thong ke viec lam Q4/2024', user: 'Admin', timestamp: '2025-02-28 16:45' },
+    { id: 'log4', action: 'Cap nhat du lieu khoa Nong nghiep', user: 'Truong khoa', timestamp: '2025-02-28 14:20' },
+    { id: 'log5', action: 'Tin tuyen dung moi: Backend Developer - FPT', user: 'Enterprise', timestamp: '2025-02-27 11:00' }
   ]
 };
 
@@ -512,12 +511,12 @@ const mockSurveyBatches: MockSurveyBatch[] = [
   {
     id: 1, title: 'Dot khao sat thang 6/2024', description: 'Khao sat viec lam sinh vien tot nghiep 2024',
     formId: 1, formSnapshot: null, status: 'completed', startDate: '2024-06-01', endDate: '2024-06-30',
-    year: 2024, graduationPeriod: '2024', totalStudents: 512, responses: [], createdAt: '2024-05-15T00:00:00', updatedAt: '2024-07-01T00:00:00'
+    year: 2024, graduationPeriod: '2024', totalStudents: 490, responses: [], createdAt: '2024-05-15T00:00:00', updatedAt: '2024-07-01T00:00:00'
   },
   {
     id: 2, title: 'Dot khao sat thang 12/2024', description: 'Khao sat viec lam sinh vien tot nghiep T12/2024',
     formId: 1, formSnapshot: null, status: 'active', startDate: '2024-12-01', endDate: '2024-12-31',
-    year: 2024, graduationPeriod: '2024-2', totalStudents: 248, responses: [], createdAt: '2024-11-20T00:00:00', updatedAt: '2024-12-15T00:00:00'
+    year: 2024, graduationPeriod: '2024-2', totalStudents: 230, responses: [], createdAt: '2024-11-20T00:00:00', updatedAt: '2024-12-15T00:00:00'
   },
   {
     id: 3, title: 'Dot khao sat thang 6/2025', description: 'Khao sat viec lam sinh vien tot nghiep 2025',
