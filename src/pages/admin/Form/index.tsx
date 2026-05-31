@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
-import { MOCK_FORMS } from '../../../feature/form/constants'
+import { useState } from 'react'
+import { useFormList } from '../../../feature/form/hooks/useFormList'
+import { createForm, updateForm, deleteForm, duplicateForm } from '../../../feature/form/api'
 import type { Form, Section, Question } from '../../../feature/form/types'
 import { BuilderView } from './builder/BuilderView'
 import PreviewView from './Preview'
@@ -8,33 +9,6 @@ import { DeleteModal } from './Deletemodal'
 import { AIView } from './Aiview'
 import './survey.css'
 import AdminLayout from '../../../components/layout/AdminLayout'
-
-const DRAFT_KEY = 'survey_draftlist'
-
-function loadDraft(): Form | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as Form
-  } catch { return null }
-}
-function saveDraft(forms: Form[]) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(forms)) } catch { }
-}
-function clearDraft() {
-  try { localStorage.removeItem(DRAFT_KEY) } catch { }
-}
-
-//  DraftBanner 
-function DraftBanner({ onRestore, onDiscard }: { onRestore: () => void; onDiscard: () => void }) {
-  return (
-    <div role="status" aria-live="polite" style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 500, background: '#1e293b', color: '#fff', borderRadius: 12, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 8px 32px rgba(0,0,0,.25)', fontSize: 13, fontWeight: 500, animation: 'fade-in-up .3s ease', maxWidth: '90vw' }}>
-      <span>Tìm thấy bản nháp chưa lưu</span>
-      <button onClick={onRestore} style={{ background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 7, padding: '5px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>Khôi phục</button>
-      <button onClick={onDiscard} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.3)', color: 'rgba(255,255,255,.8)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>Bỏ qua</button>
-    </div>
-  )
-}
 
 //  makeBlankForm helper 
 function makeBlankForm(): Form {
@@ -57,58 +31,79 @@ function makeBlankForm(): Form {
 type ViewType = 'list' | 'builder' | 'ai' | 'preview'
 
 export default function SurveyPage() {
-  const [forms, setForms] = useState<Form[]>(MOCK_FORMS)
+  const { forms, loading, error, reload } = useFormList()
   const [view, setView] = useState<ViewType>('list')
   const [activeForm, setActiveForm] = useState<Form | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Form | undefined>(undefined)
-  const [draftAvailable, setDraftAvailable] = useState<Form[] | null>(loadDraft)
-  const hasUserEdited = useRef(false)
-
-  // Autosave with debounce + immediate save on tab close
-  useEffect(() => {
-    if (!hasUserEdited.current) return
-    const timer = setTimeout(() => saveDraft(forms), 2000)
-    return () => clearTimeout(timer)
-  }, [forms])
-
-  useEffect(() => {
-    const handler = () => { if (hasUserEdited.current) saveDraft(forms) }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [forms])
 
   //  handlers 
-  const handleSaveFromBuilder = (form: Form) => {
-    hasUserEdited.current = true
-    setForms((prev) => {
-      const exists = prev.some((f) => f.id === form.id)
-      if (exists) return prev.map((f) => (f.id === form.id ? form : f))
-      return [{ ...form, id: Date.now(), createdat: new Date().toISOString().slice(0, 10) }, ...prev]
-    })
+  const handleSaveFromBuilder = async (form: Form) => {
+    try {
+      if (form.id == null) {
+        await createForm({
+          name: form.name,
+          description: form.description,
+          sections: form.sections,
+          questions: form.questions,
+          themeId: form.themeId,
+          header: form.header,
+          footer: form.footer,
+        })
+      } else {
+        await updateForm(form.id as number, {
+          name: form.name,
+          description: form.description,
+          sections: form.sections,
+          questions: form.questions,
+          themeId: form.themeId,
+          header: form.header,
+          footer: form.footer,
+        })
+      }
+      await reload()
+    } catch (e) {
+      console.error('Lưu form thất bại:', e)
+    }
     setView('list')
   }
 
-  const handleSaveFromAI = (partial: Omit<Form, 'id' | 'createdat' | 'themeId'>) => {
-    hasUserEdited.current = true
-    const newForm = { ...partial, id: Date.now(), createdat: new Date().toISOString().slice(0, 10), themeId: 'blue' } as Form
-    setForms((prev) => [newForm, ...prev])
-    setActiveForm(newForm)
-    setView('builder')
+  const handleSaveFromAI = async (partial: Omit<Form, 'id' | 'createdat' | 'themeId'>) => {
+    try {
+      const newForm = await createForm({
+        name: partial.name,
+        description: partial.description,
+        sections: partial.sections,
+        questions: partial.questions,
+        themeId: 'blue',
+      })
+      await reload()
+      setActiveForm(newForm)
+      setView('builder')
+    } catch (e) {
+      console.error('Tạo form AI thất bại:', e)
+    }
   }
 
   const handleDelete = (id: number) => setDeleteTarget(forms.find((f) => f.id === id))
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget?.id != null) {
-      hasUserEdited.current = true
-      setForms((prev) => prev.filter((f) => f.id !== deleteTarget.id))
+      try {
+        await deleteForm(deleteTarget.id as number)
+        await reload()
+      } catch (e) {
+        console.error('Xóa form thất bại:', e)
+      }
     }
     setDeleteTarget(undefined)
   }
 
-  const handleDup = (form: Form) => {
-    hasUserEdited.current = true
-    const copy = { ...form, id: Date.now(), name: `${form.name} (bản sao)`, createdat: new Date().toISOString().slice(0, 10) }
-    setForms((prev) => [copy, ...prev])
+  const handleDup = async (form: Form) => {
+    try {
+      await duplicateForm(form.id as number)
+      await reload()
+    } catch (e) {
+      console.error('Nhân bản form thất bại:', e)
+    }
   }
 
   //  routing 
@@ -131,8 +126,13 @@ export default function SurveyPage() {
   return (
     <AdminLayout>
       <div className="">
+        {error && (
+          <div style={{ color: 'red', padding: '12px 16px', background: '#fff0f0', borderRadius: 8, marginBottom: 12 }}>
+            {error}
+          </div>
+        )}
         <ListView
-          forms={forms}
+          forms={loading ? [] : forms}
           onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
           onAI={() => setView('ai')}
           onEdit={(f) => { setActiveForm(f); setView('builder') }}
@@ -144,14 +144,6 @@ export default function SurveyPage() {
         {/* Delete confirmation */}
         {deleteTarget && (
           <DeleteModal form={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(undefined)} />
-        )}
-
-        {/* Draft restore banner */}
-        {draftAvailable && (
-          <DraftBanner
-            onRestore={() => { setForms(draftAvailable as any); setDraftAvailable(null) }}
-            onDiscard={() => { clearDraft(); setDraftAvailable(null) }}
-          />
         )}
       </div>
     </AdminLayout>
