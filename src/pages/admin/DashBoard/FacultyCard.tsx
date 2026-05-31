@@ -1,12 +1,8 @@
-import { useState } from "react";
-import { Select } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Select, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import {
-  KHOA_LIST,
-  getLatestDot,
-  getSoSVPhanhoi,
-} from "../../../feature/dashboard/api";
-import type { KhoaFilter } from "../../../feature/dashboard/type";
+import { fetchKhoaList } from "../../../feature/dashboard/api";
+import type { KhoaFilter, KhoaItem } from "../../../feature/dashboard/type";
 
 function ProgressBar({
   value,
@@ -57,11 +53,45 @@ export function FacultyCard() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<KhoaFilter>("all");
   const [hovered, setHovered] = useState<number | null>(null);
-  const latestDot = getLatestDot();
+  const [items, setItems] = useState<KhoaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filtered = KHOA_LIST.filter((k) =>
-    filter === "all" ? true : filter === "daNop" ? k.daNop : !k.daNop
-  );
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetchKhoaList();
+        if (!cancelled) setItems(res);
+      } catch (e) {
+        if (!cancelled) {
+          setError(
+            e instanceof Error ? e.message : "Không thể tải danh sách khoa."
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    return items.filter((k) =>
+      filter === "all" ? true : filter === "daNop" ? k.daNop : !k.daNop
+    );
+  }, [items, filter]);
+
+  const totalAll = items.length;
+  const totalDaNop = items.filter((k) => k.daNop).length;
+  const totalChuaNop = items.filter((k) => !k.daNop).length;
 
   return (
     <div
@@ -74,7 +104,6 @@ export function FacultyCard() {
         overflow: "hidden",
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "14px 20px",
@@ -105,15 +134,6 @@ export function FacultyCard() {
             >
               Tình trạng nộp báo cáo
             </div>
-            {/* <div
-              style={{
-                fontSize: 12,
-                color: "#64748b",
-                marginTop: 2,
-              }}
-            >
-              Theo từng khoa, cập nhật theo {latestDot}
-            </div> */}
           </div>
         </div>
 
@@ -123,122 +143,151 @@ export function FacultyCard() {
           size="small"
           style={{ width: 170 }}
         >
-          <Select.Option value="all">
-            Tất cả ({KHOA_LIST.length})
-          </Select.Option>
-          <Select.Option value="daNop">
-            Đã nộp ({KHOA_LIST.filter((k) => k.daNop).length})
-          </Select.Option>
+          <Select.Option value="all">Tất cả ({totalAll})</Select.Option>
+          <Select.Option value="daNop">Đã nộp ({totalDaNop})</Select.Option>
           <Select.Option value="chuaNop">
-            Chưa nộp ({KHOA_LIST.filter((k) => !k.daNop).length})
+            Chưa nộp ({totalChuaNop})
           </Select.Option>
         </Select>
       </div>
 
-      {/* Legend */}
-      <div
-        style={{
-          padding: "8px 20px 6px",
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          borderBottom: "1px solid #f1f5f9",
-          fontSize: 11,
-          color: "#94a3b8",
-        }}
-      >
-        <span style={{ width: 32 }}>STT</span>
-        <span style={{ flex: 1 }}>Khoa</span>
-        <span style={{ width: 200 }}>SV phản hồi / tổng</span>
-        <span style={{ width: 80, textAlign: "right" as const }}>
-          Trạng thái
-        </span>
-      </div>
+      {error && (
+        <div style={{ padding: 16 }}>
+          <Alert
+            type="error"
+            showIcon
+            message="Không thể tải danh sách khoa"
+            description={error}
+          />
+        </div>
+      )}
 
-      {/* List */}
-      <div style={{ maxHeight: 360, overflowY: "auto" }}>
-        {filtered.map((k, i) => {
-          const soSVPhanhoi = getSoSVPhanhoi(k.viet_tat);
-          const isHovered = hovered === i;
+      {loading ? (
+        <div
+          style={{
+            minHeight: 260,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <div
+            style={{
+              padding: "8px 20px 6px",
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              borderBottom: "1px solid #f1f5f9",
+              fontSize: 11,
+              color: "#94a3b8",
+            }}
+          >
+            <span style={{ width: 32 }}>STT</span>
+            <span style={{ flex: 1 }}>Khoa</span>
+            <span style={{ width: 200 }}>SV phản hồi / tổng</span>
+            <span style={{ width: 80, textAlign: "right" as const }}>
+              Trạng thái
+            </span>
+          </div>
 
-          return (
-            <div
-              key={k.ten}
-              onClick={() =>
-                navigate(`/admin/bao-cao/${k.viet_tat.toLowerCase()}`)
-              }
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 20px",
-                background: isHovered
-                  ? "#f8fafc"
-                  : i % 2 === 0
-                  ? "#ffffff"
-                  : "#f9fafb",
-                borderBottom: "1px solid #f1f5f9",
-                cursor: "pointer",
-                transition: "background 120ms ease",
-              }}
-            >
-              {/* index */}
-              <span
+          <div style={{ maxHeight: 360, overflowY: "auto" }}>
+            {filtered.map((k, i) => {
+              const soSVPhanhoi = k.soSV ?? 0;
+              const isHovered = hovered === i;
+
+              return (
+                <div
+                  key={k.ten}
+                  onClick={() =>
+                    navigate(`/admin/bao-cao/${k.viet_tat.toLowerCase()}`)
+                  }
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 20px",
+                    background: isHovered
+                      ? "#f8fafc"
+                      : i % 2 === 0
+                      ? "#ffffff"
+                      : "#f9fafb",
+                    borderBottom: "1px solid #f1f5f9",
+                    cursor: "pointer",
+                    transition: "background 120ms ease",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "#9ca3af",
+                      width: 32,
+                      flexShrink: 0,
+                      textAlign: "center",
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: 14,
+                      color: "#111827",
+                      fontWeight: 500,
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {k.ten}
+                  </span>
+
+                  <div style={{ width: 200, flexShrink: 0 }}>
+                    <ProgressBar
+                      value={soSVPhanhoi}
+                      total={k.tongSV}
+                      color={k.mau}
+                    />
+                  </div>
+
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: k.daNop ? "#16a34a" : "#dc2626",
+                      flexShrink: 0,
+                      width: 80,
+                      textAlign: "right",
+                    }}
+                  >
+                    {k.daNop ? "Đã nộp" : "Chưa nộp"}
+                  </span>
+                </div>
+              );
+            })}
+
+            {!filtered.length && !error && (
+              <div
                 style={{
-                  fontSize: 11,
-                  color: "#9ca3af",
-                  width: 32,
-                  flexShrink: 0,
+                  padding: "24px 20px",
                   textAlign: "center",
+                  color: "#94a3b8",
+                  fontSize: 13,
                 }}
               >
-                {i + 1}
-              </span>
-
-              {/* name */}
-              <span
-                style={{
-                  flex: 1,
-                  fontSize: 14,
-                  color: "#111827",
-                  fontWeight: 500,
-                  minWidth: 0,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {k.ten}
-              </span>
-
-              {/* progress */}
-              <div style={{ width: 200, flexShrink: 0 }}>
-                <ProgressBar
-                  value={soSVPhanhoi}
-                  total={k.tongSV}
-                  color={k.mau}
-                />
+                Không có dữ liệu khoa
               </div>
-
-              {/* status: chỉ chữ, không icon/badge */}
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: k.daNop ? "#16a34a" : "#dc2626",
-                  flexShrink: 0,
-                  width: 80,
-                  textAlign: "right",
-                }}
-              >
-                {k.daNop ? "Đã nộp" : "Chưa nộp"}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

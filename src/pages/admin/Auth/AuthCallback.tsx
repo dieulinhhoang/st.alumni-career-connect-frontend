@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../../components/common/loader';
 
 function getSafeReturnUrl(returnUrl: string | null): string {
   if (!returnUrl) return '/admin/dashboard';
@@ -34,5 +35,7 @@ export default function AuthCallback() {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  return <div>Đang đăng nhập...</div>;
+  return   
+    <Loader/>
+   ;
 }
