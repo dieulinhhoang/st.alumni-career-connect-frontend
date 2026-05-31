@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Select, Button, Modal, Table } from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { Col, Row, Input, Select, Button, Modal } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
+import CustomTable from "../../../components/common/customTable";
 import { toSlug } from "../../../components/common/utils";
 import { useEnterprises } from "../../../feature/enterprise/hooks/useEnterprises";
 import {
@@ -30,16 +31,6 @@ const T = {
   bg: "#f7f8fa",
   hover: "#f3f4f8",
 };
-
-const stripeCSS = document.createElement("style");
-stripeCSS.textContent = `
-  .row-stripe td { background: #f9fafb !important; }
-  .ent-row:hover td { background: #f3f4f8 !important; transition: background 0.15s; }
-`;
-if (!document.head.querySelector("[data-stripe]")) {
-  stripeCSS.setAttribute("data-stripe", "1");
-  document.head.appendChild(stripeCSS);
-}
 
 const chip = (faded = false): React.CSSProperties => ({
   display: "inline-flex",
@@ -349,46 +340,42 @@ export default function EnterprisePage() {
                 }}
                 style={{
                   width: 220,
-                  borderRadius: 8,
                   height: 34,
+                  borderRadius: 7,
                   fontSize: 13,
-                  background: "#f3f4f6",
-                  borderColor: "transparent",
+                  border: `1px solid ${T.border}`,
                 }}
-                variant="filled"
                 allowClear
               />
 
               <Select
                 value={industry}
-                onChange={(value) => {
-                  setIndustry(value);
+                onChange={(v) => {
+                  setIndustry(v);
                   setQuery((prev) => ({ ...prev, page: 1 }));
                 }}
-                style={{ width: 170, height: 34, fontSize: 13 }}
-                variant="filled"
+                style={{ width: 180, height: 34 }}
                 options={[
                   { label: "Tất cả ngành", value: "Tất cả ngành" },
                   ...INDUSTRIES.map((i) => ({ label: i, value: i })),
                 ]}
               />
 
-              {/* Faculty filter — server-side qua setFacultyId */}
               <Select
+                allowClear
+                placeholder="Lọc theo khoa"
                 value={facultyFilter}
-                onChange={(value) => {
-                  const newVal = value ?? undefined;
-                  setFacultyFilter(newVal);
-                  setFacultyId(newVal);
+                onChange={(v) => {
+                  setFacultyFilter(v);
+                  const faculty = faculties.find(
+                    (f) => String(f.id) === v
+                  );
+                  setFacultyId(faculty ? String(faculty.id) : undefined);
                   setQuery((prev) => ({ ...prev, page: 1 }));
                   setPage(0);
                 }}
+                style={{ width: 180, height: 34 }}
                 loading={facultiesLoading}
-                allowClear
-                showSearch
-                placeholder="Chọn khoa liên kết"
-                style={{ width: 190, height: 34, fontSize: 13 }}
-                optionFilterProp="children"
                 notFoundContent={facultiesLoading ? "Đang tải..." : "Không có khoa"}
                 getPopupContainer={(trigger) => trigger.parentElement!}
               >
@@ -430,9 +417,9 @@ export default function EnterprisePage() {
               </span>
             </div>
 
-            <Table<Enterprise>
+            <CustomTable<Enterprise>
               rowKey="id"
-              dataSource={filtered}
+              data={filtered}
               columns={columns}
               loading={loading}
               pagination={{
@@ -442,14 +429,13 @@ export default function EnterprisePage() {
                 showSizeChanger: true,
                 pageSizeOptions: [8, 10, 20, 50],
               }}
-              onChange={(pagination: TablePaginationConfig) => {
+              handleTableChange={(pagination) => {
                 const newPage = pagination.current || 1;
                 const newSize = pagination.pageSize || query.size;
                 setQuery({ page: newPage, size: newSize });
                 setPage(newPage - 1);
               }}
               scroll={{ x: 760 }}
-              rowClassName={(_record, index) => `ent-row${index % 2 === 1 ? " row-stripe" : ""}`}
               onRow={(r) => ({
                 onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`),
                 style: { cursor: "pointer", opacity: faded(r) ? 0.6 : 1 },
