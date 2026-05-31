@@ -1,3 +1,4 @@
+import api from '../../libs/api';
 import type {
 	FilterState,
 	CurrentUser,
@@ -8,7 +9,6 @@ import type {
 	FacultySubmissionRow,
 	ReportMeta,
 } from './types';
-import axios from 'axios';
 
 export type ReportApiResponse = {
 	currentUser: CurrentUser;
@@ -29,16 +29,6 @@ export type SurveyConfig = {
 	options: SurveyOption[];
 	deadline: string;
 };
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 /**
  * Fetch comprehensive report data for the alumni survey.
