@@ -44,6 +44,7 @@ export function PieColumnChart({
   const colInst = useRef<G2Column | null>(null)
   const [selectedSlice, setSelectedSlice] = useState<string | null>(null)
 
+  // Tính colorMap từ pieData — dùng cả cho pie lẫn column để đồng màu
   const nameColorMap = useMemo(
     () =>
       Object.fromEntries(
@@ -63,6 +64,7 @@ export function PieColumnChart({
     colInst.current = null
     setSelectedSlice(null)
 
+    // colorMap tính lại trong effect để đảm bảo đồng bộ với pieData hiện tại
     const colorMap = Object.fromEntries(
       pieData.map((d, i) => [d.name, CHART_COLORS[i % CHART_COLORS.length]]),
     )
@@ -79,7 +81,8 @@ export function PieColumnChart({
       colorField: 'name',
       radius: 0.92,
       innerRadius: 0.6,
-      color: pieData.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+      // FIX: dùng colorMap để đảm bảo màu pie khớp với màu cột
+      color: ({ name }: { name: string }) => colorMap[name] ?? CHART_COLORS[0],
       pieStyle: { lineWidth: 3, stroke: '#fff' },
       appendPadding: [8, 0, 0, 0],
       label: {
@@ -136,6 +139,8 @@ export function PieColumnChart({
       yField: 'value',
       seriesField: 'type',
       isGroup: true,
+      // FIX: dùng colorMap (tính từ pieData) thay vì mảng màu tuần tự
+      // để cột và pie luôn đồng màu dù thứ tự category trong dotData khác pieData
       color: ({ type }: { type: string }) => colorMap[type] ?? COLOR.primary,
       columnStyle: ({ type }: { type: string }) => ({
         radius: [6, 6, 0, 0],
@@ -194,11 +199,17 @@ export function PieColumnChart({
       })
     })
 
-    // ResizeObserver để chart tự co giãn theo container
+    // FIX: dùng requestAnimationFrame để tránh ResizeObserver loop
+    // (G2Plot tự trigger resize → observer gọi changeSize → lại trigger → lặp vô hạn)
     const observers: ResizeObserver[] = []
     const observe = (el: HTMLDivElement, chart: G2Pie | G2Column) => {
+      let rafId: number | null = null
       const ro = new ResizeObserver(() => {
-        try { chart.changeSize(el.offsetWidth, el.offsetHeight) } catch (_) {}
+        if (rafId !== null) return
+        rafId = requestAnimationFrame(() => {
+          rafId = null
+          try { chart.changeSize(el.offsetWidth, el.offsetHeight) } catch (_) {}
+        })
       })
       ro.observe(el)
       observers.push(ro)
