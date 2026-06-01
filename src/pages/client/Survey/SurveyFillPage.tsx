@@ -51,7 +51,7 @@ export default function SurveyFillPage() {
     case 'loading':    return <LoadingScreen />
     case 'error':      return <ErrorScreen />
     case 'not-active': return <NotActiveScreen batch={batch} />
-    case 'done':       return <DoneScreen />
+    case 'done':       return <DoneScreen batch={batch} />
     case 'identify':   return batch ? <IdentifyStep batch={batch} onContinue={handleIdentify} /> : null
     case 'fill':
       return batch?.formSnapshot
