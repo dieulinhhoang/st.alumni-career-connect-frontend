@@ -14,14 +14,14 @@ import type {
 // khi formId thay đổi, gọi getStatisticalQuestions, sau đó tự động chọn question đầu tiên (nếu có) và gọi getFormStatisticsDetail
 // khi questionId thay đổi, gọi getFormStatisticsDetail
 export function useFormStatisticsDetail(initialFormId?: number) {
-    // ds fomr
+  // ds form
   const [forms, setForms] = useState<FormOption[]>([])
-  // form đang chọn
+  // danh sách câu hỏi của form đang chọn
   const [questions, setQuestions] = useState<StatisticalQuestion[]>([])
   // data render
   const [detail, setDetail] = useState<FormStatisticsDetail | null>(null)
 
-  // id form đang chọn, giữ state đang chọn để khi ds form load xong sẽ tự động chọn form đầu tiên
+  // id form đang chọn
   const [formId, setFormId] = useState<number | undefined>(initialFormId)
   const [questionId, setQuestionId] = useState<string | undefined>()
 
@@ -54,11 +54,16 @@ export function useFormStatisticsDetail(initialFormId?: number) {
     if (!formId) {
       setQuestions([])
       setQuestionId(undefined)
+      setDetail(null)
       return
     }
 
     let mounted = true
     setLoadingQuestions(true)
+    // Reset trước khi fetch mới để tránh hiển thị dữ liệu cũ trong lúc đang load
+    setQuestions([])
+    setQuestionId(undefined)
+    setDetail(null)
 
     getStatisticalQuestions(formId)
       .then((res) => {
