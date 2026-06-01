@@ -72,12 +72,11 @@ export function DetailTable({ detail }: Props) {
     <div className="stats-table-card">
       <div className="stats-table-head">
         <span className="stats-table-head__title">Bảng thống kê chi tiết</span>
-        {/* <span className="stats-table-head__count">{data.length} nhóm</span> */}
       </div>
 
       <CustomTable
         className="stats-detail-table"
-        rowKey="label"
+        rowKey={(_: unknown, index?: number) => String(index ?? 0)}
         columns={columns}
         data={{
           data: [...data].sort((a, b) => b.value - a.value),
