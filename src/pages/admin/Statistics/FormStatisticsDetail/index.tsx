@@ -17,7 +17,7 @@ export default function FormStatisticsDetailPage() {
     setFormId,
     setQuestionId,
     loading,
-  } = useFormStatisticsDetail(1)
+  } = useFormStatisticsDetail()
 
   const pieData =
     detail?.data?.map((item) => ({
