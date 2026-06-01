@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getFormById, createForm, updateForm } from '../api'
-import type { Form, Question, Section } from '../types'
+import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../types'
+import type { LogicRule } from '../../../pages/admin/Form/builder/BuilderView'
 
 export type BuilderMode = 'create' | 'edit'
 
@@ -24,6 +25,15 @@ const _defaultSection = (): Section => ({
   order: 0,
 })
 
+export interface SaveExtras {
+  header?: SurveyHeader
+  footer?: SurveyFooter
+  logoUrl?: string
+  logoSize?: number
+  logicRules?: LogicRule[]
+  descriptionParagraphs?: string[]
+}
+
 export interface UseFormBuilderReturn {
   name: string
   desc: string
@@ -41,7 +51,7 @@ export interface UseFormBuilderReturn {
   setSections: React.Dispatch<React.SetStateAction<Section[]>>
 
   // addQuestion trả về id của câu hỏi mới
-addQuestion: (afterId?: string, patch?: Partial<Question>) => string
+  addQuestion: (afterId?: string, patch?: Partial<Question>) => string
   duplicateQuestion: (id: string) => void
   removeQuestion: (id: string) => void
   updateQuestion: (id: string, patch: Partial<Question>) => void
@@ -61,7 +71,7 @@ addQuestion: (afterId?: string, patch?: Partial<Question>) => string
   saving: boolean
   saved: boolean
   saveError: string
-  handleSave: () => Promise<Form | null>
+  handleSave: (extras?: SaveExtras) => Promise<Form | null>
 }
 
 export function useFormBuilder(
@@ -114,60 +124,56 @@ export function useFormBuilder(
 
   //  Question helpers 
 
- const addQuestion = useCallback((afterId?: string, patch?: Partial<Question>): string => {
-  const newId = _genId()
+  const addQuestion = useCallback((afterId?: string, patch?: Partial<Question>): string => {
+    const newId = _genId()
 
-  setQs(qs => {
-    const afterQ = afterId ? qs.find(q => q.id === afterId) : null
-    const sid = afterQ?.sectionId || activeSectionId || sections[0]?.id || ''
+    setQs(qs => {
+      const afterQ = afterId ? qs.find(q => q.id === afterId) : null
+      const sid = afterQ?.sectionId || activeSectionId || sections[0]?.id || ''
 
-    const q: Question = {
-      ..._newQuestion(sid),
-      ...patch,
-      id: newId,
-      sectionId: patch?.sectionId ?? sid,
-    }
+      const q: Question = {
+        ..._newQuestion(sid),
+        ...patch,
+        id: newId,
+        sectionId: patch?.sectionId ?? sid,
+      }
 
-    let next: Question[]
+      let next: Question[]
 
-    if (afterId) {
-      const idx = qs.findIndex(q => q.id === afterId)
-
-      if (idx === -1) {
-        next = [...qs, q]
+      if (afterId) {
+        const idx = qs.findIndex(q => q.id === afterId)
+        if (idx === -1) {
+          next = [...qs, q]
+        } else {
+          next = [
+            ...qs.slice(0, idx + 1),
+            q,
+            ...qs.slice(idx + 1),
+          ]
+        }
       } else {
+        let lastIdx = -1
+        qs.forEach((cur, i) => {
+          if (cur.sectionId === sid) lastIdx = i
+        })
+        const insertAt = lastIdx >= 0 ? lastIdx + 1 : qs.length
         next = [
-          ...qs.slice(0, idx + 1),
+          ...qs.slice(0, insertAt),
           q,
-          ...qs.slice(idx + 1),
+          ...qs.slice(insertAt),
         ]
       }
-    } else {
-      let lastIdx = -1
 
-      qs.forEach((cur, i) => {
-        if (cur.sectionId === sid) lastIdx = i
-      })
+      return next.map((item, index) => ({
+        ...item,
+        order: index,
+      }))
+    })
 
-      const insertAt = lastIdx >= 0 ? lastIdx + 1 : qs.length
+    setActiveId(newId)
+    return newId
+  }, [activeSectionId, sections])
 
-      next = [
-        ...qs.slice(0, insertAt),
-        q,
-        ...qs.slice(insertAt),
-      ]
-    }
-
-    return next.map((item, index) => ({
-      ...item,
-      order: index,
-    }))
-  })
-
-  setActiveId(newId)
-
-  return newId
-}, [activeSectionId, sections])
   const duplicateQuestion = useCallback((id: string) => {
     setQs(qs => {
       const idx = qs.findIndex(q => q.id === id)
@@ -221,76 +227,59 @@ export function useFormBuilder(
 
   //  Section helpers 
 
- const addSectionAfter = useCallback((afterQuestionId: string) => {
-  const afterIdx = questions.findIndex(q => q.id === afterQuestionId)
-  if (afterIdx === -1) return
+  const addSectionAfter = useCallback((afterQuestionId: string) => {
+    const afterIdx = questions.findIndex(q => q.id === afterQuestionId)
+    if (afterIdx === -1) return
 
-  const currentSectionId = questions[afterIdx].sectionId
-  const newSectionId = _genId()
+    const currentSectionId = questions[afterIdx].sectionId
+    const newSectionId = _genId()
 
-  let firstQuestionInNewSectionId: string | null = null
-  let movedCount = 0
+    let firstQuestionInNewSectionId: string | null = null
+    let movedCount = 0
 
-  const updatedQs = questions.map((q, i) => {
-    if (i > afterIdx && q.sectionId === currentSectionId) {
-      movedCount += 1
-
-      if (!firstQuestionInNewSectionId) {
-        firstQuestionInNewSectionId = q.id
+    const updatedQs = questions.map((q, i) => {
+      if (i > afterIdx && q.sectionId === currentSectionId) {
+        movedCount += 1
+        if (!firstQuestionInNewSectionId) {
+          firstQuestionInNewSectionId = q.id
+        }
+        return { ...q, sectionId: newSectionId }
       }
+      return q
+    })
 
-      return {
-        ...q,
-        sectionId: newSectionId,
-      }
+    let finalQs = updatedQs
+    if (movedCount === 0) {
+      const newQuestion = _newQuestion(newSectionId)
+      firstQuestionInNewSectionId = newQuestion.id
+      finalQs = [
+        ...updatedQs.slice(0, afterIdx + 1),
+        newQuestion,
+        ...updatedQs.slice(afterIdx + 1),
+      ]
     }
 
-    return q
-  })
+    const currentSectionIndex = sections.findIndex(s => s.id === currentSectionId)
+    const insertAt = currentSectionIndex >= 0 ? currentSectionIndex + 1 : sections.length
 
-  let finalQs = updatedQs
+    const newSection: Section = {
+      id: newSectionId,
+      title: `Phần ${sections.length + 1}`,
+      order: insertAt,
+    }
 
-  if (movedCount === 0) {
-    const newQuestion = _newQuestion(newSectionId)
-    firstQuestionInNewSectionId = newQuestion.id
+    setQs(finalQs.map((q, index) => ({ ...q, order: index })))
+    setSections(
+      [
+        ...sections.slice(0, insertAt),
+        newSection,
+        ...sections.slice(insertAt),
+      ].map((s, index) => ({ ...s, order: index }))
+    )
+    setActiveSectionId(newSectionId)
+    setActiveId(firstQuestionInNewSectionId)
+  }, [questions, sections])
 
-    finalQs = [
-      ...updatedQs.slice(0, afterIdx + 1),
-      newQuestion,
-      ...updatedQs.slice(afterIdx + 1),
-    ]
-  }
-
-  const currentSectionIndex = sections.findIndex(s => s.id === currentSectionId)
-  const insertAt = currentSectionIndex >= 0 ? currentSectionIndex + 1 : sections.length
-
-  const newSection: Section = {
-    id: newSectionId,
-    title: `Phần ${sections.length + 1}`,
-    order: insertAt,
-  }
-
-  setQs(
-    finalQs.map((q, index) => ({
-      ...q,
-      order: index,
-    }))
-  )
-
-  setSections(
-    [
-      ...sections.slice(0, insertAt),
-      newSection,
-      ...sections.slice(insertAt),
-    ].map((s, index) => ({
-      ...s,
-      order: index,
-    }))
-  )
-
-  setActiveSectionId(newSectionId)
-  setActiveId(firstQuestionInNewSectionId)
-}, [questions, sections])
   const deleteSection = useCallback((id: string) => {
     setSections(prev => {
       if (prev.length <= 1) return prev
@@ -325,15 +314,21 @@ export function useFormBuilder(
     }))
   }, [])
 
-  //  Save 
+  //  Save (nhận extras từ BuilderView: header, footer, logo, logicRules, ...) 
 
-  const handleSave = useCallback(async (): Promise<Form | null> => {
+  const handleSave = useCallback(async (extras?: SaveExtras): Promise<Form | null> => {
     if (!name.trim()) return null
     setSaving(true)
     setSaveError('')
     setSaved(false)
     try {
-      const payload = { name, description: desc, questions, sections }
+      const payload = {
+        name,
+        description: desc,
+        questions,
+        sections,
+        ...(extras ?? {}),
+      }
       const result: Form = mode === 'create'
         ? await createForm(payload)
         : await updateForm(formId!, payload)
