@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Typography } from "antd";
+import { Button, Spin, Empty, Typography } from "antd";
 import { TableOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
@@ -31,9 +31,11 @@ export function ChartSection({ state, setField }: Props) {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<StatisticalQuestion[]>([]);
   const [chart, setChart] = useState<ChartResult | null>(null);
+  const [chartLoading, setChartLoading] = useState(false);
 
   const questionId = chartMode;
 
+  // Load danh sách câu hỏi một lần khi mount
   useEffect(() => {
     let cancelled = false;
     getStatisticalQuestions().then(list => {
@@ -46,15 +48,22 @@ export function ChartSection({ state, setField }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Tải lại chart khi questionId / khoa / nganh thay đổi
   useEffect(() => {
     let cancelled = false;
     if (!questionId) {
       setChart(null);
       return;
     }
-    getChartByQuestionId(questionId).then(res => {
+    setChartLoading(true);
+    getChartByQuestionId(questionId, { khoa, nganh }).then(res => {
       if (cancelled) return;
       setChart(res);
+      setChartLoading(false);
+    }).catch(() => {
+      if (cancelled) return;
+      setChart(null);
+      setChartLoading(false);
     });
     return () => { cancelled = true; };
   }, [questionId, khoa, nganh]);
@@ -132,14 +141,37 @@ export function ChartSection({ state, setField }: Props) {
       />
 
       {/* Charts */}
-      <div style={{ padding: "16px 20px 20px" }}>
-        <PieColumnChart
-          pieData={pieData}
-          dotData={chart?.dotData}
-          latestKey={latestKey}
-          pieLabel={pieLabel}
-          columnLabel={columnLabel}
-        />
+      <div style={{ padding: "16px 20px 20px", minHeight: 320, position: "relative" }}>
+        {chartLoading ? (
+          <div style={{
+            minHeight: 280,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <Spin tip="Đang tải dữ liệu…" />
+          </div>
+        ) : pieData.length === 0 ? (
+          <div style={{
+            minHeight: 280,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <Empty
+              description={<Text style={{ color: COLOR.textMuted }}>Không có dữ liệu cho bộ lọc này</Text>}
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          </div>
+        ) : (
+          <PieColumnChart
+            pieData={pieData}
+            dotData={chart?.dotData}
+            latestKey={latestKey}
+            pieLabel={pieLabel}
+            columnLabel={columnLabel}
+          />
+        )}
       </div>
     </div>
   );

@@ -6,13 +6,13 @@ import { COLOR } from '../../pages/admin/DashBoard/theme'
 const { Text } = Typography
 
 export const CHART_COLORS = [
-  '#0dac64', // VNUA green đậm [web:34]
-  '#edf512', // green nhạt hơn (tự pha)
-  '#f59e0b', // vàng cam “quả chín” [web:34]
-  '#457be6', // green FITA hay dùng ở site mới [web:36]
-  '#e9e90e', // cyan nhạt bổ trợ
-  '#6366f1', // indigo (dùng phụ)
-  '#f97316', // cam đậm hơn
+  '#0dac64', // VNUA green đậm
+  '#f59e0b', // vàng cam
+  '#457be6', // blue
+  '#e9480e', // cam đậm
+  '#a855f7', // purple
+  '#06b6d4', // cyan
+  '#f43f5e', // rose
 ]
 
 export interface PieColumnChartData {
@@ -23,21 +23,11 @@ export interface PieColumnChartData {
 export interface PieColumnChartProps {
   pieData: PieColumnChartData[]
   dotData?: Record<string, PieColumnChartData[]>
-  /**
-   * Label shown in the donut centre and as the pie sub-label.
-   * In the dashboard this is the question label (e.g. "Tình trạng việc làm").
-   * In the statistics page this is the question title.
-   */
+  /** Label hiển thị giữa donut và sub-label của pie */
   latestKey: string
-  /**
-   * Label shown above the pie chart (left column header).
-   * Defaults to "Latest batch".
-   */
+  /** Label tiêu đề phía trên biểu đồ tròn */
   pieLabel?: string
-  /**
-   * Label shown above the column chart (right column header).
-   * Defaults to "Count by survey batch".
-   */
+  /** Label tiêu đề phía trên biểu đồ cột */
   columnLabel?: string
 }
 
@@ -45,8 +35,8 @@ export function PieColumnChart({
   pieData,
   dotData,
   latestKey,
-  pieLabel = 'Latest batch',
-  columnLabel = 'Count by survey batch',
+  pieLabel = 'Đợt mới nhất',
+  columnLabel = 'Số lượng theo đợt khảo sát',
 }: PieColumnChartProps) {
   const pieRef = useRef<HTMLDivElement>(null)
   const colRef = useRef<HTMLDivElement>(null)
@@ -64,14 +54,14 @@ export function PieColumnChart({
 
   useEffect(() => {
     if (!pieRef.current || !colRef.current) return
+    if (!pieData || pieData.length === 0) return
 
+    // Destroy trước khi render lại
     try { pieInst.current?.destroy() } catch (_) {}
     try { colInst.current?.destroy() } catch (_) {}
     pieInst.current = null
     colInst.current = null
     setSelectedSlice(null)
-
-    if (!pieData || pieData.length === 0) return
 
     const colorMap = Object.fromEntries(
       pieData.map((d, i) => [d.name, CHART_COLORS[i % CHART_COLORS.length]]),
@@ -82,24 +72,26 @@ export function PieColumnChart({
       items.map(({ name, value }) => ({ dot, type: name, value })),
     )
 
+    // ---- Pie chart ----
     const pie = new G2Pie(pieRef.current, {
       data: pieData,
       angleField: 'value',
       colorField: 'name',
       radius: 0.92,
       innerRadius: 0.6,
-      color: CHART_COLORS,
+      color: pieData.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
       pieStyle: { lineWidth: 3, stroke: '#fff' },
+      appendPadding: [8, 0, 0, 0],
       label: {
         type: 'outer',
         offset: 12,
-        content: ({ percent }: any) => `${(percent * 100).toFixed(0)}%`,
+        content: ({ percent }: { percent: number }) => `${(percent * 100).toFixed(0)}%`,
         style: { fontSize: 12, fontWeight: 700, fill: '#374151' },
       },
       legend: {
         position: 'bottom',
         flipPage: false,
-        itemName: { style: { fontSize: 10 } },
+        itemName: { style: { fontSize: 11 } },
       },
       statistic: {
         title: {
@@ -110,7 +102,7 @@ export function PieColumnChart({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            maxWidth: '120px',
+            maxWidth: '110px',
           },
           content: latestKey,
         },
@@ -118,23 +110,24 @@ export function PieColumnChart({
           style: {
             fontWeight: 900,
             color: COLOR.textDark,
-            fontSize: 22,
+            fontSize: 20,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            maxWidth: '120px',
+            maxWidth: '110px',
           },
         },
       },
       interactions: [{ type: 'element-active' }, { type: 'pie-statistic-active' }],
       tooltip: {
-        formatter: (d: any) => ({ name: d.name, value: `${d.value} SV` }),
+        formatter: (d: { name: string; value: number }) => ({ name: d.name, value: `${d.value} SV` }),
       },
     })
 
     pie.render()
     pieInst.current = pie
 
+    // ---- Column chart ----
     const maxVal = Math.max(...colData.map((d) => d.value), 1)
 
     const col = new G2Column(colRef.current, {
@@ -143,10 +136,10 @@ export function PieColumnChart({
       yField: 'value',
       seriesField: 'type',
       isGroup: true,
-      color: ({ type }: any) => colorMap[type] ?? COLOR.primary,
-      columnStyle: ({ type }: any) => ({
+      color: ({ type }: { type: string }) => colorMap[type] ?? COLOR.primary,
+      columnStyle: ({ type }: { type: string }) => ({
         radius: [6, 6, 0, 0],
-        fillOpacity: 0.9,
+        fillOpacity: 0.92,
         shadowColor: (colorMap[type] ?? COLOR.primary) + '44',
         shadowBlur: 4,
         shadowOffsetY: 2,
@@ -177,10 +170,10 @@ export function PieColumnChart({
       label: {
         position: 'top',
         style: { fontSize: 11, fill: '#374151', fontWeight: 600 },
-        formatter: (d: any) => (d.value > 0 ? `${d.value} SV` : ''),
+        formatter: (d: { value: number }) => (d.value > 0 ? `${d.value} SV` : ''),
       },
       tooltip: {
-        formatter: (d: any) => ({ name: d.type, value: `${d.value} SV` }),
+        formatter: (d: { type: string; value: number }) => ({ name: d.type, value: `${d.value} SV` }),
       },
       interactions: [{ type: 'element-highlight' }],
     })
@@ -188,8 +181,9 @@ export function PieColumnChart({
     col.render()
     colInst.current = col
 
-    pie.on('element:click', (evt: any) => {
-      const name: string = evt?.data?.data?.name
+    // Khi click vào slice pie → lọc cột theo loại đó
+    pie.on('element:click', (evt: { data?: { data?: { name?: string } } }) => {
+      const name = evt?.data?.data?.name
       if (!name) return
       setSelectedSlice((prev) => {
         const next = prev === name ? null : name
@@ -200,7 +194,20 @@ export function PieColumnChart({
       })
     })
 
+    // ResizeObserver để chart tự co giãn theo container
+    const observers: ResizeObserver[] = []
+    const observe = (el: HTMLDivElement, chart: G2Pie | G2Column) => {
+      const ro = new ResizeObserver(() => {
+        try { chart.changeSize(el.offsetWidth, el.offsetHeight) } catch (_) {}
+      })
+      ro.observe(el)
+      observers.push(ro)
+    }
+    observe(pieRef.current, pie as unknown as G2Pie)
+    observe(colRef.current, col as unknown as G2Pie)
+
     return () => {
+      observers.forEach(ro => ro.disconnect())
       try { pieInst.current?.destroy() } catch (_) {}
       try { colInst.current?.destroy() } catch (_) {}
       pieInst.current = null
@@ -242,11 +249,12 @@ export function PieColumnChart({
               }}
             />
             <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
-              Bộ lọc : <strong>{selectedSlice}</strong>
+              Bộ lọc: <strong>{selectedSlice}</strong>
             </Text>
           </div>
           <button
             onClick={handleClearSlice}
+            aria-label="Xóa bộ lọc"
             style={{
               background: 'none',
               border: 'none',
@@ -258,7 +266,7 @@ export function PieColumnChart({
               borderRadius: 6,
             }}
           >
-            ✕ 
+            ✕
           </button>
         </div>
       )}
