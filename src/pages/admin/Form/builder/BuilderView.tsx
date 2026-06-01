@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button } from 'antd'
 import { ArrowLeftOutlined, SaveOutlined, CheckOutlined, AppstoreOutlined } from '@ant-design/icons'
 import { useFormBuilder } from '../../../../feature/form/hooks/useFormBuilder'
@@ -18,7 +18,7 @@ const DEFAULT_FOOTER: SurveyFooter = {
   secondaryText: 'Kính chúc Anh/Chị sức khỏe và thành công!',
 }
 
-// Fixed accent color  
+// Fixed accent color
 const ACCENT = '#279f2d'
 
 export interface LogicRule {
@@ -48,9 +48,9 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addSectionAfter, deleteSection,
     addOption, updateOption, removeOption,
     saving, saved, handleSave,
-  } = useFormBuilder(mode, form?.id)
+  } = useFormBuilder(mode, form?.id ?? undefined)
 
-  //  State ngoài hook 
+  // State ngoài hook
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
   const [footer,  setFooter]  = useState<SurveyFooter>((form as any)?.footer  ?? DEFAULT_FOOTER)
   const [logoUrl, setLogoUrl] = useState<string>((form as any)?.logoUrl ?? '')
@@ -68,12 +68,12 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [])
   const isMobile = winWidth < 768
 
-  //  Rename section 
+  // Rename section
   const renameSection = useCallback((id: string, title: string) => {
-    setSections(prev => prev.map(s => s.id === id ? { ...s, title } : s))
+    setSections(prev => prev.map((s: Section) => s.id === id ? { ...s, title } : s))
   }, [setSections])
 
-  //  Reorder câu hỏi 
+  // Reorder câu hỏi
   const reorderQuestion = useCallback((dragId: string, overId: string) => {
     const fromIdx = questions.findIndex(q => q.id === dragId)
     const toIdx   = questions.findIndex(q => q.id === overId)
@@ -83,55 +83,57 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     for (let i = 0; i < steps; i++) moveQuestion(dragId, dir)
   }, [questions, moveQuestion])
 
-  //  Drop từ bank (HTML drag API) 
+  // Drop từ bank (HTML drag API)
   const handleDrop = useCallback((e: React.DragEvent, afterId?: string) => {
     e.preventDefault()
     const raw = e.dataTransfer.getData('application/x-bank-question')
     if (!raw) return
     try {
       const q = JSON.parse(raw)
-      addQuestion(afterId)
-      setTimeout(() => {
-        setActiveId(prev => {
-          if (prev) updateQuestion(prev, {
-            type: q.type,
-            title: q.title ?? '',
-            options: q.options ?? [],
-          })
-          return prev
-        })
-      }, 0)
-    } catch {}
-  }, [addQuestion, updateQuestion, setActiveId])
-
-  //  Thêm từ bank qua nút + 
-  const handleDropFromBank = useCallback((q: any) => {
-    addQuestion()
-    setTimeout(() => {
-      setActiveId(prev => {
-        if (prev) updateQuestion(prev, {
-          type: q.type,
-          title: q.title ?? '',
-          options: q.options ?? [],
-        })
-        return prev
+      const newId = addQuestion(afterId)
+      updateQuestion(newId, {
+        type: q.type,
+        title: q.title ?? '',
+        options: q.options ?? [],
       })
-    }, 0)
-  }, [addQuestion, updateQuestion, setActiveId])
+    } catch {}
+  }, [addQuestion, updateQuestion])
 
-  //  Save 
+  // Thêm từ bank qua nút +
+  const handleDropFromBank = useCallback((q: any) => {
+    const newId = addQuestion()
+    updateQuestion(newId, {
+      type: q.type,
+      title: q.title ?? '',
+      options: q.options ?? [],
+    })
+  }, [addQuestion, updateQuestion])
+
+  // Save — truyền toàn bộ extras vào handleSave
+  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs })
+  useEffect(() => {
+    extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs }
+  }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+
   const handleSaveAll = useCallback(async () => {
-    const result = await handleSave()
+    const result = await handleSave(extrasRef.current)
     if (result) onSave(result)
   }, [handleSave, onSave])
 
+  // Auto-save debounce (thay thế beforeunload)
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
-    const handler = () => handleSaveAll()
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [handleSaveAll])
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      handleSaveAll()
+    }, 3000)
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs])
 
-  //  Mobile drawer 
+  // Mobile drawer
   const RightDrawer = () => {
     if (!isMobile || !rightOpen) return null
     return (
@@ -161,7 +163,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', background: '#fff' }}>
 
-      {/*  Topbar  */}
+      {/* Topbar */}
       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e8eaed', padding: '0 12px', height: 48, flexShrink: 0, gap: 8, background: '#fff' }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} />
 
@@ -187,7 +189,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         </Button>
       </div>
 
-      {/*  Main layout  */}
+      {/* Main layout */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
 
         {/* Center canvas */}
@@ -242,7 +244,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         )}
       </div>
 
-      {/*  Mobile drawer + bottom bar  */}
+      {/* Mobile drawer + bottom bar */}
       <RightDrawer />
 
       {isMobile && (
