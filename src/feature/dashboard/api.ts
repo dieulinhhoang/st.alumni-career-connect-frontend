@@ -132,7 +132,7 @@ export async function fetchDashboardChartData(
 }
 
 export async function fetchKhoaList(): Promise<KhoaItem[]> {
-  const res = await api.get("/khoa");
+  const res = await api.get("/faculty"); // fixed: was /khoa (route không tồn tại)
   return res.data as KhoaItem[];
 }
 
