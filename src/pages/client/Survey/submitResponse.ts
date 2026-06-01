@@ -1,15 +1,26 @@
-// TODO: replace with real fetch when backend is ready
+import api from '../../../libs/api';
+
+export interface SubmitIdentity {
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string;
+}
+
+/**
+ * Gửi câu trả lời khảo sát lên backend để lưu vào DB.
+ * POST /alumni/batches/:batchId/responses
+ */
 export async function submitResponse(
   batchId: number,
-  identity: { studentId: string; studentName: string; studentEmail: string },
+  identity: SubmitIdentity,
   answers: Record<string, any>,
 ): Promise<void> {
-  await new Promise(r => setTimeout(r, 600))
-  console.log('[submitResponse]', { batchId, identity, answers })
-  // Production:
-  // await fetch(`/api/batches/${batchId}/responses`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ ...identity, answers }),
-  // })
+  await api.post(`/alumni/batches/${batchId}/responses`, {
+    studentId: identity.studentId,
+    studentName: identity.studentName,
+    studentEmail: identity.studentEmail,
+    studentPhone: identity.studentPhone ?? undefined,
+    answers,
+  });
 }
