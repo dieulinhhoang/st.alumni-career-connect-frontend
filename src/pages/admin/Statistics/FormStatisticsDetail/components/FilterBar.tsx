@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Select } from 'antd'
+import { Select, Button } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
 import type { FormOption, StatisticalQuestion } from '../../../../../feature/statistics/types'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
   questionId?: string
   onChangeForm: (value?: number) => void
   onChangeQuestion: (value?: string) => void
+  onReset?: () => void
 }
 
 export function FilterBar({
@@ -18,6 +20,7 @@ export function FilterBar({
   questionId,
   onChangeForm,
   onChangeQuestion,
+  onReset,
 }: Props) {
   const safeForms = Array.isArray(forms) ? forms : []
   const safeQuestions = Array.isArray(questions) ? questions : []
@@ -78,6 +81,16 @@ export function FilterBar({
         style={{ width: 260 }}
         labelRender={() => selectedQuestion?.shortLabel || ''}
       />
+
+      {onReset && (
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={onReset}
+          type="default"
+        >
+          Đặt lại
+        </Button>
+      )}
     </div>
   )
 }
