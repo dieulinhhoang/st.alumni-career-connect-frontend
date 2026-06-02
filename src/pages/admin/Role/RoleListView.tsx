@@ -16,7 +16,9 @@ import {
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
+  LockOutlined,
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import FilterContainer from '../../../components/common/FilterContainer'
 
@@ -60,6 +62,8 @@ const RoleListView: React.FC<RoleListViewProps> = ({
   onDelete,
   onTableChange,
 }) => {
+  const navigate = useNavigate()
+
   const columns: ColumnsType<IRole> = [
     {
       title: 'STT',
@@ -96,7 +100,7 @@ const RoleListView: React.FC<RoleListViewProps> = ({
     },
     {
       title: 'Hành động',
-      width: 150,
+      width: 180,
       align: 'center',
       render: (_: any, record: IRole) => (
         <Space size={14}>
@@ -111,6 +115,13 @@ const RoleListView: React.FC<RoleListViewProps> = ({
             <EditOutlined
               onClick={() => onEdit(record)}
               style={{ fontSize: 18, cursor: 'pointer', color: '#1677ff' }}
+            />
+          </Tooltip>
+
+          <Tooltip title="Phân quyền">
+            <LockOutlined
+              onClick={() => navigate(`/admin/roles/${record.id}/permissions`)}
+              style={{ fontSize: 18, cursor: 'pointer', color: '#7c3aed' }}
             />
           </Tooltip>
 

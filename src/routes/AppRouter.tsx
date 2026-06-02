@@ -11,6 +11,7 @@ import GraduationList from '../pages/admin/Graduation/index';
 import StudentDetail from '../pages/admin/Graduation/Studentdetail';
 import UserManagement from '../pages/admin/User/UserManagement';
 import RoleManagement from '../pages/admin/Role/RoleManagement';
+import RolePermissionMatrix from '../pages/admin/Role/RolePermissionMatrix';
 import ResourceManagement from '../pages/admin/Resources/ResourceManagement';
 import { ResponseDetail } from '../pages/admin/Alumni/ResponseDetail';
 import { BatchResults } from '../pages/admin/Alumni/BatchResults';
@@ -114,15 +115,7 @@ const routes = [
             element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
           },
 
-          // // Users
-          // {
-          //   path: '/admin/studentlist',
-          //   element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
-          // },
-          // {
-          //   path: '/admin/stafflist',
-          //   element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
-          // },
+          // Users
           {
             path: '/admin/users',
             element: <Suspense fallback={<Loader />}><UserManagement /></Suspense>
@@ -130,6 +123,11 @@ const routes = [
           {
             path: '/admin/roles',
             element: <Suspense fallback={<Loader />}><RoleManagement /></Suspense>
+          },
+          // RBAC Permission Matrix
+          {
+            path: '/admin/roles/:id/permissions',
+            element: <Suspense fallback={<Loader />}><RolePermissionMatrix /></Suspense>
           },
           {
             path: '/admin/resources',
