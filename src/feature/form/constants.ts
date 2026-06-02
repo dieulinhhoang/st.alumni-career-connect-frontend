@@ -1,4 +1,4 @@
-import type { Theme, Form, SurveyPeriod } from "./types";
+import type { Theme, Form } from "./types";
 import type { QuestionTypeOption, FontOption, RadiusOption } from "./types";
 
 //  QUESTION TYPES
@@ -56,7 +56,7 @@ export const SUGGESTIONS = [
   "Khảo sát nhu cầu học bổng sinh viên khó khăn",
 ];
 
-//  MOCK FORMS
+//  MOCK DATA
 export const MOCK_FORMS: Form[] = [
   {
     id: 1,
@@ -175,8 +175,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "workarea",
       },
       {
-        id: "q14", type: "radio",
-        title: "Sau tốt nghiệp, Anh/Chị có việc làm từ khi nào?",
+        id: "q14", type: "radio", title: "Sau tốt nghiệp, Anh/Chị có việc làm từ khi nào?",
         required: false,
         options: [
           { id: "o1", label: "Dưới 3 tháng" },
@@ -362,114 +361,3 @@ export const MOCK_FORMS: Form[] = [
     ],
   },
 ];
-
-// ===================================================================
-//  MOCK SURVEY PERIODS (Đợt khảo sát)
-// ===================================================================
-export const MOCK_SURVEY_PERIODS: SurveyPeriod[] = [
-  {
-    id: 1,
-    title: "Đợt khảo sát việc làm – Khóa 66 (2024)",
-    description:
-      "Khảo sát tình hình việc làm của sinh viên tốt nghiệp khóa 66 năm học 2023–2024.",
-    formId: 1,
-    formName: "Khảo sát tình hình việc làm sinh viên tốt nghiệp 2024",
-    startDate: "2026-04-01",
-    endDate: "2026-05-31",
-    status: "closed",
-    targetAudience: "Sinh viên tốt nghiệp Khóa 66",
-    targetYear: 2024,
-    totalInvited: 1250,
-    totalResponses: 987,
-    createdBy: "admin@vnua.edu.vn",
-    created_at: "2026-03-20",
-    updated_at: "2026-06-01",
-    publicUrl: "/survey/public/1",
-    requiresVerification: true,
-  },
-  {
-    id: 2,
-    title: "Đợt khảo sát việc làm – Khóa 65 (2023)",
-    description:
-      "Phục hồi khảo sát bổ sung cho sinh viên khóa 65 chưa tham gia đợt 1.",
-    formId: 1,
-    formName: "Khảo sát tình hình việc làm sinh viên tốt nghiệp 2024",
-    startDate: "2026-06-01",
-    endDate: "2026-07-15",
-    status: "active",
-    targetAudience: "Sinh viên tốt nghiệp Khóa 65",
-    targetYear: 2023,
-    totalInvited: 1180,
-    totalResponses: 342,
-    createdBy: "admin@vnua.edu.vn",
-    created_at: "2026-05-15",
-    updated_at: "2026-06-02",
-    publicUrl: "/survey/public/2",
-    requiresVerification: true,
-  },
-  {
-    id: 3,
-    title: "Đợt đánh giá chương trình đào tạo Học kỳ I – 2025–2026",
-    description:
-      "Thu thập phản hồi của sinh viên hiện tại về chất lượng chương trình đào tạo.",
-    formId: 2,
-    formName: "Đánh giá chương trình đào tạo",
-    startDate: "2026-01-10",
-    endDate: "2026-02-28",
-    status: "closed",
-    targetAudience: "Sinh viên năm 3 và năm 4 toàn trường",
-    totalInvited: 3400,
-    totalResponses: 2185,
-    createdBy: "phongdaotao@vnua.edu.vn",
-    created_at: "2025-12-20",
-    updated_at: "2026-03-01",
-    publicUrl: "/survey/public/3",
-    requiresVerification: false,
-  },
-  {
-    id: 4,
-    title: "Khảo sát doanh nghiệp đối tác 2026",
-    description:
-      "Thu thập ý kiến từ các doanh nghiệp đã tiếp nhận sinh viên thực tập năm 2025.",
-    formId: 3,
-    formName: "Khảo sát doanh nghiệp đối tác",
-    startDate: "2026-07-01",
-    endDate: "2026-08-31",
-    status: "scheduled",
-    targetAudience: "Doanh nghiệp đối tác thực tập",
-    totalInvited: 85,
-    totalResponses: 0,
-    createdBy: "admin@vnua.edu.vn",
-    created_at: "2026-06-01",
-    publicUrl: "/survey/public/4",
-    requiresVerification: false,
-  },
-  {
-    id: 5,
-    title: "Đợt khảo sát việc làm – Khóa 67 (2025) – Bản nháp",
-    description:
-      "Chuẩn bị cho đợt khảo sát việc làm của sinh viên tốt nghiệp khóa 67.",
-    formId: 1,
-    formName: "Khảo sát tình hình việc làm sinh viên tốt nghiệp 2024",
-    startDate: "2026-10-01",
-    endDate: "2026-11-30",
-    status: "draft",
-    targetAudience: "Sinh viên tốt nghiệp Khóa 67",
-    targetYear: 2025,
-    totalInvited: 0,
-    totalResponses: 0,
-    createdBy: "admin@vnua.edu.vn",
-    created_at: "2026-06-02",
-    requiresVerification: true,
-  },
-];
-
-// ===================================================================
-//  SURVEY PERIOD STATUS CONFIG
-// ===================================================================
-export const SURVEY_PERIOD_STATUS_CONFIG = {
-  draft:     { label: "Nháp",          color: "default"  as const },
-  scheduled: { label: "Đã lên lịch",   color: "processing" as const },
-  active:    { label: "Đang diễn ra", color: "success"  as const },
-  closed:    { label: "Đã đóng",       color: "error"    as const },
-} satisfies Record<string, { label: string; color: 'default' | 'processing' | 'success' | 'error' | 'warning' }>;
