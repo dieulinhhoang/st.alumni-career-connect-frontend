@@ -3,7 +3,7 @@ import { Table } from 'antd'
 import type { TableProps, TablePaginationConfig } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
-// ─── Data format 1: dùng bởi BatchList ─────────────────────────────────────
+// Data format 1: dùng bởi BatchList
 // data = { data: T[], page: { total_elements, size, page } }
 interface PagedData<T> {
   data: T[]
@@ -14,7 +14,7 @@ interface PagedData<T> {
   }
 }
 
-// ─── Data format 2: dùng bởi UserListView / Enterprise ────────────────────
+// Data format 2: dùng bởi UserListView / Enterprise
 // data = { items: T[], total: number }
 interface ListData<T> {
   items: T[]
@@ -31,53 +31,79 @@ function resolveDataSource<T extends object>(data: TableData<T>): T[] {
   return []
 }
 
+const DEFAULT_PAGINATION: TablePaginationConfig = {
+  pageSize: 10,
+  showSizeChanger: true,
+  pageSizeOptions: ['10', '20', '50', '100'],
+  showTotal: (total: number, range: [number, number]) =>
+    `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
+  position: ['bottomCenter'],
+  locale: {
+    items_per_page: 'trang',
+  },
+}
+
+function mergePagination(
+  base: TablePaginationConfig,
+  override?: TablePaginationConfig | false,
+): TablePaginationConfig | false {
+  if (override === false) return false
+
+  if (!override) return base
+
+  return {
+    ...base,
+    ...override,
+    locale: {
+      ...base.locale,
+      ...override.locale,
+    },
+  }
+}
+
 function resolvePagination<T extends object>(
   data: TableData<T>,
   overridePagination?: TablePaginationConfig | false,
 ): TablePaginationConfig | false {
-  if (overridePagination !== undefined) return overridePagination
-
   if (!data || Array.isArray(data)) {
-    return {
-      pageSize: 10,
-      showSizeChanger: true,
-      pageSizeOptions: ['10', '20', '50', '100'],
-      showTotal: (total: number, range: [number, number]) =>
-        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
-      position: ['bottomCenter'],
-    }
+    return mergePagination(DEFAULT_PAGINATION, overridePagination)
   }
 
   if ('page' in data) {
-    return {
-      total: data.page.total_elements,
-      pageSize: data.page.size,
-      current: data.page.page + 1,
-      showSizeChanger: true,
-      pageSizeOptions: ['10', '20', '50', '100'],
-      showTotal: (total: number, range: [number, number]) =>
-        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
-      position: ['bottomCenter'],
-    }
+    return mergePagination(
+      {
+        ...DEFAULT_PAGINATION,
+        total: data.page.total_elements,
+        pageSize: data.page.size,
+        current: data.page.page + 1,
+      },
+      overridePagination,
+    )
   }
 
   if ('total' in data) {
-    return {
-      total: data.total,
-      pageSize: 10,
-      showSizeChanger: true,
-      pageSizeOptions: ['10', '20', '50', '100'],
-      showTotal: (total: number, range: [number, number]) =>
-        `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
-      position: ['bottomCenter'],
-    }
+    return mergePagination(
+      {
+        ...DEFAULT_PAGINATION,
+        total: data.total,
+      },
+      overridePagination,
+    )
   }
 
-  return { showSizeChanger: true, position: ['bottomCenter'] }
+  return mergePagination(
+    {
+      showSizeChanger: true,
+      position: ['bottomCenter'],
+      locale: {
+        items_per_page: 'trang',
+      },
+    },
+    overridePagination,
+  )
 }
 
-// ─── Props ─────────────────────────────────────────────────────────────────
-
+// Props
 interface CustomTableProps<T extends object>
   extends Omit<TableProps<T>, 'dataSource' | 'columns' | 'pagination'> {
   /** Dữ liệu bảng — hỗ trợ 3 format: PagedData, ListData, hoặc mảng T[] */
@@ -93,8 +119,7 @@ interface CustomTableProps<T extends object>
   striped?: boolean
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────
-
+// Component
 function CustomTable<T extends object>({
   data,
   columns,
@@ -118,7 +143,6 @@ function CustomTable<T extends object>({
         onChange={handleTableChange}
         tableLayout="auto"
         scroll={scroll ?? { x: 'max-content' }}
-        scrollToFirstRowOnChange
         pagination={resolvedPagination}
         rowClassName={
           striped
@@ -131,7 +155,6 @@ function CustomTable<T extends object>({
         style={{ minHeight, ...rest.style }}
       />
 
-      {/* Scoped styles — không cần file CSS riêng */}
       <style>{`
         .custom-table-striped .custom-table-row-even > td {
           background: #f9fafb !important;

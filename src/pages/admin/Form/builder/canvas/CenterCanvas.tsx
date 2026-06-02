@@ -258,9 +258,13 @@ export function CenterCanvas({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '16px 88px 48px 44px', // left 44 để chỗ cho drag handle
+          padding: '24px 24px 48px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
       >
+        <div style={{ width: '100%', maxWidth: 680 }}>
         {/* Header card */}
         <div
           style={{
@@ -274,7 +278,7 @@ export function CenterCanvas({
         >
           <PDFCanvas
             surveyTitle={surveyTitle}
-            descriptionParagraphs={descriptionParagraphs}
+            descriptionParagraphs={descriptionParagraphs ?? []}
             sections={sections}
             questions={[]}
             accent={accent}
@@ -468,6 +472,7 @@ export function CenterCanvas({
             </div>
           </div>
         )}
+        </div>{/* /maxWidth */}
       </div>
 
       {/*  Floating rail toolbar  */}

@@ -175,7 +175,7 @@ export function JobCard({
           </Tag>
           {job.deadline && (
             <span style={{ fontSize: 11, color: expired ? "#ef4444" : "#d97706", whiteSpace: "nowrap" }}>
-              {expired ? "✨" : "⏱"} Hạn: {formatDate(job.deadline)}
+              {expired } Hạn: {formatDate(job.deadline)}
             </span>
           )}
         </div>

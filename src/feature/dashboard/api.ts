@@ -132,8 +132,9 @@ export async function fetchDashboardChartData(
 }
 
 export async function fetchKhoaList(): Promise<KhoaItem[]> {
-  const res = await api.get("/faculty"); // fixed: was /khoa (route không tồn tại)
-  return res.data as KhoaItem[];
+  const res = await api.get("/dashboard/faculty-report-status");
+  console.log("API Request - fetchKhoaList, received data:", res.data); // Debug log to check the response data
+  return toArray<KhoaItem>(res.data);
 }
 
 /** Normalize response: API có thể trả về array thẳng hoặc paginated object { data/items: [] } */

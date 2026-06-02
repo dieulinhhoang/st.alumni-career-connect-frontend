@@ -361,7 +361,29 @@ export function EditableQuestionCard({
                 <button type="button" onClick={(e) => { e.stopPropagation(); onAddOption() }}
                   style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
                   + Thêm tùy chọn
-                </button> 
+                </button>
+                {/* "Khác" toggle — chỉ cho radio & checkbox */}
+                {(qType === 'radio' || qType === 'checkbox') && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
+                      {qType === 'checkbox'
+                        ? <Checkbox disabled />
+                        : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
+                    </div>
+                    {question.allowOther ? (
+                      <>
+                        <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1 }}>Khác (ô nhập sẽ hiện)</span>
+                        <button type="button" onClick={() => onUpdate({ allowOther: false })}
+                          style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => onUpdate({ allowOther: true })}
+                        style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0 }}>
+                        + Thêm tùy chọn "Khác"
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tooltip, Tag } from 'antd'
+import { Tooltip, Tag, Button, Input, Space, Typography, Flex } from 'antd'
 import {
   EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined,
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
@@ -9,27 +9,7 @@ import type { Form } from '../../../feature/form/types'
 import CustomTable from '../../../components/common/customTable'
 import { QRCodeModal } from './QRCodeModal'
 
-//  Design tokens 
-const T = {
-  accent:      '#0f766e',
-  accentHover: '#0d6b63',
-  accentSoft:  '#f0fdfa',
-  accentMid:   '#99f6e4',
-  text:        '#0d1117',
-  textSub:     '#536178',
-  muted:       '#94a3b8',
-  border:      '#e2e8f0',
-  borderFocus: '#0f766e',
-  surface:     '#ffffff',
-  bg:          '#f8fafc',
-  bgAlt:       '#f1f5f9',
-  danger:      '#dc2626',
-  dangerSoft:  '#fef2f2',
-  ai:          '#b45309',
-  aiSoft:      '#fffbeb',
-  aiBorder:    '#fcd34d',
-  shadow:      '0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-}
+const { Title, Text } = Typography
 
 const ACCENT_MAP: Record<string, { base: string; soft: string }> = {
   blue:   { base: '#2563eb', soft: '#eff6ff' },
@@ -56,40 +36,6 @@ interface ListViewProps {
   onDelete: (id: number) => void
 }
 
-const ActionBtn = ({
-  icon, label, onClick, danger = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-  danger?: boolean
-}) => (
-  <Tooltip title={label} mouseEnterDelay={0.4}>
-    <button
-      onClick={onClick}
-      aria-label={label}
-      style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: 30, height: 30, borderRadius: 7,
-        border: 'none', background: 'transparent',
-        color: danger ? T.danger : T.muted,
-        cursor: 'pointer', fontSize: 13,
-        transition: 'background 0.15s, color 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = danger ? T.dangerSoft : T.accentSoft
-        e.currentTarget.style.color      = danger ? T.danger     : T.accent
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'transparent'
-        e.currentTarget.style.color      = danger ? T.danger : T.muted
-      }}
-    >
-      {icon}
-    </button>
-  </Tooltip>
-)
-
 export default function ListView({
   forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete,
 }: ListViewProps) {
@@ -103,7 +49,6 @@ export default function ListView({
   const getSurveyUrl = (form: Form) =>
     `${window.location.origin}/survey/${form.id}`
 
-  //  Columns 
   const columns = [
     {
       title: 'STT',
@@ -111,9 +56,9 @@ export default function ListView({
       width: 48,
       align: 'center' as const,
       render: (_: any, __: Form, i: number) => (
-        <span style={{ fontSize: 12, color: T.muted, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
+        <Text type="secondary" style={{ fontSize: 12, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
           {String(i + 1).padStart(2, '0')}
-        </span>
+        </Text>
       ),
     },
     {
@@ -123,7 +68,7 @@ export default function ListView({
       render: (text: string, record: Form) => {
         const ac = getAccent(record.themeId as string)
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+          <Flex align="center" gap={11}>
             <div style={{
               width: 36, height: 36, borderRadius: 9, flexShrink: 0,
               background: ac.soft, color: ac.base,
@@ -134,17 +79,16 @@ export default function ListView({
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{
-                fontWeight: 600, fontSize: 14, color: T.text,
+                fontWeight: 600, fontSize: 14, color: '#0d1117',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                letterSpacing: '-0.15px',
               }}>
                 {text}
               </div>
-              <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 {record.description || 'Chưa có mô tả'}
-              </div>
+              </Text>
             </div>
-          </div>
+          </Flex>
         )
       },
     },
@@ -155,12 +99,7 @@ export default function ListView({
       width: 110,
       align: 'center' as const,
       render: (qs: any[]) => (
-        <Tag style={{
-          background: T.accentSoft, color: T.accent,
-          border: `1px solid ${T.accentMid}`,
-          borderRadius: 20, fontSize: 12, fontWeight: 600,
-          padding: '1px 10px', margin: 0,
-        }}>
+        <Tag color="teal" style={{ borderRadius: 20, fontWeight: 600, padding: '1px 10px', margin: 0 }}>
           {qs.length} câu
         </Tag>
       ),
@@ -172,9 +111,9 @@ export default function ListView({
       width: 120,
       align: 'center' as const,
       render: (date: string) => (
-        <span style={{ fontSize: 13, color: T.textSub, fontVariantNumeric: 'tabular-nums' }}>
+        <Text type="secondary" style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
           {fmt(date)}
-        </span>
+        </Text>
       ),
     },
     {
@@ -183,141 +122,86 @@ export default function ListView({
       width: 160,
       align: 'center' as const,
       render: (_: any, record: Form) => (
-        <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-          <ActionBtn icon={<EyeOutlined />}      label="Xem trước"   onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
-          <ActionBtn icon={<EditOutlined />}     label="Chỉnh sửa"   onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
-          <ActionBtn icon={<QrcodeOutlined />}   label="QR Code"     onClick={(e) => { e.stopPropagation(); setQrForm(record) }} />
-          <ActionBtn icon={<CopyOutlined />}     label="Nhân bản"    onClick={(e) => { e.stopPropagation(); onDup(record) }} />
-          <ActionBtn icon={<DeleteOutlined />}   label="Xóa"         onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} danger />
-        </div>
+        <Space size={2}>
+          <Tooltip title="Xem trước" mouseEnterDelay={0.4}>
+            <Button type="text" size="small" icon={<EyeOutlined />}
+              onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa" mouseEnterDelay={0.4}>
+            <Button type="text" size="small" icon={<EditOutlined />}
+              onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
+          </Tooltip>
+          <Tooltip title="QR Code" mouseEnterDelay={0.4}>
+            <Button type="text" size="small" icon={<QrcodeOutlined />}
+              onClick={(e) => { e.stopPropagation(); setQrForm(record) }} />
+          </Tooltip>
+          <Tooltip title="Nhân bản" mouseEnterDelay={0.4}>
+            <Button type="text" size="small" icon={<CopyOutlined />}
+              onClick={(e) => { e.stopPropagation(); onDup(record) }} />
+          </Tooltip>
+          <Tooltip title="Xóa" mouseEnterDelay={0.4}>
+            <Button type="text" size="small" danger icon={<DeleteOutlined />}
+              onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} />
+          </Tooltip>
+        </Space>
       ),
     },
   ]
 
   return (
-    <div style={{
-      padding: '28px 32px 48px',
-      minHeight: '100vh', fontFamily: "'Geist', 'DM Sans', sans-serif",
-    }}>
+    <div style={{ padding: '28px 32px 48px', minHeight: '100vh' }}>
 
-      {/*  Page header  */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 24,
-      }}>
+      {/* Page header */}
+      <Flex justify="space-between" align="flex-end" wrap="wrap" gap={12} style={{ marginBottom: 24 }}>
         <div>
-          <p style={{
-            margin: 0, fontSize: 11, fontWeight: 700,
-            letterSpacing: '0.09em', textTransform: 'uppercase',
-            color: T.accent, marginBottom: 5,
-          }}>
+          <Text style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#0f766e', display: 'block', marginBottom: 5 }}>
             Quản lý
-          </p>
-          <h2 style={{
-            margin: 0, fontSize: 22, fontWeight: 700,
-            color: T.text, letterSpacing: '-0.5px', lineHeight: 1,
-          }}>
+          </Text>
+          <Title level={3} style={{ margin: 0, letterSpacing: '-0.5px', lineHeight: 1 }}>
             Form khảo sát
-          </h2>
-          <p style={{ margin: '5px 0 0', fontSize: 13, color: T.muted }}>
+          </Title>
+          <Text type="secondary" style={{ fontSize: 13, marginTop: 5, display: 'block' }}>
             {forms.length} form · Tạo và quản lý bộ câu hỏi khảo sát
-          </p>
+          </Text>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* AI button */}
-          <button
+        <Space>
+          <Button
+            icon={<ThunderboltOutlined />}
             onClick={onAI}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              height: 36, padding: '0 14px', borderRadius: 8,
-              border: `1.5px solid ${T.aiBorder}`, background: T.aiSoft,
-              color: T.ai, fontWeight: 600, fontSize: 13,
-              cursor: 'pointer', transition: 'box-shadow 0.15s',
-              fontFamily: 'inherit', letterSpacing: '-0.1px',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 12px #f59e0b22' }}
-            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
+            style={{ borderColor: '#fcd34d', color: '#b45309', background: '#fffbeb' }}
           >
-            <ThunderboltOutlined style={{ fontSize: 13 }} />
             Tạo bằng AI
-          </button>
-
-          {/* New form button */}
-          <button
+          </Button>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={onCreate}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              height: 36, padding: '0 16px', borderRadius: 8,
-              border: 'none', background: T.accent,
-              color: '#fff',
-              background: '#1D9E75', borderColor: '#1D9E75', fontWeight: 600, fontSize: 13,
-              cursor: 'pointer', letterSpacing: '-0.1px',
-              fontFamily: 'inherit',
-            } as React.CSSProperties}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = T.accentHover
-              e.currentTarget.style.boxShadow  = '0 4px 16px rgba(15,118,110,0.36)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = T.accent
-              e.currentTarget.style.boxShadow  = '0 2px 8px rgba(15,118,110,0.28)'
-            }}
+            style={{ background: '#1D9E75', borderColor: '#1D9E75' }}
           >
-            <PlusOutlined style={{ fontSize: 13 }} />
             Form mới
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Space>
+      </Flex>
 
-      {/*  Card wrapper  */}
-      <div style={{ background: T.surface }}>
-
-        {/*  Toolbar  */}
-        <div style={{
-          padding: '10px 16px',
-          borderBottom: `1px solid ${T.border}`,
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: T.surface,
-        }}>
-          {/* Search input */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <SearchOutlined style={{
-              position: 'absolute', left: 10, fontSize: 12,
-              color: T.muted, zIndex: 1, pointerEvents: 'none',
-            }} />
-            <input
-              placeholder="Tìm kiếm form..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                height: 32, paddingLeft: 30, paddingRight: 10, width: 220,
-                border: `1.5px solid ${T.border}`, borderRadius: 8,
-                fontSize: 13, color: T.text, background: T.bg,
-                outline: 'none', transition: 'border 0.15s, background 0.15s',
-                fontFamily: 'inherit',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = T.borderFocus
-                e.currentTarget.style.background  = '#fff'
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = T.border
-                e.currentTarget.style.background  = T.bg
-              }}
-            />
-          </div>
-
-          {/* Count */}
-          <span style={{
-            marginLeft: 'auto', fontSize: 12, color: T.muted,
-            fontVariantNumeric: 'tabular-nums',
-          }}>
+      {/* Card wrapper */}
+      <div style={{ background: '#fff' }}>
+        {/* Toolbar */}
+        <Flex align="center" gap={8} style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0' }}>
+          <Input
+            prefix={<SearchOutlined style={{ color: '#94a3b8', fontSize: 12 }} />}
+            placeholder="Tìm kiếm form..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 220 }}
+            allowClear
+          />
+          <Text type="secondary" style={{ marginLeft: 'auto', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>
             {filtered.length} / {forms.length} form
-          </span>
-        </div>
+          </Text>
+        </Flex>
 
-        {/*  Table  */}
+        {/* Table */}
         <CustomTable
           columns={columns}
           data={{ data: filtered }}

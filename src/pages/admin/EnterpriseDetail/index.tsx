@@ -241,7 +241,7 @@ export default function EnterpriseDetailPage() {
                 style={{ background: ent.color, border: "none", borderRadius: 8 }}
                 onClick={() => setJobModal({ open: true, job: null })}
               >
-                Thêm tin tuyển dụng
+                {/* Thêm tin tuyển dụng */}
               </Button>
 
               <Button
@@ -249,10 +249,10 @@ export default function EnterpriseDetailPage() {
                 onClick={() => setEditOpen(true)}
                 style={{ borderRadius: 8 }}
               >
-                Chỉnh sửa
+                {/* Chỉnh sửa */}
               </Button>
 
-              {!ent.verified && (
+              {/* {!ent.verified && (
                 <Button
                   icon={<SafetyCertificateOutlined />}
                   style={{
@@ -265,7 +265,7 @@ export default function EnterpriseDetailPage() {
                 >
                   Xác minh
                 </Button>
-              )}
+              )} */}
 
               <Button
                 icon={

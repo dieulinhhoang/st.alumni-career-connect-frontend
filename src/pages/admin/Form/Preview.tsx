@@ -203,12 +203,17 @@ function AddressField({ value, onChange, hasError, readOnly }: FieldProps & {
 }
 
 
-function RadioField({ options, qId, value, onChange, hasError, readOnly }: FieldProps & {
+function RadioField({ options, qId, value, onChange, hasError, readOnly, allowOther }: FieldProps & {
   options: string[]
   qId: string
   value?: string
   onChange?: (v: string) => void
+  allowOther?: boolean
 }) {
+  const OTHER = '__other__'
+  const isOther = typeof value === 'string' && value.startsWith(OTHER)
+  const otherText = isOther ? value.slice(OTHER.length) : ''
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 8,
@@ -224,23 +229,65 @@ function RadioField({ options, qId, value, onChange, hasError, readOnly }: Field
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
+      {allowOther && (
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
+          <input
+            type="radio" name={qId} disabled={readOnly}
+            checked={isOther} onChange={() => onChange?.(OTHER)}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+          />
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 14, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
+            {isOther && (
+              <input
+                type="text" readOnly={readOnly}
+                placeholder="Vui lòng ghi rõ..."
+                value={otherText}
+                onChange={(e) => onChange?.(OTHER + e.target.value)}
+                style={{ ...baseInput, marginTop: 6 }}
+                onFocus={applyFocus} onBlur={removeFocus}
+              />
+            )}
+          </div>
+        </label>
+      )}
     </div>
   )
 }
 
 
-function CheckboxField({ options, value, onChange, hasError, readOnly }: FieldProps & {
+function CheckboxField({ options, value, onChange, hasError, readOnly, allowOther }: FieldProps & {
   options: string[]
   value?: string[]
   onChange?: (v: string[]) => void
+  allowOther?: boolean
 }) {
+  const OTHER_PREFIX = '__other__'
   const checked = new Set(value ?? [])
+  const otherEntry = Array.from(checked).find(v => v.startsWith(OTHER_PREFIX))
+  const isOtherChecked = !!otherEntry
+  const otherText = otherEntry ? otherEntry.slice(OTHER_PREFIX.length) : ''
+
   const toggle = (opt: string) => {
     if (readOnly) return
     const next = new Set(checked)
     next.has(opt) ? next.delete(opt) : next.add(opt)
     onChange?.(Array.from(next))
   }
+  const toggleOther = () => {
+    if (readOnly) return
+    const next = new Set(checked)
+    if (isOtherChecked) { next.delete(otherEntry!); }
+    else { next.add(OTHER_PREFIX) }
+    onChange?.(Array.from(next))
+  }
+  const setOtherText = (txt: string) => {
+    const next = new Set(checked)
+    if (otherEntry) next.delete(otherEntry)
+    next.add(OTHER_PREFIX + txt)
+    onChange?.(Array.from(next))
+  }
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 8,
@@ -256,6 +303,28 @@ function CheckboxField({ options, value, onChange, hasError, readOnly }: FieldPr
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
+      {allowOther && (
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
+          <input
+            type="checkbox" disabled={readOnly}
+            checked={isOtherChecked} onChange={toggleOther}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+          />
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 14, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
+            {isOtherChecked && (
+              <input
+                type="text" readOnly={readOnly}
+                placeholder="Vui lòng ghi rõ..."
+                value={otherText}
+                onChange={(e) => setOtherText(e.target.value)}
+                style={{ ...baseInput, marginTop: 6 }}
+                onFocus={applyFocus} onBlur={removeFocus}
+              />
+            )}
+          </div>
+        </label>
+      )}
     </div>
   )
 }
@@ -301,8 +370,8 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
       case 'date':     return <DateField     {...fp} value={value} onChange={onChange} />
       case 'address':  return <AddressField  {...fp} value={value} onChange={onChange} />
-      case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} />
-      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} />
+      case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
+      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
       case 'select':
       case 'dropdown': return <SelectField   {...fp} options={opts} value={value} onChange={onChange} />
       default:         return <ShortField    {...fp} value={value} onChange={onChange} />
@@ -401,7 +470,10 @@ function isVisible(q: Question, answers: Record<string, any>): boolean {
 
 function isEmpty(val: any): boolean {
   if (val === undefined || val === null) return true
-  if (typeof val === 'string') return val.trim() === ''
+  if (typeof val === 'string') {
+    if (val.startsWith('__other__')) return false  // "Khác" đã chọn = không rỗng
+    return val.trim() === ''
+  }
   if (Array.isArray(val)) return val.length === 0
   if (typeof val === 'object') return !val.address?.trim() && !val.city?.trim()
   return false

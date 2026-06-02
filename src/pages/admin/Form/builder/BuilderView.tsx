@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Button } from 'antd'
+import { Button, Input, Drawer, Flex } from 'antd'
 import { ArrowLeftOutlined, SaveOutlined, CheckOutlined, AppstoreOutlined } from '@ant-design/icons'
 import { useFormBuilder } from '../../../../feature/form/hooks/useFormBuilder'
 import type { Form, Section, SurveyFooter, SurveyHeader } from '../../../../feature/form/types'
@@ -18,7 +18,6 @@ const DEFAULT_FOOTER: SurveyFooter = {
   secondaryText: 'Kính chúc Anh/Chị sức khỏe và thành công!',
 }
 
-// Fixed accent color
 const ACCENT = '#279f2d'
 
 export interface LogicRule {
@@ -50,7 +49,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     saving, saved, handleSave,
   } = useFormBuilder(mode, form?.id ?? undefined)
 
-  // State ngoài hook
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
   const [footer,  setFooter]  = useState<SurveyFooter>((form as any)?.footer  ?? DEFAULT_FOOTER)
   const [logoUrl, setLogoUrl] = useState<string>((form as any)?.logoUrl ?? '')
@@ -58,7 +56,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const [logicRules, setLogicRules] = useState<LogicRule[]>((form as any)?.logicRules ?? [])
   const [descParagraphs, setDescParagraphs] = useState<string[]>((form as any)?.descriptionParagraphs ?? [])
 
-  // Mobile
   const [winWidth, setWinWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
   const [rightOpen, setRightOpen] = useState(false)
   useEffect(() => {
@@ -68,12 +65,13 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [])
   const isMobile = winWidth < 768
 
-  // Rename section
+  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descParagraphs })
+  useEffect(() => { extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descParagraphs } }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+
   const renameSection = useCallback((id: string, title: string) => {
     setSections(prev => prev.map((s: Section) => s.id === id ? { ...s, title } : s))
   }, [setSections])
 
-  // Reorder câu hỏi
   const reorderQuestion = useCallback((dragId: string, overId: string) => {
     const fromIdx = questions.findIndex(q => q.id === dragId)
     const toIdx   = questions.findIndex(q => q.id === overId)
@@ -83,7 +81,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     for (let i = 0; i < steps; i++) moveQuestion(dragId, dir)
   }, [questions, moveQuestion])
 
-  // Drop từ bank (HTML drag API)
   const handleDrop = useCallback((e: React.DragEvent, afterId?: string) => {
     e.preventDefault()
     const raw = e.dataTransfer.getData('application/x-bank-question')
@@ -91,97 +88,47 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     try {
       const q = JSON.parse(raw)
       const newId = addQuestion(afterId)
-      updateQuestion(newId, {
-        type: q.type,
-        title: q.title ?? '',
-        options: q.options ?? [],
-      })
+      updateQuestion(newId, { type: q.type, title: q.title ?? '', options: q.options ?? [] })
     } catch {}
   }, [addQuestion, updateQuestion])
 
-  // Thêm từ bank qua nút +
   const handleDropFromBank = useCallback((q: any) => {
     const newId = addQuestion()
-    updateQuestion(newId, {
-      type: q.type,
-      title: q.title ?? '',
-      options: q.options ?? [],
-    })
+    updateQuestion(newId, { type: q.type, title: q.title ?? '', options: q.options ?? [] })
   }, [addQuestion, updateQuestion])
 
-  // Save — truyền toàn bộ extras vào handleSave
-  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs })
-  useEffect(() => {
-    extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs }
-  }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
-
-  // handleSaveAll: chỉ lưu API, KHÔNG navigate (dùng cho auto-save và nút Lưu thủ công)
   const handleSaveOnly = useCallback(async () => {
     await handleSave(extrasRef.current)
   }, [handleSave])
 
-  // handleSaveAndBack: lưu xong mới gọi onSave để navigate (chỉ dùng khi user bấm nút Lưu rồi muốn quay lại)
   const handleSaveAll = useCallback(async () => {
     const result = await handleSave(extrasRef.current)
     if (result) onSave(result)
   }, [handleSave, onSave])
 
-  // Auto-save debounce — chỉ gọi handleSaveOnly, KHÔNG navigate
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
-    debounceTimer.current = setTimeout(() => {
-      handleSaveOnly()
-    }, 3000)
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    debounceTimer.current = setTimeout(() => { handleSaveOnly() }, 3000)
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs])
-
-  // Mobile drawer
-  const RightDrawer = () => {
-    if (!isMobile || !rightOpen) return null
-    return (
-      <div
-        style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'stretch', justifyContent: 'flex-end' }}
-        onClick={() => setRightOpen(false)}
-      >
-        <div
-          style={{ width: 300, maxWidth: '90vw', height: '100%', background: '#fff', boxShadow: '-4px 0 28px rgba(0,0,0,.15)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <RightPanel
-            questions={questions}
-            sections={sections}
-            logoSize={logoSize}
-            logicRules={logicRules}
-            onAddBlank={_type => { addQuestion(); setRightOpen(false) }}
-            onDropFromBank={q => { handleDropFromBank(q); setRightOpen(false) }}
-            onLogoSizeChange={setLogoSize}
-            onLogicRulesChange={setLogicRules}
-          />
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', background: '#fff' }}>
 
       {/* Topbar */}
-      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e8eaed', padding: '0 12px', height: 48, flexShrink: 0, gap: 8, background: '#fff' }}>
+      <Flex align="center" gap={8} style={{ borderBottom: '1px solid #e8eaed', padding: '0 12px', height: 48, flexShrink: 0, background: '#fff' }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} />
 
         <div style={{ width: 1, height: 18, background: '#e8eaed', flexShrink: 0 }} />
 
-        <input
+        <Input
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="Tên form..."
-          style={{ flex: 1, border: 'none', outline: 'none', fontSize: isMobile ? 13 : 14, fontWeight: 600, color: '#111827', fontFamily: 'inherit', background: 'transparent', minWidth: 0, padding: '4px 6px', borderRadius: 6 }}
-          onFocus={e => (e.currentTarget.style.background = '#f9fafb')}
-          onBlur={e => (e.currentTarget.style.background = 'transparent')}
+          variant="borderless"
+          style={{ flex: 1, fontSize: isMobile ? 13 : 14, fontWeight: 600, minWidth: 0 }}
         />
 
         <Button
@@ -189,11 +136,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           icon={saved ? <CheckOutlined /> : <SaveOutlined />}
           onClick={handleSaveAll}
           loading={saving}
-          style={{ background: saved ? '#f0fdf4' : undefined, color: saved ? '#16a34a' : undefined, borderColor: saved ? '#bbf7d0' : undefined, flexShrink: 0 }}
+          style={saved ? { background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0' } : {}}
         >
           {!isMobile && (saved ? 'Đã lưu' : 'Lưu')}
         </Button>
-      </div>
+      </Flex>
 
       {/* Main layout */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -250,18 +197,41 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         )}
       </div>
 
-      {/* Mobile drawer + bottom bar */}
-      <RightDrawer />
-
+      {/* Mobile: Ant Design Drawer */}
       {isMobile && (
-        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 52, background: '#fff', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', zIndex: 100, boxShadow: '0 -2px 12px rgba(0,0,0,.06)' }}>
-          <button
-            onClick={() => setRightOpen(o => !o)}
-            style={{ flex: 1, height: '100%', border: 'none', background: rightOpen ? '#f1f5f9' : '#fff', color: rightOpen ? '#334155' : '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer', fontSize: 12.5, fontWeight: rightOpen ? 700 : 500 }}
+        <>
+          <Drawer
+            open={rightOpen}
+            onClose={() => setRightOpen(false)}
+            placement="right"
+            width={300}
+            styles={{ body: { padding: 0 } }}
+            title="Thư viện / Giao diện"
           >
-            <AppstoreOutlined /> Thư viện / Giao diện
-          </button>
-        </div>
+            <RightPanel
+              questions={questions}
+              sections={sections}
+              logoSize={logoSize}
+              logicRules={logicRules}
+              onAddBlank={_type => { addQuestion(); setRightOpen(false) }}
+              onDropFromBank={q => { handleDropFromBank(q); setRightOpen(false) }}
+              onLogoSizeChange={setLogoSize}
+              onLogicRulesChange={setLogicRules}
+            />
+          </Drawer>
+
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 52, background: '#fff', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', zIndex: 100, boxShadow: '0 -2px 12px rgba(0,0,0,.06)' }}>
+            <Button
+              type="text"
+              icon={<AppstoreOutlined />}
+              onClick={() => setRightOpen(o => !o)}
+              block
+              style={{ height: '100%', fontSize: 12.5, fontWeight: rightOpen ? 700 : 500, color: rightOpen ? '#334155' : '#6b7280', background: rightOpen ? '#f1f5f9' : '#fff' }}
+            >
+              Thư viện / Giao diện
+            </Button>
+          </div>
+        </>
       )}
     </div>
   )
