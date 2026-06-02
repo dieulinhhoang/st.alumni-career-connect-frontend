@@ -50,7 +50,6 @@ export interface UseFormBuilderReturn {
   setActiveSectionId: (id: string | null) => void
   setSections: React.Dispatch<React.SetStateAction<Section[]>>
 
-  // addQuestion trả về id của câu hỏi mới
   addQuestion: (afterId?: string, patch?: Partial<Question>) => string
   duplicateQuestion: (id: string) => void
   removeQuestion: (id: string) => void
@@ -94,35 +93,76 @@ export function useFormBuilder(
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
 
-  //  Load (edit mode) 
+  // =========================
+  // LOAD FORM (EDIT MODE)
+  // =========================
   useEffect(() => {
     if (mode !== 'edit' || !formId) return
+
     let cancelled = false
     setLoading(true)
+
     getFormById(formId)
       .then((form: Form) => {
         if (cancelled) return
+
+        // set basic info
         setName(form.name)
         setDesc(form.description)
-        const loadedSections: Section[] = (form as any).sections?.length
-          ? (form as any).sections
-          : [_defaultSection()]
+
+        // chuẩn hóa questions
+        const formQuestions: Question[] = Array.isArray(form.questions)
+          ? form.questions
+          : []
+
+        // chuẩn hóa sections từ backend
+        const rawSections = (form as any).sections
+        const serverSections: Section[] = Array.isArray(rawSections)
+          ? rawSections
+          : []
+
+        // fallback: nếu không có sections thì dựng từ question.sectionId
+        const loadedSections: Section[] =
+          serverSections.length > 0
+            ? serverSections
+            : formQuestions.length > 0
+            ? Array.from(
+                new Set(formQuestions.map(q => q.sectionId).filter(Boolean))
+              ).map((sectionId, index) => ({
+                id: sectionId,
+                title: `Phần ${index + 1}`,
+                order: index,
+              }))
+            : [_defaultSection()]
+
         setSections(loadedSections)
         setActiveSectionId(loadedSections[0]?.id ?? null)
-        const qs = form.questions.length > 0
-          ? form.questions
+
+        // questions fallback
+        const qs = formQuestions.length > 0
+          ? formQuestions
           : [_newQuestion(loadedSections[0]?.id)]
+
         setQs(qs)
         setActiveId(qs[0]?.id ?? null)
       })
       .catch((e: unknown) => {
-        if (!cancelled) setLoadError(e instanceof Error ? e.message : 'Không thể tải form.')
+        if (!cancelled) {
+          setLoadError(e instanceof Error ? e.message : 'Không thể tải form.')
+        }
       })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [mode, formId])
 
-  //  Question helpers 
+  // =========================
+  // QUESTION HELPERS
+  // =========================
 
   const addQuestion = useCallback((afterId?: string, patch?: Partial<Question>): string => {
     const newId = _genId()
@@ -225,7 +265,9 @@ export function useFormBuilder(
     })
   }, [])
 
-  //  Section helpers 
+  // =========================
+  // SECTION HELPERS
+  // =========================
 
   const addSectionAfter = useCallback((afterQuestionId: string) => {
     const afterIdx = questions.findIndex(q => q.id === afterQuestionId)
@@ -291,7 +333,9 @@ export function useFormBuilder(
     })
   }, [])
 
-  //  Option helpers 
+  // =========================
+  // OPTION HELPERS
+  // =========================
 
   const addOption = useCallback((qid: string) => {
     setQs(qs => qs.map(q => {
@@ -314,7 +358,9 @@ export function useFormBuilder(
     }))
   }, [])
 
-  //  Save (nhận extras từ BuilderView: header, footer, logo, logicRules, ...) 
+  // =========================
+  // SAVE
+  // =========================
 
   const handleSave = useCallback(async (extras?: SaveExtras): Promise<Form | null> => {
     if (!name.trim()) return null
