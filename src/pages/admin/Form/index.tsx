@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Tabs } from 'antd'
+import { FileTextOutlined, CalendarOutlined } from '@ant-design/icons'
 import { useFormList } from '../../../feature/form/hooks/useFormList'
 import { createForm, updateForm, deleteForm, duplicateForm } from '../../../feature/form/api'
 import type { Form, Section, Question } from '../../../feature/form/types'
@@ -7,6 +9,7 @@ import PreviewView from './Preview'
 import ListView from './Listview'
 import { DeleteModal } from './Deletemodal'
 import { AIView } from './Aiview'
+import SurveyPeriodListview from './SurveyPeriodListview'
 import './survey.css'
 import AdminLayout from '../../../components/layout/AdminLayout'
 
@@ -106,7 +109,7 @@ export default function SurveyPage() {
     }
   }
 
-  //  routing 
+  //  routing — builder / ai / preview bypass tabs 
   if (view === 'builder') return (
     <AdminLayout>
       <BuilderView form={activeForm} onSave={handleSaveFromBuilder} onBack={() => setView('list')} />
@@ -125,26 +128,48 @@ export default function SurveyPage() {
 
   return (
     <AdminLayout>
-      <div className="">
+      <div>
         {error && (
-          <div style={{ color: 'red', padding: '12px 16px', background: '#fff0f0', borderRadius: 8, marginBottom: 12 }}>
+          <div style={{ color: 'red', padding: '12px 16px', background: '#fff0f0', borderRadius: 8, margin: '16px 32px 0' }}>
             {error}
           </div>
         )}
-        <ListView
-          forms={loading ? [] : forms}
-          onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
-          onAI={() => setView('ai')}
-          onEdit={(f) => { setActiveForm(f); setView('builder') }}
-          onPreview={(f) => { setActiveForm(f); setView('preview') }}
-          onDup={handleDup}
-          onDelete={handleDelete}
+        <Tabs
+          defaultActiveKey="forms"
+          style={{ paddingTop: 8 }}
+          tabBarStyle={{ paddingLeft: 32, marginBottom: 0, background: '#fff', borderBottom: '1px solid #e2e8f0' }}
+          items={[
+            {
+              key: 'forms',
+              label: (
+                <span><FileTextOutlined style={{ marginRight: 6 }} />Form khảo sát</span>
+              ),
+              children: (
+                <>
+                  <ListView
+                    forms={loading ? [] : forms}
+                    onCreate={() => { const blank = makeBlankForm(); setActiveForm(blank); setView('builder') }}
+                    onAI={() => setView('ai')}
+                    onEdit={(f) => { setActiveForm(f); setView('builder') }}
+                    onPreview={(f) => { setActiveForm(f); setView('preview') }}
+                    onDup={handleDup}
+                    onDelete={handleDelete}
+                  />
+                  {deleteTarget && (
+                    <DeleteModal form={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(undefined)} />
+                  )}
+                </>
+              ),
+            },
+            {
+              key: 'periods',
+              label: (
+                <span><CalendarOutlined style={{ marginRight: 6 }} />Đợt khảo sát</span>
+              ),
+              children: <SurveyPeriodListview />,
+            },
+          ]}
         />
-
-        {/* Delete confirmation */}
-        {deleteTarget && (
-          <DeleteModal form={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(undefined)} />
-        )}
       </div>
     </AdminLayout>
   )
