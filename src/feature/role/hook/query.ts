@@ -5,6 +5,9 @@ import {
   updateRoleAPI,
   deleteRoleAPI,
   getRoleDetailAPI,
+  getRolePermissionsAPI,
+  assignRolePermissionsAPI,
+  getAllPermissionsAPI,
 } from '../api'
 import {
   IRoleListResponse,
@@ -33,6 +36,40 @@ export const useGetRoleDetail = ({
     queryKey: ['role-detail', id],
     queryFn: () => getRoleDetailAPI(id!),
     enabled: !!id && enabled,
+  })
+}
+
+export const useGetRolePermissions = ({
+  id,
+  enabled,
+}: {
+  id?: string
+  enabled?: boolean
+}) => {
+  return useQuery({
+    queryKey: ['role-permissions', id],
+    queryFn: () => getRolePermissionsAPI(id!),
+    enabled: !!id && enabled,
+  })
+}
+
+export const useGetAllPermissions = ({ enabled }: { enabled?: boolean } = {}) => {
+  return useQuery({
+    queryKey: ['permissions-all'],
+    queryFn: () => getAllPermissionsAPI(),
+    enabled: enabled !== false,
+  })
+}
+
+export const useAssignRolePermissions = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      permissionIds,
+    }: {
+      id: string
+      permissionIds: number[]
+    }) => assignRolePermissionsAPI(id, permissionIds),
   })
 }
 

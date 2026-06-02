@@ -1,41 +1,33 @@
-import axios from 'axios'
-import {
-  IRole,
-  IRoleListResponse,
-  IRoleQuery,
-  ICreateRoleBody,
-  IUpdateRoleBody,
-} from './type'
+import request from '../../global/config/request'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
-
-export const getListRoleAPI = async (
-  params: IRoleQuery,
-): Promise<IRoleListResponse> => {
-  const { data } = await api.get('/role', { params })
-  return data
+export const getListRoleAPI = (params: any) => {
+  return request.get('/role', { params })
 }
 
-export const createRoleAPI = async (body: ICreateRoleBody): Promise<IRole> => {
-  const { data } = await api.post('/role', body)
-  return data
+export const getRoleDetailAPI = (id: string) => {
+  return request.get(`/role/${id}`)
 }
 
-export const deleteRoleAPI = async (id: string): Promise<void> => {
-  await api.delete(`/role/${id}`)
+export const createRoleAPI = (body: any) => {
+  return request.post('/role', body)
 }
 
-export const updateRoleAPI = async (
-  id: string,
-  body: IUpdateRoleBody,
-): Promise<IRole> => {
-  const { data } = await api.put(`/role/${id}`, body)
-  return data
+export const updateRoleAPI = (id: string, body: any) => {
+  return request.put(`/role/${id}`, body)
 }
 
-export const getRoleDetailAPI = async (id: string): Promise<IRole> => {
-  const { data } = await api.get(`/role/${id}`)
-  return data
+export const deleteRoleAPI = (id: string) => {
+  return request.delete(`/role/${id}`)
+}
+
+export const getRolePermissionsAPI = (id: string) => {
+  return request.get(`/role/${id}/permissions`)
+}
+
+export const assignRolePermissionsAPI = (id: string, permissionIds: number[]) => {
+  return request.post(`/role/${id}/permissions`, { permissionIds })
+}
+
+export const getAllPermissionsAPI = () => {
+  return request.get('/role/permissions/all')
 }

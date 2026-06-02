@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { message } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
 import { usePermission } from '../../../global/hooks/usePermission'
-// import { PermissionEnum } from '../../../feature/auth/type'
-
 import {
   useGetListRoles,
   useCreateRole,
   useUpdateRole,
   useDeleteRole,
   useGetRoleDetail,
+  useGetRolePermissions,
+  useGetAllPermissions,
+  useAssignRolePermissions,
 } from '../../../feature/role/hook/query'
-
 import RoleListView from './RoleListView'
 import RoleFormView from './RoleFormView'
 import AdminLayout from '../../../components/layout/AdminLayout'
@@ -38,7 +38,6 @@ const RoleManagement: React.FC = () => {
     name: '',
   })
   const [roleId, setRoleId] = useState<string | null>(null)
-
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
@@ -46,11 +45,39 @@ const RoleManagement: React.FC = () => {
   const createRole = useCreateRole()
   const updateRole = useUpdateRole()
   const deleteRole = useDeleteRole()
+  const assignRolePermissions = useAssignRolePermissions()
 
   const { data: roleDetail } = useGetRoleDetail({
     id: roleId || undefined,
     enabled: !!roleId && (view === 'edit' || view === 'view'),
   })
+
+  // Load permissions for edit/view (by roleId) hoặc all permissions cho create
+  const { data: rolePermissionGroups, isLoading: loadingRolePerms } = useGetRolePermissions({
+    id: roleId || undefined,
+    enabled: !!roleId && (view === 'edit' || view === 'view'),
+  })
+
+  const { data: allPermissionGroups, isLoading: loadingAllPerms } = useGetAllPermissions({
+    enabled: view === 'create',
+  })
+
+  const permissionGroups: any[] =
+    view === 'create'
+      ? (allPermissionGroups as any) ?? []
+      : (rolePermissionGroups as any) ?? []
+
+  const loadingPermissions =
+    view === 'create' ? loadingAllPerms : view !== 'list' && loadingRolePerms
+
+  const selectedPermissionIds: number[] =
+    view === 'create'
+      ? []
+      : (permissionGroups?.flatMap((group: any) =>
+          group.permissions
+            .filter((perm: any) => perm.isGranted)
+            .map((perm: any) => perm.id),
+        ) ?? [])
 
   useEffect(() => {
     if (roleDetail && (view === 'edit' || view === 'view')) {
@@ -104,15 +131,28 @@ const RoleManagement: React.FC = () => {
     })
   }
 
-  const handleSubmit = (values: any) => {
+  const handleSavePermissions = async (targetRoleId: string, permissionIds: number[]) => {
+    await assignRolePermissions.mutateAsync({
+      id: targetRoleId,
+      permissionIds,
+    })
+  }
+
+  const handleSubmit = async (values: any) => {
     const body: ICreateRoleBody = {
       name: values.name.trim(),
       description: values.description?.trim(),
     }
 
+    const permissionIds: number[] = values.permissionIds || []
+
     if (view === 'create') {
       createRole.mutate(body, {
-        onSuccess: async () => {
+        onSuccess: async (createdRole: any) => {
+          const newRoleId = String(createdRole?.id)
+          if (newRoleId) {
+            await handleSavePermissions(newRoleId, permissionIds)
+          }
           await queryClient.refetchQueries({ queryKey: ['roles'] })
           messageApi.success('Tạo mới vai trò thành công')
           handleBackToList()
@@ -124,8 +164,10 @@ const RoleManagement: React.FC = () => {
         { id: roleId, body },
         {
           onSuccess: async () => {
+            await handleSavePermissions(roleId, permissionIds)
             await queryClient.refetchQueries({ queryKey: ['roles'] })
             await queryClient.invalidateQueries({ queryKey: ['role-detail', roleId] })
+            await queryClient.invalidateQueries({ queryKey: ['role-permissions', roleId] })
             messageApi.success('Cập nhật vai trò thành công')
             handleBackToList()
           },
@@ -139,38 +181,41 @@ const RoleManagement: React.FC = () => {
     <>
       {contextHolder}
       <AdminLayout>
-        <div>
-          {view === 'list' ? (
-            <RoleListView
-              query={query}
-              setQuery={setQuery}
-              listData={listData}
-              loading={listLoading}
-              onCreate={openCreate}
-              onEdit={openEdit}
-              onView={openView}
-              onDelete={handleDelete}
-              onTableChange={(p: any) =>
-                setQuery((prev) => ({
-                  ...prev,
-                  page: (p.current ?? 1) - 1,
-                  size: p.pageSize ?? 10,
-                }))
-              }
-            />
-          ) : (
-            <RoleFormView
-              view={view}
-              name={name}
-              description={description}
-              setName={setName}
-              setDescription={setDescription}
-              onBack={handleBackToList}
-              onSubmit={handleSubmit}
-              submitting={createRole.isPending || updateRole.isPending}
-            />
-          )}
-        </div>
+        {view === 'list' ? (
+          <RoleListView
+            query={query}
+            setQuery={setQuery}
+            listData={listData}
+            loading={listLoading}
+            onCreate={openCreate}
+            onEdit={openEdit}
+            onView={openView}
+            onDelete={handleDelete}
+            onTableChange={(p) =>
+              setQuery((prev) => ({
+                ...prev,
+                page: (p.current ?? 1) - 1,
+                size: p.pageSize ?? 10,
+              }))
+            }
+          />
+        ) : (
+          <RoleFormView
+            view={view as 'create' | 'edit' | 'view'}
+            name={name}
+            description={description}
+            permissionGroups={permissionGroups}
+            selectedPermissionIds={selectedPermissionIds}
+            loadingPermissions={loadingPermissions}
+            onBack={handleBackToList}
+            onSubmit={handleSubmit}
+            submitting={
+              createRole.isPending ||
+              updateRole.isPending ||
+              assignRolePermissions.isPending
+            }
+          />
+        )}
       </AdminLayout>
     </>
   )
