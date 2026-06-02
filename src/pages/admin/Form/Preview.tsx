@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Form, Question, Section } from '../../../feature/form/types'
-import { QrcodeOutlined } from '@ant-design/icons'
-import { QRCodeModal } from './QRCodeModal'
 
 
 //  Utility 
 
 
-function todayLabel() {
-  const d = new Date()
+function formatDate(dateStr?: string | null) {
+  const d = dateStr ? new Date(dateStr) : null
+  if (!d || isNaN(d.getTime())) return ''
   return `Ngày ${String(d.getDate()).padStart(2, '0')} / ${String(d.getMonth() + 1).padStart(2, '0')} / ${d.getFullYear()}`
 }
 
@@ -412,6 +411,8 @@ function mapForm(form: Form) {
       : [{ id: 'default-section', title: 'Nội dung khảo sát', order: 0 }]
 
   const defaultSectionId = sections[0].id
+  const sectionIds = new Set(sections.map((s: Section) => s.id))
+
   const typeMap: Record<string, Question['type']> = {
     short: 'short', long: 'long', radio: 'radio', checkbox: 'checkbox',
     dropdown: 'select', select: 'select', date: 'date',
@@ -419,18 +420,22 @@ function mapForm(form: Form) {
   }
 
   let order = 0
-  const questions: Question[] = form.questions.map((q: any) => ({
-    id: q.id,
-    type: typeMap[q.type] ?? 'short',
-    title: q.title,
-    placeholder: q.placeholder ?? (q.type === 'short' ? 'Câu trả lời của bạn' : undefined),
-    options: q.options?.map((o: any) => (typeof o === 'string' ? { id: o, label: o } : o)),
-    required: q.required,
-    sectionId: q.sectionId ?? defaultSectionId,
-    order: order++,
-    reportFieldKey: q.reportFieldKey,
-    visibleWhen: q.visibleWhen,
-  }))
+  const questions: Question[] = form.questions.map((q: any) => {
+    // Keep existing sectionId if it matches a real section, otherwise assign to default
+    const sectionId = q.sectionId && sectionIds.has(q.sectionId) ? q.sectionId : defaultSectionId
+    return {
+      id: q.id,
+      type: typeMap[q.type] ?? 'short',
+      title: q.title,
+      placeholder: q.placeholder ?? (q.type === 'short' ? 'Câu trả lời của bạn' : undefined),
+      options: q.options?.map((o: any) => (typeof o === 'string' ? { id: o, label: o } : o)),
+      required: q.required,
+      sectionId,
+      order: q.order ?? order++,
+      reportFieldKey: q.reportFieldKey,
+      visibleWhen: q.visibleWhen,
+    }
+  })
 
   const header = {
     logoUrl:  (form as any).logoUrl   ?? 'https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png',
@@ -502,7 +507,6 @@ export function SurveyPreview({
   const [errors,        setErrors]        = useState<Set<string>>(new Set())
   const [submitting,    setSubmitting]    = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [qrOpen,        setQrOpen]        = useState(false)
 
   useEffect(() => { if (initialValues) setAnswers(initialValues) }, [initialValues])
 
@@ -523,17 +527,25 @@ export function SurveyPreview({
     </div>
   )
 
-  const surveyUrl = `${window.location.origin}/survey/${form.id}`
-
   const { sections, questions, header, footer, descParagraphs } = mapForm(form)
 
   const visibleIds = new Set(questions.filter(q => isVisible(q, answers)).map(q => q.id))
 
   const bySection = sections
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    .map(sec => ({
+    .map((sec, idx) => ({
       section: sec,
-      qs: questions.filter(q => q.sectionId === sec.id && visibleIds.has(q.id)).sort((a, b) => a.order - b.order),
+      qs: questions
+        .filter(q => {
+          if (idx === 0) {
+            // First section also catches any orphaned questions
+            const matchesThisSection = q.sectionId === sec.id
+            const isOrphan = !sections.find(s => s.id === q.sectionId)
+            return (matchesThisSection || isOrphan) && visibleIds.has(q.id)
+          }
+          return q.sectionId === sec.id && visibleIds.has(q.id)
+        })
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
     }))
     .filter(g => g.qs.length > 0)
 
@@ -568,14 +580,13 @@ export function SurveyPreview({
       color: C.text,
     }}>
 
-      {/* Toolbar: Back + QR button (only in admin preview mode) */}
       {onBack && !compact && (
         <div style={{
           position: 'sticky', top: 0, zIndex: 10,
           background: '#fff',
           borderBottom: `1px solid ${C.border}`,
           padding: '10px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
           <button
@@ -592,23 +603,6 @@ export function SurveyPreview({
             onMouseLeave={(e) => { e.currentTarget.style.background = C.surface }}
           >
             ← Quay lại
-          </button>
-
-          <button
-            onClick={() => setQrOpen(true)}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              height: 34, padding: '0 16px', borderRadius: 7,
-              border: 'none', background: '#0f766e',
-              color: '#fff', fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', fontFamily: 'inherit',
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#0d6b63' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#0f766e' }}
-          >
-            <QrcodeOutlined style={{ fontSize: 15 }} />
-            Xuất QR Code
           </button>
         </div>
       )}
@@ -636,7 +630,7 @@ export function SurveyPreview({
               />
               <div style={{ flex: 1, textAlign: 'right' }}>
                 <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6, fontStyle: 'italic' }}>
-                  {todayLabel()}
+                  {formatDate((form as any).createdat ?? (form as any).createdAt)}
                 </div>
                 <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', color: C.text, letterSpacing: '0.04em', marginBottom: 3 }}>
                   {header.ministry}
@@ -765,13 +759,6 @@ export function SurveyPreview({
         </div>
       </div>
 
-      {/* QR Code Modal */}
-      <QRCodeModal
-        open={qrOpen}
-        onClose={() => setQrOpen(false)}
-        surveyUrl={surveyUrl}
-        formName={form.name}
-      />
     </div>
   )
 }

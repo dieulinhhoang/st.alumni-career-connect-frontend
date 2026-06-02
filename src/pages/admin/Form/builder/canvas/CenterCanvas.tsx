@@ -358,7 +358,12 @@ export function CenterCanvas({
                       onRename={onRenameSection}
                       onDelete={onDeleteSection}
                       onAddQuestion={(sectionId) => {
-                        onAddQuestion(undefined, { sectionId })
+                        // Find last question in this section to add after it
+                        const sectionQs = questions
+                          .filter(q => q.sectionId === sectionId)
+                          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                        const lastQ = sectionQs[sectionQs.length - 1]
+                        onAddQuestion(lastQ?.id, { sectionId })
                       }}
                     />
                     {sqs.map((q) => (

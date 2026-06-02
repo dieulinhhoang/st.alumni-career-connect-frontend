@@ -8,20 +8,12 @@ import {
   Button,
   Modal,
   Card,
-  Statistic,
   Tag,
-  Badge,
   Space,
   Typography,
+  Tooltip,
 } from "antd";
-import {
-  PlusOutlined,
-  ClearOutlined,
-  BankOutlined,
-  CheckCircleOutlined,
-  PauseCircleOutlined,
-  SolutionOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
@@ -30,122 +22,82 @@ import { toSlug } from "../../../components/common/utils";
 import { useEnterprises } from "../../../feature/enterprise/hooks/useEnterprises";
 import {
   INDUSTRIES,
-  type PartnerStatus,
   type EnterpriseFormValues,
   type Enterprise,
-  type Faculty,
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
-import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
-import { COLOR, RADIUS, SHADOW } from "../DashBoard/theme";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-function StatusBadge({ status }: { status: PartnerStatus }) {
-  const isActive = status === "active";
-  return (
-    <Badge
-      status={isActive ? "success" : "default"}
-      text={
-        <Text type={isActive ? undefined : "secondary"} style={{ fontSize: 12 }}>
-          {isActive ? "Hoạt động" : "Tạm ngưng"}
-        </Text>
-      }
-    />
-  );
-}
+const T = {
+  accent: "#16a34a",
+  warning: "#f59e0b",
+  text: "#1e2433",
+  sub: "#8791a6",
+  muted: "#adb5c4",
+  border: "#eceef2",
+  surface: "#ffffff",
+};
 
-function IndustryTag({ value, faded }: { value: string; faded?: boolean }) {
-  return (
-    <Tag color={faded ? "default" : "blue"} style={{ margin: 0 }}>
-      {value}
-    </Tag>
-  );
-}
-
-function getEnterpriseFacultyLabel(
-  enterprise: Enterprise,
-  faculties: Faculty[]
-): string {
-  if (!Array.isArray(enterprise.faculties) || enterprise.faculties.length === 0)
-    return "-";
-  return enterprise.faculties
-    .map((ef) => {
-      if (ef.name) return ef.name;
-      const matched = faculties.find((f) => String(f.id) === String(ef.id));
-      return matched?.name ?? `Khoa #${ef.id}`;
-    })
-    .join(", ");
-}
-
-interface EnterpriseStatCardProps {
-  icon: React.ReactNode;
+function StatCard({
+  label,
+  value,
+  color,
+}: {
   label: string;
-  value: number;
-  accentColor: string;
-  valueColor: string;
-}
-
-function EnterpriseStatCard({ icon, label, value, accentColor, valueColor }: EnterpriseStatCardProps) {
-  const iconBg = `${accentColor}18`;
+  value: React.ReactNode;
+  color: string;
+}) {
   return (
     <div
       style={{
-        background: COLOR.bgCard,
-        borderRadius: RADIUS.xl,
-        padding: "16px 20px",
-        height: "100%",
-        border: `1px solid ${COLOR.border}`,
-        boxShadow: SHADOW.card,
-        transition: "box-shadow 0.2s ease, transform 0.2s ease",
-        display: "flex",
-        alignItems: "center",
-        gap: 14,
-        cursor: "default",
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = SHADOW.hover;
-        el.style.transform = "translateY(-2px)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = SHADOW.card;
-        el.style.transform = "translateY(0)";
+        background: "#f4f5f7",
+        borderRadius: 14,
+        padding: "20px 24px",
+        minHeight: 96,
       }}
     >
       <div
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: RADIUS.lg,
-          background: iconBg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 20,
-          color: accentColor,
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </div>
-      <Statistic
-        title={
-          <span style={{ fontSize: 12, color: COLOR.textMuted, fontWeight: 600 }}>
-            {label}
-          </span>
-        }
-        value={value}
-        valueStyle={{
           fontSize: 26,
           fontWeight: 700,
-          color: valueColor,
-          lineHeight: 1.2,
-          fontVariantNumeric: "tabular-nums",
+          color,
+          letterSpacing: "-0.5px",
+          lineHeight: 1,
         }}
-      />
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          color: T.sub,
+          marginTop: 8,
+          fontWeight: 400,
+        }}
+      >
+        {label}
+      </div>
     </div>
+  );
+}
+
+function IndustryPill({ value }: { value: string }) {
+  return (
+    <Tag
+      style={{
+        margin: 0,
+        borderRadius: 8,
+        padding: "4px 12px",
+        fontSize: 12,
+        fontWeight: 500,
+        color: "#667085",
+        background: "#f2f4f7",
+        border: "1px solid #eaecf0",
+      }}
+    >
+      {value}
+    </Tag>
   );
 }
 
@@ -154,26 +106,20 @@ export default function EnterprisePage() {
 
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
-  const [facultyFilter, setFacultyFilter] = useState<string | undefined>(undefined);
   const [query, setQuery] = useState({ page: 1, size: 8 });
-  const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>(
-    { open: false, enterprise: null }
-  );
+  const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>({
+    open: false,
+    enterprise: null,
+  });
 
   const {
     enterprises,
     loading,
     total,
-    setFacultyId,
     setPage,
     addEnterprise,
     editEnterprise,
-    togglePartnerStatus,
   } = useEnterprises({ page: query.page - 1, size: query.size });
-
-  const { faculties = [], loading: facultiesLoading } = useFaculties();
-
-  const faded = (r: Enterprise) => r.partnerStatus === "inactive";
 
   const filtered = useMemo(() => {
     return enterprises.filter((e) => {
@@ -182,8 +128,10 @@ export default function EnterprisePage() {
         !keyword ||
         e.name.toLowerCase().includes(keyword) ||
         e.email.toLowerCase().includes(keyword);
+
       const matchIndustry =
         industry === "Tất cả ngành" || e.industry === industry;
+
       return matchSearch && matchIndustry;
     });
   }, [enterprises, search, industry]);
@@ -197,191 +145,169 @@ export default function EnterprisePage() {
     setModal({ open: false, enterprise: null });
   };
 
-  const handleToggle = (id: string, checked: boolean) => {
-    const ent = enterprises.find((e) => e.id === id);
-    if (!ent) return;
-    const newStatus: PartnerStatus = checked ? "active" : "inactive";
-    if (!checked) {
-      Modal.confirm({
-        title: "Ngưng hợp tác đối tác?",
-        content: `"${ent.name}" sẽ bị hủy kích hoạt.`,
-        okText: "Hủy kích hoạt",
-        okType: "danger",
-        cancelText: "Quay lại",
-        onOk: () => togglePartnerStatus(id, newStatus),
-      });
-      return;
-    }
-    togglePartnerStatus(id, newStatus);
-  };
+  const activeCount = enterprises.filter((e) => e.partnerStatus === "active").length;
+  const inactiveCount = enterprises.filter((e) => e.partnerStatus === "inactive").length;
+  const totalJobs = enterprises.reduce((sum, e) => sum + e.jobs, 0);
 
   const columns: ColumnsType<Enterprise> = [
     {
       title: "STT",
       key: "stt",
       align: "center",
-      width: 55,
+      width: 70,
       render: (_value, _record, index) => (
-        <Text type="secondary" style={{ fontVariantNumeric: "tabular-nums", fontSize: 13 }}>
+        <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>
           {(query.page - 1) * query.size + index + 1}
-        </Text>
+        </span>
       ),
     },
     {
       title: "Doanh nghiệp",
       key: "name",
-      width: 270,
-      render: (_value, r) => (
-        <Space direction="vertical" size={2} style={{ opacity: faded(r) ? 0.45 : 1 }}>
-          <Text strong style={{ fontSize: 14 }}>
-            {r.name}
-          </Text>
-          {r.website && (
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {r.website}
-            </Text>
-          )}
-        </Space>
+      dataIndex: "name",
+      render: (value: string) => (
+        <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{value}</span>
       ),
     },
     {
       title: "Ngành",
       dataIndex: "industry",
       key: "industry",
-      width: 160,
-      render: (value: string, r) => <IndustryTag value={value} faded={faded(r)} />,
-    },
-    {
-      title: "Khoa",
-      key: "faculties",
-      width: 190,
-      render: (_value, r) => (
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          {getEnterpriseFacultyLabel(r, faculties)}
-        </Text>
-      ),
-    },
-    {
-      title: "Trạng thái",
-      key: "status",
-      width: 130,
-      render: (_value, r) => <StatusBadge status={r.partnerStatus} />,
+      width: 320,
+      render: (value: string) => <IndustryPill value={value} />,
     },
     {
       title: "Việc làm",
       dataIndex: "jobs",
       key: "jobs",
+      width: 120,
       align: "center",
-      width: 90,
-      render: (value: number, r) => (
-        <Tag
-          color={faded(r) ? "default" : "blue"}
-          style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700, minWidth: 32, textAlign: "center" }}
+      render: (value: number) => (
+        <span
+          style={{
+            fontWeight: 700,
+            fontSize: 14,
+            color: T.accent,
+            fontVariantNumeric: "tabular-nums",
+          }}
         >
           {value}
-        </Tag>
+        </span>
       ),
     },
-  ];
-
-  const hasFilter = search || industry !== "Tất cả ngành" || facultyFilter !== undefined;
-
-  const activeCount = enterprises.filter((e) => e.partnerStatus === "active").length;
-  const inactiveCount = enterprises.filter((e) => e.partnerStatus === "inactive").length;
-  const totalJobs = enterprises
-    .filter((e) => e.partnerStatus === "active")
-    .reduce((sum, e) => sum + e.jobs, 0);
-
-  const statCards = [
     {
-      key: "total",
-      icon: <BankOutlined />,
-      label: "Tổng doanh nghiệp",
-      value: total,
-      accentColor: COLOR.primary,
-      valueColor: COLOR.primary,
-    },
-    {
-      key: "active",
-      icon: <CheckCircleOutlined />,
-      label: "Đang hoạt động",
-      value: activeCount,
-      accentColor: COLOR.success,
-      valueColor: COLOR.success,
-    },
-    {
-      key: "inactive",
-      icon: <PauseCircleOutlined />,
-      label: "Tạm ngưng",
-      value: inactiveCount,
-      accentColor: COLOR.textFaint,
-      valueColor: COLOR.textMuted,
-    },
-    {
-      key: "jobs",
-      icon: <SolutionOutlined />,
-      label: "Vị trí tuyển dụng",
-      value: totalJobs,
-      accentColor: COLOR.warning,
-      valueColor: COLOR.warning,
+      title: "",
+      key: "action",
+      width: 80,
+      align: "center",
+      render: (_value, record) => (
+        <Tooltip title="Chỉnh sửa">
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setModal({ open: true, enterprise: record });
+            }}
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: 10,
+              width: 34,
+              height: 34,
+              color: "#98a2b3",
+              background: "#fff",
+            }}
+          />
+        </Tooltip>
+      ),
     },
   ];
 
   return (
     <AdminLayout>
-      <div style={{ padding: "28px 32px 40px" }}>
-        {/* Header */}
-        <Row justify="space-between" align="middle" style={{ marginBottom: 24 }} wrap>
+      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <Row justify="space-between" align="top" wrap style={{ gap: 12 }}>
           <Col>
-            <Title level={4} style={{ margin: 0 }}>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 20,
+                fontWeight: 700,
+                color: T.text,
+                letterSpacing: "-0.3px",
+              }}
+            >
               Doanh nghiệp đối tác
-            </Title>
-            <Text type="secondary">Quản lý danh sách và trạng thái hợp tác doanh nghiệp</Text>
+            </h2>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: T.sub }}>
+              Quản lý danh sách và trạng thái hợp tác
+            </p>
           </Col>
+
           <Col>
             <Button
               type="primary"
               icon={<PlusOutlined />}
+              size="large"
               onClick={() => setModal({ open: true, enterprise: null })}
+              style={{
+                height: 44,
+                borderRadius: 12,
+                paddingInline: 18,
+                fontWeight: 600,
+              }}
             >
               Thêm doanh nghiệp
             </Button>
           </Col>
         </Row>
 
-        {/* Stat Cards */}
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {statCards.map((card) => (
-            <Col xs={12} sm={6} key={card.key}>
-              <EnterpriseStatCard {...card} />
-            </Col>
-          ))}
+        <Row gutter={[14, 14]}>
+          <Col xs={12} sm={12} md={6}>
+            <StatCard label="Tổng doanh nghiệp" value={total} color={T.accent} />
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <StatCard label="Đang hoạt động" value={activeCount} color="#d4a106" />
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <StatCard label="Tạm ngưng" value={inactiveCount} color="#6b5a3a" />
+          </Col>
+          <Col xs={12} sm={12} md={6}>
+            <StatCard label="Vị trí tuyển dụng" value={totalJobs} color="#9a6b21" />
+          </Col>
         </Row>
 
-        {/* Table Card */}
         <Card
           variant="borderless"
           styles={{ body: { padding: 0 } }}
+          style={{
+            background: T.surface,
+            borderRadius: 14,
+            overflow: "hidden",
+            border: `1px solid ${T.border}`,
+          }}
         >
-          {/* Filter Bar */}
           <div
             style={{
-              padding: "14px 20px",
-              borderBottom: `1px solid ${COLOR.border}`,
+              padding: "16px 22px",
+              borderBottom: `1px solid ${T.border}`,
               display: "flex",
-              gap: 10,
-              flexWrap: "wrap",
               alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+              background: "#fff",
             }}
           >
-            <Input.Search
-              placeholder="Tìm kiếm tên, email..."
+            <Input
+              prefix={<SearchOutlined style={{ color: "#98a2b3", fontSize: 12 }} />}
+              placeholder="Tìm kiếm doanh nghiệp..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{ width: 230 }}
+              style={{ width: 250, height: 38, fontSize: 13 }}
+              variant="filled"
               allowClear
             />
 
@@ -391,61 +317,18 @@ export default function EnterprisePage() {
                 setIndustry(v);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{ width: 185 }}
+              style={{ width: 170, height: 38 }}
               options={[
                 { label: "Tất cả ngành", value: "Tất cả ngành" },
                 ...INDUSTRIES.map((i) => ({ label: i, value: i })),
               ]}
             />
 
-            <Select
-              allowClear
-              placeholder="Lọc theo khoa"
-              value={facultyFilter}
-              onChange={(v) => {
-                setFacultyFilter(v);
-                const faculty = faculties.find((f) => String(f.id) === v);
-                setFacultyId(faculty ? String(faculty.id) : undefined);
-                setQuery((prev) => ({ ...prev, page: 1 }));
-                setPage(0);
-              }}
-              style={{ width: 185 }}
-              loading={facultiesLoading}
-              notFoundContent={facultiesLoading ? "Đang tải..." : "Không có khoa"}
-              getPopupContainer={(trigger) => trigger.parentElement!}
-            >
-              {(faculties ?? []).map((f: any) => (
-                <Select.Option
-                  key={String(f.id ?? f.facultyId)}
-                  value={String(f.id ?? f.facultyId)}
-                >
-                  {f.name ?? f.facultyName ?? `Khoa #${f.id ?? ""}`}
-                </Select.Option>
-              ))}
-            </Select>
-
-            {hasFilter && (
-              <Button
-                danger
-                icon={<ClearOutlined />}
-                onClick={() => {
-                  setSearch("");
-                  setIndustry("Tất cả ngành");
-                  setFacultyFilter(undefined);
-                  setFacultyId(undefined);
-                  setQuery((prev) => ({ ...prev, page: 1 }));
-                  setPage(0);
-                }}
-              >
-                Xóa bộ lọc
-              </Button>
-            )}
-
             <Text
-              type="secondary"
               style={{
                 marginLeft: "auto",
-                fontSize: 12,
+                fontSize: 13,
+                color: T.sub,
                 fontVariantNumeric: "tabular-nums",
               }}
             >
@@ -461,9 +344,11 @@ export default function EnterprisePage() {
             pagination={{
               current: query.page,
               pageSize: query.size,
-              total: total,
+              total: filtered.length,
               showSizeChanger: true,
               pageSizeOptions: [8, 10, 20, 50],
+              showTotal: (total, range) =>
+                `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
             }}
             handleTableChange={(pagination) => {
               const newPage = pagination.current || 1;
@@ -471,22 +356,22 @@ export default function EnterprisePage() {
               setQuery({ page: newPage, size: newSize });
               setPage(newPage - 1);
             }}
-            scroll={{ x: 820 }}
+            scroll={{ x: 760 }}
             onRow={(r) => ({
               onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`),
               style: { cursor: "pointer" },
             })}
           />
         </Card>
-      </div>
 
-      <EnterpriseFormModal
-        open={modal.open}
-        enterprise={modal.enterprise}
-        faculties={faculties}
-        onClose={() => setModal({ open: false, enterprise: null })}
-        onSave={handleSave}
-      />
+        <EnterpriseFormModal
+          open={modal.open}
+          enterprise={modal.enterprise}
+          faculties={[]}
+          onClose={() => setModal({ open: false, enterprise: null })}
+          onSave={handleSave}
+        />
+      </div>
     </AdminLayout>
   );
 }

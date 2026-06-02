@@ -81,6 +81,14 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     for (let i = 0; i < steps; i++) moveQuestion(dragId, dir)
   }, [questions, moveQuestion])
 
+  const handleAddQuestion = useCallback((afterId?: string, patch?: Partial<import('../../../../feature/form/types').Question>) => {
+    const newId = addQuestion(afterId)
+    if (patch && Object.keys(patch).length > 0) {
+      updateQuestion(newId, patch)
+    }
+    return newId
+  }, [addQuestion, updateQuestion])
+
   const handleDrop = useCallback((e: React.DragEvent, afterId?: string) => {
     e.preventDefault()
     const raw = e.dataTransfer.getData('application/x-bank-question')
@@ -165,7 +173,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             onRemove={removeQuestion}
             onMoveUp={id => moveQuestion(id, 'up')}
             onMoveDown={id => moveQuestion(id, 'down')}
-            onAddQuestion={addQuestion}
+            onAddQuestion={handleAddQuestion}
             onAddSectionAfter={addSectionAfter}
             onAddOption={addOption}
             onUpdateOption={updateOption}
