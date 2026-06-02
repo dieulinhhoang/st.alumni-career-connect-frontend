@@ -1,33 +1,33 @@
-import api from '../../libs/api'
+import request from '../../global/config/request'
 
 export const getListRoleAPI = (params: any) => {
-  return api.get('/role', { params })
+  return request.get('/role', { params })
 }
 
 export const getRoleDetailAPI = (id: string) => {
-  return api.get(`/role/${id}`)
+  return request.get(`/role/${id}`)
 }
 
 export const createRoleAPI = (body: any) => {
-  return api.post('/role', body)
+  return request.post('/role', body)
 }
 
 export const updateRoleAPI = (id: string, body: any) => {
-  return api.put(`/role/${id}`, body)
+  return request.put(`/role/${id}`, body)
 }
 
 export const deleteRoleAPI = (id: string) => {
-  return api.delete(`/role/${id}`)
+  return request.delete(`/role/${id}`)
 }
 
 export const getRolePermissionsAPI = (id: string) => {
-  return api.get(`/role/${id}/permissions`)
+  return request.get(`/role/${id}/permissions`)
 }
 
 export const assignRolePermissionsAPI = (id: string, permissionIds: number[]) => {
-  return api.post(`/role/${id}/permissions`, { permissionIds })
+  return request.post(`/role/${id}/permissions`, { permissionIds })
 }
 
 export const getAllPermissionsAPI = () => {
-  return api.get('/role/permissions/all')
+  return request.get('/role/permissions/all')
 }

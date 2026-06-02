@@ -1,21 +1,24 @@
-// src/libs/api.ts (hoặc file central api)
+import axios from "axios";
 
-import api, { mockApiHandler } from "./mock";
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
 
-const useMock = import.meta.env.VITE_USE_MOCK === "true";
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-export async function request<T = any>(
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
-  url: string,
-  data?: any,
-  params?: any,
-): Promise<T> {
-  if (useMock) {
-    // gọi mock layer
-    const res = mockApiHandler(method, url, data, params);
-    return res as T;
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("accessToken");
+      window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
+    }
+    return Promise.reject(error);
   }
+);
 
-  const res = await api.request<T>({ method, url, data, params });
-  return res.data;
-}
+export default api;
