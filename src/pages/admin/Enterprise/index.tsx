@@ -222,6 +222,13 @@ export default function EnterprisePage() {
     .filter((e) => e.partnerStatus === "active")
     .reduce((sum, e) => sum + e.jobs, 0);
 
+  const statCardStyle: React.CSSProperties = {
+    borderRadius: token.borderRadiusLG,
+    boxShadow: token.boxShadowTertiary,
+    border: `1px solid ${token.colorBorderSecondary}`,
+    height: "100%",
+  };
+
   return (
     <AdminLayout>
       <div style={{ padding: "28px 32px 40px" }}>
@@ -247,7 +254,7 @@ export default function EnterprisePage() {
         {/* Stat Cards */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={12} sm={6}>
-            <Card variant="borderless" size="small">
+            <Card size="small" style={statCardStyle}>
               <Statistic
                 title="Tổng doanh nghiệp"
                 value={total}
@@ -257,7 +264,7 @@ export default function EnterprisePage() {
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card variant="borderless" size="small">
+            <Card size="small" style={statCardStyle}>
               <Statistic
                 title="Đang hoạt động"
                 value={activeCount}
@@ -267,7 +274,7 @@ export default function EnterprisePage() {
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card variant="borderless" size="small">
+            <Card size="small" style={statCardStyle}>
               <Statistic
                 title="Tạm ngưng"
                 value={inactiveCount}
@@ -277,7 +284,7 @@ export default function EnterprisePage() {
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card variant="borderless" size="small">
+            <Card size="small" style={statCardStyle}>
               <Statistic
                 title="Vị trí tuyển dụng"
                 value={totalJobs}
