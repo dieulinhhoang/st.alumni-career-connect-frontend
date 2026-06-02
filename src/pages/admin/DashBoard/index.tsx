@@ -103,7 +103,7 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-      <div style={{ background: COLOR.bgPage, minHeight: "100vh", padding: "0 0 32px" }}>
+      <div >
         {/* Hero banner */}
         <div
           style={{

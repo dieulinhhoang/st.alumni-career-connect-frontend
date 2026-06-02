@@ -5,8 +5,27 @@ import { fetchKhoaList } from "../../../feature/dashboard/api";
 import type { KhoaFilter, KhoaItem } from "../../../feature/dashboard/type";
 import { COLOR, RADIUS, SHADOW } from "./theme";
 
-function ProgressBar({ value, total, color }: { value: number; total: number; color: string }) {
+type FacultyApiItem = KhoaItem & {
+  facultyId?: string | number;
+  facultyName?: string;
+  facultyCode?: string;
+  responded?: number;
+  total?: number;
+  status?: string;
+  color?: string;
+};
+
+function ProgressBar({
+  value,
+  total,
+  color,
+}: {
+  value: number;
+  total: number;
+  color: string;
+}) {
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <div
@@ -28,7 +47,13 @@ function ProgressBar({ value, total, color }: { value: number; total: number; co
           }}
         />
       </div>
-      <span style={{ fontSize: 12, color: COLOR.textMuted, whiteSpace: "nowrap" }}>
+      <span
+        style={{
+          fontSize: 12,
+          color: COLOR.textMuted,
+          whiteSpace: "nowrap",
+        }}
+      >
         {value}/{total}
       </span>
     </div>
@@ -39,39 +64,70 @@ export function FacultyCard() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<KhoaFilter>("all");
   const [hovered, setHovered] = useState<number | null>(null);
-  const [items, setItems] = useState<KhoaItem[]>([]);
+  const [items, setItems] = useState<FacultyApiItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
+
     const run = async () => {
       setLoading(true);
       setError("");
+
       try {
         const res = await fetchKhoaList();
-        if (!cancelled) setItems(res);
+        if (!cancelled) setItems((res as FacultyApiItem[]) ?? []);
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Không thể tải danh sách khoa.");
+          setError(
+            e instanceof Error ? e.message : "Không thể tải danh sách khoa."
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
+
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const filtered = useMemo(() => {
-    return items.filter((k) =>
-      filter === "all" ? true : filter === "daNop" ? k.daNop : !k.daNop
-    );
-  }, [items, filter]);
+  const normalizedItems = useMemo(() => {
+    return items.map((item) => {
+      const name = item.facultyName ?? item.ten ?? "—";
+      const code = item.facultyCode ?? item.viet_tat ?? "";
+      const responded = Number(item.responded ?? item.soSV ?? 0);
+      const total = Number(item.total ?? item.tongSV ?? 0);
+      const color = item.color ?? item.mau ?? COLOR.primaryLight;
+      const submitted =
+        typeof item.daNop === "boolean"
+          ? item.daNop
+          : item.status === "submitted" || item.status === "done";
 
-  const totalAll   = items.length;
-  const totalDaNop  = items.filter((k) => k.daNop).length;
-  const totalChuaNop = items.filter((k) => !k.daNop).length;
+      return {
+        key: String(item.facultyId ?? code ?? name),
+        name,
+        code,
+        responded,
+        total,
+        color,
+        submitted,
+      };
+    });
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    return normalizedItems.filter((k) =>
+      filter === "all" ? true : filter === "daNop" ? k.submitted : !k.submitted
+    );
+  }, [normalizedItems, filter]);
+
+  const totalAll = normalizedItems.length;
+  const totalDaNop = normalizedItems.filter((k) => k.submitted).length;
+  const totalChuaNop = normalizedItems.filter((k) => !k.submitted).length;
 
   return (
     <div
@@ -84,7 +140,6 @@ export function FacultyCard() {
         height: "100%",
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "14px 20px",
@@ -115,26 +170,38 @@ export function FacultyCard() {
           onChange={(v) => setFilter(v as KhoaFilter)}
           size="small"
           style={{ width: 175 }}
-        >
-          <Select.Option value="all">Tất cả ({totalAll})</Select.Option>
-          <Select.Option value="daNop">Đã nộp ({totalDaNop})</Select.Option>
-          <Select.Option value="chuaNop">Chưa nộp ({totalChuaNop})</Select.Option>
-        </Select>
+          options={[
+            { value: "all", label: `Tất cả (${totalAll})` },
+            { value: "daNop", label: `Đã nộp (${totalDaNop})` },
+            { value: "chuaNop", label: `Chưa nộp (${totalChuaNop})` },
+          ]}
+        />
       </div>
 
       {error && (
         <div style={{ padding: 16 }}>
-          <Alert type="error" showIcon message="Không thể tải danh sách khoa" description={error} />
+          <Alert
+            type="error"
+            showIcon
+            message="Không thể tải danh sách khoa"
+            description={error}
+          />
         </div>
       )}
 
       {loading ? (
-        <div style={{ minHeight: 260, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            minHeight: 260,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Spin />
         </div>
       ) : (
         <>
-          {/* Column header */}
           <div
             style={{
               padding: "8px 20px",
@@ -157,12 +224,12 @@ export function FacultyCard() {
 
           <div style={{ maxHeight: 360, overflowY: "auto" }}>
             {filtered.map((k, i) => {
-              const soSVPhanhoi = k.soSV ?? 0;
               const isHovered = hovered === i;
+
               return (
                 <div
-                  key={k.ten}
-                  onClick={() => navigate(`/admin/bao-cao/${k.viet_tat.toLowerCase()}`)}
+                  key={k.key}
+                  onClick={() => k.code && navigate(`/admin/bao-cao/${k.code.toLowerCase()}`)}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
                   style={{
@@ -170,9 +237,14 @@ export function FacultyCard() {
                     alignItems: "center",
                     gap: 12,
                     padding: "10px 20px",
-                    background: isHovered ? COLOR.bgMuted : i % 2 === 0 ? COLOR.bgCard : COLOR.bgPage,
+                    background:
+                      isHovered
+                        ? COLOR.bgMuted
+                        : i % 2 === 0
+                        ? COLOR.bgCard
+                        : COLOR.bgPage,
                     borderBottom: `1px solid ${COLOR.borderSoft}`,
-                    cursor: "pointer",
+                    cursor: k.code ? "pointer" : "default",
                     transition: "background 120ms ease",
                   }}
                 >
@@ -199,32 +271,44 @@ export function FacultyCard() {
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
+                    title={k.name}
                   >
-                    {k.ten}
+                    {k.name}
                   </span>
 
                   <div style={{ width: 200, flexShrink: 0 }}>
-                    <ProgressBar value={soSVPhanhoi} total={k.tongSV} color={k.mau} />
+                    <ProgressBar
+                      value={k.responded}
+                      total={k.total}
+                      color={k.color}
+                    />
                   </div>
 
                   <span
                     style={{
                       fontSize: 12,
                       fontWeight: 600,
-                      color: k.daNop ? COLOR.success : COLOR.danger,
+                      color: k.submitted ? COLOR.success : COLOR.danger,
                       flexShrink: 0,
                       width: 80,
                       textAlign: "right",
                     }}
                   >
-                    {k.daNop ? "✓ Đã nộp" : "✗ Chưa nộp"}
+                    {k.submitted ? "Đã nộp" : "Chưa nộp"}
                   </span>
                 </div>
               );
             })}
 
             {!filtered.length && !error && (
-              <div style={{ padding: "32px 20px", textAlign: "center", color: COLOR.textFaint, fontSize: 13 }}>
+              <div
+                style={{
+                  padding: "32px 20px",
+                  textAlign: "center",
+                  color: COLOR.textFaint,
+                  fontSize: 13,
+                }}
+              >
                 Không có dữ liệu khoa
               </div>
             )}
