@@ -1,6 +1,28 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Select, Button, Modal } from "antd";
+import {
+  Col,
+  Row,
+  Input,
+  Select,
+  Button,
+  Modal,
+  Card,
+  Statistic,
+  Tag,
+  Badge,
+  Space,
+  Typography,
+  theme,
+} from "antd";
+import {
+  PlusOutlined,
+  ClearOutlined,
+  BankOutlined,
+  CheckCircleOutlined,
+  PauseCircleOutlined,
+  SolutionOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
@@ -17,126 +39,27 @@ import {
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 
-const T = {
-  primary: "#1d4ed8",
-  primaryLight: "#eff6ff",
-  primaryBorder: "#bfdbfe",
-  success: "#16a34a",
-  successLight: "#f0fdf4",
-  successBorder: "#bbf7d0",
-  warning: "#d97706",
-  warningLight: "#fffbeb",
-  warningBorder: "#fde68a",
-  danger: "#dc2626",
-  dangerLight: "#fef2f2",
-  dangerBorder: "#fecaca",
-  neutral: "#6b7280",
-  neutralLight: "#f9fafb",
-  text: "#111827",
-  textMuted: "#6b7280",
-  textFaint: "#9ca3af",
-  border: "#e5e7eb",
-  surface: "#ffffff",
-  bg: "#f3f4f6",
-};
-
-interface StatCardProps {
-  label: string;
-  value: number;
-  color: string;
-  bg: string;
-  border: string;
-  accent: string;
-}
-
-function StatCard({ label, value, color, bg, border, accent }: StatCardProps) {
-  return (
-    <div
-      style={{
-        background: T.surface,
-        border: `1px solid ${T.border}`,
-        borderRadius: 12,
-        padding: "20px 24px",
-        borderTop: `3px solid ${accent}`,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: 28,
-          fontWeight: 700,
-          color: color,
-          letterSpacing: "-0.5px",
-          lineHeight: 1,
-          marginBottom: 8,
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {value.toLocaleString("vi-VN")}
-      </div>
-      <div
-        style={{
-          fontSize: 13,
-          color: T.textMuted,
-          fontWeight: 500,
-          letterSpacing: "0.01em",
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
+const { Title, Text } = Typography;
 
 function StatusBadge({ status }: { status: PartnerStatus }) {
   const isActive = status === "active";
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "3px 10px",
-        borderRadius: 20,
-        fontSize: 12,
-        fontWeight: 600,
-        background: isActive ? T.successLight : T.dangerLight,
-        color: isActive ? T.success : T.danger,
-        border: `1px solid ${isActive ? T.successBorder : T.dangerBorder}`,
-      }}
-    >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: isActive ? T.success : T.danger,
-          display: "inline-block",
-          flexShrink: 0,
-        }}
-      />
-      {isActive ? "Hoạt động" : "Tạm ngưng"}
-    </span>
+    <Badge
+      status={isActive ? "success" : "default"}
+      text={
+        <Text type={isActive ? undefined : "secondary"} style={{ fontSize: 12 }}>
+          {isActive ? "Hoạt động" : "Tạm ngưng"}
+        </Text>
+      }
+    />
   );
 }
 
-function IndustryChip({ value, faded }: { value: string; faded?: boolean }) {
+function IndustryTag({ value, faded }: { value: string; faded?: boolean }) {
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "3px 10px",
-        borderRadius: 6,
-        fontSize: 12,
-        fontWeight: 500,
-        background: faded ? T.bg : T.primaryLight,
-        color: faded ? T.textFaint : T.primary,
-        border: `1px solid ${faded ? T.border : T.primaryBorder}`,
-        whiteSpace: "nowrap",
-      }}
-    >
+    <Tag color={faded ? "default" : "blue"} style={{ margin: 0 }}>
       {value}
-    </span>
+    </Tag>
   );
 }
 
@@ -157,17 +80,15 @@ function getEnterpriseFacultyLabel(
 
 export default function EnterprisePage() {
   const navigate = useNavigate();
+  const { token } = theme.useToken();
 
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
-  const [facultyFilter, setFacultyFilter] = useState<string | undefined>(
-    undefined
-  );
+  const [facultyFilter, setFacultyFilter] = useState<string | undefined>(undefined);
   const [query, setQuery] = useState({ page: 1, size: 8 });
-  const [modal, setModal] = useState<{
-    open: boolean;
-    enterprise: Enterprise | null;
-  }>({ open: false, enterprise: null });
+  const [modal, setModal] = useState<{ open: boolean; enterprise: Enterprise | null }>(
+    { open: false, enterprise: null }
+  );
 
   const {
     enterprises,
@@ -196,43 +117,6 @@ export default function EnterprisePage() {
       return matchSearch && matchIndustry;
     });
   }, [enterprises, search, industry]);
-
-  const stats: StatCardProps[] = [
-    {
-      label: "Tổng doanh nghiệp",
-      value: total,
-      color: T.primary,
-      bg: T.primaryLight,
-      border: T.primaryBorder,
-      accent: T.primary,
-    },
-    {
-      label: "Đang hoạt động",
-      value: enterprises.filter((e) => e.partnerStatus === "active").length,
-      color: T.success,
-      bg: T.successLight,
-      border: T.successBorder,
-      accent: T.success,
-    },
-    {
-      label: "Tạm ngưng",
-      value: enterprises.filter((e) => e.partnerStatus === "inactive").length,
-      color: T.danger,
-      bg: T.dangerLight,
-      border: T.dangerBorder,
-      accent: T.danger,
-    },
-    {
-      label: "Vị trí tuyển dụng",
-      value: enterprises
-        .filter((e) => e.partnerStatus === "active")
-        .reduce((sum, e) => sum + e.jobs, 0),
-      color: T.warning,
-      bg: T.warningLight,
-      border: T.warningBorder,
-      accent: T.warning,
-    },
-  ];
 
   const handleSave = async (values: EnterpriseFormValues) => {
     if (modal.enterprise) {
@@ -268,16 +152,9 @@ export default function EnterprisePage() {
       align: "center",
       width: 55,
       render: (_value, _record, index) => (
-        <span
-          style={{
-            fontSize: 13,
-            color: T.textFaint,
-            fontWeight: 500,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
+        <Text type="secondary" style={{ fontVariantNumeric: "tabular-nums", fontSize: 13 }}>
           {(query.page - 1) * query.size + index + 1}
-        </span>
+        </Text>
       ),
     },
     {
@@ -285,34 +162,16 @@ export default function EnterprisePage() {
       key: "name",
       width: 270,
       render: (_value, r) => (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            opacity: faded(r) ? 0.45 : 1,
-          }}
-        >
-          <span
-            style={{
-              fontWeight: 600,
-              fontSize: 14,
-              color: T.text,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
+        <Space direction="vertical" size={2} style={{ opacity: faded(r) ? 0.45 : 1 }}>
+          <Text strong style={{ fontSize: 14 }}>
             {r.name}
-          </span>
+          </Text>
           {r.website && (
-            <span
-              style={{ fontSize: 12, color: T.textFaint, fontWeight: 400 }}
-            >
+            <Text type="secondary" style={{ fontSize: 12 }}>
               {r.website}
-            </span>
+            </Text>
           )}
-        </div>
+        </Space>
       ),
     },
     {
@@ -320,24 +179,16 @@ export default function EnterprisePage() {
       dataIndex: "industry",
       key: "industry",
       width: 160,
-      render: (value: string, r) => (
-        <IndustryChip value={value} faded={faded(r)} />
-      ),
+      render: (value: string, r) => <IndustryTag value={value} faded={faded(r)} />,
     },
     {
       title: "Khoa",
       key: "faculties",
       width: 190,
       render: (_value, r) => (
-        <span
-          style={{
-            fontSize: 12,
-            color: faded(r) ? T.textFaint : T.textMuted,
-            fontWeight: 400,
-          }}
-        >
+        <Text type="secondary" style={{ fontSize: 12 }}>
           {getEnterpriseFacultyLabel(r, faculties)}
-        </span>
+        </Text>
       ),
     },
     {
@@ -353,137 +204,114 @@ export default function EnterprisePage() {
       align: "center",
       width: 90,
       render: (value: number, r) => (
-        <span
-          style={{
-            display: "inline-block",
-            minWidth: 32,
-            padding: "3px 10px",
-            borderRadius: 20,
-            fontWeight: 700,
-            fontSize: 13,
-            color: faded(r) ? T.textFaint : T.primary,
-            background: faded(r) ? T.bg : T.primaryLight,
-            border: `1px solid ${faded(r) ? T.border : T.primaryBorder}`,
-            fontVariantNumeric: "tabular-nums",
-          }}
+        <Tag
+          color={faded(r) ? "default" : "blue"}
+          style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700, minWidth: 32, textAlign: "center" }}
         >
           {value}
-        </span>
+        </Tag>
       ),
     },
   ];
 
-  const hasFilter =
-    search || industry !== "Tất cả ngành" || facultyFilter !== undefined;
+  const hasFilter = search || industry !== "Tất cả ngành" || facultyFilter !== undefined;
+
+  const activeCount = enterprises.filter((e) => e.partnerStatus === "active").length;
+  const inactiveCount = enterprises.filter((e) => e.partnerStatus === "inactive").length;
+  const totalJobs = enterprises
+    .filter((e) => e.partnerStatus === "active")
+    .reduce((sum, e) => sum + e.jobs, 0);
 
   return (
     <AdminLayout>
-      <div
-        style={{
-          minHeight: "100vh",
-          background: T.bg,
-          padding: "28px 32px 40px",
-        }}
-      >
+      <div style={{ padding: "28px 32px 40px", background: token.colorBgLayout, minHeight: "100vh" }}>
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 24,
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 22,
-                fontWeight: 700,
-                color: T.text,
-                letterSpacing: "-0.4px",
-                lineHeight: 1.2,
-              }}
-            >
+        <Row justify="space-between" align="middle" style={{ marginBottom: 24 }} wrap>
+          <Col>
+            <Title level={4} style={{ margin: 0 }}>
               Doanh nghiệp đối tác
-            </h1>
-            <p
-              style={{
-                margin: "6px 0 0",
-                fontSize: 13,
-                color: T.textMuted,
-                fontWeight: 400,
-              }}
+            </Title>
+            <Text type="secondary">Quản lý danh sách và trạng thái hợp tác doanh nghiệp</Text>
+          </Col>
+          <Col>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setModal({ open: true, enterprise: null })}
             >
-              Quản lý danh sách và trạng thái hợp tác doanh nghiệp
-            </p>
-          </div>
-
-          <Button
-            type="primary"
-            style={{
-              background: T.primary,
-              border: "none",
-              borderRadius: 8,
-              fontWeight: 600,
-              height: 38,
-              paddingInline: 20,
-              fontSize: 13,
-              boxShadow: "0 1px 4px rgba(29,78,216,0.25)",
-            }}
-            onClick={() => setModal({ open: true, enterprise: null })}
-          >
-            + Thêm doanh nghiệp
-          </Button>
-        </div>
+              Thêm doanh nghiệp
+            </Button>
+          </Col>
+        </Row>
 
         {/* Stat Cards */}
-        <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
-          {stats.map((s) => (
-            <Col key={s.label} xs={12} sm={6}>
-              <StatCard {...s} />
-            </Col>
-          ))}
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={12} sm={6}>
+            <Card variant="borderless" size="small">
+              <Statistic
+                title="Tổng doanh nghiệp"
+                value={total}
+                prefix={<BankOutlined />}
+                valueStyle={{ color: token.colorPrimary }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card variant="borderless" size="small">
+              <Statistic
+                title="Đang hoạt động"
+                value={activeCount}
+                prefix={<CheckCircleOutlined />}
+                valueStyle={{ color: token.colorSuccess }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card variant="borderless" size="small">
+              <Statistic
+                title="Tạm ngưng"
+                value={inactiveCount}
+                prefix={<PauseCircleOutlined />}
+                valueStyle={{ color: token.colorTextQuaternary }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card variant="borderless" size="small">
+              <Statistic
+                title="Vị trí tuyển dụng"
+                value={totalJobs}
+                prefix={<SolutionOutlined />}
+                valueStyle={{ color: token.colorWarning }}
+              />
+            </Card>
+          </Col>
         </Row>
 
         {/* Table Card */}
-        <div
-          style={{
-            background: T.surface,
-            border: `1px solid ${T.border}`,
-            borderRadius: 12,
-            overflow: "hidden",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-          }}
+        <Card
+          variant="borderless"
+          styles={{ body: { padding: 0 } }}
         >
           {/* Filter Bar */}
           <div
             style={{
               padding: "14px 20px",
-              borderBottom: `1px solid ${T.border}`,
+              borderBottom: `1px solid ${token.colorBorderSecondary}`,
               display: "flex",
               gap: 10,
               flexWrap: "wrap",
               alignItems: "center",
-              background: T.surface,
             }}
           >
-            <Input
+            <Input.Search
               placeholder="Tìm kiếm tên, email..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{
-                width: 230,
-                height: 34,
-                borderRadius: 7,
-                fontSize: 13,
-                border: `1px solid ${T.border}`,
-              }}
+              style={{ width: 230 }}
               allowClear
             />
 
@@ -493,7 +321,7 @@ export default function EnterprisePage() {
                 setIndustry(v);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{ width: 185, height: 34 }}
+              style={{ width: 185 }}
               options={[
                 { label: "Tất cả ngành", value: "Tất cả ngành" },
                 ...INDUSTRIES.map((i) => ({ label: i, value: i })),
@@ -511,11 +339,9 @@ export default function EnterprisePage() {
                 setQuery((prev) => ({ ...prev, page: 1 }));
                 setPage(0);
               }}
-              style={{ width: 185, height: 34 }}
+              style={{ width: 185 }}
               loading={facultiesLoading}
-              notFoundContent={
-                facultiesLoading ? "Đang tải..." : "Không có khoa"
-              }
+              notFoundContent={facultiesLoading ? "Đang tải..." : "Không có khoa"}
               getPopupContainer={(trigger) => trigger.parentElement!}
             >
               {(faculties ?? []).map((f: any) => (
@@ -530,7 +356,8 @@ export default function EnterprisePage() {
 
             {hasFilter && (
               <Button
-                type="text"
+                danger
+                icon={<ClearOutlined />}
                 onClick={() => {
                   setSearch("");
                   setIndustry("Tất cả ngành");
@@ -539,32 +366,21 @@ export default function EnterprisePage() {
                   setQuery((prev) => ({ ...prev, page: 1 }));
                   setPage(0);
                 }}
-                style={{
-                  height: 34,
-                  color: T.danger,
-                  fontSize: 13,
-                  fontWeight: 500,
-                  padding: "0 10px",
-                  borderRadius: 7,
-                  border: `1px solid ${T.dangerBorder}`,
-                  background: T.dangerLight,
-                }}
               >
                 Xóa bộ lọc
               </Button>
             )}
 
-            <span
+            <Text
+              type="secondary"
               style={{
                 marginLeft: "auto",
                 fontSize: 12,
-                color: T.textFaint,
-                fontWeight: 500,
                 fontVariantNumeric: "tabular-nums",
               }}
             >
               {filtered.length} / {total} doanh nghiệp
-            </span>
+            </Text>
           </div>
 
           <CustomTable<Enterprise>
@@ -587,15 +403,11 @@ export default function EnterprisePage() {
             }}
             scroll={{ x: 820 }}
             onRow={(r) => ({
-              onClick: () =>
-                navigate(`/admin/enterprises/${toSlug(r.name)}`),
-              style: {
-                cursor: "pointer",
-                transition: "background 0.15s",
-              },
+              onClick: () => navigate(`/admin/enterprises/${toSlug(r.name)}`),
+              style: { cursor: "pointer" },
             })}
           />
-        </div>
+        </Card>
       </div>
 
       <EnterpriseFormModal

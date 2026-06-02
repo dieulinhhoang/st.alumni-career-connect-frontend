@@ -38,7 +38,6 @@ export function EnterpriseFormModal({
       form.resetFields();
       return;
     }
-
     form.setFieldsValue({
       name: enterprise?.name ?? "",
       abbr: enterprise?.abbr ?? "",
@@ -55,21 +54,15 @@ export function EnterpriseFormModal({
 
   const handleOk = async () => {
     const values = await form.validateFields();
-
     setSaving(true);
     try {
-      await onSave({
-        ...values,
-        faculty: values.faculty ?? null,
-      });
+      await onSave({ ...values, faculty: values.faculty ?? null });
       form.resetFields();
       onClose();
     } finally {
       setSaving(false);
     }
   };
-
-  const accentColor = "#226cc0";
 
   return (
     <Modal
@@ -81,7 +74,6 @@ export function EnterpriseFormModal({
       cancelText="Hủy"
       width={600}
       confirmLoading={saving}
-      okButtonProps={{ style: { background: accentColor, border: "none" } }}
     >
       <Form<EnterpriseFormValues>
         form={form}
@@ -98,7 +90,6 @@ export function EnterpriseFormModal({
               <Input placeholder="VD: FPT Software" />
             </Form.Item>
           </Col>
-
           <Col xs={24} sm={10}>
             <Form.Item
               name="abbr"
@@ -119,22 +110,15 @@ export function EnterpriseFormModal({
             >
               <Select
                 placeholder="Chọn ngành nghề"
-                options={INDUSTRIES.map((item) => ({
-                  label: item,
-                  value: item,
-                }))}
+                options={INDUSTRIES.map((item) => ({ label: item, value: item }))}
               />
             </Form.Item>
           </Col>
-
           <Col xs={24} sm={12}>
             <Form.Item name="size" label="Quy mô nhân sự">
               <Select
                 placeholder="Chọn quy mô"
-                options={ENTERPRISE_SIZES.map((item) => ({
-                  label: item,
-                  value: item,
-                }))}
+                options={ENTERPRISE_SIZES.map((item) => ({ label: item, value: item }))}
               />
             </Form.Item>
           </Col>
@@ -170,7 +154,6 @@ export function EnterpriseFormModal({
               <Input placeholder="hr@company.com" />
             </Form.Item>
           </Col>
-
           <Col xs={24} sm={12}>
             <Form.Item name="phone" label="Số điện thoại">
               <Input placeholder="024 xxxx xxxx" />
