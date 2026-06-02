@@ -13,7 +13,6 @@ import {
   Badge,
   Space,
   Typography,
-  theme,
 } from "antd";
 import {
   PlusOutlined,
@@ -38,6 +37,7 @@ import {
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
+import { COLOR, RADIUS, SHADOW } from "../DashBoard/theme";
 
 const { Title, Text } = Typography;
 
@@ -78,9 +78,79 @@ function getEnterpriseFacultyLabel(
     .join(", ");
 }
 
+interface EnterpriseStatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  accentColor: string;
+  valueColor: string;
+}
+
+function EnterpriseStatCard({ icon, label, value, accentColor, valueColor }: EnterpriseStatCardProps) {
+  const iconBg = `${accentColor}18`;
+  return (
+    <div
+      style={{
+        background: COLOR.bgCard,
+        borderRadius: RADIUS.xl,
+        padding: "16px 20px",
+        height: "100%",
+        border: `1px solid ${COLOR.border}`,
+        boxShadow: SHADOW.card,
+        transition: "box-shadow 0.2s ease, transform 0.2s ease",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        cursor: "default",
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.boxShadow = SHADOW.hover;
+        el.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.boxShadow = SHADOW.card;
+        el.style.transform = "translateY(0)";
+      }}
+    >
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: RADIUS.lg,
+          background: iconBg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 20,
+          color: accentColor,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <Statistic
+        title={
+          <span style={{ fontSize: 12, color: COLOR.textMuted, fontWeight: 600 }}>
+            {label}
+          </span>
+        }
+        value={value}
+        valueStyle={{
+          fontSize: 26,
+          fontWeight: 700,
+          color: valueColor,
+          lineHeight: 1.2,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      />
+    </div>
+  );
+}
+
 export default function EnterprisePage() {
   const navigate = useNavigate();
-  const { token } = theme.useToken();
 
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState("Tất cả ngành");
@@ -222,12 +292,40 @@ export default function EnterprisePage() {
     .filter((e) => e.partnerStatus === "active")
     .reduce((sum, e) => sum + e.jobs, 0);
 
-  const statCardStyle: React.CSSProperties = {
-    borderRadius: token.borderRadiusLG,
-    boxShadow: token.boxShadowTertiary,
-    border: `1px solid ${token.colorBorderSecondary}`,
-    height: "100%",
-  };
+  const statCards = [
+    {
+      key: "total",
+      icon: <BankOutlined />,
+      label: "Tổng doanh nghiệp",
+      value: total,
+      accentColor: COLOR.primary,
+      valueColor: COLOR.primary,
+    },
+    {
+      key: "active",
+      icon: <CheckCircleOutlined />,
+      label: "Đang hoạt động",
+      value: activeCount,
+      accentColor: COLOR.success,
+      valueColor: COLOR.success,
+    },
+    {
+      key: "inactive",
+      icon: <PauseCircleOutlined />,
+      label: "Tạm ngưng",
+      value: inactiveCount,
+      accentColor: COLOR.textFaint,
+      valueColor: COLOR.textMuted,
+    },
+    {
+      key: "jobs",
+      icon: <SolutionOutlined />,
+      label: "Vị trí tuyển dụng",
+      value: totalJobs,
+      accentColor: COLOR.warning,
+      valueColor: COLOR.warning,
+    },
+  ];
 
   return (
     <AdminLayout>
@@ -253,46 +351,11 @@ export default function EnterprisePage() {
 
         {/* Stat Cards */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={12} sm={6}>
-            <Card size="small" style={statCardStyle}>
-              <Statistic
-                title="Tổng doanh nghiệp"
-                value={total}
-                prefix={<BankOutlined />}
-                valueStyle={{ color: token.colorPrimary }}
-              />
-            </Card>
-          </Col>
-          <Col xs={12} sm={6}>
-            <Card size="small" style={statCardStyle}>
-              <Statistic
-                title="Đang hoạt động"
-                value={activeCount}
-                prefix={<CheckCircleOutlined />}
-                valueStyle={{ color: token.colorSuccess }}
-              />
-            </Card>
-          </Col>
-          <Col xs={12} sm={6}>
-            <Card size="small" style={statCardStyle}>
-              <Statistic
-                title="Tạm ngưng"
-                value={inactiveCount}
-                prefix={<PauseCircleOutlined />}
-                valueStyle={{ color: token.colorTextQuaternary }}
-              />
-            </Card>
-          </Col>
-          <Col xs={12} sm={6}>
-            <Card size="small" style={statCardStyle}>
-              <Statistic
-                title="Vị trí tuyển dụng"
-                value={totalJobs}
-                prefix={<SolutionOutlined />}
-                valueStyle={{ color: token.colorWarning }}
-              />
-            </Card>
-          </Col>
+          {statCards.map((card) => (
+            <Col xs={12} sm={6} key={card.key}>
+              <EnterpriseStatCard {...card} />
+            </Col>
+          ))}
         </Row>
 
         {/* Table Card */}
@@ -304,7 +367,7 @@ export default function EnterprisePage() {
           <div
             style={{
               padding: "14px 20px",
-              borderBottom: `1px solid ${token.colorBorderSecondary}`,
+              borderBottom: `1px solid ${COLOR.border}`,
               display: "flex",
               gap: 10,
               flexWrap: "wrap",
