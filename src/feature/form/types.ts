@@ -87,6 +87,45 @@ export interface SurveyResponse {
   }[];
 }
 
+// SURVEY PERIOD (Đợt khảo sát)
+export type SurveyPeriodStatus = 'draft' | 'active' | 'closed' | 'scheduled';
+
+export interface SurveyPeriod {
+  id: number;
+  title: string;                   // Tên đợt khảo sát
+  description?: string;
+  formId: number;                  // FK -> Form.id
+  formName: string;                // tên biểu mẫu liên kết
+  startDate: string;               // ISO date string
+  endDate: string;                 // ISO date string
+  status: SurveyPeriodStatus;
+  targetAudience: string;          // Đối tượng khảo sát (vd: "Sinh viên tốt nghiệp 2023")
+  targetYear?: number;             // Năm tốt nghiệp mục tiêu
+  totalInvited: number;            // Số lượng mời
+  totalResponses: number;          // Số lượng đã trả lời
+  createdBy: string;               // Người tạo
+  created_at: string;              // ISO date string
+  updated_at?: string;
+  publicUrl?: string;              // URL công khai phát hành
+  requiresVerification: boolean;   // Có cần xác thực danh tính không
+}
+
+export interface CreateSurveyPeriodPayload {
+  title: string;
+  description?: string;
+  formId: number;
+  startDate: string;
+  endDate: string;
+  targetAudience: string;
+  targetYear?: number;
+  totalInvited?: number;
+  requiresVerification: boolean;
+}
+
+export interface UpdateSurveyPeriodPayload extends Partial<CreateSurveyPeriodPayload> {
+  status?: SurveyPeriodStatus;
+}
+
 // THEME TYPES
 export interface Theme {
   id: string;
