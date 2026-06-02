@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { COLOR, RADIUS, SHADOW } from "./theme";
 
 interface Props {
   index: number;
@@ -12,22 +13,20 @@ interface Props {
 
 export function StatCard({ label, value, sub, icon, accentColor, trend }: Props) {
   const isNegative = trend?.startsWith("-");
-  const trendColor = isNegative ? "#e11d48" : "#059669";
+  const trendColor = isNegative ? COLOR.danger : COLOR.success;
   const trendBg    = isNegative ? "#fff1f2" : "#f0fdf4";
   const trendArrow = isNegative ? "↓" : "↑";
-
-  // Derive a very light tint from accent for the icon bubble
   const iconBg = `${accentColor}18`;
 
   return (
     <div
       style={{
-        background: "#ffffff",
-        borderRadius: 16,
+        background: COLOR.bgCard,
+        borderRadius: RADIUS.xl,
         padding: "18px 20px",
         height: "100%",
-        border: "1px solid rgba(0,0,0,0.07)",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)",
+        border: `1px solid ${COLOR.border}`,
+        boxShadow: SHADOW.card,
         transition: "box-shadow 0.2s ease, transform 0.2s ease",
         display: "flex",
         flexDirection: "column",
@@ -36,12 +35,12 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
       }}
       onMouseEnter={e => {
         const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08)";
+        el.style.boxShadow = SHADOW.hover;
         el.style.transform  = "translateY(-2px)";
       }}
       onMouseLeave={e => {
         const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)";
+        el.style.boxShadow = SHADOW.card;
         el.style.transform  = "translateY(0)";
       }}
     >
@@ -51,7 +50,7 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
           style={{
             width: 40,
             height: 40,
-            borderRadius: 12,
+            borderRadius: RADIUS.lg,
             background: iconBg,
             display: "flex",
             alignItems: "center",
@@ -74,7 +73,7 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
               color: trendColor,
               background: trendBg,
               padding: "3px 8px",
-              borderRadius: 99,
+              borderRadius: RADIUS.pill,
               letterSpacing: "0.2px",
             }}
           >
@@ -89,30 +88,32 @@ export function StatCard({ label, value, sub, icon, accentColor, trend }: Props)
           style={{
             fontSize: 30,
             fontWeight: 700,
-            color: "#0f172a",
+            color: COLOR.textDark,
             lineHeight: 1,
             letterSpacing: "-0.5px",
           }}
         >
           {value}
         </div>
-        <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.4 }}>{label}</div>
+        <div style={{ fontSize: 12, color: COLOR.textMuted, fontWeight: 600, lineHeight: 1.4 }}>
+          {label}
+        </div>
       </div>
 
-      {/* Row 3: Sub-text + thin accent line */}
-      {/* <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {/* Row 3: Sub-text */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div
           style={{
             width: 3,
             height: 14,
-            borderRadius: 99,
+            borderRadius: RADIUS.pill,
             background: accentColor,
             flexShrink: 0,
             opacity: 0.7,
           }}
         />
-        <span style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.4 }}>{sub}</span>
-      </div> */}
+        <span style={{ fontSize: 11, color: COLOR.textFaint, lineHeight: 1.4 }}>{sub}</span>
+      </div>
     </div>
   );
 }

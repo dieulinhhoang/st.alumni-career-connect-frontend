@@ -16,7 +16,7 @@ import {
   fetchDashboardSummary,
   type DashboardSummary,
 } from "../../../feature/dashboard/api";
-import { COLOR } from "./theme";
+import { COLOR, RADIUS, SHADOW } from "./theme";
 
 const { Title, Text } = Typography;
 
@@ -38,7 +38,6 @@ export function DashBoard() {
 
   useEffect(() => {
     let cancelled = false;
-
     const run = async () => {
       setLoading(true);
       setError("");
@@ -47,24 +46,18 @@ export function DashBoard() {
         if (!cancelled) setSummary(res);
       } catch (e) {
         if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : "Không thể tải dữ liệu dashboard."
-          );
+          setError(e instanceof Error ? e.message : "Không thể tải dữ liệu dashboard.");
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
-
     run();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const statCards: StatCardItem[] = useMemo(() => {
     if (!summary) return [];
-
     return [
       {
         index: 1,
@@ -110,39 +103,35 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-      <div className="">
+      <div style={{ background: COLOR.bgPage, minHeight: "100vh", padding: "0 0 32px" }}>
+        {/* Hero banner */}
         <div
           style={{
             marginBottom: 24,
-            background:
-              "linear-gradient(135deg, #e0f2e9 0%, #f1f8f4 40%, #ffffff 100%)",
-            borderRadius: 20,
+            background: `linear-gradient(135deg, ${COLOR.primaryTint} 0%, #f1f8f4 40%, #ffffff 100%)`,
+            borderRadius: RADIUS.xl,
             padding: "20px 24px",
             position: "relative",
             overflow: "hidden",
-            border: "1px solid #cce3d7",
+            border: `1px solid ${COLOR.borderSoft}`,
+            boxShadow: SHADOW.sm,
           }}
         >
+          {/* Decorative circles */}
           <div
             style={{
-              position: "absolute",
-              top: -30,
-              right: -30,
-              width: 160,
-              height: 160,
-              borderRadius: "50%",
-              background: "rgba(0,114,63,0.06)",
+              position: "absolute", top: -30, right: -30,
+              width: 160, height: 160, borderRadius: "50%",
+              background: `${COLOR.primary}08`,
+              pointerEvents: "none",
             }}
           />
           <div
             style={{
-              position: "absolute",
-              bottom: -20,
-              right: 80,
-              width: 80,
-              height: 80,
-              borderRadius: "50%",
-              background: "rgba(0,114,63,0.04)",
+              position: "absolute", bottom: -20, right: 80,
+              width: 80, height: 80, borderRadius: "50%",
+              background: `${COLOR.primary}05`,
+              pointerEvents: "none",
             }}
           />
 
@@ -159,12 +148,7 @@ export function DashBoard() {
             <div>
               <Title
                 level={4}
-                style={{
-                  margin: 0,
-                  color: "#064e3b",
-                  fontWeight: 800,
-                  fontSize: 20,
-                }}
+                style={{ margin: 0, color: COLOR.textDark, fontWeight: 800, fontSize: 20 }}
               >
                 Tổng quan hệ thống
               </Title>
@@ -181,29 +165,21 @@ export function DashBoard() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                background: "#ffffff",
-                borderRadius: 100,
+                background: COLOR.bgCard,
+                borderRadius: RADIUS.pill,
                 padding: "6px 14px",
-                border: "1px solid #d1fae5",
-                boxShadow: "0 1px 4px rgba(22,163,74,0.14)",
+                border: `1px solid ${COLOR.borderSoft}`,
+                boxShadow: "0 1px 4px rgba(22,163,74,0.12)",
               }}
             >
               <div
                 style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
+                  width: 7, height: 7, borderRadius: "50%",
                   background: "#22c55e",
-                  boxShadow: "0 0 0 2px rgba(34,197,94,0.45)",
+                  boxShadow: "0 0 0 2px rgba(34,197,94,0.35)",
                 }}
               />
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: COLOR.primary,
-                  fontWeight: 600,
-                }}
-              >
+              <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
                 Dữ liệu cập nhật
               </Text>
             </div>
@@ -216,24 +192,18 @@ export function DashBoard() {
             showIcon
             message="Không thể tải dashboard"
             description={error}
-            style={{ marginBottom: 16, borderRadius: 12 }}
+            style={{ marginBottom: 16, borderRadius: RADIUS.lg }}
           />
         )}
 
         {loading ? (
-          <div
-            style={{
-              minHeight: 220,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Spin />
+          <div style={{ minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Spin size="large" />
           </div>
         ) : (
           <>
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="top">
+            {/* KPI cards */}
+            <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="stretch">
               {statCards.map((item) => (
                 <Col xs={24} sm={12} md={12} lg={6} key={item.index}>
                   <StatCard {...item} />
@@ -241,7 +211,8 @@ export function DashBoard() {
               ))}
             </Row>
 
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="top">
+            {/* Faculty + Enterprise */}
+            <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="stretch">
               <Col xs={24} lg={14}>
                 <FacultyCard />
               </Col>
@@ -250,6 +221,7 @@ export function DashBoard() {
               </Col>
             </Row>
 
+            {/* Chart section */}
             <ChartSection state={state} setField={setField} />
           </>
         )}
@@ -258,7 +230,7 @@ export function DashBoard() {
           .ant-select-selector { border-radius: 8px !important; }
           ::-webkit-scrollbar { width: 4px; }
           ::-webkit-scrollbar-track { background: transparent; }
-          ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+          ::-webkit-scrollbar-thumb { background: ${COLOR.border}; border-radius: 99px; }
         `}</style>
       </div>
     </AdminLayout>
