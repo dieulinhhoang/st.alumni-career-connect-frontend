@@ -224,7 +224,7 @@ export default function EnterprisePage() {
 
   return (
     <AdminLayout>
-      <div style={{ padding: "28px 32px 40px", background: token.colorBgLayout, minHeight: "100vh" }}>
+      <div style={{ padding: "28px 32px 40px" }}>
         {/* Header */}
         <Row justify="space-between" align="middle" style={{ marginBottom: 24 }} wrap>
           <Col>
