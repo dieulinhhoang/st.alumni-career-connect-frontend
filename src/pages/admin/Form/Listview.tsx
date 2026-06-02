@@ -3,9 +3,11 @@ import { Tooltip, Tag } from 'antd'
 import {
   EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined,
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
+  QrcodeOutlined,
 } from '@ant-design/icons'
 import type { Form } from '../../../feature/form/types'
 import CustomTable from '../../../components/common/customTable'
+import { QRCodeModal } from './QRCodeModal'
 
 //  Design tokens 
 const T = {
@@ -92,9 +94,14 @@ export default function ListView({
   forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete,
 }: ListViewProps) {
   const [search, setSearch] = useState('')
+  const [qrForm, setQrForm] = useState<Form | null>(null)
+
   const filtered = forms.filter((f) =>
     f.name.toLowerCase().includes(search.toLowerCase())
   )
+
+  const getSurveyUrl = (form: Form) =>
+    `${window.location.origin}/survey/${form.id}`
 
   //  Columns 
   const columns = [
@@ -173,22 +180,23 @@ export default function ListView({
     {
       title: '',
       key: 'actions',
-      width: 136,
+      width: 160,
       align: 'center' as const,
       render: (_: any, record: Form) => (
-       <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-    <ActionBtn icon={<EyeOutlined />}    label="Xem trước" onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
-    <ActionBtn icon={<EditOutlined />}   label="Chỉnh sửa" onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
-    <ActionBtn icon={<CopyOutlined />}   label="Nhân bản"  onClick={(e) => { e.stopPropagation(); onDup(record) }} />
-    <ActionBtn icon={<DeleteOutlined />} label="Xóa"       onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} danger />
-  </div>
+        <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <ActionBtn icon={<EyeOutlined />}      label="Xem trước"   onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
+          <ActionBtn icon={<EditOutlined />}     label="Chỉnh sửa"   onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
+          <ActionBtn icon={<QrcodeOutlined />}   label="QR Code"     onClick={(e) => { e.stopPropagation(); setQrForm(record) }} />
+          <ActionBtn icon={<CopyOutlined />}     label="Nhân bản"    onClick={(e) => { e.stopPropagation(); onDup(record) }} />
+          <ActionBtn icon={<DeleteOutlined />}   label="Xóa"         onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} danger />
+        </div>
       ),
     },
   ]
 
   return (
     <div style={{
-      padding: '28px 32px 48px', 
+      padding: '28px 32px 48px',
       minHeight: '100vh', fontFamily: "'Geist', 'DM Sans', sans-serif",
     }}>
 
@@ -242,13 +250,11 @@ export default function ListView({
               display: 'inline-flex', alignItems: 'center', gap: 6,
               height: 36, padding: '0 16px', borderRadius: 8,
               border: 'none', background: T.accent,
-              color : '#fff',
-              background: '#1D9E75', borderColor: '#1D9E75' , fontWeight: 600, fontSize: 13,
+              color: '#fff',
+              background: '#1D9E75', borderColor: '#1D9E75', fontWeight: 600, fontSize: 13,
               cursor: 'pointer', letterSpacing: '-0.1px',
-              // boxShadow: '0 2px 8px rgba(15,118,110,0.28)',
-              // transition: 'box-shadow 0.15s, background 0.15s',
               fontFamily: 'inherit',
-            }}
+            } as React.CSSProperties}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = T.accentHover
               e.currentTarget.style.boxShadow  = '0 4px 16px rgba(15,118,110,0.36)'
@@ -265,11 +271,7 @@ export default function ListView({
       </div>
 
       {/*  Card wrapper  */}
-      <div style={{
-        background: T.surface,
-        // border: `1px solid ${T.border}`, overflow: 'hidden',
-        // boxShadow: T.shadow,
-      }}>
+      <div style={{ background: T.surface }}>
 
         {/*  Toolbar  */}
         <div style={{
@@ -333,6 +335,16 @@ export default function ListView({
           rowKey="id"
         />
       </div>
+
+      {/* QR Code Modal */}
+      {qrForm && (
+        <QRCodeModal
+          open={!!qrForm}
+          onClose={() => setQrForm(null)}
+          surveyUrl={getSurveyUrl(qrForm)}
+          formName={qrForm.name}
+        />
+      )}
     </div>
   )
 }

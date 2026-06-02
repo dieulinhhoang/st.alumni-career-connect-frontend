@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Form, Question, Section } from '../../../feature/form/types'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { QrcodeOutlined } from '@ant-design/icons'
+import { QRCodeModal } from './QRCodeModal'
 
 
 //  Utility 
@@ -429,6 +430,7 @@ export function SurveyPreview({
   const [errors,        setErrors]        = useState<Set<string>>(new Set())
   const [submitting,    setSubmitting]    = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [qrOpen,        setQrOpen]        = useState(false)
 
   useEffect(() => { if (initialValues) setAnswers(initialValues) }, [initialValues])
 
@@ -448,6 +450,8 @@ export function SurveyPreview({
       Chưa có nội dung xem trước
     </div>
   )
+
+  const surveyUrl = `${window.location.origin}/survey/${form.id}`
 
   const { sections, questions, header, footer, descParagraphs } = mapForm(form)
 
@@ -489,10 +493,53 @@ export function SurveyPreview({
       background: compact ? 'transparent' : C.bg,
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       fontSize: 14,
-      color: C.text,  
+      color: C.text,
     }}>
- 
 
+      {/* Toolbar: Back + QR button (only in admin preview mode) */}
+      {onBack && !compact && (
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 10,
+          background: '#fff',
+          borderBottom: `1px solid ${C.border}`,
+          padding: '10px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              height: 34, padding: '0 14px', borderRadius: 7,
+              border: `1px solid ${C.border}`, background: C.surface,
+              color: C.sub, fontSize: 13, fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'inherit',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = C.bg }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = C.surface }}
+          >
+            ← Quay lại
+          </button>
+
+          <button
+            onClick={() => setQrOpen(true)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              height: 34, padding: '0 16px', borderRadius: 7,
+              border: 'none', background: '#0f766e',
+              color: '#fff', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', fontFamily: 'inherit',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#0d6b63' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#0f766e' }}
+          >
+            <QrcodeOutlined style={{ fontSize: 15 }} />
+            Xuất QR Code
+          </button>
+        </div>
+      )}
 
       {/* Form card */}
       <div style={{ maxWidth: 780, margin: '0 auto', padding: compact ? '0' : '28px 16px 72px' }}>
@@ -615,7 +662,7 @@ export function SurveyPreview({
                   color: C.sub, fontSize: 13, fontWeight: 500,
                   cursor: 'pointer', fontFamily: 'inherit',
                 }}>
-                  ← 
+                  ←
                 </button>
               )}
 
@@ -645,6 +692,14 @@ export function SurveyPreview({
           </div>
         </div>
       </div>
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+        surveyUrl={surveyUrl}
+        formName={form.name}
+      />
     </div>
   )
 }
