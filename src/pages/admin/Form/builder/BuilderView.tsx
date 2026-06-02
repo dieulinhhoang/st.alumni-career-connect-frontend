@@ -115,17 +115,23 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs }
   }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
 
+  // handleSaveAll: chỉ lưu API, KHÔNG navigate (dùng cho auto-save và nút Lưu thủ công)
+  const handleSaveOnly = useCallback(async () => {
+    await handleSave(extrasRef.current)
+  }, [handleSave])
+
+  // handleSaveAndBack: lưu xong mới gọi onSave để navigate (chỉ dùng khi user bấm nút Lưu rồi muốn quay lại)
   const handleSaveAll = useCallback(async () => {
     const result = await handleSave(extrasRef.current)
     if (result) onSave(result)
   }, [handleSave, onSave])
 
-  // Auto-save debounce (thay thế beforeunload)
+  // Auto-save debounce — chỉ gọi handleSaveOnly, KHÔNG navigate
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
-      handleSaveAll()
+      handleSaveOnly()
     }, 3000)
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
