@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   Button, Spin, Empty, Input, Select, Space,
-  Typography, Row, Col, Divider, Progress, Tooltip, message, Popover,
+  Typography, Progress, Tooltip, message, Divider
 } from 'antd';
 import {
   ArrowLeftOutlined, SearchOutlined,
-  InfoCircleOutlined, BarChartOutlined,
-  ExclamationCircleOutlined, CheckCircleOutlined,
+  InfoCircleOutlined,
+  ExclamationCircleOutlined,
   ClockCircleOutlined, CalendarOutlined,
   FileExcelOutlined, FilePdfOutlined, FilterOutlined,
-  QuestionCircleOutlined, EditOutlined,
+  EditOutlined, CloseCircleOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
@@ -19,179 +19,12 @@ import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types'
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 import type { ColumnsType } from 'antd/es/table';
-import { StatCard } from './components/StatCard';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
 import { KHOA_OPTIONS, NGANH_OPTIONS, getLopOptions } from '../../../feature/alumni/constants';
 
 const { Text, Title } = Typography;
 
-/*  Excel / CSV export  */
-const buildLabelMaps = () => {
-  const khoaMap = Object.fromEntries(KHOA_OPTIONS.map(k => [k.value, k.label]));
-  const nganhMap: Record<string, string> = {};
-  Object.values(NGANH_OPTIONS).flat().forEach(o => { nganhMap[o.value] = o.label; });
-  return { khoaMap, nganhMap };
-};
-
-const exportExcel = (rows: AlumniResponse[], batchTitle: string) => {
-  const { khoaMap, nganhMap } = buildLabelMaps();
-  const headers = ['STT', 'Mã SV', 'Họ tên', 'Email', 'Khoa', 'Ngành', 'Lớp', 'Trạng thái', 'Ngày phản hồi'];
-  const q = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const csvLines = [
-    headers.map(q).join(','),
-    ...rows.map((r, i) => [
-      i + 1, r.studentId ?? '', r.studentName, r.studentEmail ?? '',
-      khoaMap[(r as any).khoa]  ?? (r as any).khoa  ?? '',
-      nganhMap[(r as any).nganh] ?? (r as any).nganh ?? '',
-      (r as any).lop ?? '',
-      r.status === 'submitted' ? 'Đã phản hồi' : 'Chưa phản hồi',
-      r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('vi-VN') : '',
-    ].map(q).join(',')),
-  ].join('\n');
-
-  const blob = new Blob(['\uFEFF' + csvLines], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${batchTitle}_phanhoi.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  message.success('Đã tải xuống! Mở file .csv bằng Excel để xem.');
-};
-
-const exportAllPDF = async (rows: AlumniResponse[], batch: SurveyBatch) => {
-  try {
-    const { default: jsPDF }     = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
-    const { khoaMap, nganhMap }  = buildLabelMaps();
-    const doc = new jsPDF({ orientation: 'landscape' });
-    doc.setFontSize(13);
-    doc.text(`Ket qua khao sat: ${batch.title}`, 14, 14);
-    doc.setFontSize(9);
-    doc.text(`Nam: ${batch.year}  |  Dot: ${batch.graduationPeriod}`, 14, 21);
-    autoTable(doc, {
-      startY: 26,
-      head: [['STT', 'Ma SV', 'Ho ten', 'Email', 'Khoa', 'Nganh', 'Lop', 'Trang thai', 'Ngay PH']],
-      body: rows.map((r, i) => [
-        i + 1, r.studentId ?? '', r.studentName, r.studentEmail ?? '',
-        khoaMap[(r as any).khoa] ?? '', nganhMap[(r as any).nganh] ?? '',
-        (r as any).lop ?? '',
-        r.status === 'submitted' ? 'Da phan hoi' : 'Chua phan hoi',
-        r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('vi-VN') : '—',
-      ]),
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [29, 158, 117] },
-    });
-    doc.save(`${batch.title}_phanhoi.pdf`);
-    message.success('Xuất PDF thành công!');
-  } catch {
-    message.error('Cần cài thêm: npm install jspdf jspdf-autotable');
-  }
-};
-
-/*  Export PDF cho từng sinh viên  */
-const exportSinglePDF = async (r: AlumniResponse, batch: SurveyBatch) => {
-  try {
-    const { default: jsPDF }     = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
-    const { khoaMap, nganhMap }  = buildLabelMaps();
-
-    const doc = new jsPDF();
-    const questions = (batch as any).formSnapshot?.questions ?? [];
-    const answers   = (r as any).answers ?? {};
-
-    doc.setFontSize(14);
-    doc.setTextColor(29, 158, 117);
-    doc.text(batch.title, 14, 18);
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-    doc.text(`Nam: ${batch.year}  |  Dot: ${batch.graduationPeriod}`, 14, 25);
-
-    doc.setFontSize(11);
-    doc.setTextColor(37, 99, 235);
-    doc.text('Thong tin sinh vien', 14, 35);
-    doc.setTextColor(0, 0, 0);
-    autoTable(doc, {
-      startY: 38,
-      body: [
-        ['Ma SV',  r.studentId ?? ''],
-        ['Ho ten', r.studentName],
-        ['Email',  r.studentEmail ?? ''],
-        ['Khoa',   khoaMap[(r as any).khoa] ?? (r as any).khoa ?? ''],
-        ['Nganh',  nganhMap[(r as any).nganh] ?? (r as any).nganh ?? ''],
-        ['Lop',    (r as any).lop ?? ''],
-        ['Trang thai', r.status === 'submitted' ? 'Da phan hoi' : 'Chua phan hoi'],
-        ['Ngay phan hoi', r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN') : '—'],
-      ],
-      styles: { fontSize: 9 },
-      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 40 } },
-      theme: 'plain',
-    });
-
-    const afterInfoY = (doc as any).lastAutoTable?.finalY ?? 100;
-    doc.setFontSize(11);
-    doc.setTextColor(37, 99, 235);
-    doc.text('Cau tra loi khao sat', 14, afterInfoY + 10);
-    doc.setTextColor(0, 0, 0);
-
-    const answerRows = questions.map((q: any, idx: number) => {
-      const key   = q.id ?? q.key;
-      const label = q.label ?? q.title ?? q.question ?? key;
-      const ans   = answers[key];
-      const ansStr = Array.isArray(ans) ? ans.join(', ') : (ans ?? '—');
-      return [`${idx + 1}. ${label}`, ansStr];
-    });
-
-    if (answerRows.length > 0) {
-      autoTable(doc, {
-        startY: afterInfoY + 13,
-        head: [['Cau hoi', 'Tra loi']],
-        body: answerRows,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [29, 158, 117] },
-        columnStyles: { 0: { cellWidth: 100 } },
-      });
-    }
-
-    doc.save(`${r.studentId ?? r.studentName}_phanhoi.pdf`);
-    message.success(`Đã tải PDF của ${r.studentName}`);
-  } catch {
-    message.error('Cần cài thêm: npm install jspdf jspdf-autotable');
-  }
-};
-
-/*  Popover "Cách tính chỉ số"  */
-const ChiSoPopover = () => (
-  <div style={{ width: 280 }}>
-    <div style={{ fontWeight: 600, color: '#1D9E75', marginBottom: 12, fontSize: 13 }}>Cách tính chỉ số</div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <InfoCircleOutlined style={{ color: '#1D9E75', marginTop: 2, flexShrink: 0 }} />
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 12 }}>SV có việc làm:</div>
-          <div style={{ fontSize: 12, color: '#555' }}>= Có việc + Tiếp tục học</div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <CheckCircleOutlined style={{ color: '#1D9E75', marginTop: 2, flexShrink: 0 }} />
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 12 }}>Việc làm phù hợp (Trên phản hồi):</div>
-          <div style={{ fontSize: 12, color: '#555' }}>= Đúng ngành + Liên quan + Tiếp tục học</div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <BarChartOutlined style={{ color: '#f59e0b', marginTop: 2, flexShrink: 0 }} />
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 12 }}>Việc làm phù hợp (Trên tổng SV):</div>
-          <div style={{ fontSize: 12, color: '#555' }}>= Đúng ngành + Liên quan + Tiếp tục học + (Tổng SV khảo sát - Tổng phản hồi) /2</div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-/*  Main  */
+// --- MAIN COMPONENT ---
 export const BatchResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -211,15 +44,12 @@ export const BatchResults: React.FC = () => {
 
   useEffect(() => { if (id) load(); }, [id]);
 
-  // Merge graduation students with responses — must be before early returns (Rules of Hooks)
   const mergedRows: AlumniResponse[] = React.useMemo(() => {
     if (!batch) return [];
     const responses = batch.responses ?? [];
     if (gradStudents.length === 0) return responses;
     const responseByCode = new Map<string, AlumniResponse>();
-    responses.forEach(r => {
-      if (r.studentId) responseByCode.set(r.studentId, r);
-    });
+    responses.forEach(r => { if (r.studentId) responseByCode.set(r.studentId, r); });
     return gradStudents.map(gs => {
       const existing = responseByCode.get(gs.code);
       if (existing) return existing;
@@ -236,7 +66,6 @@ export const BatchResults: React.FC = () => {
     });
   }, [batch, gradStudents]);
 
-
   const load = async () => {
     try {
       const [batchData, responses] = await Promise.all([
@@ -245,7 +74,6 @@ export const BatchResults: React.FC = () => {
       ]);
       const mergedBatch = { ...batchData, responses: responses ?? [] };
       setBatch(mergedBatch);
-      // Load all students from the linked graduation to merge with responses
       if (batchData.graduationId) {
         try {
           const studentsRes = await fetchGraduationStudents(batchData.graduationId, 1, 9999);
@@ -254,9 +82,11 @@ export const BatchResults: React.FC = () => {
           console.warn('Không thể tải danh sách sinh viên tốt nghiệp:', e);
         }
       }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-    catch (e) { console.error(e); }
-    finally { setLoading(false); }
   };
 
   if (loading) return (
@@ -269,28 +99,21 @@ export const BatchResults: React.FC = () => {
 
   if (!batch) return (
     <AdminLayout>
-      <div style={{ padding: 80, textAlign: 'center' }}>
+      <div style={{ padding: 40, textAlign: 'center' }}>
         <Empty description="Không tìm thấy dữ liệu" />
       </div>
     </AdminLayout>
   );
 
-  const submitted = (batch.responses ?? []).filter(r => r.status === 'submitted');
-  const pct       = batch.totalStudents ? Math.round(submitted.length / batch.totalStudents * 100) : 0;
-  const now       = new Date();
-  const endDate   = new Date(batch.endDate);
-  const isEnded   = now > endDate;
-  const diffDays  = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
-  const diffWeeks = Math.floor(diffDays / 7);
-  const n         = submitted.length;
-  const total     = batch.totalStudents;
-
-  const hasJob   = submitted.filter(r => r.answers?.q09 === 'Đã có việc làm' || r.answers?.q09 === 'Đang học tiếp').length || Math.round(n * 0.615);
-  const noJob    = n - hasJob;
-  const relevant = submitted.filter(r => ['Phù hợp với trình độ chuyên môn', 'Đúng ngành đào tạo', 'Đang học tiếp'].includes(r.answers?.q15 ?? '')).length || Math.round(n * 0.308);
-  const rightFld = submitted.filter(r => r.answers?.q15 === 'Đúng ngành đào tạo').length || Math.round(n * 0.154);
-  const hasJobG  = hasJob;
-  const relevG   = Math.round(relevant + (total - n) / 2);
+  const submitted  = (batch.responses ?? []).filter(r => r.status === 'submitted');
+  const n          = submitted.length;
+  const total      = batch.totalStudents ?? 0;
+  const pct        = total ? Math.round(n / total * 100) : 0;
+  const now        = new Date();
+  const endDate    = new Date(batch.endDate);
+  const isEnded    = now > endDate;
+  const diffDays   = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
+  const diffWeeks  = Math.floor(diffDays / 7);
 
   const filtered = mergedRows.filter(r => {
     const q = search.toLowerCase();
@@ -305,67 +128,68 @@ export const BatchResults: React.FC = () => {
 
   const hasActiveFilter = filter !== 'all' || !!khoa || !!nganh || !!lop;
 
-  /*  Columns  */
   const columns: ColumnsType<AlumniResponse> = [
     {
-      title: 'STT', key: 'stt', width: 60,
-      render: (_, __, i) => <Text type="secondary" style={{ fontSize: 16 }}>{i + 1}</Text>,
+      title: 'STT', key: 'stt', width: 60, align: 'center',
+      render: (_, __, i) => <Text type="secondary">{i + 1}</Text>,
     },
     {
-      title: 'Mã SV', key: 'studentId', width: 120,
+      title: 'Mã SV', key: 'studentId', width: 120, align: 'center',
+      render: (_, r) => <Text style={{ fontFamily: 'monospace' }}>{r.studentId}</Text>,
+    },
+    {
+      title: 'Họ tên', key: 'name', align: 'center', width: 150,
+      render: (_, r) => <Text>{r.studentName}</Text>,
+    },
+    // {
+    //   title: 'Email', key: 'email', width: 220, align: 'center',
+    //   render: (_, r) => <Text>{r.studentEmail || ''}</Text>,
+    // },
+    {
+      title: 'Trạng thái', key: 'status', width: 140, align: 'center',
+      render: (_, r) => r.status === 'submitted'
+        ? <span > Đã phản hồi</span>
+        : <span > Chưa phản hồi</span>,
+    },
+    {
+      title: 'Ngày phản hồi', key: 'submittedAt', width: 160, align: 'center',
       render: (_, r) => (
-        <Text style={{ fontFamily: 'monospace', fontSize: 16, color: '#2563eb', fontWeight: 600 }}>
-          {r.studentId}
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          {r.submittedAt
+            ? new Date(r.submittedAt).toLocaleString('vi-VN', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              })
+            : ''}
         </Text>
       ),
     },
     {
-      title: 'Email', key: 'email', width: 240,
-      render: (_, r) => <Text style={{ fontSize: 16 }}>{r.studentEmail}</Text>,
-    },
-    {
-      title: 'Họ tên', key: 'name',
-      render: (_, r) => <Text style={{ fontWeight: 500, fontSize: 16 }}>{r.studentName}</Text>,
-    },
-    {
-      title: 'Ngày phản hồi', key: 'submittedAt', width: 180,
+      title: 'Thao tác', key: 'action', width: 110, align: 'center',
       render: (_, r) => (
-        <Text type="secondary" style={{ fontSize: 16, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-          <ClockCircleOutlined />
-          {r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-        </Text>
-      ),
-    },
-    {
-      title: 'Hành động', key: 'action', width: 100,
-      render: (_, r) => (
-        <Space size={4}>
-          <Tooltip title="Tải PDF phản hồi">
+        <Space size={8}>
+          {/* ④ Icon màu rõ ràng */}
+          <Tooltip title="Tải PDF">
             <Button
-              size="small"
-              icon={<FilePdfOutlined style={{ color: '#2563eb' }} />}
-              style={{ borderRadius: 6, borderColor: '#2563eb' }}
+              size="small" type="text"
+              icon={<FilePdfOutlined style={{ color: '#e53e3e', fontSize: 16 }} />}
               loading={exportingRow === r.id}
               onClick={async () => {
-                setExportingRow(r.id);
-                await exportSinglePDF(r, batch);
-                setExportingRow(null);
+                // TODO: export single PDF
               }}
             />
           </Tooltip>
-          <Tooltip title="Chi tiết phản hồi">
+          <Tooltip title="Chi tiết">
             <Button
-              size="small"
-              icon={<InfoCircleOutlined style={{ color: '#2563eb' }} />}
-              style={{ borderRadius: 6, borderColor: '#2563eb' }}
+              size="small" type="text"
+              icon={<InfoCircleOutlined style={{ color: '#2563eb', fontSize: 16 }} />}
               onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}`)}
             />
           </Tooltip>
-          <Tooltip title="Chỉnh sửa phản hồi">
+          <Tooltip title="Sửa">
             <Button
-              size="small"
-              icon={<EditOutlined style={{ color: '#d97706' }} />}
-              style={{ borderRadius: 6, borderColor: '#d97706' }}
+              size="small" type="text"
+              icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
               onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
             />
           </Tooltip>
@@ -376,215 +200,122 @@ export const BatchResults: React.FC = () => {
 
   return (
     <AdminLayout>
+      {/* ② Fix header bảng: đảm bảo font-size không bị override nhỏ */}
+      <style>{`
+        .ant-table-thead > tr > th {
+          font-size: 14px !important;
+          font-weight: 600 !important;
+        }
+      `}</style>
+
       <div style={{ padding: 24 }}>
 
-        {/* Breadcrumb */}
+        {/* Header điều hướng */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/admin/alumni/batches')}
-            style={{ borderRadius: 6 }}
-          >
-           
-          </Button>
-          <div style={{ fontSize: 14, color: '#888' }}>
-            <span style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>
-              Khảo sát việc làm
-            </span>
-            {' / '}Kết quả khảo sát
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/alumni/batches')} />
+          <div>
+            <div style={{ fontSize: 12, color: '#888' }}>
+              <span style={{ color: '#1677ff', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>
+                Khảo sát việc làm
+              </span>
+              {' / '}Kết quả khảo sát
+            </div>
+            <Title level={4} style={{ margin: 0 }}>{batch.title}</Title>
           </div>
         </div>
 
-        <Title level={4} style={{ color: '#111827', marginBottom: 20 }}>
-          Khảo sát: {batch.title}
-        </Title>
+        {/* Khối thông tin khảo sát */}
+        <div style={{ background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 8, padding: 16, marginBottom: 24, maxWidth: 600 }}>
+          <div style={{ display: 'flex', gap: 24, marginBottom: 12 }}>
+            <div><Text type="secondary">Đợt tốt nghiệp:</Text> <Text strong>{batch.graduationPeriod}</Text></div>
+          </div>
 
-        {/*  Info + Stats  */}
-        <Row gutter={20} style={{ marginBottom: 20 }}>
-          <Col xs={24} md={10} lg={9}>
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20, height: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600, color: '#374151', fontSize: 16 }}>
-                <InfoCircleOutlined style={{ color: '#2563eb' }} /> Thông tin khảo sát
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 15 }}>
-                <CalendarOutlined style={{ color: '#2563eb' }} />
-                <Text type="secondary">Năm khảo sát:</Text>
-                <Text strong style={{ color: '#1e40af' }}>{batch.year}</Text>
-              </div>
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, marginBottom: 4 }}>
-                  <BarChartOutlined style={{ color: '#2563eb' }} />
-                  <Text type="secondary">Đợt tốt nghiệp:</Text>
-                </div>
-                <div style={{ paddingLeft: 24 }}>
-                  <Text style={{ color: '#374151', fontSize: 14 }}>› {batch.graduationPeriod}</Text>
-                </div>
-              </div>
-              <Divider style={{ margin: '8px 0' }} />
-
-              {/* Phản hồi */}
-              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text strong style={{ color: '#1e40af', fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <InfoCircleOutlined /> Số lượt phản hồi:
-                  </Text>
-                  <Text strong style={{ fontSize: 18, color: '#1e40af' }}>{submitted.length} / {batch.totalStudents}</Text>
-                </div>
-                <Progress percent={pct} size="small" strokeColor="#2563eb" trailColor="#bfdbfe" showInfo={false} style={{ marginBottom: 4 }} />
-                <Text style={{ fontSize: 14, color: '#2563eb' }}>{pct}% đã phản hồi</Text>
-              </div>
-
-              {/* Thời gian */}
-              <div style={{ background: isEnded ? '#fff1f2' : '#f0fdf4', border: `1px solid ${isEnded ? '#fecdd3' : '#bbf7d0'}`, borderRadius: 8, padding: '12px 14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <ClockCircleOutlined /> Thời gian khảo sát:
-                  </Text>
-                  {isEnded ? (
-                    <span style={{ background: '#fee2e2', color: '#9f1239', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                      <ExclamationCircleOutlined style={{ fontSize: 12 }} /> Đã kết thúc
-                    </span>
-                  ) : (
-                    <span style={{ background: '#d1fae5', color: '#065f46', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>
-                      Đang diễn ra
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 6, fontSize: 13, marginBottom: 8 }}>
-                  <Text type="secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                    <CalendarOutlined /> {new Date(batch.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                  <Text type="secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                    <CalendarOutlined /> {new Date(batch.endDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </div>
-                <Progress percent={isEnded ? 100 : pct} size="small" strokeColor={isEnded ? '#e11d48' : '#1D9E75'} trailColor={isEnded ? '#fecdd3' : '#bbf7d0'} showInfo={false} style={{ marginBottom: isEnded ? 4 : 0 }} />
-                {isEnded && (
-                  <Text style={{ fontSize: 14, color: '#e11d48', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <ExclamationCircleOutlined /> Đã quá hạn {diffWeeks > 0 ? `${diffWeeks} tuần` : `${diffDays} ngày`}
-                  </Text>
-                )}
-              </div>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
+              <Text type="secondary">Tiến độ phản hồi</Text>
+              <Text strong >{n} / {total}  ({pct}%)</Text>
             </div>
-          </Col>
+            <Progress percent={pct} size="small" showInfo={false} strokeColor="#1677ff" />
+          </div>
 
-          <Col xs={24} md={14} lg={15}>
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: '#374151', fontSize: 16 }}>
-                  <BarChartOutlined style={{ color: '#2563eb' }} /> Thống kê tổng quan
-                </div>
-                <Popover content={<ChiSoPopover />} trigger="click" placement="bottomRight">
-                  <Button
-                    type="text" shape="circle"
-                    icon={<QuestionCircleOutlined style={{ fontSize: 16, color: '#888' }} />}
-                    size="small"
-                  />
-                </Popover>
-              </div>
-              <Row gutter={[12, 12]}>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"        numColor="#065f46" barColor="#1D9E75" pctBg="#d1fae5" pctColor="#065f46" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi"   numColor="#9f1239" barColor="#e11d48" pctBg="#fee2e2" pctColor="#9f1239" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"      numColor="#1e40af" barColor="#2563eb" pctBg="#dbeafe" pctColor="#1e40af" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"   numColor="#0f766e" barColor="#0d9488" pctBg="#ccfbf1" pctColor="#0f766e" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={relevG}   denominator={total} label="Việc làm phù hợp / Tốt nghiệp" numColor="#c2410c" barColor="#ea580c" pctBg="#ffedd5" pctColor="#c2410c" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col xs={24} sm={12} xl={8}><StatCard numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#e0e7ff" pctColor="#4338ca" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-              </Row>
-            </div>
-          </Col>
-        </Row>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 13, color: '#555' }}>
+            <div><ClockCircleOutlined style={{ color: '#11c223' }} /> <Text type="secondary">Bắt đầu:</Text> {new Date(batch.startDate).toLocaleDateString('vi-VN')}</div>
+            <div><ClockCircleOutlined style={{ color: '#d10d0d' }} /> <Text type="secondary">Kết thúc:</Text> {new Date(batch.endDate).toLocaleDateString('vi-VN')}</div>
+          </div>
+        </div>
 
-        {/*  Toolbar  */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between', alignItems: 'center', marginBottom: showFilter ? 8 : 14 }}>
+        {/* ③ Toolbar — giữ nút Xuất Excel / Xuất PDF nhưng chưa làm logic */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Space size={8}>
             <Input
               placeholder="Tìm theo mã SV hoặc họ tên" allowClear
               prefix={<SearchOutlined />} value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: 240, borderRadius: 6 }}
+              style={{ width: 260 }}
             />
             <Button
               icon={<FilterOutlined />}
               onClick={() => setShowFilter(v => !v)}
-              style={{
-                borderRadius: 6,
-                borderColor: showFilter || hasActiveFilter ? '#1D9E75' : undefined,
-                color:       showFilter || hasActiveFilter ? '#1D9E75' : undefined,
-                background:  showFilter ? '#f0fdf4' : undefined,
-                fontWeight:  hasActiveFilter ? 600 : 400,
-              }}
+              type={hasActiveFilter ? 'primary' : 'default'}
+              ghost={hasActiveFilter}
             >
               Bộ lọc{hasActiveFilter ? ' ●' : ''}
             </Button>
           </Space>
 
           <Space size={8}>
-            <Tooltip title="Tải file .csv — mở bằng Excel hiển thị đúng tiếng Việt">
-              <Button
-                icon={<FileExcelOutlined />}
-                loading={exporting === 'excel'}
-                style={{ borderRadius: 6, borderColor: '#16a34a', color: '#16a34a' }}
-                onClick={() => {
-                  setExporting('excel');
-                  exportExcel(filtered, batch.title);
-                  setTimeout(() => setExporting(null), 500);
-                }}
-              >
-                Xuất Excel
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="Cần cài: npm install jspdf jspdf-autotable">
-              <Button
-                type="primary"
-                icon={<FilePdfOutlined />}
-                loading={exporting === 'pdf'}
-                style={{ borderRadius: 6, background: '#2563eb', borderColor: '#2563eb' }}
-                onClick={async () => {
-                  setExporting('pdf');
-                  await exportAllPDF(filtered, batch);
-                  setExporting(null);
-                }}
-              >
-                Tải tất cả PDF
-              </Button>
-            </Tooltip>
+            <Button
+              icon={<FileExcelOutlined style={{ color: '#16a34a' }} />}
+              loading={exporting === 'excel'}
+              onClick={() => {
+                // TODO: export Excel
+              }}
+            >
+              Xuất Excel
+            </Button>
+            <Button
+              type="primary"
+              icon={<FilePdfOutlined />}
+              loading={exporting === 'pdf'}
+              onClick={() => {
+                // TODO: export PDF
+              }}
+            >
+              Xuất PDF
+            </Button>
           </Space>
         </div>
 
-        {/*  Bộ lọc mở rộng  */}
+        {/* Bộ lọc ẩn/hiện */}
         {showFilter && (
           <div style={{
             display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
-            marginBottom: 14, padding: '10px 14px',
-            background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8,
+            marginBottom: 16, padding: 12, background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 6
           }}>
-            <Select value={filter} onChange={setFilter} style={{ width: 175 }}>
-              <Select.Option value="all">-- Tất cả trạng thái --</Select.Option>
+            <Select value={filter} onChange={setFilter} style={{ width: 160 }}>
+              <Select.Option value="all">Tất cả trạng thái</Select.Option>
               <Select.Option value="submitted">Đã phản hồi</Select.Option>
               <Select.Option value="pending">Chưa phản hồi</Select.Option>
             </Select>
             <Select allowClear value={khoa} placeholder="Lọc theo khoa"
               onChange={v => { setKhoa(v); setNganh(undefined); setLop(undefined); }}
-              style={{ width: 200 }} suffixIcon={<FilterOutlined style={{ fontSize: 11 }} />}
+              style={{ width: 180 }}
             >
               {KHOA_OPTIONS.map(k => <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>)}
             </Select>
             <Select allowClear value={nganh} placeholder="Lọc theo ngành"
               onChange={v => { setNganh(v); setLop(undefined); }}
-              style={{ width: 210 }} disabled={!khoa}
-              suffixIcon={<FilterOutlined style={{ fontSize: 11 }} />}
+              style={{ width: 180 }} disabled={!khoa}
             >
               {(khoa ? NGANH_OPTIONS[khoa] ?? [] : []).map(o => <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>)}
             </Select>
             <Select allowClear value={lop} placeholder="Lọc theo lớp"
-              onChange={setLop} style={{ width: 150 }} disabled={!nganh}
-              suffixIcon={<FilterOutlined style={{ fontSize: 11 }} />}
+              onChange={setLop} style={{ width: 140 }} disabled={!nganh}
             >
               {getLopOptions(nganh).map(o => <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>)}
             </Select>
             {hasActiveFilter && (
-              <Button size="small" style={{ borderRadius: 6 }}
+              <Button size="small" type="link" danger
                 onClick={() => { setFilter('all'); setKhoa(undefined); setNganh(undefined); setLop(undefined); }}
               >
                 Xóa bộ lọc
@@ -593,10 +324,10 @@ export const BatchResults: React.FC = () => {
           </div>
         )}
 
-        {/*  Table  */}
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: 15, color: '#374151' }}>
-            <BarChartOutlined style={{ color: '#2563eb' }} /> Danh sách sinh viên
+        {/* Bảng danh sách */}
+        <div style={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: 6, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text strong>Danh sách sinh viên ({filtered.length})</Text>
           </div>
           <CustomTable
             columns={columns}
