@@ -134,3 +134,19 @@ export async function getRadiusOptions(): Promise<RadiusOption[]> {
 	const res = await api.get("/radius-options");
 	return res.data ?? [];
 }
+
+/**
+ * Publish a form (status -> 'published').
+ */
+export async function publishForm(id: number): Promise<Form> {
+	const res = await api.patch(`/forms/${id}/publish`);
+	return res.data;
+}
+
+/**
+ * Unpublish a form (status -> 'draft').
+ */
+export async function unpublishForm(id: number): Promise<Form> {
+	const res = await api.patch(`/forms/${id}/unpublish`);
+	return res.data;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getFormById, createForm, updateForm } from '../api'
+import { getFormById, createForm, updateForm, publishForm, unpublishForm } from '../api'
 import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../types'
 import type { LogicRule } from '../../../pages/admin/Form/builder/BuilderView'
 
@@ -71,6 +71,14 @@ export interface UseFormBuilderReturn {
   saved: boolean
   saveError: string
   handleSave: (extras?: SaveExtras) => Promise<Form | null>
+
+  // publish
+  publishing: boolean
+  published: boolean
+  publishError: string
+  handlePublish: () => Promise<Form | null>
+  handleUnpublish: () => Promise<Form | null>
+  formStatus: 'draft' | 'published' | undefined
 }
 
 export function useFormBuilder(
@@ -93,6 +101,11 @@ export function useFormBuilder(
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
 
+  const [formStatus, setFormStatus] = useState<'draft' | 'published' | undefined>(undefined)
+  const [publishing, setPublishing] = useState(false)
+  const [published, setPublished] = useState(false)
+  const [publishError, setPublishError] = useState('')
+
   // =========================
   // LOAD FORM (EDIT MODE)
   // =========================
@@ -106,22 +119,19 @@ export function useFormBuilder(
       .then((form: Form) => {
         if (cancelled) return
 
-        // set basic info
         setName(form.name)
         setDesc(form.description)
+        setFormStatus(form.status)
 
-        // chuẩn hóa questions
         const formQuestions: Question[] = Array.isArray(form.questions)
           ? form.questions
           : []
 
-        // chuẩn hóa sections từ backend
         const rawSections = (form as any).sections
         const serverSections: Section[] = Array.isArray(rawSections)
           ? rawSections
           : []
 
-        // fallback: nếu không có sections thì dựng từ question.sectionId
         const loadedSections: Section[] =
           serverSections.length > 0
             ? serverSections
@@ -138,7 +148,6 @@ export function useFormBuilder(
         setSections(loadedSections)
         setActiveSectionId(loadedSections[0]?.id ?? null)
 
-        // questions fallback
         const qs = formQuestions.length > 0
           ? formQuestions
           : [_newQuestion(loadedSections[0]?.id)]
@@ -389,6 +398,45 @@ export function useFormBuilder(
     }
   }, [mode, formId, name, desc, questions, sections])
 
+  // =========================
+  // PUBLISH / UNPUBLISH
+  // =========================
+
+  const handlePublish = useCallback(async (): Promise<Form | null> => {
+    if (!formId) return null
+    setPublishing(true)
+    setPublishError('')
+    try {
+      const result = await publishForm(formId)
+      setFormStatus('published')
+      setPublished(true)
+      setTimeout(() => setPublished(false), 2500)
+      return result
+    } catch (e) {
+      setPublishError(e instanceof Error ? e.message : 'Xuất bản thất bại.')
+      return null
+    } finally {
+      setPublishing(false)
+    }
+  }, [formId])
+
+  const handleUnpublish = useCallback(async (): Promise<Form | null> => {
+    if (!formId) return null
+    setPublishing(true)
+    setPublishError('')
+    try {
+      const result = await unpublishForm(formId)
+      setFormStatus('draft')
+      setPublished(false)
+      return result
+    } catch (e) {
+      setPublishError(e instanceof Error ? e.message : 'Hủy xuất bản thất bại.')
+      return null
+    } finally {
+      setPublishing(false)
+    }
+  }, [formId])
+
   return {
     name, desc, setName, setDesc,
     questions,
@@ -400,5 +448,6 @@ export function useFormBuilder(
     addOption, updateOption, removeOption,
     loading, loadError,
     saving, saved, saveError, handleSave,
+    publishing, published, publishError, handlePublish, handleUnpublish, formStatus,
   }
 }
