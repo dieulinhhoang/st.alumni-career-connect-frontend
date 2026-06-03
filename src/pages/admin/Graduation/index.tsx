@@ -171,6 +171,8 @@ export default function GraduationList() {
     total: search.trim() ? filtered.length : meta.total,
     showSizeChanger: true,
     showTotal: (total, range) => `${range[0]}-${range[1]} / ${total} đợt`,
+    pageSizeOptions: ['10', '20', '50', '100'],
+    locale: { items_per_page: '/ trang' },
     onChange: (nextPage, nextPageSize) => {
       if (nextPageSize !== pageSize) {
         setPage(1);

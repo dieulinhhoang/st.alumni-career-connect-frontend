@@ -60,7 +60,6 @@ export default function SurveyFillPage() {
             form={batch.formSnapshot}
             onSubmit={handleSubmit}
             submitLabel="Gửi phiếu khảo sát"
-            onBack={() => setPageState('identify')}
           />
         : null
     default: return null

@@ -23,8 +23,11 @@ export interface SurveyBatch {
   status: BatchStatus;
   startDate: string;
   endDate: string;
-  year: number;
+  /** @deprecated use graduationId + graduationPeriod from the linked Graduation record */
+  year?: number;
   graduationPeriod: string;
+  /** FK to graduation.id — stored when batch is created */
+  graduationId?: number;
   totalStudents: number;
   responses: AlumniResponse[];
   createdAt: string;
@@ -38,8 +41,11 @@ export interface CreateBatchPayload {
   formSnapshot: Form;
   startDate: string;
   endDate: string;
-  year: number;
+  /** @deprecated kept for legacy compat; set automatically from graduation */
+  year?: number;
   graduationPeriod: string;
+  /** FK to graduation.id */
+  graduationId?: number;
   totalStudents?: number;
 }
 

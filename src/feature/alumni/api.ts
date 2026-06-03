@@ -49,3 +49,38 @@ export async function getBatchResponses(batchId: number): Promise<AlumniResponse
   const res = await api.get(`/alumni/batches/${batchId}/responses`);
   return res.data;
 }
+
+// ── Graduation API ──────────────────────────────────────────────
+export interface GraduationOption {
+  id: number;
+  name: string;
+  certification: string;
+  certificationDate: string;
+  schoolYear: number;
+}
+
+export async function getGraduations(page = 1, perPage = 100): Promise<GraduationOption[]> {
+  const res = await api.get('/graduation', { params: { page, per_page: perPage } });
+  // Backend returns { data: [...], total, page, perPage }
+  const raw = res.data;
+  return Array.isArray(raw) ? raw : (raw.data ?? []);
+}
+
+/** Validate xem một mã SV có thuộc đợt tốt nghiệp (graduationId) không */
+export async function checkStudentInGraduation(
+  graduationId: number,
+  studentCode: string,
+): Promise<boolean> {
+  try {
+    // GET /grad-students?graduation_id=X&per_page=9999 rồi tìm trong danh sách
+    const res = await api.get('/grad-students', {
+      params: { graduation_id: graduationId, per_page: 9999 },
+    });
+    const rows: any[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+    return rows.some(
+      (r) => (r.student?.code ?? r.studentCode ?? r.code ?? '').toString() === studentCode.trim(),
+    );
+  } catch {
+    return false;
+  }
+}

@@ -14,15 +14,18 @@ function formatDate(dateStr?: string | null) {
 
 //  Design tokens 
 const C = {
-  text:      '#111827',
-  sub:       '#6b7280',
-  muted:     '#9ca3af',
-  border:    '#e5e7eb',
-  bg:        '#f9fafb',
-  surface:   '#ffffff',
-  accent:    '#374151',
-  danger:    '#dc2626',
-  dangerBg:  '#fef2f2',
+  text:        '#111827',
+  sub:         '#6b7280',
+  muted:       '#9ca3af',
+  border:      '#e5e7eb',
+  bg:          '#f9fafb',
+  surface:     '#ffffff',
+  accent:      '#1D9E75',
+  accentHover: '#178763',
+  accentBg:    '#f0fdf4',
+  accentBorder:'#bbf7d0',
+  danger:      '#dc2626',
+  dangerBg:    '#fef2f2',
 }
 
 
@@ -219,11 +222,20 @@ function RadioField({ options, qId, value, onChange, hasError, readOnly, allowOt
       ...(hasError ? { padding: '8px 10px', borderRadius: 6, border: `1px solid ${C.danger}`, background: C.dangerBg } : {}),
     }}>
       {options.map((opt, i) => (
-        <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
+        <label
+          key={i}
+          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer',
+            padding: '6px 10px', borderRadius: 7, transition: 'background .13s',
+            background: value === opt ? '#f0fdf4' : 'transparent',
+            border: value === opt ? '1px solid #bbf7d0' : '1px solid transparent',
+          }}
+          onMouseEnter={e => { if (!readOnly && value !== opt) e.currentTarget.style.background = '#f9fafb' }}
+          onMouseLeave={e => { if (!readOnly && value !== opt) e.currentTarget.style.background = 'transparent' }}
+        >
           <input
             type="radio" name={qId} disabled={readOnly}
             checked={value === opt} onChange={() => onChange?.(opt)}
-            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0, accentColor: '#1D9E75' }}
           />
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
@@ -293,11 +305,20 @@ function CheckboxField({ options, value, onChange, hasError, readOnly, allowOthe
       ...(hasError ? { padding: '8px 10px', borderRadius: 6, border: `1px solid ${C.danger}`, background: C.dangerBg } : {}),
     }}>
       {options.map((opt, i) => (
-        <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer' }}>
+        <label
+          key={i}
+          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer',
+            padding: '6px 10px', borderRadius: 7, transition: 'background .13s',
+            background: checked.has(opt) ? '#f0fdf4' : 'transparent',
+            border: checked.has(opt) ? '1px solid #bbf7d0' : '1px solid transparent',
+          }}
+          onMouseEnter={e => { if (!readOnly && !checked.has(opt)) e.currentTarget.style.background = '#f9fafb' }}
+          onMouseLeave={e => { if (!readOnly && !checked.has(opt)) e.currentTarget.style.background = 'transparent' }}
+        >
           <input
             type="checkbox" disabled={readOnly}
             checked={checked.has(opt)} onChange={() => toggle(opt)}
-            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0, accentColor: '#1D9E75' }}
           />
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
@@ -740,15 +761,15 @@ export function SurveyPreview({
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     height: 36, padding: '0 20px', borderRadius: 6,
                     border: 'none',
-                    background: submitSuccess ? '#374151' : submitting ? '#9ca3af' : '#111827',
+                    background: submitSuccess ? '#178763' : submitting ? '#9ca3af' : '#1D9E75',
                     color: '#fff',
                     fontSize: 13.5, fontWeight: 600,
                     cursor: submitting || submitSuccess ? 'default' : 'pointer',
                     fontFamily: 'inherit',
                     transition: 'background .15s, opacity .15s',
                   }}
-                  onMouseEnter={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#374151' }}
-                  onMouseLeave={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#111827' }}
+                  onMouseEnter={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#178763' }}
+                  onMouseLeave={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#1D9E75' }}
                 >
                   {submitSuccess ? '✓ Đã lưu' : submitting ? 'Đang gửi…' : submitLabel}
                 </button>

@@ -10,9 +10,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getForms, type FormType } from '../../../feature/form/api';
 import { useCreateBatch } from '../../../feature/alumni/hooks/useCreateBatch';
+import { getGraduations, type GraduationOption } from '../../../feature/alumni/api';
 import Preview from '../Form/Preview';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import { GRADUATION_OPTIONS, YEAR_OPTIONS } from '../../../feature/alumni/constants';
 
 const { RangePicker } = DatePicker;
 const { Text, Title } = Typography;
@@ -20,12 +20,14 @@ const { Text, Title } = Typography;
 export const BatchCreate: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [publishedForms, setPublishedForms] = useState<FormType[]>([]);
-  const [selectedForm,   setSelectedForm]   = useState<FormType | null>(null);
-  const [loadingForms,   setLoadingForms]   = useState(true);
+  const [publishedForms, setPublishedForms]   = useState<FormType[]>([]);
+  const [selectedForm,   setSelectedForm]     = useState<FormType | null>(null);
+  const [loadingForms,   setLoadingForms]     = useState(true);
+  const [graduations,    setGraduations]      = useState<GraduationOption[]>([]);
+  const [loadingGrads,   setLoadingGrads]     = useState(true);
   const { create, loading: creating } = useCreateBatch();
 
-  useEffect(() => { loadPublishedForms(); }, []);
+  useEffect(() => { loadPublishedForms(); loadGraduations(); }, []);
 
   const loadPublishedForms = async () => {
     try {
@@ -38,19 +40,36 @@ export const BatchCreate: React.FC = () => {
     }
   };
 
+  const loadGraduations = async () => {
+    try {
+      const data = await getGraduations();
+      setGraduations(data);
+    } catch {
+      message.error('Không thể tải danh sách đợt tốt nghiệp');
+    } finally {
+      setLoadingGrads(false);
+    }
+  };
+
   const onFinish = async (values: any) => {
     if (!selectedForm) { message.warning('Vui lòng chọn form khảo sát'); return; }
     const [s, e] = values.dateRange;
+
+    // Lấy thông tin đợt tốt nghiệp đã chọn
+    const grad = graduations.find(g => g.id === values.graduationId);
+    if (!grad) { message.warning('Vui lòng chọn đợt tốt nghiệp'); return; }
+
     const newBatch = await create({
-      title: values.title,
-      formId: selectedForm.id!,
-      formSnapshot: { ...selectedForm, status: 'published' },
-      startDate: s.format('YYYY-MM-DD'),
-      endDate:   e.format('YYYY-MM-DD'),
-      year:      values.year,
-      graduationPeriod: values.graduationPeriod,
-      totalStudents: 0,
-      status: 'active',
+      title:            values.title,
+      formId:           selectedForm.id!,
+      formSnapshot:     { ...selectedForm, status: 'published' },
+      startDate:        s.format('YYYY-MM-DD'),
+      endDate:          e.format('YYYY-MM-DD'),
+      graduationId:     grad.id,
+      graduationPeriod: grad.name,
+      year:             grad.schoolYear,   // kept for legacy display
+      totalStudents:    0,
+      status:           'active',
     });
     if (newBatch) {
       message.success('Tạo đợt khảo sát thành công!');
@@ -93,25 +112,43 @@ export const BatchCreate: React.FC = () => {
                 <RangePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%', borderRadius: 6 }} />
               </Form.Item>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <Form.Item label="Năm tốt nghiệp" name="year" rules={[{ required: true, message: 'Chọn năm' }]}>
-                  <Select placeholder="Chọn năm" style={{ borderRadius: 6 }}>
-                    {YEAR_OPTIONS.map(y => <Select.Option key={y} value={y}>{y}</Select.Option>)}
-                  </Select>
-                </Form.Item>
-                <Form.Item label="Đợt tốt nghiệp" name="graduationPeriod" rules={[{ required: true, message: 'Chọn đợt' }]}>
-                  <Select placeholder="Chọn đợt" style={{ borderRadius: 6 }}>
-                    {GRADUATION_OPTIONS.map(o => (
-                      <Select.Option key={o} value={o}>
-                        <span style={{ fontSize: 12 }}>{o.length > 30 ? `${o.slice(0, 30)}…` : o}</span>
+              {/* Single graduation dropdown — replaces separate year + graduationPeriod */}
+              <Form.Item
+                label="Đợt tốt nghiệp"
+                name="graduationId"
+                rules={[{ required: true, message: 'Vui lòng chọn đợt tốt nghiệp' }]}
+              >
+                {loadingGrads ? (
+                  <div style={{ textAlign: 'center', padding: '8px 0' }}><Spin size="small" /></div>
+                ) : (
+                  <Select
+                    placeholder="Chọn đợt tốt nghiệp từ danh sách"
+                    style={{ borderRadius: 6 }}
+                    optionFilterProp="label"
+                    showSearch
+                    notFoundContent={
+                      <div style={{ textAlign: 'center', color: '#bfbfbf', padding: 8 }}>
+                        Không có đợt tốt nghiệp nào trong hệ thống
+                      </div>
+                    }
+                  >
+                    {graduations.map(g => (
+                      <Select.Option key={g.id} value={g.id} label={g.name}>
+                        <div style={{ lineHeight: 1.5 }}>
+                          <div style={{ fontWeight: 500, fontSize: 13 }}>{g.name}</div>
+                          <div style={{ fontSize: 11, color: '#64748b' }}>
+                            {g.schoolYear ? `Năm học ${g.schoolYear}` : ''}
+                            {g.certificationDate ? ` · ${new Date(g.certificationDate).toLocaleDateString('vi-VN')}` : ''}
+                          </div>
+                        </div>
                       </Select.Option>
                     ))}
                   </Select>
-                </Form.Item>
-              </div>
+                )}
+              </Form.Item>
 
               <Alert
-                message="Thông tin tốt nghiệp không thể sửa sau khi tạo"
+                message="Thông tin đợt tốt nghiệp không thể sửa sau khi tạo"
                 type="warning" showIcon
                 style={{ marginBottom: 16, borderRadius: 6 }}
               />

@@ -7,15 +7,16 @@ import type { MenuProps } from 'antd';
 import {
   PlusOutlined, EyeOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
-  FilePdfOutlined, FileTextOutlined,
+  FilePdfOutlined, FileTextOutlined, QrcodeOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { useBatches } from '../../../feature/alumni/hooks/useBatches';
 import type { SurveyBatch } from '../../../feature/alumni/types';
-import { STATUS_CFG } from '../../../feature/alumni/constants';
+import { STATUS_CFG, getSurveyUrl } from '../../../feature/alumni/constants';
 import { PctBadge } from './components/PctBadge';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
+import { QRCodeModal } from '../Form/QRCodeModal';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 
@@ -59,12 +60,13 @@ const useMenuItems = (
 export const BatchList: React.FC = () => {
   const { batches, loading, deleteBatch } = useBatches();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
+  const [search,    setSearch]    = useState('');
+  const [status,    setStatus]    = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatch | null>(null);
+  const [qrBatch,   setQrBatch]   = useState<SurveyBatch | null>(null);
 
   const getMenuItems = useMenuItems(navigate, deleteBatch);
-  const safeBatches = Array.isArray(batches) ? batches : []; // Đảm bảo batches luôn là mảng để tránh lỗi khi gọi filter/map/etc.
+  const safeBatches = Array.isArray(batches) ? batches : [];
 
   const filtered = safeBatches.filter(b => {
     const q = search.toLowerCase();
@@ -114,13 +116,25 @@ export const BatchList: React.FC = () => {
       },
     },
     {
-      title: 'Hành động', key: 'actions', width: 140,
+      title: 'Hành động', key: 'actions', width: 160,
       render: (_, r) => (
         <Space size={4}>
           <Button size="small" icon={<EyeOutlined />} style={{ borderRadius: 6 }}
             onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)} />
-          <Button size="small" icon={<LinkOutlined style={{ color: '#1D9E75' }} />} style={{ borderRadius: 6 }}
-            onClick={() => setLinkBatch(r)} />
+          <Button
+            size="small"
+            icon={<LinkOutlined style={{ color: '#1D9E75' }} />}
+            style={{ borderRadius: 6 }}
+            title="Sao chép link khảo sát"
+            onClick={() => setLinkBatch(r)}
+          />
+          <Button
+            size="small"
+            icon={<QrcodeOutlined style={{ color: '#0f766e' }} />}
+            style={{ borderRadius: 6 }}
+            title="QR Code khảo sát"
+            onClick={() => setQrBatch(r)}
+          />
           <Button size="small" icon={<BarChartOutlined style={{ color: '#1D9E75' }} />} style={{ borderRadius: 6 }}
             onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)} />
           <Dropdown menu={{ items: getMenuItems(r) }} trigger={['click']} placement="bottomRight">
@@ -169,6 +183,7 @@ export const BatchList: React.FC = () => {
           />
         </div>
 
+        {/* Copy-link modal */}
         <SurveyLinkModal
           batchId={linkBatch?.id}
           batchTitle={linkBatch?.title ?? ''}
@@ -178,6 +193,16 @@ export const BatchList: React.FC = () => {
           open={!!linkBatch}
           onClose={() => setLinkBatch(null)}
         />
+
+        {/* QR code modal — now lives here in the list page */}
+        {qrBatch && (
+          <QRCodeModal
+            open={!!qrBatch}
+            onClose={() => setQrBatch(null)}
+            surveyUrl={getSurveyUrl(qrBatch.id, qrBatch.title)}
+            formName={qrBatch.title}
+          />
+        )}
       </div>
     </AdminLayout>
   );

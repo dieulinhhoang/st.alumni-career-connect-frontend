@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { SurveyBatch } from '../../../feature/alumni/types'
+import { checkStudentInGraduation } from '../../../feature/alumni/api'
 import { inp, focusIn, focusOut } from './styles'
 
 export interface Identity {
@@ -17,15 +18,34 @@ export function IdentifyStep({ batch, onContinue }: Props) {
   const [studentId,    setStudentId]    = useState('')
   const [studentName,  setStudentName]  = useState('')
   const [studentEmail, setStudentEmail] = useState('')
-  const [err, setErr] = useState('')
+  const [err,          setErr]          = useState('')
+  const [checking,     setChecking]     = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
+    setErr('')
     if (!studentId.trim() || !studentName.trim() || !studentEmail.trim()) {
       setErr('Vui lòng điền đầy đủ thông tin.'); return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)) {
       setErr('Email không hợp lệ.'); return
     }
+
+    // Validate mã SV thuộc đợt tốt nghiệp của batch nếu có graduationId
+    if (batch.graduationId) {
+      setChecking(true)
+      try {
+        const found = await checkStudentInGraduation(batch.graduationId, studentId.trim())
+        if (!found) {
+          setErr('Mã sinh viên không thuộc đợt tốt nghiệp này. Vui lòng kiểm tra lại.')
+          return
+        }
+      } catch {
+        // Nếu không thể kiểm tra (lỗi mạng), cho phép tiếp tục để không chặn SV
+      } finally {
+        setChecking(false)
+      }
+    }
+
     onContinue({
       studentId:    studentId.trim(),
       studentName:  studentName.trim(),
@@ -57,7 +77,7 @@ export function IdentifyStep({ batch, onContinue }: Props) {
             {batch.title}
           </h2>
           <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 6 }}>
-            {batch.graduationPeriod} · {batch.year}
+            {batch.graduationPeriod}
           </div>
         </div>
 
@@ -98,18 +118,22 @@ export function IdentifyStep({ batch, onContinue }: Props) {
 
         <button
           onClick={submit}
+          disabled={checking}
           style={{
             width: '100%', height: 44, borderRadius: 10, border: 'none',
-            background: 'linear-gradient(135deg, #1D9E75, #16a34a)',
+            background: checking
+              ? 'linear-gradient(135deg, #9ca3af, #6b7280)'
+              : 'linear-gradient(135deg, #1D9E75, #16a34a)',
             color: '#fff', fontSize: 14.5, fontWeight: 700,
-            cursor: 'pointer', fontFamily: 'inherit',
+            cursor: checking ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
             boxShadow: '0 4px 16px #1D9E7544',
             transition: 'opacity .13s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = '.88')}
+          onMouseEnter={e => { if (!checking) e.currentTarget.style.opacity = '.88' }}
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
         >
-          Bắt đầu điền phiếu →
+          {checking ? 'Đang xác thực...' : 'Bắt đầu điền phiếu →'}
         </button>
       </div>
     </div>
