@@ -33,6 +33,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/allforms': 'Cấu hình form',
   '/admin/alumni/batches': 'Khảo sát việc làm',
   '/admin/statistics': 'Biểu đồ thống kê',
+  '/admin/employment-stats': 'Thống kê việc làm',
   '/admin/reports': 'Báo cáo tổng hợp',
   '/admin/resources': 'Tài nguyên',
   '/admin/roles': 'Vai trò',
@@ -102,7 +103,8 @@ const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
       height: 64,
       display: 'flex',
       alignItems: 'center',
-      justify: collapsed ? 'center' : 'flex-start',
+      // Bug #1 fix: typo `justify` → `justifyContent`
+      justifyContent: collapsed ? 'center' : 'flex-start',
       padding: collapsed ? 0 : '0 16px',
       borderBottom: '1px solid rgba(255,255,255,0.06)',
       gap: 10,
@@ -176,7 +178,18 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const SIDER_COLLAPSED = 80;
   const contentLeft = isMobile ? 0 : collapsed ? SIDER_COLLAPSED : SIDER_W;
 
-  const pageLabel = ROUTE_TITLE_VI[location.pathname] ?? 'Trang hiện tại';
+  // Bug #8 fix: Breadcrumb hỗ trợ dynamic routes (không chỉ exact match)
+  const getPageLabel = (pathname: string): string => {
+    if (ROUTE_TITLE_VI[pathname]) return ROUTE_TITLE_VI[pathname];
+    if (/^\/admin\/bao-cao\//.test(pathname)) return 'Báo cáo khoa';
+    if (/^\/admin\/faculties\//.test(pathname)) return 'Chi tiết khoa';
+    if (/^\/admin\/enterprises\//.test(pathname)) return 'Chi tiết doanh nghiệp';
+    if (/^\/admin\/graduation\//.test(pathname)) return 'Chi tiết đợt tốt nghiệp';
+    if (/^\/admin\/alumni\/batches\//.test(pathname)) return 'Chi tiết đợt khảo sát';
+    if (/^\/admin\/statistics\//.test(pathname)) return 'Chỉ số thống kê';
+    return 'Trang hiện tại';
+  };
+  const pageLabel = getPageLabel(location.pathname);
 
   const userDropdownMenu = {
     items: [
@@ -235,14 +248,14 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
         </Sider>
       )}
 
-      {/* Drawer mobile */}
+      {/* Drawer mobile - Bug #6 fix: bodyStyle deprecated → styles.body */}
       <Drawer
         placement="left"
         closable={false}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         width={260}
-        bodyStyle={{ padding: 0, background: '#001529' }}
+        styles={{ body: { padding: 0, background: '#001529' } }}
       >
         <SiderLogo collapsed={false} />
         <Menu
@@ -299,7 +312,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
                 </span>
               </>
             ) : (
-              /* Đã sửa lỗi title của Tooltip truyền trực tiếp boolean */
               <Tooltip title={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"} placement="bottom">
                 <Button
                   type="text"
@@ -319,43 +331,49 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
             <Badge count={3} size="small" offset={[-4, 4]}>
               <Button
                 type="text"
-                icon={<BellOutlined style={{ fontSize: 16, color: '#64748b' }} />}
-                style={{ width: 36, height: 36, borderRadius: 999 }}
+                icon={<BellOutlined style={{ fontSize: 18 }} />}
+                style={{ width: 38, height: 38, borderRadius: 6 }}
               />
             </Badge>
 
-            <Dropdown trigger={['click']} menu={userDropdownMenu}>
-              <Button
-                type="text"
+            <Dropdown menu={userDropdownMenu} trigger={['click']} placement="bottomRight">
+              <div
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '0 10px 0 4px',
-                  height: 40,
-                  borderRadius: 999,
-                  border: '1px solid #e2e8f0',
+                  padding: '4px 8px',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <Avatar
-                  size={26}
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=AdminPro"
-                />
-                <span
-                  className="al-avatar-name"
-                  style={{ fontWeight: 600, fontSize: 13.5, color: '#0f172a' }}
+                  size={32}
+                  style={{
+                    background: 'linear-gradient(135deg, #1677ff 0%, #0958d9 100%)',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
                 >
-                  Quản trị viên
-                </span>
-                <DownOutlined style={{ fontSize: 9, color: '#94a3b8' }} />
-              </Button>
+                  A
+                </Avatar>
+                <div className="al-avatar-name" style={{ lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Admin</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Quản trị viên</div>
+                </div>
+                <DownOutlined style={{ fontSize: 10, color: '#94a3b8' }} />
+              </div>
             </Dropdown>
           </div>
         </Header>
 
         {/* Content */}
         <Content style={{ margin: 24 }}>
-          {/* Breadcrumb tiếng Việt - Đã bọc Link điều hướng về Dashboard */}
+          {/* Breadcrumb tiếng Việt - Bug #8 fix: hỗ trợ dynamic routes */}
           <div
             style={{
               marginBottom: 16,
@@ -367,12 +385,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
               color: '#94a3b8',
             }}
           >
-            <Link 
-              to="/admin/dashboard" 
-              style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: 6, 
+            <Link
+              to="/admin/dashboard"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
                 color: '#64748b',
                 textDecoration: 'none',
                 transition: 'color 0.2s'
@@ -409,7 +427,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
             fontWeight: 500,
           }}
         >
-          © {new Date().getFullYear()} ST TEAM 
+          © {new Date().getFullYear()} VNUA Alumni Career Connect
         </div>
       </Layout>
     </Layout>

@@ -13,14 +13,17 @@
     GLOBAL FONT SIZE
     ======================================== */
 html {
-    font-size: 17px;
+    /* Bug #5 fix: 17px → 16px để tránh phá vỡ Ant Design rem scale.
+       Ant Design 5 sử dụng 14px base (via ConfigProvider token.fontSize).
+       Đặt html font-size khác 16px sẽ làm lệch toàn bộ rem calculations. */
+    font-size: 16px;
 }
 body {
     font-size: 1rem;
     line-height: 1.6;
 }
 /* Ant Design global override */
-/* NOTE: font size cho Table doực quan lý bỏi ConfigProvider token.fontSize */
+/* NOTE: font size cho Table được quản lý bởi ConfigProvider token.fontSize */
 .ant-typography,
 .ant-btn,
 .ant-input,

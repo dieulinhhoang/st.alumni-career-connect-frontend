@@ -71,6 +71,11 @@ const routes = [
             path: '/admin/statistics/indicators',
             element: <Suspense fallback={<Loader />}><StatIndicatorConfig /></Suspense>
           },
+          // Bug #3 fix: route /admin/employment-stats không tồn tại → thêm vào trỏ đến Statistics
+          {
+            path: '/admin/employment-stats',
+            element: <Suspense fallback={<Loader />}><FormStatisticsDetailPage /></Suspense>
+          },
 
           // Forms
           {
@@ -81,6 +86,11 @@ const routes = [
           // Reports
           {
             path: '/admin/reports',
+            element: <Suspense fallback={<Loader />}><ReportsPage /></Suspense>
+          },
+          // Bug #2 fix: route /admin/bao-cao/:code không tồn tại → thêm vào
+          {
+            path: '/admin/bao-cao/:code',
             element: <Suspense fallback={<Loader />}><ReportsPage /></Suspense>
           },
 
@@ -98,31 +108,11 @@ const routes = [
             element: <Suspense fallback={<Loader />}><BatchResults /></Suspense>
           },
           {
-            path: '/admin/alumni/batches/:id/responses',
-            element: <Suspense fallback={<Loader />}><BatchResults /></Suspense>
-          },
-          {
             path: '/admin/alumni/batches/:id/responses/:responseId',
             element: <Suspense fallback={<Loader />}><ResponseDetail /></Suspense>
           },
-          {
-            path: '/admin/alumni/batches/:id/responses/:responseId/edit',
-            element: <Suspense fallback={<Loader />}><ResponseDetail /></Suspense>
-          },
-          {
-            path: '/admin/alumni/batches/:id/edit-form',
-            element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
-          },
 
-          // // Users
-          // {
-          //   path: '/admin/studentlist',
-          //   element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
-          // },
-          // {
-          //   path: '/admin/stafflist',
-          //   element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
-          // },
+          // Users
           {
             path: '/admin/users',
             element: <Suspense fallback={<Loader />}><UserManagement /></Suspense>
