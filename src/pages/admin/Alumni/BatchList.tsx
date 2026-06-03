@@ -108,7 +108,7 @@ export const BatchList: React.FC = () => {
     {
       title: 'Phản hồi', key: 'rate', width: 90,
       render: (_, r) => {
-        const sub = r.responses.filter(x => x.status === 'submitted').length;
+        const sub = (r as any).submittedCount ?? 0;
         const pct = r.totalStudents ? Math.round((sub / r.totalStudents) * 1000) / 10 : 0;
         return <PctBadge pct={pct} />;
       },

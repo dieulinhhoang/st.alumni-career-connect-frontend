@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Button, Input, Drawer, Flex } from 'antd'
-import { ArrowLeftOutlined, SaveOutlined, CheckOutlined, AppstoreOutlined } from '@ant-design/icons'
+import { Button, Input, Drawer, Flex, Tooltip, Tag, message } from 'antd'
+import { ArrowLeftOutlined, SaveOutlined, CheckOutlined, AppstoreOutlined, CloudUploadOutlined, StopOutlined } from '@ant-design/icons'
 import { useFormBuilder } from '../../../../feature/form/hooks/useFormBuilder'
 import type { Form, Section, SurveyFooter, SurveyHeader } from '../../../../feature/form/types'
 import { CenterCanvas } from './canvas/CenterCanvas'
@@ -47,6 +47,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addSectionAfter, deleteSection,
     addOption, updateOption, removeOption,
     saving, saved, handleSave,
+    publishing, formStatus, handlePublish, handleUnpublish,
   } = useFormBuilder(mode, form?.id ?? undefined)
 
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
@@ -114,6 +115,19 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     if (result) onSave(result)
   }, [handleSave, onSave])
 
+  const handlePublishClick = useCallback(async () => {
+    // Lưu trước rồi mới publish
+    const saved = await handleSave(extrasRef.current)
+    if (!saved) return
+    const result = await handlePublish()
+    if (result) message.success('Đã xuất bản form!')
+  }, [handleSave, handlePublish])
+
+  const handleUnpublishClick = useCallback(async () => {
+    const result = await handleUnpublish()
+    if (result) message.info('Đã hủy xuất bản.')
+  }, [handleUnpublish])
+
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
@@ -148,6 +162,41 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         >
           {!isMobile && (saved ? 'Đã lưu' : 'Lưu')}
         </Button>
+
+        {/* Nút Publish — chỉ hiển thị khi đang ở edit mode (form đã có id) */}
+        {form?.id && (
+          formStatus === 'published' ? (
+            <Tooltip title="Hủy xuất bản để chỉnh sửa lại">
+              <Button
+                icon={<StopOutlined />}
+                onClick={handleUnpublishClick}
+                loading={publishing}
+                style={{ borderColor: '#f59e0b', color: '#b45309', background: '#fffbeb' }}
+              >
+                {!isMobile && 'Hủy xuất bản'}
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Xuất bản để dùng trong đợt khảo sát">
+              <Button
+                type="primary"
+                icon={<CloudUploadOutlined />}
+                onClick={handlePublishClick}
+                loading={publishing}
+                style={{ background: '#0d7a7f', borderColor: '#0d7a7f' }}
+              >
+                {!isMobile && 'Xuất bản'}
+              </Button>
+            </Tooltip>
+          )
+        )}
+
+        {/* Badge trạng thái */}
+        {form?.id && !isMobile && (
+          <Tag color={formStatus === 'published' ? 'green' : 'default'} style={{ marginLeft: 2 }}>
+            {formStatus === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
+          </Tag>
+        )}
       </Flex>
 
       {/* Main layout */}

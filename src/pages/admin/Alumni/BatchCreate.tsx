@@ -44,16 +44,17 @@ export const BatchCreate: React.FC = () => {
     const newBatch = await create({
       title: values.title,
       formId: selectedForm.id!,
-      formSnapshot: { ...selectedForm, status: 'draft' },
-      startDate: s.toISOString(),
-      endDate:   e.toISOString(),
+      formSnapshot: { ...selectedForm, status: 'published' },
+      startDate: s.format('YYYY-MM-DD'),
+      endDate:   e.format('YYYY-MM-DD'),
       year:      values.year,
       graduationPeriod: values.graduationPeriod,
       totalStudents: 0,
+      status: 'active',
     });
     if (newBatch) {
       message.success('Tạo đợt khảo sát thành công!');
-      navigate(`/admin/alumni/batches/${newBatch.id}/edit-form`);
+      navigate('/admin/alumni/batches');
     }
   };
 

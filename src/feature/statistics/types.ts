@@ -1,14 +1,21 @@
 export type ChartType = 'pie' | 'column'
 
-export interface FormOption {
+/** Một đợt khảo sát đã kết thúc (dùng cho dropdown chọn đợt thống kê) */
+export interface BatchOption {
   id: number
-  name: string
+  title: string
+  year?: number
+  graduationPeriod?: string
+  endDate?: string
+  totalStudents?: number
 }
 
+/** Câu hỏi có show_in_chart = 1 trong formSnapshot của batch */
 export interface StatisticalQuestion {
-  id: string
+  questionKey: string   // key dùng để query thống kê
   title: string
   chartType: ChartType
+  questionType: string
 }
 
 export interface ChartDatum {
@@ -18,11 +25,14 @@ export interface ChartDatum {
 }
 
 export interface FormStatisticsDetail {
-  totalResponses: number
-  completionRate: number
-  formName: string
+  batchId: number
+  batchTitle: string
+  questionKey: string
   questionTitle: string
   chartType: ChartType
+  totalResponses: number
+  answeredCount: number
+  completionRate: number
   data: ChartDatum[]
 }
 

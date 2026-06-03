@@ -106,8 +106,8 @@ export default function ListView({
     },
     {
       title: 'Ngày tạo',
-      dataIndex: 'createdat',
-      key: 'createdat',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 120,
       align: 'center' as const,
       render: (date: string) => (

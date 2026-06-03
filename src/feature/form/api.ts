@@ -1,152 +1,156 @@
 import api from "../../libs/api";
 import type {
-	Form,
-	Question,
-	CreateFormPayload,
-	UpdateFormPayload,
-	GetFormsParams,
-	PaginatedResponse,
-	AIFormResult,
-	QuestionTypeOption,
-	Theme,
-	FontOption,
-	RadiusOption,
+  Form,
+  Question,
+  CreateFormPayload,
+  UpdateFormPayload,
+  GetFormsParams,
+  PaginatedResponse,
+  AIFormResult,
+  QuestionTypeOption,
+  Theme,
+  FontOption,
+  RadiusOption,
 } from "./types";
 
 // ====== Question Bank ======
 export interface BankQuestion {
-	id: string;
-	category: string;
-	title: string;
-	type: Question['type'];
-	options?: Array<{ id: string; label: string }>;
+  id: string;
+  category: string;
+  title: string;
+  type: Question['type'];
+  options?: Array<{ id: string; label: string }>;
 }
 
 /**
  * Fetch question bank entries with optional search/category filter.
  */
 export async function getQuestionBank(params?: {
-	search?: string;
-	category?: string;
+  search?: string;
+  category?: string;
 }): Promise<BankQuestion[]> {
-	const res = await api.get("/question-bank", { params });
-	return Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+  const res = await api.get("/question-bank", { params });
+  return Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
 }
 
 // ====== Forms ======
 
 /**
  * Fetch all forms with optional filtering and pagination.
+ * Backend returns PaginatedResponse<Form>.
  */
 export async function getForms(
-	params?: GetFormsParams
+  params?: GetFormsParams
 ): Promise<PaginatedResponse<Form>> {
-	const res = await api.get("/forms", { params });
-	return res.data;
+  const res = await api.get("/forms", { params });
+  return res.data;
 }
 
 /**
  * Fetch a single form by ID.
  */
 export async function getFormById(id: number): Promise<Form> {
-	const res = await api.get(`/forms/${id}`);
-	return res.data;
+  const res = await api.get(`/forms/${id}`);
+  return res.data;
 }
 
 /**
  * Create a new form.
  */
 export async function createForm(payload: CreateFormPayload): Promise<Form> {
-	const res = await api.post("/forms", payload);
-	return res.data;
+  const res = await api.post("/forms", payload);
+  return res.data;
 }
 
 /**
  * Update an existing form.
  */
 export async function updateForm(
-	id: number,
-	payload: UpdateFormPayload
+  id: number,
+  payload: UpdateFormPayload
 ): Promise<Form> {
-	const res = await api.put(`/forms/${id}`, payload);
-	return res.data;
+  const res = await api.put(`/forms/${id}`, payload);
+  return res.data;
 }
 
 /**
  * Delete a form.
  */
 export async function deleteForm(id: number): Promise<void> {
-	await api.delete(`/forms/${id}`);
+  await api.delete(`/forms/${id}`);
 }
 
 /**
  * Duplicate an existing form.
  */
 export async function duplicateForm(id: number): Promise<Form> {
-	const res = await api.post(`/forms/${id}/duplicate`);
-	return res.data;
+  const res = await api.post(`/forms/${id}/duplicate`);
+  return res.data;
 }
 
 /**
  * Generate a form using AI based on a prompt.
  */
 export async function generateFormWithAI(prompt: string): Promise<AIFormResult> {
-	const res = await api.post("/forms/generate-ai", { prompt });
-	return res.data;
+  const res = await api.post("/forms/generate-ai", { prompt });
+  return res.data;
 }
 
 /**
- * Fetch all forms (alias for getForms without params).
+ * FIX: fetchAllForms - trả về mảng Form[] từ paginated response.
+ * Dùng pageSize lớn để lấy tất cả (dùng cho dropdown chọn form).
  */
 export async function fetchAllForms(): Promise<Form[]> {
-	const res = await api.get("/forms");
-	return Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+  const res = await api.get("/forms", { params: { pageSize: 200 } });
+  // Backend trả { data: [...], total, page, pageSize }
+  if (Array.isArray(res.data)) return res.data;
+  return res.data?.data ?? [];
 }
 
 /**
  * Fetch all question type options.
  */
 export async function getQuestionTypeOptions(): Promise<QuestionTypeOption[]> {
-	const res = await api.get("/question-type-options");
-	return res.data ?? [];
+  const res = await api.get("/question-type-options");
+  return res.data ?? [];
 }
 
 /**
  * Fetch available themes for forms.
  */
 export async function getThemes(): Promise<Theme[]> {
-	const res = await api.get("/themes");
-	return res.data ?? [];
+  const res = await api.get("/themes");
+  return res.data ?? [];
 }
 
 /**
  * Fetch available font options.
  */
 export async function getFonts(): Promise<FontOption[]> {
-	const res = await api.get("/fonts");
-	return res.data ?? [];
+  const res = await api.get("/fonts");
+  return res.data ?? [];
 }
 
 /**
  * Fetch available radius options.
  */
 export async function getRadiusOptions(): Promise<RadiusOption[]> {
-	const res = await api.get("/radius-options");
-	return res.data ?? [];
+  const res = await api.get("/radius-options");
+  return res.data ?? [];
 }
 
 /**
  * Publish a form (status -> 'published').
  */
 export async function publishForm(id: number): Promise<Form> {
-	const res = await api.patch(`/forms/${id}/publish`);
-	return res.data;
+  const res = await api.patch(`/forms/${id}/publish`);
+  return res.data;
 }
 
 /**
  * Unpublish a form (status -> 'draft').
  */
 export async function unpublishForm(id: number): Promise<Form> {
-	const res = await api.patch(`/forms/${id}/unpublish`);
-	return res.data;
+  const res = await api.patch(`/forms/${id}/unpublish`);
+  return res.data;
 }

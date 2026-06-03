@@ -1,38 +1,38 @@
 import type {
-  FormOption,
+  BatchOption,
   StatisticalQuestion,
   FormStatisticsDetail,
 } from './types';
 import api from '../../libs/api';
 
 /**
- * Fetch list of survey forms
+ * Fetch list of ended survey batches (for dropdown selection)
+ * GET /statistics/batches
  */
-export async function getForms(): Promise<FormOption[]> {
-  const res = await api.get('/forms');
+export async function getEndedBatches(): Promise<BatchOption[]> {
+  const res = await api.get('/statistics/batches');
   return res.data ?? [];
 }
 
 /**
- * Fetch statistical questions for a specific form
- * @param formId - form ID
+ * Fetch statistical questions (showInChart=1) for a specific batch
+ * GET /statistics/questions?batch_id=X
  */
-export async function getStatisticalQuestions(formId: number): Promise<StatisticalQuestion[]> {
-  const res = await api.get('/form-questions', { params: { form_id: formId } });
+export async function getStatisticalQuestions(batchId: number): Promise<StatisticalQuestion[]> {
+  const res = await api.get('/statistics/questions', { params: { batch_id: batchId } });
   return res.data ?? [];
 }
 
 /**
- * Fetch detailed statistics for a specific question in a form
- * @param formId - form ID
- * @param questionId - question ID
+ * Fetch detailed statistics for a specific question in a batch
+ * GET /statistics?batch_id=X&question_key=Y
  */
 export async function getFormStatisticsDetail(
-  formId: number,
-  questionId: string,
+  batchId: number,
+  questionKey: string,
 ): Promise<FormStatisticsDetail | null> {
   const res = await api.get('/statistics', {
-    params: { form_id: formId, question_id: questionId },
+    params: { batch_id: batchId, question_key: questionKey },
   });
   return res.data ?? null;
 }

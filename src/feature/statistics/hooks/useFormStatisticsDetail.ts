@@ -1,87 +1,84 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  getForms,
+  getEndedBatches,
   getStatisticalQuestions,
   getFormStatisticsDetail,
 } from '../api'
 import type {
-  FormOption,
+  BatchOption,
   StatisticalQuestion,
   FormStatisticsDetail,
 } from '../types'
 
-// mount  gọi get forms, sau đó tự động chọn form đầu tiên (nếu có) và gọi getStatisticalQuestions
-// khi formId thay đổi, gọi getStatisticalQuestions, sau đó tự động chọn question đầu tiên (nếu có) và gọi getFormStatisticsDetail
-// khi questionId thay đổi, gọi getFormStatisticsDetail
-export function useFormStatisticsDetail(initialFormId?: number) {
-  // ds form
-  const [forms, setForms] = useState<FormOption[]>([])
-  // danh sách câu hỏi của form đang chọn
+/**
+ * Hook quản lý toàn bộ state cho trang thống kê:
+ * 1. Load danh sách đợt khảo sát đã kết thúc → tự chọn đợt đầu tiên
+ * 2. Khi batchId thay đổi → load danh sách câu hỏi showInChart=1 → tự chọn câu đầu tiên
+ * 3. Khi questionKey thay đổi → load chi tiết thống kê từ AlumniBatchResponse.answers
+ */
+export function useFormStatisticsDetail(initialBatchId?: number) {
+  const [batches, setBatches] = useState<BatchOption[]>([])
   const [questions, setQuestions] = useState<StatisticalQuestion[]>([])
-  // data render
   const [detail, setDetail] = useState<FormStatisticsDetail | null>(null)
 
-  // id form đang chọn
-  const [formId, setFormId] = useState<number | undefined>(initialFormId)
-  const [questionId, setQuestionId] = useState<string | undefined>()
+  const [batchId, setBatchId] = useState<number | undefined>(initialBatchId)
+  const [questionKey, setQuestionKey] = useState<string | undefined>()
 
-  const [loadingForms, setLoadingForms] = useState(false)
+  const [loadingBatches, setLoadingBatches] = useState(false)
   const [loadingQuestions, setLoadingQuestions] = useState(false)
   const [loadingDetail, setLoadingDetail] = useState(false)
 
+  // Step 1: Load danh sách batch đã ended
   useEffect(() => {
     let mounted = true
-    setLoadingForms(true)
+    setLoadingBatches(true)
 
-    getForms()
+    getEndedBatches()
       .then((res) => {
         if (!mounted) return
-        setForms(res)
-        if (!formId && res.length > 0) {
-          setFormId(res[0].id)
+        setBatches(res)
+        if (!batchId && res.length > 0) {
+          setBatchId(res[0].id)
         }
       })
       .finally(() => {
-        if (mounted) setLoadingForms(false)
+        if (mounted) setLoadingBatches(false)
       })
 
-    return () => {
-      mounted = false
-    }
+    return () => { mounted = false }
   }, [])
 
+  // Step 2: Khi batchId thay đổi → load câu hỏi
   useEffect(() => {
-    if (!formId) {
+    if (!batchId) {
       setQuestions([])
-      setQuestionId(undefined)
+      setQuestionKey(undefined)
       setDetail(null)
       return
     }
 
     let mounted = true
     setLoadingQuestions(true)
-    // Reset trước khi fetch mới để tránh hiển thị dữ liệu cũ trong lúc đang load
     setQuestions([])
-    setQuestionId(undefined)
+    setQuestionKey(undefined)
     setDetail(null)
 
-    getStatisticalQuestions(formId)
+    getStatisticalQuestions(batchId)
       .then((res) => {
         if (!mounted) return
         setQuestions(res)
-        setQuestionId(res[0]?.id)
+        setQuestionKey(res[0]?.questionKey)
       })
       .finally(() => {
         if (mounted) setLoadingQuestions(false)
       })
 
-    return () => {
-      mounted = false
-    }
-  }, [formId])
+    return () => { mounted = false }
+  }, [batchId])
 
+  // Step 3: Khi questionKey thay đổi → load detail
   useEffect(() => {
-    if (!formId || !questionId) {
+    if (!batchId || !questionKey) {
       setDetail(null)
       return
     }
@@ -89,7 +86,7 @@ export function useFormStatisticsDetail(initialFormId?: number) {
     let mounted = true
     setLoadingDetail(true)
 
-    getFormStatisticsDetail(formId, questionId)
+    getFormStatisticsDetail(batchId, questionKey)
       .then((res) => {
         if (!mounted) return
         setDetail(res)
@@ -98,24 +95,23 @@ export function useFormStatisticsDetail(initialFormId?: number) {
         if (mounted) setLoadingDetail(false)
       })
 
-    return () => {
-      mounted = false
-    }
-  }, [formId, questionId])
+    return () => { mounted = false }
+  }, [batchId, questionKey])
 
   const loading = useMemo(
-    () => loadingForms || loadingQuestions || loadingDetail,
-    [loadingForms, loadingQuestions, loadingDetail],
+    () => loadingBatches || loadingQuestions || loadingDetail,
+    [loadingBatches, loadingQuestions, loadingDetail],
   )
 
   return {
-    forms,
+    // Thay thế `forms` bằng `batches` — tên đúng hơn với nghiệp vụ
+    batches,
     questions,
     detail,
-    formId,
-    questionId,
-    setFormId,
-    setQuestionId,
+    batchId,
+    questionKey,
+    setBatchId,
+    setQuestionKey,
     loading,
   }
 }

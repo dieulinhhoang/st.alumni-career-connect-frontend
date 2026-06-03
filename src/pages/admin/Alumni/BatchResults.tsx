@@ -12,7 +12,7 @@ import {
   QuestionCircleOutlined, EditOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getBatchById } from '../../../feature/alumni/api';
+import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
@@ -209,7 +209,13 @@ export const BatchResults: React.FC = () => {
   useEffect(() => { if (id) load(); }, [id]);
 
   const load = async () => {
-    try { setBatch(await getBatchById(Number(id))); }
+    try {
+      const [batchData, responses] = await Promise.all([
+        getBatchById(Number(id)),
+        getBatchResponses(Number(id)),
+      ]);
+      setBatch({ ...batchData, responses: responses ?? [] });
+    }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -230,7 +236,7 @@ export const BatchResults: React.FC = () => {
     </AdminLayout>
   );
 
-  const submitted = batch.responses.filter(r => r.status === 'submitted');
+  const submitted = (batch.responses ?? []).filter(r => r.status === 'submitted');
   const pct       = batch.totalStudents ? Math.round(submitted.length / batch.totalStudents * 100) : 0;
   const now       = new Date();
   const endDate   = new Date(batch.endDate);
@@ -247,7 +253,7 @@ export const BatchResults: React.FC = () => {
   const hasJobG  = hasJob;
   const relevG   = Math.round(relevant + (total - n) / 2);
 
-  const filtered = batch.responses.filter(r => {
+  const filtered = (batch.responses ?? []).filter(r => {
     const q = search.toLowerCase();
     return (
       (r.studentName.toLowerCase().includes(q) || r.studentId?.toLowerCase().includes(q)) &&
