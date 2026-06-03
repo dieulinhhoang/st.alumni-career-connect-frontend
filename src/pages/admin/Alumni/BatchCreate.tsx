@@ -68,7 +68,7 @@ export const BatchCreate: React.FC = () => {
       graduationId:     grad.id,
       graduationPeriod: grad.name,
       year:             grad.schoolYear,   // kept for legacy display
-      totalStudents:    0,
+      totalStudents:    grad.studentCount ?? 0,
       status:           'active',
     });
     if (newBatch) {

@@ -3,11 +3,9 @@ import { Tooltip, Tag, Button, Input, Space, Typography, Flex } from 'antd'
 import {
   EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined,
   SearchOutlined, FileOutlined, PlusOutlined, ThunderboltOutlined,
-  QrcodeOutlined,
 } from '@ant-design/icons'
 import type { Form } from '../../../feature/form/types'
 import CustomTable from '../../../components/common/customTable'
-import { QRCodeModal } from './QRCodeModal'
 
 const { Title, Text } = Typography
 
@@ -40,7 +38,6 @@ export default function ListView({
   forms, onCreate, onAI, onEdit, onPreview, onDup, onDelete,
 }: ListViewProps) {
   const [search, setSearch] = useState('')
-  const [qrForm, setQrForm] = useState<Form | null>(null)
 
   const filtered = forms.filter((f) =>
     f.name.toLowerCase().includes(search.toLowerCase())
@@ -131,10 +128,6 @@ export default function ListView({
             <Button type="text" size="small" icon={<EditOutlined />}
               onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
           </Tooltip>
-          <Tooltip title="QR Code" mouseEnterDelay={0.4}>
-            <Button type="text" size="small" icon={<QrcodeOutlined />}
-              onClick={(e) => { e.stopPropagation(); setQrForm(record) }} />
-          </Tooltip>
           <Tooltip title="Nhân bản" mouseEnterDelay={0.4}>
             <Button type="text" size="small" icon={<CopyOutlined />}
               onClick={(e) => { e.stopPropagation(); onDup(record) }} />
@@ -220,15 +213,6 @@ export default function ListView({
         />
       </div>
 
-      {/* QR Code Modal */}
-      {qrForm && (
-        <QRCodeModal
-          open={!!qrForm}
-          onClose={() => setQrForm(null)}
-          surveyUrl={getSurveyUrl(qrForm)}
-          formName={qrForm.name}
-        />
-      )}
     </div>
   )
 }

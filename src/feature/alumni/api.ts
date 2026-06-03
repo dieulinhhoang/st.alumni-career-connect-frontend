@@ -57,13 +57,22 @@ export interface GraduationOption {
   certification: string;
   certificationDate: string;
   schoolYear: number;
+  studentCount: number;
 }
 
 export async function getGraduations(page = 1, perPage = 100): Promise<GraduationOption[]> {
   const res = await api.get('/graduation', { params: { page, per_page: perPage } });
   // Backend returns { data: [...], total, page, perPage }
   const raw = res.data;
-  return Array.isArray(raw) ? raw : (raw.data ?? []);
+  const list: any[] = Array.isArray(raw) ? raw : (raw.data ?? []);
+  return list.map((g: any) => ({
+    id: g.id,
+    name: g.name,
+    certification: g.certification,
+    certificationDate: g.certification_date ?? g.certificationDate,
+    schoolYear: g.school_year ?? g.schoolYear,
+    studentCount: g.student_count ?? g.studentCount ?? 0,
+  }));
 }
 
 /** Validate xem một mã SV có thuộc đợt tốt nghiệp (graduationId) không */

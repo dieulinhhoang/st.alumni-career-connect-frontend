@@ -13,6 +13,8 @@ import {
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
+import { fetchGraduationStudents } from '../../../feature/graduation/api';
+import type { GraduationStudent } from '../../../feature/graduation/type';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
@@ -205,8 +207,35 @@ export const BatchResults: React.FC = () => {
   const [exporting,    setExporting]    = useState<'excel' | 'pdf' | null>(null);
   const [showFilter,   setShowFilter]   = useState(false);
   const [exportingRow, setExportingRow] = useState<number | string | null>(null);
+  const [gradStudents, setGradStudents] = useState<GraduationStudent[]>([]);
 
   useEffect(() => { if (id) load(); }, [id]);
+
+  // Merge graduation students with responses — must be before early returns (Rules of Hooks)
+  const mergedRows: AlumniResponse[] = React.useMemo(() => {
+    if (!batch) return [];
+    const responses = batch.responses ?? [];
+    if (gradStudents.length === 0) return responses;
+    const responseByCode = new Map<string, AlumniResponse>();
+    responses.forEach(r => {
+      if (r.studentId) responseByCode.set(r.studentId, r);
+    });
+    return gradStudents.map(gs => {
+      const existing = responseByCode.get(gs.code);
+      if (existing) return existing;
+      return {
+        id: -(gs.id),
+        batchId: batch.id,
+        studentId: gs.code,
+        studentName: gs.full_name ?? `${gs.last_name ?? ''} ${gs.first_name ?? ''}`.trim(),
+        studentEmail: gs.email ?? '',
+        answers: {},
+        submittedAt: '',
+        status: 'pending' as any,
+      } as AlumniResponse;
+    });
+  }, [batch, gradStudents]);
+
 
   const load = async () => {
     try {
@@ -214,7 +243,17 @@ export const BatchResults: React.FC = () => {
         getBatchById(Number(id)),
         getBatchResponses(Number(id)),
       ]);
-      setBatch({ ...batchData, responses: responses ?? [] });
+      const mergedBatch = { ...batchData, responses: responses ?? [] };
+      setBatch(mergedBatch);
+      // Load all students from the linked graduation to merge with responses
+      if (batchData.graduationId) {
+        try {
+          const studentsRes = await fetchGraduationStudents(batchData.graduationId, 1, 9999);
+          setGradStudents(studentsRes.data);
+        } catch (e) {
+          console.warn('Không thể tải danh sách sinh viên tốt nghiệp:', e);
+        }
+      }
     }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -253,7 +292,7 @@ export const BatchResults: React.FC = () => {
   const hasJobG  = hasJob;
   const relevG   = Math.round(relevant + (total - n) / 2);
 
-  const filtered = (batch.responses ?? []).filter(r => {
+  const filtered = mergedRows.filter(r => {
     const q = search.toLowerCase();
     return (
       (r.studentName.toLowerCase().includes(q) || r.studentId?.toLowerCase().includes(q)) &&
