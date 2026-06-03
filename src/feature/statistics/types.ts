@@ -10,9 +10,18 @@ export interface BatchOption {
   totalStudents?: number
 }
 
+/** Alias dùng cho FilterBar (để tương thích với prop `forms`) */
+export type FormOption = {
+  id: number
+  /** FilterBar dùng field .name để hiển thị label */
+  name: string
+}
+
 /** Câu hỏi có show_in_chart = 1 trong formSnapshot của batch */
 export interface StatisticalQuestion {
-  questionKey: string   // key dùng để query thống kê
+  /** id = questionKey, dùng thống nhất cho value của Select */
+  id: string
+  questionKey: string
   title: string
   chartType: ChartType
   questionType: string

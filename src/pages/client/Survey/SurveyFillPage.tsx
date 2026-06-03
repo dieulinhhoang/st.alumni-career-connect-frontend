@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getBatchById } from '../../../feature/alumni/api'
+import { getBatchByIdPublic } from '../../../feature/alumni/api'
 import type { SurveyBatch } from '../../../feature/alumni/types'
 import { SurveyPreview } from '../../admin/Form/Preview'
 import { IdentifyStep } from './IdentifyStep'
@@ -21,7 +21,8 @@ export default function SurveyFillPage() {
 
   useEffect(() => {
     if (!id) { setPageState('error'); return }
-    getBatchById(Number(id))
+    // Dùng getBatchByIdPublic – không kèm JWT token
+    getBatchByIdPublic(Number(id))
       .then(b => {
         setBatch(b)
         const now   = new Date()

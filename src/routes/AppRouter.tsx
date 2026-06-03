@@ -50,7 +50,7 @@ const routes = [
         element: <Suspense fallback={<Loader />}><AuthCallback /></Suspense>
       },
       {
-        path: '/survey/:slug',
+        path: '/survey/:id/:slug',
         element: <Suspense fallback={<Loader />}><SurveyFillPage /></Suspense>
       },
 

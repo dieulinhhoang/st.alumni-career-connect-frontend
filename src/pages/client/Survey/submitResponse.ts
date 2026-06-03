@@ -8,8 +8,8 @@ export interface SubmitIdentity {
 }
 
 /**
- * Gửi câu trả lời khảo sát lên backend để lưu vào DB.
- * POST /alumni/batches/:batchId/responses
+ * Gửi câu trả lời khảo sát – dùng chung instance api
+ * (backend không có global guard cho route này)
  */
 export async function submitResponse(
   batchId: number,

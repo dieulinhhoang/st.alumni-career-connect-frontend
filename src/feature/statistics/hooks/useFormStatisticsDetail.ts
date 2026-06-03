@@ -6,6 +6,7 @@ import {
 } from '../api'
 import type {
   BatchOption,
+  FormOption,
   StatisticalQuestion,
   FormStatisticsDetail,
 } from '../types'
@@ -13,16 +14,17 @@ import type {
 /**
  * Hook quản lý toàn bộ state cho trang thống kê:
  * 1. Load danh sách đợt khảo sát đã kết thúc → tự chọn đợt đầu tiên
- * 2. Khi batchId thay đổi → load danh sách câu hỏi showInChart=1 → tự chọn câu đầu tiên
- * 3. Khi questionKey thay đổi → load chi tiết thống kê từ AlumniBatchResponse.answers
+ * 2. Khi batchId (formId) thay đổi → load danh sách câu hỏi showInChart=1 → tự chọn câu đầu tiên
+ * 3. Khi questionKey (questionId) thay đổi → load chi tiết thống kê
  */
 export function useFormStatisticsDetail(initialBatchId?: number) {
   const [batches, setBatches] = useState<BatchOption[]>([])
   const [questions, setQuestions] = useState<StatisticalQuestion[]>([])
   const [detail, setDetail] = useState<FormStatisticsDetail | null>(null)
 
-  const [batchId, setBatchId] = useState<number | undefined>(initialBatchId)
-  const [questionKey, setQuestionKey] = useState<string | undefined>()
+  // Dùng tên `formId` và `questionId` để khớp với FilterBar props
+  const [formId, setFormId] = useState<number | undefined>(initialBatchId)
+  const [questionId, setQuestionId] = useState<string | undefined>()
 
   const [loadingBatches, setLoadingBatches] = useState(false)
   const [loadingQuestions, setLoadingQuestions] = useState(false)
@@ -37,8 +39,8 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
       .then((res) => {
         if (!mounted) return
         setBatches(res)
-        if (!batchId && res.length > 0) {
-          setBatchId(res[0].id)
+        if (!formId && res.length > 0) {
+          setFormId(res[0].id)
         }
       })
       .finally(() => {
@@ -48,11 +50,11 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     return () => { mounted = false }
   }, [])
 
-  // Step 2: Khi batchId thay đổi → load câu hỏi
+  // Step 2: Khi formId (batchId) thay đổi → load câu hỏi
   useEffect(() => {
-    if (!batchId) {
+    if (!formId) {
       setQuestions([])
-      setQuestionKey(undefined)
+      setQuestionId(undefined)
       setDetail(null)
       return
     }
@@ -60,25 +62,30 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingQuestions(true)
     setQuestions([])
-    setQuestionKey(undefined)
+    setQuestionId(undefined)
     setDetail(null)
 
-    getStatisticalQuestions(batchId)
+    getStatisticalQuestions(formId)
       .then((res) => {
         if (!mounted) return
-        setQuestions(res)
-        setQuestionKey(res[0]?.questionKey)
+        // Map questionKey → id để Select dùng được
+        const mapped: StatisticalQuestion[] = res.map((q: any) => ({
+          ...q,
+          id: q.questionKey,
+        }))
+        setQuestions(mapped)
+        setQuestionId(mapped[0]?.questionKey)
       })
       .finally(() => {
         if (mounted) setLoadingQuestions(false)
       })
 
     return () => { mounted = false }
-  }, [batchId])
+  }, [formId])
 
-  // Step 3: Khi questionKey thay đổi → load detail
+  // Step 3: Khi questionId (questionKey) thay đổi → load detail
   useEffect(() => {
-    if (!batchId || !questionKey) {
+    if (!formId || !questionId) {
       setDetail(null)
       return
     }
@@ -86,7 +93,7 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingDetail(true)
 
-    getFormStatisticsDetail(batchId, questionKey)
+    getFormStatisticsDetail(formId, questionId)
       .then((res) => {
         if (!mounted) return
         setDetail(res)
@@ -96,22 +103,27 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
       })
 
     return () => { mounted = false }
-  }, [batchId, questionKey])
+  }, [formId, questionId])
 
   const loading = useMemo(
     () => loadingBatches || loadingQuestions || loadingDetail,
     [loadingBatches, loadingQuestions, loadingDetail],
   )
 
+  // `forms` là BatchOption[] được map sang FormOption[] (field .name = .title)
+  const forms: FormOption[] = useMemo(
+    () => batches.map((b) => ({ id: b.id, name: b.title })),
+    [batches],
+  )
+
   return {
-    // Thay thế `forms` bằng `batches` — tên đúng hơn với nghiệp vụ
-    batches,
+    forms,
     questions,
     detail,
-    batchId,
-    questionKey,
-    setBatchId,
-    setQuestionKey,
+    formId,
+    questionId,
+    setFormId,
+    setQuestionId,
     loading,
   }
 }

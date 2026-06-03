@@ -36,7 +36,7 @@ export function useGraduations(page = 1) {
   return state;
 }
 
-//  useGraduationStudents 
+//  useGraduationStudents
 interface GraduationStudentsState {
   data: GraduationStudent[];
   meta: PaginationMeta;
@@ -44,10 +44,14 @@ interface GraduationStudentsState {
   error: string | null;
 }
 
-export function useGraduationStudents(graduationId: number, page = 1) {
+/**
+ * Nhận đủ 3 params: graduationId, page, pageSize
+ * để phân trang đúng theo lựa chọn của người dùng.
+ */
+export function useGraduationStudents(graduationId: number, page = 1, pageSize = 10) {
   const [state, setState] = useState<GraduationStudentsState>({
     data: [],
-    meta: { total: 0, per_page: 10, current_page: 1, last_page: 1 },
+    meta: { total: 0, per_page: pageSize, current_page: 1, last_page: 1 },
     loading: true,
     error: null,
   });
@@ -57,7 +61,7 @@ export function useGraduationStudents(graduationId: number, page = 1) {
     let cancelled = false;
     setState(s => ({ ...s, loading: true, error: null }));
 
-    fetchGraduationStudents(graduationId, page)
+    fetchGraduationStudents(graduationId, page, pageSize)
       .then(res => {
         if (!cancelled) setState({ data: res.data, meta: res.meta, loading: false, error: null });
       })
@@ -66,7 +70,7 @@ export function useGraduationStudents(graduationId: number, page = 1) {
       });
 
     return () => { cancelled = true; };
-  }, [graduationId, page]);
+  }, [graduationId, page, pageSize]);
 
   return state;
 }

@@ -17,6 +17,15 @@ export async function getBatchById(id: number): Promise<SurveyBatch> {
   return res.data;
 }
 
+/**
+ * Lấy batch cho trang public survey – dùng chung instance api
+ * vì backend không có global JwtAuthGuard
+ */
+export async function getBatchByIdPublic(id: number): Promise<SurveyBatch> {
+  const res = await api.get(`/alumni/batches/${id}`);
+  return res.data;
+}
+
 export async function createBatch(payload: CreateBatchPayload): Promise<SurveyBatch> {
   const res = await api.post('/alumni/batches', payload);
   return res.data;
@@ -36,10 +45,6 @@ export async function getBatchStats(batchId: number): Promise<BatchStats> {
   return res.data;
 }
 
-/**
- * Lấy danh sách các phiếu trả lời của một đợt khảo sát
- * GET /alumni/batches/:id/responses
- */
 export async function getBatchResponses(batchId: number): Promise<AlumniResponse[]> {
   const res = await api.get(`/alumni/batches/${batchId}/responses`);
   return res.data;

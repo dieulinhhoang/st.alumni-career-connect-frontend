@@ -47,5 +47,5 @@ export const STATUS_CFG: Record<string, { color: string; bg: string; label: stri
   draft:  { color: '#92400e', bg: '#fef9c3', label: 'Nháp'      },
 };
 
-export const getSurveyUrl = (batchId: number | string , batchTitle: string) =>
-  `${window.location.origin}/survey/${toSlug(batchTitle)}`;
+export const getSurveyUrl = (batchId: number | string, batchTitle: string) =>
+  `${window.location.origin}/survey/${batchId}/${toSlug(batchTitle)}`;
