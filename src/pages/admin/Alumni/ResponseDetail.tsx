@@ -12,7 +12,7 @@ import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { SurveyPreview } from '../Form/Preview';
- import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
+import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
 import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
 
 const { Text, Title } = Typography;
@@ -43,7 +43,6 @@ export const ResponseDetail: React.FC = () => {
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
 
-
   const load = async () => {
     try {
       const numId = Number(responseId);
@@ -67,11 +66,38 @@ export const ResponseDetail: React.FC = () => {
             answers: {},
             submittedAt: '',
             status: 'pending' as any,
+            // Thêm thông tin ngành từ GraduationStudent
+            training_industry_id: gs.training_industry_id,
+            training_industry_name: gs.training_industry_name,
+            training_industry_code: gs.training_industry_code,
           } as any);
         }
       } else {
+        // Tìm response đã submit, rồi bổ sung thông tin ngành từ gradStudents
         const r = responses.find(x => String(x.id) === responseId);
-        setResponse(r ?? null);
+        if (r && b.graduationId) {
+          // Load gradStudents để lấy faculty_name + training_industry_name
+          try {
+            const studentsRes = await fetchGraduationStudents(b.graduationId, 1, 9999);
+            const gs = studentsRes.data.find(s => s.code === r.studentId);
+            if (gs) {
+              setResponse({
+                ...r,
+                faculty_id: (gs as any).faculty_id,
+                faculty_name: (gs as any).faculty_name,
+                training_industry_id: gs.training_industry_id,
+                training_industry_name: gs.training_industry_name,
+                training_industry_code: gs.training_industry_code,
+              } as any);
+            } else {
+              setResponse(r);
+            }
+          } catch {
+            setResponse(r ?? null);
+          }
+        } else {
+          setResponse(r ?? null);
+        }
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -107,10 +133,11 @@ export const ResponseDetail: React.FC = () => {
     </AdminLayout>
   );
 
-  const responseKhoa  = (response as any)?.khoa  as string | undefined;
-  const responseNganh = (response as any)?.nganh as string | undefined;
-  const khoaLabel  = (response as any)?.faculty_name  as string | undefined;
-  const nganhLabel = (response as any)?.training_industry_name as string | undefined;
+  // Lấy tên khoa và ngành từ các field đã được enrich ở load()
+  const khoaLabel  = (response as any)?.faculty_name as string | undefined;
+  // Ưu tiên training_industry_name, fallback về training_industry_code
+  const nganhLabel = (response as any)?.training_industry_name as string | undefined
+    ?? (response as any)?.training_industry_code as string | undefined;
 
   const answers    = (response as any)?.answers ?? {};
   const formSnapshot = (batch as any).formSnapshot ?? null;
@@ -124,9 +151,15 @@ export const ResponseDetail: React.FC = () => {
         <InfoRow icon={<IdcardOutlined />} label="Mã sinh viên" value={<Text style={{ fontFamily: 'monospace', color: '#2563eb', fontWeight: 700 }}>{response.studentId}</Text>} />
         <InfoRow icon={<UserOutlined />}   label="Họ và tên"    value={response.studentName} />
         <InfoRow icon={<MailOutlined />}   label="Email"        value={response.studentEmail} />
-        <InfoRow icon={<BankOutlined />}   label="Khoa"         value={khoaLabel} />
-        <InfoRow icon={<BookOutlined />}   label="Ngành"        value={nganhLabel} />
-        <InfoRow icon={<BookOutlined />}   label="Lớp"          value={(response as any).lop} />
+        {/* Hiển thị Khoa nếu có dữ liệu */}
+        {khoaLabel && (
+          <InfoRow icon={<BankOutlined />} label="Khoa" value={khoaLabel} />
+        )}
+        {/* Hiển thị Ngành nếu có dữ liệu */}
+        {nganhLabel && (
+          <InfoRow icon={<BookOutlined />} label="Ngành" value={nganhLabel} />
+        )}
+        {/* Ẩn Lớp và Năm tốt nghiệp */}
       </div>
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
         <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -142,8 +175,8 @@ export const ResponseDetail: React.FC = () => {
             ? new Date(response.submittedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             : undefined
         } />
-        <InfoRow icon={<CalendarOutlined />} label="Năm tốt nghiệp" value={batch.year} />
-        <InfoRow icon={<BankOutlined />}     label="Đợt tốt nghiệp" value={batch.graduationPeriod} />
+        {/* Ẩn Năm tốt nghiệp (batch.year) */}
+        <InfoRow icon={<BankOutlined />} label="Đợt tốt nghiệp" value={batch.graduationPeriod} />
       </div>
     </div>
   );
@@ -239,7 +272,7 @@ export const ResponseDetail: React.FC = () => {
         </Row>
       </div>
 
-      {/* Hidden div */}
+      {/* Hidden div for PDF export */}
       {formSnapshot && (
         <div
           ref={pdfRef}

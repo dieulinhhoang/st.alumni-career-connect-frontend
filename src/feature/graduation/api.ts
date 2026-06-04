@@ -1,19 +1,5 @@
-import axios from "axios";
+import api from "../../libs/api";
 import type { Graduation, GraduationStudent, PaginatedResponse } from "./type";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-// Gắn JWT token vào mọi request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 /**
  * Normalize a raw BE response into a typed array.
@@ -70,7 +56,7 @@ function buildPaginated<T>(
 
 /**
  * Fetch list of graduation ceremonies with pagination.
- * Path: GET /graduation (khớp controller BE)
+ * Path: GET /graduation
  */
 export async function fetchGraduations(
   page = 1,
@@ -85,15 +71,24 @@ export async function fetchGraduations(
 /**
  * Fetch students for a specific graduation ceremony.
  * Path: GET /grad-students
+ * Hỗ trợ thêm filters tuỳ chọn (faculty_id, major_id, v.v.)
  */
 export async function fetchGraduationStudents(
   graduationId: number,
   page = 1,
-  perPage = 10
+  perPage = 10,
+  filters?: Record<string, string | number | undefined>
 ): Promise<PaginatedResponse<GraduationStudent>> {
   const res = await api.get("/grad-students", {
-    params: { graduation_id: graduationId, page, per_page: perPage },
+    params: {
+      graduation_id: graduationId,
+      page,
+      per_page: perPage,
+      // Spread filters nếu có (bỏ qua undefined)
+      ...Object.fromEntries(
+        Object.entries(filters ?? {}).filter(([, v]) => v !== undefined)
+      ),
+    },
   });
-  console.log("Raw students response:", res.data);
   return buildPaginated<GraduationStudent>(res.data, page, perPage);
 }

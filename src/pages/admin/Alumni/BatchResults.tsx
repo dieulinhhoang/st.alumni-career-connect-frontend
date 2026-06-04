@@ -13,7 +13,7 @@ import {
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
-import { useGraduationStudents } from '../../../feature/graduation/hooks/useGraduation'; // LẤY DS SV TRONG ĐỌT TN 
+import { useGraduationStudents } from '../../../feature/graduation/hooks/useGraduation';
 import type { GraduationStudent } from '../../../feature/graduation/type';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
@@ -44,10 +44,7 @@ export const BatchResults: React.FC = () => {
   // Hook lấy toàn bộ sinh viên của đợt tốt nghiệp (không phân trang, load hết)
   const { data: gradStudents } = useGraduationStudents(batch?.graduationId ?? 0, 1, 9999);
 
-  //  Derive khoa + ngành trực tiếp từ gradStudents 
-  // gradStudents có faculty_name (BE trả về) và training_industry_id/name
-  // → không phụ thuộc vào /faculty API nữa, tránh mismatch id giữa major và training_industry
-
+  // Derive khoa + ngành trực tiếp từ gradStudents
   const khoaOptions = React.useMemo(() => {
     const seen = new Map<string, string>();
     gradStudents.forEach(s => {
@@ -60,14 +57,8 @@ export const BatchResults: React.FC = () => {
 
   const nganhOptions = React.useMemo(() => {
     const seen = new Map<string, string>();
-    if (gradStudents.length > 0) {
-      // Debug: xem student đầu tiên có những field gì
-      console.log('[DEBUG] gradStudents[0]:', gradStudents[0]);
-      console.log('[DEBUG] khoa đang chọn:', khoa);
-    }
     gradStudents.forEach(s => {
       const studentFacultyId = String((s as any).faculty_id ?? (s as any).facultyId ?? '');
-      // chỉ show ngành thuộc khoa đang chọn (nếu có)
       if (khoa && studentFacultyId !== khoa) return;
       const id   = String(s.training_industry_id ?? (s as any).trainingIndustryId ?? '');
       const name = s.training_industry_name ?? (s as any).trainingIndustryName ?? s.training_industry_code ?? id;
@@ -77,13 +68,12 @@ export const BatchResults: React.FC = () => {
   }, [gradStudents, khoa]);
 
   useEffect(() => { if (id) load(); }, [id]);
-/**
- * mergedRows = useMemo([batch, gradStudents])
-  → với mỗi gradStudent:
-      nếu đã có response → merge response + thêm faculty/industry fields
-      nếu chưa           → tạo row pending từ student data
-  * Mục đích: hiển thị đầy đủ danh sách sinh viên trong đợt tốt nghiệp, dù đã phản hồi hay chưa, và có thông tin khoa/ngành để filter.
-*/
+
+  /**
+   * mergedRows — merge gradStudents với responses:
+   * - SV đã phản hồi: lấy response + thêm faculty/industry từ gradStudent
+   * - SV chưa phản hồi: tạo row pending từ student data
+   */
   const mergedRows: AlumniResponse[] = React.useMemo(() => {
     if (!batch) return [];
     const responses = batch.responses ?? [];
@@ -109,7 +99,6 @@ export const BatchResults: React.FC = () => {
         answers: {},
         submittedAt: '',
         status: 'pending' as any,
-        // Giữ lại thông tin khoa/ngành để filter hoạt động
         faculty_id: (gs as any).faculty_id,
         faculty_name: (gs as any).faculty_name,
         training_industry_id: gs.training_industry_id,
@@ -153,14 +142,20 @@ export const BatchResults: React.FC = () => {
 
   const submitted  = (batch.responses ?? []).filter(r => r.status === 'submitted');
   const n          = submitted.length;
-  const total      = batch.totalStudents ?? 0;
-  const pct        = total ? Math.round(n / total * 100) : 0;
+
+  // FIX: Ưu tiên gradStudents.length (thực tế đã load),
+  // fallback về batch.totalStudents nếu gradStudents chưa load xong
+  const total = gradStudents.length > 0
+    ? gradStudents.length
+    : (batch.totalStudents || 0);
+
+  const pct        = total > 0 ? Math.round(n / total * 100) : 0;
   const now        = new Date();
   const endDate    = new Date(batch.endDate);
   const isEnded    = now > endDate;
   const diffDays   = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
 
-  // Filter client-side dùng đúng field từ GraduationStudent
+  // Filter client-side
   const filtered = mergedRows.filter(r => {
     const q = search.toLowerCase();
     return (
@@ -273,7 +268,9 @@ export const BatchResults: React.FC = () => {
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
               <Text type="secondary">Tiến độ phản hồi</Text>
-              <Text strong>{n} / {total}  ({pct}%)</Text>
+              <Text strong>
+                {n} / {total > 0 ? total : (gradStudents.length > 0 ? gradStudents.length : '...')} ({pct}%)
+              </Text>
             </div>
             <Progress percent={pct} size="small" showInfo={false} strokeColor="#1677ff" />
           </div>

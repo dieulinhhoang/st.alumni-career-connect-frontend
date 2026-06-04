@@ -5,15 +5,14 @@ import {
 } from 'antd';
 import type { MenuProps } from 'antd';
 import {
-  PlusOutlined, EyeOutlined, LinkOutlined, BarChartOutlined,
+  PlusOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
   FilePdfOutlined, FileTextOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
-import { useBatches } from '../../../feature/alumni/hooks/useBatches';
-import type { SurveyBatch } from '../../../feature/alumni/types';
-import { STATUS_CFG, getSurveyUrl } from '../../../feature/alumni/constants';
+import { useBatches, type SurveyBatchWithStats } from '../../../feature/alumni/hooks/useBatches';
+import { STATUS_CFG } from '../../../feature/alumni/constants';
 import { PctBadge } from './components/PctBadge';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
 import AdminLayout from '../../../components/layout/AdminLayout';
@@ -25,7 +24,7 @@ const useMenuItems = (
   navigate: ReturnType<typeof useNavigate>,
   deleteBatch: (id: number) => void,
 ) =>
-  (r: SurveyBatch): MenuProps['items'] => [
+  (r: SurveyBatchWithStats): MenuProps['items'] => [
     {
       key: 'email', icon: <MailOutlined />, label: 'Gửi email khảo sát',
       onClick: () => message.info('Tính năng đang phát triển'),
@@ -61,7 +60,7 @@ export const BatchList: React.FC = () => {
   const navigate = useNavigate();
   const [search,    setSearch]    = useState('');
   const [status,    setStatus]    = useState('all');
-  const [linkBatch, setLinkBatch] = useState<SurveyBatch | null>(null);
+  const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
 
   const getMenuItems = useMenuItems(navigate, deleteBatch);
   const safeBatches = Array.isArray(batches) ? batches : [];
@@ -74,7 +73,7 @@ export const BatchList: React.FC = () => {
     );
   });
 
-  const columns: ColumnsType<SurveyBatch> = [
+  const columns: ColumnsType<SurveyBatchWithStats> = [
     {
       title: 'Tiêu đề khảo sát', key: 'title',
       render: (_, r) => <Text style={{ fontWeight: 500 }}>{r.title}</Text>,
@@ -95,30 +94,26 @@ export const BatchList: React.FC = () => {
     },
     {
       title: 'Số lượng', key: 'totalStudents', width: 120,
-      render: (_, r) => <Text type="secondary">{r.totalStudents} sinh viên</Text>,
+      render: (_, r) => (
+        <Text type="secondary">{r.submittedCount} / {r.totalStudents}</Text>
+      ),
     },
     {
       title: 'Bắt đầu', key: 'startDate', width: 140,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{(r.startDate)}</Text>,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{r.startDate}</Text>,
     },
     {
       title: 'Kết thúc', key: 'endDate', width: 140,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{(r.endDate)}</Text>,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{r.endDate}</Text>,
     },
     {
       title: 'Phản hồi', key: 'rate', width: 90,
-      render: (_, r) => {
-        const sub = (r as any).submittedCount ?? 0;
-        const pct = r.totalStudents ? Math.round((sub / r.totalStudents) * 1000) / 10 : 0;
-        return <PctBadge pct={pct} />;
-      },
+      render: (_, r) => <PctBadge pct={r.responseRate} />,
     },
     {
       title: 'Hành động', key: 'actions', width: 120,
       render: (_, r) => (
         <Space size={4}>
-          {/* <Button size="small" icon={<EyeOutlined />} style={{ borderRadius: 6 }}
-            onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)} /> */}
           <Button
             size="small"
             icon={<LinkOutlined style={{ color: '#1D9E75' }} />}
@@ -126,8 +121,12 @@ export const BatchList: React.FC = () => {
             title="Sao chép link khảo sát"
             onClick={() => setLinkBatch(r)}
           />
-          <Button size="small" icon={<BarChartOutlined style={{ color: '#1D9E75' }} />} style={{ borderRadius: 6 }}
-            onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)} />
+          <Button
+            size="small"
+            icon={<BarChartOutlined style={{ color: '#1D9E75' }} />}
+            style={{ borderRadius: 6 }}
+            onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)}
+          />
           <Dropdown menu={{ items: getMenuItems(r) }} trigger={['click']} placement="bottomRight">
             <Button size="small" icon={<MoreOutlined />}
               style={{ borderRadius: 6, color: '#1D9E75' }} />
@@ -139,10 +138,8 @@ export const BatchList: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="">
-
+      <div>
         <div style={{ padding: 24 }}>
-          {/* Toolbar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Space>
               <Input
@@ -174,7 +171,6 @@ export const BatchList: React.FC = () => {
           />
         </div>
 
-        {/* Copy-link modal */}
         <SurveyLinkModal
           batchId={linkBatch?.id}
           batchTitle={linkBatch?.title ?? ''}
@@ -184,7 +180,6 @@ export const BatchList: React.FC = () => {
           open={!!linkBatch}
           onClose={() => setLinkBatch(null)}
         />
-
       </div>
     </AdminLayout>
   );

@@ -7,8 +7,9 @@ import type {
   AlumniResponse,
 } from './types';
 
-export async function getBatches(): Promise<SurveyBatch[]> {
+export async function getBatches(): Promise<(SurveyBatch & { submittedCount: number })[]> {
   const res = await api.get('/alumni/batches');
+  console.log('Fetched batches:', res.data);
   return res.data;
 }
 
@@ -28,6 +29,7 @@ export async function getBatchByIdPublic(id: number): Promise<SurveyBatch> {
 
 export async function createBatch(payload: CreateBatchPayload): Promise<SurveyBatch> {
   const res = await api.post('/alumni/batches', payload);
+  
   return res.data;
 }
 
@@ -50,7 +52,7 @@ export async function getBatchResponses(batchId: number): Promise<AlumniResponse
   return res.data;
 }
 
-// ── Graduation API ──────────────────────────────────────────────
+//  Graduation API 
 export interface GraduationOption {
   id: number;
   name: string;
