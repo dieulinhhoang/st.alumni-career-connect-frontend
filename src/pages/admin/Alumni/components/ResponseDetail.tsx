@@ -15,8 +15,8 @@ import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types'
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/CustomTable';
 import type { ColumnsType } from 'antd/es/table';
-import { KHOA_OPTIONS, NGANH_OPTIONS } from './constants';
 import { StatCard } from './components/StatCard';
+import { useFacultyFilter } from '../../../../feature/alumni/hooks/useFacultyFilter';
 
 const { Text, Title } = Typography;
 
@@ -37,6 +37,16 @@ export const ResponseDetail: React.FC = () => {
   const [filter,  setFilter]  = useState('all');
   const [khoa,    setKhoa]    = useState<string | undefined>(undefined);
   const [nganh,   setNganh]   = useState<string | undefined>(undefined);
+
+  // Lấy khoa/ngành từ API thật
+  const {
+    khoaOptions,
+    nganhOptions,
+    loadingKhoa,
+    loadingNganh,
+    getKhoaLabel,
+    getNganhLabel,
+  } = useFacultyFilter(khoa, nganh);
 
   useEffect(() => { if (id) load(); }, [id]);
 
@@ -106,20 +116,17 @@ export const ResponseDetail: React.FC = () => {
       title: 'Khoa', key: 'khoa', width: 180,
       render: (_, r) => (
         <Text style={{ fontSize: 12 }}>
-          {KHOA_OPTIONS.find(k => k.value === (r as any).khoa)?.label || '—'}
+          {(r as any).khoa ? getKhoaLabel((r as any).khoa) : '—'}
         </Text>
       ),
     },
     {
       title: 'Ngành', key: 'nganh', width: 190,
-      render: (_, r) => {
-        const opts = NGANH_OPTIONS[(r as any).khoa] || [];
-        return (
-          <Text style={{ fontSize: 12 }}>
-            {opts.find(o => o.value === (r as any).nganh)?.label || '—'}
-          </Text>
-        );
-      },
+      render: (_, r) => (
+        <Text style={{ fontSize: 12 }}>
+          {(r as any).nganh ? getNganhLabel((r as any).nganh) : '—'}
+        </Text>
+      ),
     },
     {
       title: 'Trạng thái', key: 'status', width: 145,
@@ -269,16 +276,26 @@ export const ResponseDetail: React.FC = () => {
             <Select.Option value="submitted">Đã phản hồi</Select.Option>
             <Select.Option value="pending">Chưa phản hồi</Select.Option>
           </Select>
-          <Select allowClear value={khoa}
+          <Select
+            allowClear
+            value={khoa}
+            loading={loadingKhoa}
             onChange={v => { setKhoa(v); setNganh(undefined); }}
-            style={{ width: 200 }} placeholder="Lọc theo khoa"
+            style={{ width: 200 }}
+            placeholder="Lọc theo khoa"
           >
-            {KHOA_OPTIONS.map(k => <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>)}
+            {khoaOptions.map(k => <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>)}
           </Select>
-          <Select allowClear value={nganh} onChange={setNganh}
-            style={{ width: 220 }} placeholder="Lọc theo ngành" disabled={!khoa}
+          <Select
+            allowClear
+            value={nganh}
+            loading={loadingNganh}
+            onChange={setNganh}
+            style={{ width: 220 }}
+            placeholder="Lọc theo ngành"
+            disabled={!khoa}
           >
-            {(khoa ? NGANH_OPTIONS[khoa] ?? [] : []).map(o => (
+            {nganhOptions.map(o => (
               <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
             ))}
           </Select>

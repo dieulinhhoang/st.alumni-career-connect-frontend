@@ -20,7 +20,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 import type { ColumnsType } from 'antd/es/table';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
-import { KHOA_OPTIONS, NGANH_OPTIONS, getLopOptions } from '../../../feature/alumni/constants';
+import { useFacultyFilter } from '../../../feature/alumni/hooks/useFacultyFilter';
 
 const { Text, Title } = Typography;
 
@@ -41,6 +41,16 @@ export const BatchResults: React.FC = () => {
   const [showFilter,   setShowFilter]   = useState(false);
   const [exportingRow, setExportingRow] = useState<number | string | null>(null);
   const [gradStudents, setGradStudents] = useState<GraduationStudent[]>([]);
+
+  // ── Lấy khoa/ngành/lớp từ API thật ──────────────────────────────
+  const {
+    khoaOptions,
+    nganhOptions,
+    classOptions,
+    loadingKhoa,
+    loadingNganh,
+    loadingClass,
+  } = useFacultyFilter(khoa, nganh);
 
   useEffect(() => { if (id) load(); }, [id]);
 
@@ -113,7 +123,6 @@ export const BatchResults: React.FC = () => {
   const endDate    = new Date(batch.endDate);
   const isEnded    = now > endDate;
   const diffDays   = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
-  const diffWeeks  = Math.floor(diffDays / 7);
 
   const filtered = mergedRows.filter(r => {
     const q = search.toLowerCase();
@@ -141,15 +150,11 @@ export const BatchResults: React.FC = () => {
       title: 'Họ tên', key: 'name', align: 'center', width: 150,
       render: (_, r) => <Text>{r.studentName}</Text>,
     },
-    // {
-    //   title: 'Email', key: 'email', width: 220, align: 'center',
-    //   render: (_, r) => <Text>{r.studentEmail || ''}</Text>,
-    // },
     {
       title: 'Trạng thái', key: 'status', width: 140, align: 'center',
       render: (_, r) => r.status === 'submitted'
-        ? <span > Đã phản hồi</span>
-        : <span > Chưa phản hồi</span>,
+        ? <span> Đã phản hồi</span>
+        : <span> Chưa phản hồi</span>,
     },
     {
       title: 'Ngày phản hồi', key: 'submittedAt', width: 160, align: 'center',
@@ -168,7 +173,6 @@ export const BatchResults: React.FC = () => {
       title: 'Thao tác', key: 'action', width: 110, align: 'center',
       render: (_, r) => (
         <Space size={8}>
-          {/* ④ Icon màu rõ ràng */}
           <Tooltip title="Tải PDF">
             <Button
               size="small" type="text"
@@ -200,7 +204,6 @@ export const BatchResults: React.FC = () => {
 
   return (
     <AdminLayout>
-      {/* ② Fix header bảng: đảm bảo font-size không bị override nhỏ */}
       <style>{`
         .ant-table-thead > tr > th {
           font-size: 14px !important;
@@ -233,7 +236,7 @@ export const BatchResults: React.FC = () => {
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
               <Text type="secondary">Tiến độ phản hồi</Text>
-              <Text strong >{n} / {total}  ({pct}%)</Text>
+              <Text strong>{n} / {total}  ({pct}%)</Text>
             </div>
             <Progress percent={pct} size="small" showInfo={false} strokeColor="#1677ff" />
           </div>
@@ -244,7 +247,7 @@ export const BatchResults: React.FC = () => {
           </div>
         </div>
 
-        {/* ③ Toolbar — giữ nút Xuất Excel / Xuất PDF nhưng chưa làm logic */}
+        {/* Toolbar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Space size={8}>
             <Input
@@ -292,28 +295,59 @@ export const BatchResults: React.FC = () => {
             display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
             marginBottom: 16, padding: 12, background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 6
           }}>
+            {/* Lọc trạng thái */}
             <Select value={filter} onChange={setFilter} style={{ width: 160 }}>
               <Select.Option value="all">Tất cả trạng thái</Select.Option>
               <Select.Option value="submitted">Đã phản hồi</Select.Option>
               <Select.Option value="pending">Chưa phản hồi</Select.Option>
             </Select>
-            <Select allowClear value={khoa} placeholder="Lọc theo khoa"
+
+            {/* Lọc Khoa — từ API */}
+            <Select
+              allowClear
+              value={khoa}
+              placeholder="Lọc theo khoa"
+              loading={loadingKhoa}
               onChange={v => { setKhoa(v); setNganh(undefined); setLop(undefined); }}
-              style={{ width: 180 }}
+              style={{ width: 200 }}
             >
-              {KHOA_OPTIONS.map(k => <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>)}
+              {khoaOptions.map(k => (
+                <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>
+              ))}
             </Select>
-            <Select allowClear value={nganh} placeholder="Lọc theo ngành"
+
+            {/* Lọc Ngành — từ API, phụ thuộc khoa đã chọn */}
+            <Select
+              allowClear
+              value={nganh}
+              placeholder="Lọc theo ngành"
+              loading={loadingNganh}
               onChange={v => { setNganh(v); setLop(undefined); }}
-              style={{ width: 180 }} disabled={!khoa}
+              style={{ width: 200 }}
+              disabled={!khoa}
             >
-              {(khoa ? NGANH_OPTIONS[khoa] ?? [] : []).map(o => <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>)}
+              {nganhOptions.map(o => (
+                <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
+              ))}
             </Select>
-            <Select allowClear value={lop} placeholder="Lọc theo lớp"
-              onChange={setLop} style={{ width: 140 }} disabled={!nganh}
-            >
-              {getLopOptions(nganh).map(o => <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>)}
-            </Select>
+
+            {/* Lọc Lớp — từ API, phụ thuộc ngành đã chọn; ẩn nếu không có data */}
+            {(classOptions.length > 0 || loadingClass) && (
+              <Select
+                allowClear
+                value={lop}
+                placeholder="Lọc theo lớp"
+                loading={loadingClass}
+                onChange={setLop}
+                style={{ width: 160 }}
+                disabled={!nganh}
+              >
+                {classOptions.map(o => (
+                  <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
+                ))}
+              </Select>
+            )}
+
             {hasActiveFilter && (
               <Button size="small" type="link" danger
                 onClick={() => { setFilter('all'); setKhoa(undefined); setNganh(undefined); setLop(undefined); }}

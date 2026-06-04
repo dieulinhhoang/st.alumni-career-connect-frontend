@@ -10,7 +10,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getBatchById } from '../../../feature/alumni/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import { KHOA_OPTIONS, NGANH_OPTIONS } from '../../../feature/alumni/constants';
+import { useFacultyFilter } from '../../../feature/alumni/hooks/useFacultyFilter';
 import { SurveyPreview } from '../Form/Preview';
  import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
 import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
@@ -85,8 +85,14 @@ export const ResponseDetail: React.FC = () => {
     </AdminLayout>
   );
 
-  const khoaLabel  = KHOA_OPTIONS.find(k => k.value === (response as any).khoa)?.label;
-  const nganhLabel = (NGANH_OPTIONS[(response as any).khoa] ?? []).find((o: any) => o.value === (response as any).nganh)?.label;
+  const responseKhoa  = (response as any).khoa  as string | undefined;
+  const responseNganh = (response as any).nganh as string | undefined;
+
+  // Lấy nhãn khoa/ngành từ API thật thay vì dùng constant hardcode
+  const { getKhoaLabel, getNganhLabel } = useFacultyFilter(responseKhoa, responseNganh);
+  const khoaLabel  = responseKhoa  ? getKhoaLabel(responseKhoa)   : undefined;
+  const nganhLabel = responseNganh ? getNganhLabel(responseNganh) : undefined;
+
   const answers    = (response as any)?.answers ?? {};
   const formSnapshot = (batch as any).formSnapshot ?? null;
 
