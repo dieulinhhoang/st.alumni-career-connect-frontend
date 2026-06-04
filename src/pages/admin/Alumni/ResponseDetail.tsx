@@ -7,10 +7,10 @@ import {
   BookOutlined, EditOutlined, CloseOutlined, FilePdfOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getBatchById } from '../../../feature/alumni/api';
+import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
+import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import { useFacultyFilter } from '../../../feature/alumni/hooks/useFacultyFilter';
 import { SurveyPreview } from '../Form/Preview';
  import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
 import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
@@ -43,12 +43,34 @@ export const ResponseDetail: React.FC = () => {
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
 
+
   const load = async () => {
     try {
-      const b = await getBatchById(Number(id));
+      const numId = Number(responseId);
+      const [b, responses] = await Promise.all([
+        getBatchById(Number(id)),
+        getBatchResponses(Number(id)),
+      ]);
       setBatch(b);
-      if (responseId) {
-        const r = b.responses.find(x => String(x.id) === responseId);
+
+      if (numId < 0 && b.graduationId) {
+        // ID âm = SV chưa submit → tìm trong gradStudents
+        const studentsRes = await fetchGraduationStudents(b.graduationId, 1, 9999);
+        const gs = studentsRes.data.find(s => s.id === -numId);
+        if (gs) {
+          setResponse({
+            id: numId,
+            batchId: b.id,
+            studentId: gs.code,
+            studentName: gs.full_name ?? '',
+            studentEmail: gs.email ?? '',
+            answers: {},
+            submittedAt: '',
+            status: 'pending' as any,
+          } as any);
+        }
+      } else {
+        const r = responses.find(x => String(x.id) === responseId);
         setResponse(r ?? null);
       }
     } catch (e) { console.error(e); }
@@ -85,13 +107,10 @@ export const ResponseDetail: React.FC = () => {
     </AdminLayout>
   );
 
-  const responseKhoa  = (response as any).khoa  as string | undefined;
-  const responseNganh = (response as any).nganh as string | undefined;
-
-  // Lấy nhãn khoa/ngành từ API thật thay vì dùng constant hardcode
-  const { getKhoaLabel, getNganhLabel } = useFacultyFilter(responseKhoa, responseNganh);
-  const khoaLabel  = responseKhoa  ? getKhoaLabel(responseKhoa)   : undefined;
-  const nganhLabel = responseNganh ? getNganhLabel(responseNganh) : undefined;
+  const responseKhoa  = (response as any)?.khoa  as string | undefined;
+  const responseNganh = (response as any)?.nganh as string | undefined;
+  const khoaLabel  = (response as any)?.faculty_name  as string | undefined;
+  const nganhLabel = (response as any)?.training_industry_name as string | undefined;
 
   const answers    = (response as any)?.answers ?? {};
   const formSnapshot = (batch as any).formSnapshot ?? null;
