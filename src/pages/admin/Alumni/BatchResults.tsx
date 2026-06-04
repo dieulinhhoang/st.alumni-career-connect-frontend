@@ -13,14 +13,14 @@ import {
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
-import { fetchGraduationStudents } from '../../../feature/graduation/api';
+import { useGraduationStudents } from '../../../feature/graduation/hooks/useGraduation'; // LẤY DS SV TRONG ĐỌT TN 
 import type { GraduationStudent } from '../../../feature/graduation/type';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 import type { ColumnsType } from 'antd/es/table';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
-import { useFacultyFilter } from '../../../feature/alumni/hooks/useFacultyFilter';
+
 
 const { Text, Title } = Typography;
 
@@ -40,20 +40,50 @@ export const BatchResults: React.FC = () => {
   const [exporting,    setExporting]    = useState<'excel' | 'pdf' | null>(null);
   const [showFilter,   setShowFilter]   = useState(false);
   const [exportingRow, setExportingRow] = useState<number | string | null>(null);
-  const [gradStudents, setGradStudents] = useState<GraduationStudent[]>([]);
 
-  // ── Lấy khoa/ngành/lớp từ API thật ──────────────────────────────
-  const {
-    khoaOptions,
-    nganhOptions,
-    classOptions,
-    loadingKhoa,
-    loadingNganh,
-    loadingClass,
-  } = useFacultyFilter(khoa, nganh);
+  // Hook lấy toàn bộ sinh viên của đợt tốt nghiệp (không phân trang, load hết)
+  const { data: gradStudents } = useGraduationStudents(batch?.graduationId ?? 0, 1, 9999);
+
+  //  Derive khoa + ngành trực tiếp từ gradStudents 
+  // gradStudents có faculty_name (BE trả về) và training_industry_id/name
+  // → không phụ thuộc vào /faculty API nữa, tránh mismatch id giữa major và training_industry
+
+  const khoaOptions = React.useMemo(() => {
+    const seen = new Map<string, string>();
+    gradStudents.forEach(s => {
+      const id   = String((s as any).faculty_id ?? (s as any).facultyId ?? '');
+      const name = (s as any).faculty_name ?? (s as any).facultyName ?? id;
+      if (id && !seen.has(id)) seen.set(id, name);
+    });
+    return Array.from(seen.entries()).map(([value, label]) => ({ value, label }));
+  }, [gradStudents]);
+
+  const nganhOptions = React.useMemo(() => {
+    const seen = new Map<string, string>();
+    if (gradStudents.length > 0) {
+      // Debug: xem student đầu tiên có những field gì
+      console.log('[DEBUG] gradStudents[0]:', gradStudents[0]);
+      console.log('[DEBUG] khoa đang chọn:', khoa);
+    }
+    gradStudents.forEach(s => {
+      const studentFacultyId = String((s as any).faculty_id ?? (s as any).facultyId ?? '');
+      // chỉ show ngành thuộc khoa đang chọn (nếu có)
+      if (khoa && studentFacultyId !== khoa) return;
+      const id   = String(s.training_industry_id ?? (s as any).trainingIndustryId ?? '');
+      const name = s.training_industry_name ?? (s as any).trainingIndustryName ?? s.training_industry_code ?? id;
+      if (id && !seen.has(id)) seen.set(id, name);
+    });
+    return Array.from(seen.entries()).map(([value, label]) => ({ value, label }));
+  }, [gradStudents, khoa]);
 
   useEffect(() => { if (id) load(); }, [id]);
-
+/**
+ * mergedRows = useMemo([batch, gradStudents])
+  → với mỗi gradStudent:
+      nếu đã có response → merge response + thêm faculty/industry fields
+      nếu chưa           → tạo row pending từ student data
+  * Mục đích: hiển thị đầy đủ danh sách sinh viên trong đợt tốt nghiệp, dù đã phản hồi hay chưa, và có thông tin khoa/ngành để filter.
+*/
   const mergedRows: AlumniResponse[] = React.useMemo(() => {
     if (!batch) return [];
     const responses = batch.responses ?? [];
@@ -62,7 +92,14 @@ export const BatchResults: React.FC = () => {
     responses.forEach(r => { if (r.studentId) responseByCode.set(r.studentId, r); });
     return gradStudents.map(gs => {
       const existing = responseByCode.get(gs.code);
-      if (existing) return existing;
+      if (existing) return {
+        ...existing,
+        faculty_id: (gs as any).faculty_id,
+        faculty_name: (gs as any).faculty_name,
+        training_industry_id: gs.training_industry_id,
+        training_industry_name: gs.training_industry_name,
+        training_industry_code: gs.training_industry_code,
+      } as AlumniResponse;
       return {
         id: -(gs.id),
         batchId: batch.id,
@@ -72,6 +109,12 @@ export const BatchResults: React.FC = () => {
         answers: {},
         submittedAt: '',
         status: 'pending' as any,
+        // Giữ lại thông tin khoa/ngành để filter hoạt động
+        faculty_id: (gs as any).faculty_id,
+        faculty_name: (gs as any).faculty_name,
+        training_industry_id: gs.training_industry_id,
+        training_industry_name: gs.training_industry_name,
+        training_industry_code: gs.training_industry_code,
       } as AlumniResponse;
     });
   }, [batch, gradStudents]);
@@ -84,14 +127,7 @@ export const BatchResults: React.FC = () => {
       ]);
       const mergedBatch = { ...batchData, responses: responses ?? [] };
       setBatch(mergedBatch);
-      if (batchData.graduationId) {
-        try {
-          const studentsRes = await fetchGraduationStudents(batchData.graduationId, 1, 9999);
-          setGradStudents(studentsRes.data);
-        } catch (e) {
-          console.warn('Không thể tải danh sách sinh viên tốt nghiệp:', e);
-        }
-      }
+
     } catch (e) {
       console.error(e);
     } finally {
@@ -124,14 +160,15 @@ export const BatchResults: React.FC = () => {
   const isEnded    = now > endDate;
   const diffDays   = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
 
+  // Filter client-side dùng đúng field từ GraduationStudent
   const filtered = mergedRows.filter(r => {
     const q = search.toLowerCase();
     return (
       (r.studentName.toLowerCase().includes(q) || r.studentId?.toLowerCase().includes(q)) &&
       (filter === 'all' || r.status === filter) &&
-      (!khoa  || (r as any).khoa  === khoa) &&
-      (!nganh || (r as any).nganh === nganh) &&
-      (!lop   || (r as any).lop   === lop)
+      (!khoa  || String((r as any).faculty_id) === khoa) &&
+      (!nganh || String((r as any).training_industry_id) === nganh) &&
+      (!lop   || (r as any).class_name === lop || (r as any).lop === lop)
     );
   });
 
@@ -262,7 +299,7 @@ export const BatchResults: React.FC = () => {
               type={hasActiveFilter ? 'primary' : 'default'}
               ghost={hasActiveFilter}
             >
-              Bộ lọc{hasActiveFilter ? ' ●' : ''}
+              Bộ lọc
             </Button>
           </Space>
 
@@ -302,12 +339,11 @@ export const BatchResults: React.FC = () => {
               <Select.Option value="pending">Chưa phản hồi</Select.Option>
             </Select>
 
-            {/* Lọc Khoa — từ API */}
+            {/* Lọc Khoa */}
             <Select
               allowClear
               value={khoa}
               placeholder="Lọc theo khoa"
-              loading={loadingKhoa}
               onChange={v => { setKhoa(v); setNganh(undefined); setLop(undefined); }}
               style={{ width: 200 }}
             >
@@ -316,37 +352,19 @@ export const BatchResults: React.FC = () => {
               ))}
             </Select>
 
-            {/* Lọc Ngành — từ API, phụ thuộc khoa đã chọn */}
+            {/* Lọc Ngành — phụ thuộc khoa đã chọn */}
             <Select
               allowClear
               value={nganh}
               placeholder="Lọc theo ngành"
-              loading={loadingNganh}
               onChange={v => { setNganh(v); setLop(undefined); }}
-              style={{ width: 200 }}
+              style={{ width: 220 }}
               disabled={!khoa}
             >
               {nganhOptions.map(o => (
                 <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
               ))}
             </Select>
-
-            {/* Lọc Lớp — từ API, phụ thuộc ngành đã chọn; ẩn nếu không có data */}
-            {(classOptions.length > 0 || loadingClass) && (
-              <Select
-                allowClear
-                value={lop}
-                placeholder="Lọc theo lớp"
-                loading={loadingClass}
-                onChange={setLop}
-                style={{ width: 160 }}
-                disabled={!nganh}
-              >
-                {classOptions.map(o => (
-                  <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
-                ))}
-              </Select>
-            )}
 
             {hasActiveFilter && (
               <Button size="small" type="link" danger
