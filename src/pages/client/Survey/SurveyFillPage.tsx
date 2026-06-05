@@ -15,6 +15,10 @@ type PageState = 'loading' | 'error' | 'not-active' | 'identify' | 'fill' | 'don
 /**
  * Số câu hỏi đầu tiên (theo thứ tự order) được tự động điền từ thông tin
  * xác thực SV và khoá lại, không cho phép chỉnh sửa.
+ *
+ * Câu 1–8 luôn bị khoá vì dữ liệu đến từ bước xác thực (IdentifyStep).
+ * Câu 9–10 (SĐT, Email) chỉ được prefill nếu có studentData nhưng KHÔNG bị khoá
+ * để SV có thể cập nhật nếu thông tin thay đổi.
  */
 const LOCKED_COUNT = 8
 
@@ -25,11 +29,11 @@ const LOCKED_COUNT = 8
  *  3 (index 2): Giới tính
  *  4 (index 3): Ngày sinh
  *  5 (index 4): Mã ngành đào tạo
- *  6 (index 5): Số CCCD  ← câu hỏi dạng "short", giá trị là chuỗi số
+ *  6 (index 5): Số CCCD
  *  7 (index 6): Khóa học (school_year_end)
  *  8 (index 7): Tên ngành được đào tạo
- *  9 (index 8): Số điện thoại
- * 10 (index 9): Email
+ *  9 (index 8): Số điện thoại  ← prefill nhưng không khoá
+ * 10 (index 9): Email          ← prefill nhưng không khoá
  */
 function buildInitialValues(
   formSnapshot: SurveyBatch['formSnapshot'],
@@ -50,11 +54,15 @@ function buildInitialValues(
     }
   }
 
+  // ── Câu 1–2: luôn có từ IdentifyStep ──────────────────────────────────────
+
   // Câu 1: Mã sinh viên
   set(0, identity.studentId)
 
   // Câu 2: Họ và tên
   set(1, sd?.full_name || identity.studentName)
+
+  // ── Câu 3–9: lấy từ studentData (có đợt tốt nghiệp) ──────────────────────
 
   if (sd) {
     // Câu 3: Giới tính — chuyển enum → tiếng Việt để hiển thị đúng trong form
@@ -85,11 +93,12 @@ function buildInitialValues(
     // Câu 8: Tên ngành được đào tạo
     set(7, sd.training_industry_name)
 
-    // Câu 9: Số điện thoại
+    // Câu 9: Số điện thoại (prefill nhưng không khoá — SV có thể cập nhật)
     set(8, sd.phone)
   }
 
-  // Câu 10: Email
+  // ── Câu 10: Email — ưu tiên studentData, fallback về IdentifyStep ──────────
+  // (prefill nhưng không khoá)
   set(9, sd?.email || identity.studentEmail)
 
   return values

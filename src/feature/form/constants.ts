@@ -91,7 +91,6 @@ export const MOCK_FORMS: Form[] = [
         options: [
           { id: "o1", label: "Nam" },
           { id: "o2", label: "Nữ" },
-          { id: "o3", label: "Khác" },
         ],
         sectionId: "sec-info", order: 3,
         reportFieldKey: "gender",
@@ -109,22 +108,22 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "industrycode",
       },
       {
-        id: "q06", type: "short", title: "Tên ngành được đào tạo",
+        id: "q06", type: "short", title: "Số CCCD",
         required: true, options: [],
         sectionId: "sec-info", order: 6,
-        reportFieldKey: "industryname",
+        reportFieldKey: "citizen_identification",
       },
       {
-        id: "q07", type: "short", title: "Số điện thoại",
+        id: "q07", type: "short", title: "Khóa học",
         required: true, options: [],
         sectionId: "sec-info", order: 7,
-        reportFieldKey: "phonenumber",
+        reportFieldKey: "courseyear",
       },
       {
-        id: "q08", type: "short", title: "Email",
+        id: "q08", type: "short", title: "Tên ngành được đào tạo",
         required: true, options: [],
         sectionId: "sec-info", order: 8,
-        reportFieldKey: "email",
+        reportFieldKey: "industryname",
       },
 
       //  TÌNH HÌNH VIỆC LÀM 

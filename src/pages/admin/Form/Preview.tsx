@@ -728,8 +728,8 @@ export function SurveyPreview({
                   const isLocked = lockedQIds.has(q.id)
                   return (
                     <div key={q.id} id={`q-${q.id}`} style={isLocked ? {
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
+                      background: '#f0fdf4',
+                      border: '1.5px solid #bbf7d0',
                       borderRadius: 10,
                       padding: '14px 16px',
                       marginBottom: 24,
@@ -739,8 +739,9 @@ export function SurveyPreview({
                         <div style={{
                           position: 'absolute', top: 10, right: 12,
                           display: 'flex', alignItems: 'center', gap: 4,
-                          fontSize: 11.5, color: '#64748b', fontWeight: 600,
-                          background: '#e2e8f0', borderRadius: 20, padding: '2px 10px',
+                          fontSize: 11.5, color: '#166534', fontWeight: 600,
+                          background: '#dcfce7', border: '1px solid #bbf7d0',
+                          borderRadius: 20, padding: '2px 10px',
                         }}>
                           🔒 Tự động điền
                         </div>

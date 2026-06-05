@@ -21,9 +21,58 @@ const _newQuestion = (sectionId?: string): Question => ({
 
 const _defaultSection = (): Section => ({
   id: _genId(),
-  title: 'Phần 1',
+  title: 'Phần I. Thông tin cá nhân',
   order: 0,
 })
+
+const _defaultQuestions = (sectionId: string): Question[] => [
+  {
+    id: _genId(), type: 'short',    title: 'Mã sinh viên',
+    required: true,  options: [], sectionId, order: 0,
+    reportFieldKey: 'student_code',
+  },
+  {
+    id: _genId(), type: 'short',    title: 'Họ và tên',
+    required: true,  options: [], sectionId, order: 1,
+    reportFieldKey: 'fullname',
+  },
+  {
+    id: _genId(), type: 'radio',    title: 'Giới tính',
+    required: true,
+    options: [
+      { id: _genId(), label: 'Nam' },
+      { id: _genId(), label: 'Nữ' },
+      { id: _genId(), label: 'Khác' },
+    ],
+    sectionId, order: 2,
+    reportFieldKey: 'gender',
+  },
+  {
+    id: _genId(), type: 'date',     title: 'Ngày sinh',
+    required: true,  options: [], sectionId, order: 3,
+    reportFieldKey: 'dob',
+  },
+  {
+    id: _genId(), type: 'short',    title: 'Mã ngành đào tạo',
+    required: true,  options: [], sectionId, order: 4,
+    reportFieldKey: 'industrycode',
+  },
+  {
+    id: _genId(), type: 'short',    title: 'Số CCCD',
+    required: true,  options: [], sectionId, order: 5,
+    reportFieldKey: 'citizen_identification',
+  },
+  {
+    id: _genId(), type: 'short',    title: 'Khóa học',
+    required: true,  options: [], sectionId, order: 6,
+    reportFieldKey: 'courseyear',
+  },
+  {
+    id: _genId(), type: 'short',    title: 'Tên ngành được đào tạo',
+    required: true,  options: [], sectionId, order: 7,
+    reportFieldKey: 'industryname',
+  },
+]
 
 export interface SaveExtras {
   header?: SurveyHeader
@@ -86,12 +135,12 @@ export function useFormBuilder(
   formId?: number
 ): UseFormBuilderReturn {
   const defaultSection = _defaultSection()
-  const initialQ = _newQuestion(defaultSection.id)
+  const initialQs = mode === 'create' ? _defaultQuestions(defaultSection.id) : []
 
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
-  const [questions, setQs] = useState<Question[]>([initialQ])
-  const [activeId, setActiveId] = useState<string | null>(initialQ.id)
+  const [questions, setQs] = useState<Question[]>(initialQs)
+  const [activeId, setActiveId] = useState<string | null>(initialQs[0]?.id ?? null)
   const [sections, setSections] = useState<Section[]>([defaultSection])
   const [activeSectionId, setActiveSectionId] = useState<string | null>(defaultSection.id)
 
