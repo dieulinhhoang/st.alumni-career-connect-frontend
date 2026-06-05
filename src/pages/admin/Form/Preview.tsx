@@ -225,17 +225,13 @@ function RadioField({ options, qId, value, onChange, hasError, readOnly, allowOt
         <label
           key={i}
           style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer',
-            padding: '6px 10px', borderRadius: 7, transition: 'background .13s',
-            background: value === opt ? '#f0fdf4' : 'transparent',
-            border: value === opt ? '1px solid #bbf7d0' : '1px solid transparent',
+            padding: '6px 10px', borderRadius: 7,
           }}
-          onMouseEnter={e => { if (!readOnly && value !== opt) e.currentTarget.style.background = '#f9fafb' }}
-          onMouseLeave={e => { if (!readOnly && value !== opt) e.currentTarget.style.background = 'transparent' }}
         >
           <input
             type="radio" name={qId} disabled={readOnly}
             checked={value === opt} onChange={() => onChange?.(opt)}
-            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0, accentColor: '#1D9E75' }}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
@@ -308,17 +304,13 @@ function CheckboxField({ options, value, onChange, hasError, readOnly, allowOthe
         <label
           key={i}
           style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: readOnly ? 'default' : 'pointer',
-            padding: '6px 10px', borderRadius: 7, transition: 'background .13s',
-            background: checked.has(opt) ? '#f0fdf4' : 'transparent',
-            border: checked.has(opt) ? '1px solid #bbf7d0' : '1px solid transparent',
+            padding: '6px 10px', borderRadius: 7,
           }}
-          onMouseEnter={e => { if (!readOnly && !checked.has(opt)) e.currentTarget.style.background = '#f9fafb' }}
-          onMouseLeave={e => { if (!readOnly && !checked.has(opt)) e.currentTarget.style.background = 'transparent' }}
         >
           <input
             type="checkbox" disabled={readOnly}
             checked={checked.has(opt)} onChange={() => toggle(opt)}
-            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0, accentColor: '#1D9E75' }}
+            style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
           <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
@@ -727,25 +719,7 @@ export function SurveyPreview({
                   num++
                   const isLocked = lockedQIds.has(q.id)
                   return (
-                    <div key={q.id} id={`q-${q.id}`} style={isLocked ? {
-                      background: '#f0fdf4',
-                      border: '1.5px solid #bbf7d0',
-                      borderRadius: 10,
-                      padding: '14px 16px',
-                      marginBottom: 24,
-                      position: 'relative',
-                    } : {}}>
-                      {isLocked && (
-                        <div style={{
-                          position: 'absolute', top: 10, right: 12,
-                          display: 'flex', alignItems: 'center', gap: 4,
-                          fontSize: 11.5, color: '#166534', fontWeight: 600,
-                          background: '#dcfce7', border: '1px solid #bbf7d0',
-                          borderRadius: 20, padding: '2px 10px',
-                        }}>
-                          🔒 Tự động điền
-                        </div>
-                      )}
+                    <div key={q.id} id={`q-${q.id}`}>
                       <QuestionItem
                         q={q} num={num}
                         value={answers[q.id]}
