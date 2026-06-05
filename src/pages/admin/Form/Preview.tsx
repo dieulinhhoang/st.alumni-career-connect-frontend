@@ -510,6 +510,8 @@ export interface SurveyPreviewProps {
   form: Form | null
   onBack?: () => void
   initialValues?: Record<string, any>
+  /** Số câu hỏi đầu tiên bị khoá (auto-fill từ xác thực, không cho sửa) */
+  lockedCount?: number
   onSubmit?: (answers: Record<string, any>) => void | Promise<void>
   submitLabel?: string
   compact?: boolean
@@ -520,6 +522,7 @@ export function SurveyPreview({
   form,
   onBack,
   initialValues,
+  lockedCount = 0,
   onSubmit,
   submitLabel = 'Gửi',
   compact = false,
@@ -591,6 +594,17 @@ export function SurveyPreview({
   }
 
   let num = 0
+
+  // Collect locked question ids (first lockedCount questions by order)
+  const lockedQIds = new Set<string>(
+    lockedCount > 0
+      ? questions
+          .slice()
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .slice(0, lockedCount)
+          .map(q => q.id)
+      : []
+  )
 
   return (
     <div style={{
@@ -711,14 +725,32 @@ export function SurveyPreview({
                 {showSectionHeaders && <SectionHeader title={section.title} />}
                 {qs.map(q => {
                   num++
+                  const isLocked = lockedQIds.has(q.id)
                   return (
-                    <div key={q.id} id={`q-${q.id}`}>
+                    <div key={q.id} id={`q-${q.id}`} style={isLocked ? {
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 10,
+                      padding: '14px 16px',
+                      marginBottom: 24,
+                      position: 'relative',
+                    } : {}}>
+                      {isLocked && (
+                        <div style={{
+                          position: 'absolute', top: 10, right: 12,
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          fontSize: 11.5, color: '#64748b', fontWeight: 600,
+                          background: '#e2e8f0', borderRadius: 20, padding: '2px 10px',
+                        }}>
+                          🔒 Tự động điền
+                        </div>
+                      )}
                       <QuestionItem
                         q={q} num={num}
                         value={answers[q.id]}
                         onChange={v => setAnswer(q.id, v)}
                         hasError={errors.has(q.id)}
-                        readOnly={isViewOnly}
+                        readOnly={isViewOnly || isLocked}
                       />
                     </div>
                   )
