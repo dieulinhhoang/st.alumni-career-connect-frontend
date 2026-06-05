@@ -19,36 +19,78 @@ type PageState = 'loading' | 'error' | 'not-active' | 'identify' | 'fill' | 'don
 const LOCKED_COUNT = 8
 
 /**
- * Map identity → initialValues cho 8 câu đầu của form.
- * Câu 1: Mã sinh viên
- * Câu 2: Họ và tên
- * Câu 9: Số điện thoại  (nếu identity có)
- * Câu 10: Email
- * Các câu còn lại trong LOCKED_COUNT giữ nguyên (rỗng, locked).
- *
- * Mapping dựa theo thứ tự (order) của question trong formSnapshot.
+ * Mapping thứ tự câu hỏi → field của student (dựa theo form chuẩn VNUA):
+ *  1 (index 0): Mã sinh viên
+ *  2 (index 1): Họ và tên
+ *  3 (index 2): Giới tính
+ *  4 (index 3): Ngày sinh
+ *  5 (index 4): Mã ngành đào tạo
+ *  6 (index 5): Số CCCD  ← câu hỏi dạng "short", giá trị là chuỗi số
+ *  7 (index 6): Khóa học (school_year_end)
+ *  8 (index 7): Tên ngành được đào tạo
+ *  9 (index 8): Số điện thoại
+ * 10 (index 9): Email
  */
 function buildInitialValues(
   formSnapshot: SurveyBatch['formSnapshot'],
-  identity: Identity
+  identity: Identity,
 ): Record<string, any> {
   if (!formSnapshot) return {}
 
-  // Sắp xếp câu hỏi theo order
   const sortedQs = [...(formSnapshot.questions ?? [])].sort(
-    (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)
+    (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
   )
 
+  const sd = identity.studentData
   const values: Record<string, any> = {}
 
-  // Điền theo thứ tự câu hỏi (câu 1 = index 0, ...)
-  // Câu 1 (index 0) = Mã sinh viên
-  if (sortedQs[0]) values[sortedQs[0].id] = identity.studentId
-  // Câu 2 (index 1) = Họ và tên
-  if (sortedQs[1]) values[sortedQs[1].id] = identity.studentName
-  // Câu 9 (index 8, nếu có) = Số điện thoại – để trống, đã locked
-  // Câu 10 (index 9, nếu có) = Email
-  if (sortedQs[9]) values[sortedQs[9].id] = identity.studentEmail
+  const set = (idx: number, val: any) => {
+    if (sortedQs[idx] && val !== null && val !== undefined && val !== '') {
+      values[sortedQs[idx].id] = val
+    }
+  }
+
+  // Câu 1: Mã sinh viên
+  set(0, identity.studentId)
+
+  // Câu 2: Họ và tên
+  set(1, sd?.full_name || identity.studentName)
+
+  if (sd) {
+    // Câu 3: Giới tính — chuyển enum → tiếng Việt để hiển thị đúng trong form
+    const genderMap: Record<string, string> = {
+      male:   'Nam',
+      female: 'Nữ',
+      other:  'Khác',
+    }
+    set(2, sd.gender ? (genderMap[sd.gender] ?? sd.gender) : null)
+
+    // Câu 4: Ngày sinh — format YYYY-MM-DD (date input chuẩn HTML)
+    if (sd.dob) {
+      const d = new Date(sd.dob)
+      if (!isNaN(d.getTime())) {
+        set(3, d.toISOString().slice(0, 10))
+      }
+    }
+
+    // Câu 5: Mã ngành đào tạo
+    set(4, sd.training_industry_code)
+
+    // Câu 6: Số CCCD
+    set(5, sd.citizen_identification)
+
+    // Câu 7: Khóa học
+    set(6, sd.school_year_end)
+
+    // Câu 8: Tên ngành được đào tạo
+    set(7, sd.training_industry_name)
+
+    // Câu 9: Số điện thoại
+    set(8, sd.phone)
+  }
+
+  // Câu 10: Email
+  set(9, sd?.email || identity.studentEmail)
 
   return values
 }

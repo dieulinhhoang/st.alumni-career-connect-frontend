@@ -77,21 +77,63 @@ export async function getGraduations(page = 1, perPage = 100): Promise<Graduatio
   }));
 }
 
+/** Thông tin đầy đủ của sinh viên từ backend */
+export interface StudentData {
+  id: number
+  code: string
+  full_name: string
+  email: string | null
+  phone: string | null
+  dob: string | null
+  gender: 'male' | 'female' | 'other' | null
+  citizen_identification: string | null
+  training_industry_code: string | null
+  training_industry_name: string | null
+  school_year_end: string | null
+}
+
+/**
+ * Kiểm tra mã SV trong đợt tốt nghiệp và trả về data đầy đủ nếu tìm thấy.
+ * Trả về null nếu không tìm thấy hoặc lỗi mạng.
+ */
+export async function getStudentFromGraduation(
+  graduationId: number,
+  studentCode: string,
+): Promise<StudentData | null> {
+  try {
+    const res = await api.get('/grad-students', {
+      params: { graduation_id: graduationId, per_page: 9999 },
+    });
+    const rows: any[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+    const found = rows.find(
+      (r) => (r.student?.code ?? r.studentCode ?? r.code ?? '').toString() === studentCode.trim(),
+    );
+    if (!found) return null;
+    // Backend có thể wrap trong .student hoặc trả thẳng
+    const s = found.student ?? found;
+    return {
+      id:                     s.id,
+      code:                   s.code ?? studentCode,
+      full_name:              s.full_name ?? s.fullName ?? '',
+      email:                  s.email ?? null,
+      phone:                  s.phone ?? null,
+      dob:                    s.dob ?? null,
+      gender:                 s.gender ?? null,
+      citizen_identification: s.citizen_identification ?? s.citizenIdentification ?? null,
+      training_industry_code: s.training_industry_code ?? s.trainingIndustryCode ?? null,
+      training_industry_name: s.training_industry_name ?? s.trainingIndustryName ?? null,
+      school_year_end:        s.school_year_end ?? s.schoolYearEnd ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Validate xem một mã SV có thuộc đợt tốt nghiệp (graduationId) không */
 export async function checkStudentInGraduation(
   graduationId: number,
   studentCode: string,
 ): Promise<boolean> {
-  try {
-    // GET /grad-students?graduation_id=X&per_page=9999 rồi tìm trong danh sách
-    const res = await api.get('/grad-students', {
-      params: { graduation_id: graduationId, per_page: 9999 },
-    });
-    const rows: any[] = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
-    return rows.some(
-      (r) => (r.student?.code ?? r.studentCode ?? r.code ?? '').toString() === studentCode.trim(),
-    );
-  } catch {
-    return false;
-  }
+  const student = await getStudentFromGraduation(graduationId, studentCode);
+  return student !== null;
 }

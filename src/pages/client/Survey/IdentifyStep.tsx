@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
-import { SafetyCertificateOutlined, CalendarOutlined, InfoCircleOutlined, WarningOutlined, LoadingOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { SafetyCertificateOutlined, CalendarOutlined, WarningOutlined, LoadingOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import type { SurveyBatch } from '../../../feature/alumni/types'
-import { checkStudentInGraduation } from '../../../feature/alumni/api'
+import { getStudentFromGraduation } from '../../../feature/alumni/api'
+import type { StudentData } from '../../../feature/alumni/api'
 
 export interface Identity {
   studentId: string
   studentName: string
   studentEmail: string
+  /** Toàn bộ data student từ backend (nếu có đợt tốt nghiệp) */
+  studentData?: StudentData | null
 }
 
 interface Props {
@@ -46,16 +49,18 @@ export function IdentifyStep({ batch, onContinue }: Props) {
       setErr('Email không hợp lệ.'); return
     }
 
+    let studentData: StudentData | null = null
+
     if (batch.graduationId) {
       setChecking(true)
       try {
-        const found = await checkStudentInGraduation(batch.graduationId, studentId.trim())
-        if (!found) {
+        studentData = await getStudentFromGraduation(batch.graduationId, studentId.trim())
+        if (!studentData) {
           setErr('Mã sinh viên không thuộc đợt tốt nghiệp này. Vui lòng kiểm tra lại.')
           return
         }
       } catch {
-        // Nếu lỗi mạng, cho phép tiếp tục
+        // Lỗi mạng → cho tiếp tục, không có studentData
       } finally {
         setChecking(false)
       }
@@ -63,8 +68,9 @@ export function IdentifyStep({ batch, onContinue }: Props) {
 
     onContinue({
       studentId:    studentId.trim(),
-      studentName:  studentName.trim(),
-      studentEmail: studentEmail.trim(),
+      studentName:  studentData?.full_name || studentName.trim(),
+      studentEmail: studentData?.email     || studentEmail.trim(),
+      studentData,
     })
   }
 
