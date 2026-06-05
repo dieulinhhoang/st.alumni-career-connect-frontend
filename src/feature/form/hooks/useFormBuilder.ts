@@ -300,7 +300,8 @@ export function useFormBuilder(
     })
 
     let finalQs = updatedQs
-    if (movedCount === 0) {
+    const hasQuestionAfter = afterIdx < questions.length - 1
+    if (movedCount === 0 && !hasQuestionAfter) {
       const newQuestion = _newQuestion(newSectionId)
       firstQuestionInNewSectionId = newQuestion.id
       finalQs = [

@@ -204,7 +204,7 @@ export function SectionManager({
         onMouseEnter={(e) => (e.currentTarget.style.background = `${accent}10`)}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
-        {/* <PlusOutlined /> Thêm phần mới */}
+        <PlusOutlined /> Thêm phần mới
       </button>
     </div>
   )

@@ -1,59 +1,134 @@
 import React, { useState, useEffect } from 'react';
+import { Button, Spin, Empty, Typography, Tag, Row, Col, message } from 'antd';
 import {
-  Button, Spin, Empty, Input, Select, Space,
-  Typography, Row, Col, Divider, Progress,
-} from 'antd';
-import {
-  SearchOutlined, InfoCircleOutlined, BarChartOutlined,
-  ExclamationCircleOutlined, CheckCircleOutlined,
-  ClockCircleOutlined, CalendarOutlined, MessageOutlined,
-  UserOutlined, StarOutlined, BankOutlined,
+  ArrowLeftOutlined, UserOutlined, MailOutlined,
+  IdcardOutlined, BankOutlined, CalendarOutlined,
+  CheckCircleOutlined, ClockCircleOutlined,
+  BookOutlined, EditOutlined, CloseOutlined, FilePdfOutlined,
 } from '@ant-design/icons';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getBatchById } from '../../../feature/alumni/api';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { getBatchById, getBatchResponses, updateResponse, createResponse } from '../../../feature/alumni/api';
+import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import CustomTable from '../../../components/common/CustomTable';
-import type { ColumnsType } from 'antd/es/table';
-import { StatCard } from './components/StatCard';
-import { useFacultyFilter } from '../../../../feature/alumni/hooks/useFacultyFilter';
+import { SurveyPreview } from '../Form/Preview';
+import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
+import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
 
 const { Text, Title } = Typography;
 
-//  Inline SVG icons for StatCard 
-const IcBriefcase  = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
-const IcXCircle    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
-const IcGradCap    = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>;
-const IcCheckCirc  = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-const IcStar       = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
-const IcBuilding   = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>;
+const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: React.ReactNode }> = ({ icon, label, value }) => (
+  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
+    <span style={{ color: '#2563eb', fontSize: 14, marginTop: 1, flexShrink: 0 }}>{icon}</span>
+    <Text type="secondary" style={{ fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0, minWidth: 100, maxWidth: 110 }}>{label}</Text>
+    <span style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{value ?? <span style={{ color: '#cbd5e1' }}>—</span>}</span>
+  </div>
+);
 
 export const ResponseDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id, responseId } = useParams<{ id: string; responseId: string }>();
   const navigate = useNavigate();
-  const [batch,   setBatch]   = useState<SurveyBatch | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [search,  setSearch]  = useState('');
-  const [filter,  setFilter]  = useState('all');
-  const [khoa,    setKhoa]    = useState<string | undefined>(undefined);
-  const [nganh,   setNganh]   = useState<string | undefined>(undefined);
+  const { pathname } = useLocation();
+  const isEdit = pathname.endsWith('/edit');
 
-  // Lấy khoa/ngành từ API thật
-  const {
-    khoaOptions,
-    nganhOptions,
-    loadingKhoa,
-    loadingNganh,
-    getKhoaLabel,
-    getNganhLabel,
-  } = useFacultyFilter(khoa, nganh);
+  const [batch,    setBatch]    = useState<SurveyBatch | null>(null);
+  const [response, setResponse] = useState<AlumniResponse | null>(null);
+  const [loading,  setLoading]  = useState(true);
+  const [saving,   setSaving]   = useState(false);
 
-  useEffect(() => { if (id) load(); }, [id]);
+  const pdfFilename = batch && response
+    ? `phanhoi_${response.studentId}_${batch.title.replace(/\s+/g, '_')}.pdf`
+    : 'phanhoi.pdf';
+  const { containerRef: pdfRef, exporting, exportPDF } = useExportPDF(pdfFilename);
+
+  useEffect(() => { if (id) load(); }, [id, responseId]);
 
   const load = async () => {
-    try { setBatch(await getBatchById(Number(id))); }
-    catch (err) { console.error(err); }
+    try {
+      const numId = Number(responseId);
+      const [b, responses] = await Promise.all([
+        getBatchById(Number(id)),
+        getBatchResponses(Number(id)),
+      ]);
+      setBatch(b);
+
+      if (numId < 0 && b.graduationId) {
+        // ID âm = SV chưa submit → tìm trong gradStudents
+        const studentsRes = await fetchGraduationStudents(b.graduationId, 1, 9999);
+        const gs = studentsRes.data.find(s => s.id === -numId);
+        if (gs) {
+          setResponse({
+            id: numId,
+            batchId: b.id,
+            studentId: gs.code,
+            studentName: gs.full_name ?? '',
+            studentEmail: gs.email ?? '',
+            answers: {},
+            submittedAt: '',
+            status: 'pending' as any,
+            // Thêm thông tin ngành từ GraduationStudent
+            training_industry_id: gs.training_industry_id,
+            training_industry_name: gs.training_industry_name,
+            training_industry_code: gs.training_industry_code,
+          } as any);
+        }
+      } else {
+        // Tìm response đã submit, rồi bổ sung thông tin ngành từ gradStudents
+        const r = responses.find(x => String(x.id) === responseId);
+        if (r && b.graduationId) {
+          // Load gradStudents để lấy faculty_name + training_industry_name
+          try {
+            const studentsRes = await fetchGraduationStudents(b.graduationId, 1, 9999);
+            const gs = studentsRes.data.find(s => s.code === r.studentId);
+            if (gs) {
+              setResponse({
+                ...r,
+                faculty_id: (gs as any).faculty_id,
+                faculty_name: (gs as any).faculty_name,
+                training_industry_id: gs.training_industry_id,
+                training_industry_name: gs.training_industry_name,
+                training_industry_code: gs.training_industry_code,
+              } as any);
+            } else {
+              setResponse(r);
+            }
+          } catch {
+            setResponse(r ?? null);
+          }
+        } else {
+          setResponse(r ?? null);
+        }
+      }
+    } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleSubmit = async (answers: Record<string, any>) => {
+    setSaving(true);
+    try {
+      const numId = Number(responseId);
+      if (numId < 0 && response) {
+        // SV chưa submit → tạo mới response
+        await createResponse(Number(id), {
+          studentId:    response.studentId,
+          studentName:  response.studentName,
+          studentEmail: response.studentEmail,
+          answers,
+        });
+      } else {
+        // SV đã submit → cập nhật answers
+        await updateResponse(Number(id), numId, { answers });
+      }
+      message.success('Đã lưu chỉnh sửa!');
+      if (numId < 0) {
+        // SV vừa được tạo mới → về danh sách để reload với ID thật
+        navigate(`/admin/alumni/batches/${id}/responses`);
+      } else {
+        navigate(`/admin/alumni/batches/${id}/responses/${responseId}`);
+      }
+    } catch {
+      message.error('Lưu thất bại, thử lại.');
+    } finally { setSaving(false); }
   };
 
   if (loading) return (
@@ -64,251 +139,183 @@ export const ResponseDetail: React.FC = () => {
     </AdminLayout>
   );
 
-  if (!batch) return (
+  if (!batch || !response) return (
     <AdminLayout>
       <div style={{ padding: 80, textAlign: 'center' }}>
-        <Empty description="Không tìm thấy dữ liệu" />
+        <Empty description="Không tìm thấy dữ liệu phản hồi" />
+        <Button style={{ marginTop: 16 }} onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>
+          Danh sách
+        </Button>
       </div>
     </AdminLayout>
   );
 
-  const submitted = batch.responses.filter(r => r.status === 'submitted');
-  const pct       = batch.totalStudents ? Math.round(submitted.length / batch.totalStudents * 100) : 0;
-  const now       = new Date();
-  const endDate   = new Date(batch.endDate);
-  const isEnded   = now > endDate;
-  const diffDays  = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
-  const diffWeeks = Math.floor(diffDays / 7);
-  const n         = submitted.length;
-  const total     = batch.totalStudents;
-  const hasJob    = Math.round(n * 0.615);
-  const noJob     = n - hasJob;
-  const relevant  = Math.round(n * 0.308);
-  const rightFld  = Math.round(n * 0.154);
-  const hasJobG   = Math.round(total * 0.615);
-  const relevG    = Math.round(total * 0.308);
+  // Lấy tên khoa và ngành từ các field đã được enrich ở load()
+  const khoaLabel  = (response as any)?.faculty_name as string | undefined;
+  // Ưu tiên training_industry_name, fallback về training_industry_code
+  const nganhLabel = (response as any)?.training_industry_name as string | undefined
+    ?? (response as any)?.training_industry_code as string | undefined;
 
-  const filtered = batch.responses.filter(r => {
-    const q = search.toLowerCase();
-    return (
-      (r.studentName.toLowerCase().includes(q) || r.studentId?.toLowerCase().includes(q)) &&
-      (filter === 'all' || r.status === filter) &&
-      (!khoa  || (r as any).khoa  === khoa) &&
-      (!nganh || (r as any).nganh === nganh)
-    );
-  });
+  const answers    = (response as any)?.answers ?? {};
+  const formSnapshot = (batch as any).formSnapshot ?? null;
 
-  const columns: ColumnsType<AlumniResponse> = [
-    {
-      title: 'Sinh viên', key: 'student',
-      render: (_, r) => (
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 13 }}>{r.studentName}</div>
-          <Text type="secondary" style={{ fontSize: 11 }}>{r.studentEmail}</Text>
+  const ProfileCard = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
+        <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <UserOutlined style={{ color: '#2563eb' }} /> Thông tin sinh viên
         </div>
-      ),
-    },
-    {
-      title: 'Mã SV', key: 'studentId', width: 120,
-      render: (_, r) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }}>{r.studentId}</Text>,
-    },
-    {
-      title: 'Khoa', key: 'khoa', width: 180,
-      render: (_, r) => (
-        <Text style={{ fontSize: 12 }}>
-          {(r as any).khoa ? getKhoaLabel((r as any).khoa) : '—'}
-        </Text>
-      ),
-    },
-    {
-      title: 'Ngành', key: 'nganh', width: 190,
-      render: (_, r) => (
-        <Text style={{ fontSize: 12 }}>
-          {(r as any).nganh ? getNganhLabel((r as any).nganh) : '—'}
-        </Text>
-      ),
-    },
-    {
-      title: 'Trạng thái', key: 'status', width: 145,
-      render: (_, r) => r.status === 'submitted' ? (
-        <span style={{ background: '#d1fae5', color: '#065f46', padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-          <CheckCircleOutlined style={{ fontSize: 12 }} /> Đã hoàn thành
-        </span>
-      ) : (
-        <span style={{ background: '#f5f5f5', color: '#595959', padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500 }}>
-          Chưa phản hồi
-        </span>
-      ),
-    },
-    {
-      title: 'Ngày phản hồi', key: 'submittedAt', width: 140,
-      render: (_, r) => (
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          <ClockCircleOutlined style={{ marginRight: 5 }} />
-          {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('vi-VN') : '—'}
-        </Text>
-      ),
-    },
-    {
-      title: '', key: 'action', width: 80,
-      render: (_, r) => (
-        <Button type="link" size="small" style={{ color: '#1D9E75', padding: 0 }}
-          onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}`)}>
-          Chi tiết
-        </Button>
-      ),
-    },
-  ];
+        <InfoRow icon={<IdcardOutlined />} label="Mã sinh viên" value={<Text style={{ fontFamily: 'monospace', color: '#2563eb', fontWeight: 700 }}>{response.studentId}</Text>} />
+        <InfoRow icon={<UserOutlined />}   label="Họ và tên"    value={response.studentName} />
+        <InfoRow icon={<MailOutlined />}   label="Email"        value={response.studentEmail} />
+        {/* Hiển thị Khoa nếu có dữ liệu */}
+        {khoaLabel && (
+          <InfoRow icon={<BankOutlined />} label="Khoa" value={khoaLabel} />
+        )}
+        {/* Hiển thị Ngành nếu có dữ liệu */}
+        {nganhLabel && (
+          <InfoRow icon={<BookOutlined />} label="Ngành" value={nganhLabel} />
+        )}
+        {/* Ẩn Lớp và Năm tốt nghiệp */}
+      </div>
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
+        <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <CalendarOutlined style={{ color: '#2563eb' }} /> Thông tin phản hồi
+        </div>
+        <InfoRow icon={<CheckCircleOutlined />} label="Trạng thái" value={
+          response.status === 'submitted'
+            ? <Tag color="success" icon={<CheckCircleOutlined />}>Đã hoàn thành</Tag>
+            : <Tag color="default">Chưa phản hồi</Tag>
+        } />
+        <InfoRow icon={<ClockCircleOutlined />} label="Ngày phản hồi" value={
+          response.submittedAt
+            ? new Date(response.submittedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : undefined
+        } />
+        {/* Ẩn Năm tốt nghiệp (batch.year) */}
+        <InfoRow icon={<BankOutlined />} label="Đợt tốt nghiệp" value={batch.graduationPeriod} />
+      </div>
+    </div>
+  );
 
   return (
     <AdminLayout>
-      <div style={{ padding: 24 }}>
+      <div style={{ padding: 24, background: '#f8fafc', minHeight: '100vh' }}>
 
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>
-          <span style={{ color: '#1D9E75', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>
-            Khảo sát việc làm
-          </span>
-          {' / '}Kết quả khảo sát
+        {/* Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <Button icon={<ArrowLeftOutlined />} size="small" style={{ borderRadius: 6 }}
+            onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>
+           
+          </Button>
+          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+            <span style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => navigate('/admin/alumni/batches')}>Khảo sát việc làm</span>
+            {' / '}
+            <span style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => navigate(`/admin/alumni/batches/${id}/responses`)}>{batch.title}</span>
+            {' / '}
+            <span style={{ color: '#475569' }}>{isEdit ? 'Chỉnh sửa phản hồi' : 'Chi tiết phản hồi'}</span>
+          </div>
         </div>
 
-        <Title level={4} style={{ color: '#1D9E75', marginBottom: 20 }}>
-          Khảo sát: {batch.title}
-        </Title>
+        {/* Title + toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <Title level={4} style={{ margin: 0, color: '#111827' }}>
+            {isEdit
+              ? <><EditOutlined style={{ color: '#d97706', marginRight: 8 }} />Chỉnh sửa </>
+              : ""}
+          </Title>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {!isEdit && (
+              <Button
+                icon={<FilePdfOutlined />}
+                loading={exporting}
+                style={{ borderRadius: 6, borderColor: '#2563eb', color: '#2563eb' }}
+                onClick={exportPDF}
+              >
+                Xuất PDF
+              </Button>
+            )}
+            {!isEdit ? (
+              <Button icon={<EditOutlined />}
+                style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}>
+                Chỉnh sửa phản hồi
+              </Button>
+            ) : (
+              <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
+                Hủy chỉnh sửa
+              </Button>
+            )}
+          </div>
+        </div>
 
-        <Row gutter={20} style={{ marginBottom: 20 }}>
-          <Col span={10}>
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20, height: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontWeight: 600, color: '#1D9E75', fontSize: 14 }}>
-                <InfoCircleOutlined /> Thông tin khảo sát
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 13.5 }}>
-                <CalendarOutlined style={{ color: '#1D9E75' }} />
-                <Text type="secondary">Năm khảo sát:</Text>
-                <Text strong style={{ color: '#1D9E75' }}>{batch.year}</Text>
-              </div>
-
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, marginBottom: 4 }}>
-                  <UserOutlined style={{ color: '#1D9E75' }} />
-                  <Text type="secondary">Đợt tốt nghiệp:</Text>
-                </div>
-                <div style={{ paddingLeft: 24 }}>
-                  <Text style={{ color: '#1D9E75', fontSize: 13 }}>› {batch.graduationPeriod}</Text>
-                </div>
-              </div>
-
-              <Divider style={{ margin: '8px 0' }} />
-
-              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text strong style={{ color: '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <MessageOutlined /> Số lượt phản hồi:
-                  </Text>
-                  <Text strong style={{ fontSize: 16, color: '#065f46' }}>{submitted.length} / {batch.totalStudents}</Text>
-                </div>
-                <Progress percent={pct} size="small" strokeColor="#1D9E75" trailColor="#bbf7d0" showInfo={false} style={{ marginBottom: 4 }} />
-                <Text style={{ fontSize: 12, color: '#059669' }}>↗ {pct}% đã phản hồi</Text>
-              </div>
-
-              <div style={{ background: isEnded ? '#fff1f2' : '#f0fdf4', border: `1px solid ${isEnded ? '#fecdd3' : '#bbf7d0'}`, borderRadius: 8, padding: '12px 14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text strong style={{ color: isEnded ? '#9f1239' : '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <ClockCircleOutlined /> Thời gian khảo sát:
-                  </Text>
-                  {isEnded ? (
-                    <span style={{ background: '#fee2e2', color: '#9f1239', padding: '2px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <ExclamationCircleOutlined style={{ fontSize: 12 }} /> Đã kết thúc
-                    </span>
-                  ) : (
-                    <span style={{ background: '#d1fae5', color: '#065f46', padding: '2px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500 }}>
-                      Đang diễn ra
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 8 }}>
-                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <CalendarOutlined /> {new Date(batch.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                  <Text type="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <CalendarOutlined /> {new Date(batch.endDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </div>
-                <Progress percent={isEnded ? 100 : pct} size="small" strokeColor={isEnded ? '#e11d48' : '#1D9E75'} trailColor={isEnded ? '#fecdd3' : '#bbf7d0'} showInfo={false} style={{ marginBottom: isEnded ? 4 : 0 }} />
-                {isEnded && (
-                  <Text style={{ fontSize: 12, color: '#e11d48', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <ExclamationCircleOutlined /> Đã quá hạn {diffWeeks > 0 ? `${diffWeeks} tuần` : `${diffDays} ngày`}
-                  </Text>
-                )}
-              </div>
+        {/* Layout chung — cả view lẫn edit đều dùng 2 cột */}
+        <Row gutter={20}>
+          {/* Cột trái: profile */}
+          <Col span={isEdit ? 7 : 9}>
+            <div style={{ position: 'sticky', top: 24 }}>
+              {ProfileCard}
             </div>
           </Col>
 
-          <Col span={14}>
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: '#1D9E75', fontSize: 14 }}>
-                  <BarChartOutlined /> Thống kê tổng quan
+          {/* Cột phải: form */}
+          <Col span={isEdit ? 17 : 15}>
+            {/* Form */}
+            <div style={{
+              border: isEdit ? '1px solid #fde68a' : '1px solid #e5e7eb',
+              borderRadius: 10,
+              overflow: 'hidden',
+              background: '#fff',
+            }}>
+              {formSnapshot ? (
+                /* Khi xem: bọc pointer-events:none để không cho tương tác */
+                <div style={!isEdit ? { pointerEvents: 'none', userSelect: 'none', opacity: 0.92 } : undefined}>
+                  <SurveyPreview
+                    form={formSnapshot}
+                    compact={false}
+                    initialValues={answers}
+                    onSubmit={isEdit ? handleSubmit : undefined}
+                    submitLabel="Lưu"
+                  />
                 </div>
-              </div>
-              <Row gutter={[10, 10]}>
-                <Col span={8}><StatCard icon={IcBriefcase} iconBg="#d1fae5" iconColor="#065f46" numerator={hasJob}   denominator={n}     label="Có việc làm / Phản hồi"      numColor="#065f46" barColor="#1D9E75" pctBg="#ffffff" pctColor="#065f46" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={IcXCircle}   iconBg="#fee2e2" iconColor="#9f1239" numerator={noJob}    denominator={n}     label="Chưa có việc làm / Phản hồi" numColor="#9f1239" barColor="#e11d48" pctBg="#fee2e2" pctColor="#9f1239" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={IcGradCap}   iconBg="#dbeafe" iconColor="#1e40af" numerator={hasJobG}  denominator={total} label="Có việc làm / Tốt nghiệp"     numColor="#1e40af" barColor="#2563eb" pctBg="#dbeafe" pctColor="#1e40af" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={IcCheckCirc} iconBg="#ccfbf1" iconColor="#0f766e" numerator={relevant} denominator={n}     label="Việc làm phù hợp / Phản hồi"  numColor="#0f766e" barColor="#0d9488" pctBg="#ccfbf1" pctColor="#0f766e" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={IcStar}      iconBg="#ffedd5" iconColor="#c2410c" numerator={relevG}   denominator={total} label="Việc làm phù hợp / TN"         numColor="#c2410c" barColor="#ea580c" pctBg="#ffedd5" pctColor="#c2410c" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-                <Col span={8}><StatCard icon={IcBuilding}  iconBg="#e0e7ff" iconColor="#4338ca" numerator={rightFld} denominator={n}     label="Đúng ngành / Phản hồi"         numColor="#4338ca" barColor="#4f46e5" pctBg="#e0e7ff" pctColor="#4338ca" cardBg="#ffffff" cardBorder="#e5e7eb" /></Col>
-              </Row>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
+                  Không có form snapshot
+                </div>
+              )}
             </div>
           </Col>
         </Row>
-
-        {/*  Filter bar  */}
-        <Space wrap style={{ marginBottom: 12 }}>
-          <Input
-            placeholder="Tìm tên, mã sinh viên…" allowClear
-            prefix={<SearchOutlined />} value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ width: 220 }}
-          />
-          <Select value={filter} onChange={setFilter} style={{ width: 150 }}>
-            <Select.Option value="all">Tất cả</Select.Option>
-            <Select.Option value="submitted">Đã phản hồi</Select.Option>
-            <Select.Option value="pending">Chưa phản hồi</Select.Option>
-          </Select>
-          <Select
-            allowClear
-            value={khoa}
-            loading={loadingKhoa}
-            onChange={v => { setKhoa(v); setNganh(undefined); }}
-            style={{ width: 200 }}
-            placeholder="Lọc theo khoa"
-          >
-            {khoaOptions.map(k => <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>)}
-          </Select>
-          <Select
-            allowClear
-            value={nganh}
-            loading={loadingNganh}
-            onChange={setNganh}
-            style={{ width: 220 }}
-            placeholder="Lọc theo ngành"
-            disabled={!khoa}
-          >
-            {nganhOptions.map(o => (
-              <Select.Option key={o.value} value={o.value}>{o.label}</Select.Option>
-            ))}
-          </Select>
-          <Text type="secondary">{filtered.length} sinh viên</Text>
-        </Space>
-
-        <CustomTable
-          columns={columns}
-          data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
-          loading={false}
-          rowKey="id"
-        />
       </div>
+
+      {/* Hidden div for PDF export */}
+      {formSnapshot && (
+        <div
+          ref={pdfRef}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: '-9999px',
+            width: 794,
+            background: '#fff',
+            zIndex: -1,
+            pointerEvents: 'none',
+          }}
+        >
+          <PDFCanvas
+            surveyTitle={(formSnapshot as any).surveyTitle ?? batch.title}
+            descriptionParagraphs={(formSnapshot as any).descriptionParagraphs ?? []}
+            sections={(formSnapshot as any).sections ?? []}
+            questions={(formSnapshot as any).questions ?? []}
+            accent={(formSnapshot as any).accent ?? '#2563eb'}
+            header={(formSnapshot as any).header ?? {}}
+            footer={(formSnapshot as any).footer ?? {}}
+            interactive={false}
+            initialValues={answers}
+          />
+        </div>
+      )}
     </AdminLayout>
   );
 };

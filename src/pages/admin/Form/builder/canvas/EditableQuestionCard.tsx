@@ -278,8 +278,10 @@ export function EditableQuestionCard({
         background: '#fff', borderRadius: 0,
         border: 'none',
         borderBottom: '1px solid #e8eaed',
-        boxShadow: 'none',
-        padding: 18, marginBottom: 12, transition: 'all .18s ease',
+        borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
+        boxShadow: isActive ? '0 1px 6px rgba(0,0,0,.10)' : 'none',
+        padding: isActive ? '18px 18px 18px 14px' : 18,
+        marginBottom: 12, transition: 'all .18s ease',
         position: 'relative', overflow: 'hidden',
       }}
     >

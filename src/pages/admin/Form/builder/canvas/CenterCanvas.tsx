@@ -355,6 +355,7 @@ export function CenterCanvas({
                       accent={accent}
                       sectionIndex={sIdx}
                       canDelete={sections.length > 1}
+                      isEmpty={sqs.length === 0}
                       onRename={onRenameSection}
                       onDelete={onDeleteSection}
                       onAddQuestion={(sectionId) => {
@@ -460,7 +461,7 @@ export function CenterCanvas({
                 </button>
               </Tooltip>
 
-              {/* <Tooltip title="Ngắt phần — thêm section mới" placement="top">
+              <Tooltip title="Ngắt phần — thêm section mới" placement="top">
                 <button
                   onClick={() => {
                     const targetId = activeQuestionId ?? questions[questions.length - 1]?.id
@@ -473,7 +474,7 @@ export function CenterCanvas({
                 >
                   <SplitCellsOutlined style={{ fontSize: 13 }} /> Ngắt phần
                 </button>
-              </Tooltip> */}
+              </Tooltip>
             </div>
           </div>
         )}
