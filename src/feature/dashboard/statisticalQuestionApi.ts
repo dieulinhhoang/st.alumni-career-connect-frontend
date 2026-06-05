@@ -179,6 +179,9 @@ export interface GetChartParams {
  * Fallback về MOCK nếu BE chưa có hoặc gặp lỗi.
  *
  * BE: GET /dashboard/statistical-questions
+ *
+ * BE trả về: { questionId, label, title, questionType, chartType, options? }[]
+ * (đã được normalize bởi dashboard.service.ts)
  */
 export async function getStatisticalQuestions(): Promise<StatisticalQuestion[]> {
   if (!hasApiUrl()) {
@@ -188,7 +191,18 @@ export async function getStatisticalQuestions(): Promise<StatisticalQuestion[]> 
 
   try {
     const res = await api.get<StatisticalQuestion[]>("/dashboard/statistical-questions");
-    return res.data;
+    // Normalize phòng trường hợp BE cũ trả về field khác tên
+    const list = res.data ?? [];
+    return list.map((q: any) => ({
+      questionId: q.questionId ?? String(q.id ?? ""),
+      label: q.label ?? q.questionKey ?? (q.questionText ?? "").slice(0, 60),
+      title: q.title ?? q.questionText ?? "",
+      questionType: q.questionType ?? "single_choice",
+      chartType: q.chartType ?? "pie",
+      options: Array.isArray(q.options)
+        ? q.options.map((o: any) => (typeof o === "string" ? o : o.label ?? ""))
+        : [],
+    }));
   } catch (err) {
     if (isDev) console.warn("[dashboard] getStatisticalQuestions failed, fallback to mock", err);
     return MOCK_QUESTIONS;
@@ -200,6 +214,9 @@ export async function getStatisticalQuestions(): Promise<StatisticalQuestion[]> 
  * Fallback về MOCK nếu BE chưa có hoặc gặp lỗi.
  *
  * BE: GET /dashboard/statistical-questions/{questionId}/chart?khoa=...&nganh=...
+ *
+ * BE trả về: { questionId, title, chartType, totalResponses, data, dotData }
+ * trong đó `data` = pieData của đợt mới nhất, `dotData` = phân bố theo tất cả các đợt.
  */
 export async function getChartByQuestionId(
   questionId: string,
@@ -222,7 +239,23 @@ export async function getChartByQuestionId(
         },
       },
     );
-    return res.data;
+
+    const raw: any = res.data;
+
+    // Normalize: hỗ trợ cả BE mới (data/dotData) và BE cũ (pieData/dotData/latestKey)
+    const data: ChartResult["data"] =
+      Array.isArray(raw.data) ? raw.data
+      : Array.isArray(raw.pieData) ? raw.pieData
+      : [];
+
+    return {
+      questionId: raw.questionId ?? questionId,
+      title: raw.title ?? "",
+      chartType: raw.chartType ?? "pie",
+      totalResponses: raw.totalResponses,
+      data,
+      dotData: raw.dotData ?? undefined,
+    };
   } catch (err) {
     if (isDev) console.warn(`[dashboard] getChartByQuestionId(${questionId}) failed, fallback to mock`, err);
     return MOCK_CHART_DATA[questionId] ?? null;

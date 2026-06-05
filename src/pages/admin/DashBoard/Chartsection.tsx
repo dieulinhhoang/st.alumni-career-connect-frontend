@@ -16,6 +16,8 @@ import type {
   ChartResult,
   StatisticalQuestion,
 } from "../../../feature/dashboard/statisticalQuestion";
+import { fetchKhoaList } from "../../../feature/dashboard/api";
+import type { KhoaItem } from "../../../feature/dashboard/type";
 import { COLOR } from "./theme";
 import { PieColumnChart } from "../../../components/charts/PieColumnChart";
 
@@ -86,9 +88,18 @@ export function ChartSection({ state, setField }: Props) {
     [questions, questionId],
   );
 
-  const latestKey = currentQuestion?.label ?? "—";
+  // latestKey: ưu tiên lấy từ BE response (key của đợt mới nhất trong dotData),
+  // fallback về label câu hỏi nếu chưa có
+  const latestKey = useMemo(() => {
+    if (chart?.dotData) {
+      const keys = Object.keys(chart.dotData);
+      if (keys.length) return keys[keys.length - 1];
+    }
+    return currentQuestion?.label ?? "—";
+  }, [chart, currentQuestion]);
+
   const pieLabel = currentQuestion
-    ? `Đợt khảo sát mới nhất · ${currentQuestion.label}`
+    ? `Đợt khảo sát mới nhất · ${latestKey}`
     : "Đợt khảo sát mới nhất";
   const columnLabel = "Số lượng theo từng đợt khảo sát";
 
