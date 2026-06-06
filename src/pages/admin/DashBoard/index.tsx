@@ -31,7 +31,7 @@ type StatCardItem = {
 };
 
 export function DashBoard() {
-  const { state, setField } = useChartFilter();
+  const { state, setField, khoaOptions, nganhOptions } = useChartFilter();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -222,7 +222,7 @@ export function DashBoard() {
             </Row>
 
             {/* Chart section */}
-            <ChartSection state={state} setField={setField} />
+            <ChartSection state={state} setField={setField} khoaOptions={khoaOptions} nganhOptions={nganhOptions} />
           </>
         )}
 

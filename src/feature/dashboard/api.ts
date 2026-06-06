@@ -153,3 +153,60 @@ export async function fetchEnterpriseList(): Promise<EnterpriseItem[]> {
   const res = await api.get("/enterprises");
   return toArray<EnterpriseItem>(res.data);
 }
+
+export interface FacultyOption {
+  value: string;
+  label: string;
+  abbr?: string;
+}
+
+export interface MajorOption {
+  value: string;
+  label: string;
+  facultyAbbr?: string;
+}
+
+export async function fetchFacultyOptions(): Promise<FacultyOption[]> {
+  try {
+    const res = await api.get('/faculties', { params: { size: 200, page: 0 } });
+    const raw = toArray<any>(res.data);
+    return [
+      { value: 'all', label: 'Tất cả khoa' },
+      ...raw.map((f: any) => ({
+        value: f.abbr ?? f.slug ?? String(f.id),
+        label: f.name,
+        abbr: f.abbr,
+      })),
+    ];
+  } catch {
+    return [{ value: 'all', label: 'Tất cả khoa' }];
+  }
+}
+
+export async function fetchMajorOptions(khoa?: string): Promise<MajorOption[]> {
+  try {
+    const params: any = { size: 500, page: 0 };
+    // Backend lọc theo facultyId (số) — cần resolve abbr → id
+    // Nếu khoa là abbr, lấy faculty list để tìm id tương ứng
+    if (khoa && khoa !== 'all') {
+      const facRes = await api.get('/faculties', { params: { size: 200, page: 0 } });
+      const facList = toArray<any>(facRes.data);
+      const fac = facList.find(
+        (f: any) => f.abbr === khoa || f.slug === khoa || String(f.id) === khoa,
+      );
+      if (fac) params.facultyId = fac.id;
+    }
+    const res = await api.get('/major', { params });
+    const raw = toArray<any>(res.data);
+    return [
+      { value: 'all', label: 'Tất cả ngành' },
+      ...raw.map((m: any) => ({
+        value: m.code ?? m.slug ?? String(m.id),
+        label: m.name,
+        facultyAbbr: m.faculty?.abbr,
+      })),
+    ];
+  } catch {
+    return [{ value: 'all', label: 'Tất cả ngành' }];
+  }
+}

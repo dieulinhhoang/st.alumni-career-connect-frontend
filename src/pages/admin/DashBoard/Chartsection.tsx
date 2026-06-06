@@ -6,6 +6,7 @@ import {
   CHART_FILTER_SCHEMA,
   type ChartFilterState,
   type FilterFieldSchema,
+  type FilterOption,
 } from "../../../feature/dashboard/filterSchema";
 import { DynamicFilterBar } from "../../../feature/dashboard/DynamicFilterBar";
 import {
@@ -16,8 +17,6 @@ import type {
   ChartResult,
   StatisticalQuestion,
 } from "../../../feature/dashboard/statisticalQuestion";
-import { fetchKhoaList } from "../../../feature/dashboard/api";
-import type { KhoaItem } from "../../../feature/dashboard/type";
 import { COLOR } from "./theme";
 import { PieColumnChart } from "../../../components/charts/PieColumnChart";
 
@@ -26,9 +25,11 @@ const { Text } = Typography;
 interface Props {
   state: ChartFilterState;
   setField: (key: string, value: string) => void;
+  khoaOptions?: FilterOption[];
+  nganhOptions?: FilterOption[];
 }
 
-export function ChartSection({ state, setField }: Props) {
+export function ChartSection({ state, setField, khoaOptions = [], nganhOptions = [] }: Props) {
   const { khoa, nganh, chartMode } = state;
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<StatisticalQuestion[]>([]);
@@ -57,6 +58,7 @@ export function ChartSection({ state, setField }: Props) {
       setChart(null);
       return;
     }
+    console.log('[ChartSection] fetch chart', { questionId, khoa, nganh });
     setChartLoading(true);
     getChartByQuestionId(questionId, { khoa, nganh }).then(res => {
       if (cancelled) return;
@@ -71,15 +73,24 @@ export function ChartSection({ state, setField }: Props) {
   }, [questionId, khoa, nganh]);
 
   const dynamicSchema = useMemo<FilterFieldSchema[]>(() => {
-    const opts = questions.length
+    const questionOpts = questions.length
       ? questions.map(q => ({ value: q.questionId, label: q.label }))
       : [{ value: questionId, label: "Đang tải…" }];
-    return CHART_FILTER_SCHEMA.map(f =>
-      f.key === "chartMode"
-        ? { ...f, getOptions: () => opts }
-        : f,
-    );
-  }, [questions, questionId]);
+
+    const safeKhoaOptions = khoaOptions.length
+      ? khoaOptions
+      : [{ value: "all", label: "Tất cả khoa" }];
+    const safeNganhOptions = nganhOptions.length
+      ? nganhOptions
+      : [{ value: "all", label: "Tất cả ngành" }];
+
+    return CHART_FILTER_SCHEMA.map(f => {
+      if (f.key === "chartMode") return { ...f, getOptions: () => questionOpts };
+      if (f.key === "khoa") return { ...f, getOptions: () => safeKhoaOptions };
+      if (f.key === "nganh") return { ...f, getOptions: () => safeNganhOptions };
+      return f;
+    });
+  }, [questions, questionId, khoaOptions, nganhOptions]);
 
   const pieData = chart?.data ?? [];
 

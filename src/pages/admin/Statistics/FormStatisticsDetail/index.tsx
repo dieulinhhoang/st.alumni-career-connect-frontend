@@ -26,7 +26,7 @@ export default function FormStatisticsDetailPage() {
     })) ?? []
 
   const currentQuestion = questions.find((q) => q.id === questionId)
-  const pieLabel = detail ? `Biểu đồ tròn · ${detail.formName}` : 'Biểu đồ tròn'
+  const pieLabel = detail ? `Biểu đồ tròn · ${detail.batchTitle}` : 'Biểu đồ tròn'
   const columnLabel = currentQuestion
     ? `Biểu đồ cột · ${currentQuestion.title}`
     : 'Biểu đồ cột'

@@ -1,10 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CHART_FILTER_DEFAULTS,
   CHART_FILTER_SCHEMA,
   type ChartFilterState,
   type FilterFieldSchema,
+  type FilterOption,
 } from "../filterSchema";
+import { fetchFacultyOptions, fetchMajorOptions } from "../api";
 
 function buildDefaults(schema: FilterFieldSchema[], base: Record<string, string>) {
   const out: Record<string, string> = { ...base };
@@ -46,11 +48,25 @@ export function useChartFilter() {
     CHART_FILTER_DEFAULTS,
   );
 
+  const [khoaOptions, setKhoaOptions] = useState<FilterOption[]>([{ value: "all", label: "Tất cả khoa" }]);
+  const [nganhOptions, setNganhOptions] = useState<FilterOption[]>([{ value: "all", label: "Tất cả ngành" }]);
+
+  // Load danh sách khoa khi mount
+  useEffect(() => {
+    fetchFacultyOptions().then(setKhoaOptions).catch(() => {});
+  }, []);
+
+  // Load ngành theo khoa đã chọn
+  useEffect(() => {
+    fetchMajorOptions(state.khoa).then(setNganhOptions).catch(() => {});
+  }, [state.khoa]);
+
   return {
     state,
     setField,
     reset,
-    // chartMode now holds a statistical questionId (string), not the legacy ChartMode union
+    khoaOptions,
+    nganhOptions,
     chartMode: state.chartMode,
     khoa: state.khoa,
     nganh: state.nganh,
