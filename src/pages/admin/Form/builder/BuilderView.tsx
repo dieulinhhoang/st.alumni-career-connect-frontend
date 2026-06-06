@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button, Input, Drawer, Flex, Tooltip, Tag, message } from 'antd'
-import { ArrowLeftOutlined, SaveOutlined, CheckOutlined, AppstoreOutlined, CloudUploadOutlined, StopOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckOutlined, AppstoreOutlined, CloudUploadOutlined, StopOutlined } from '@ant-design/icons'
 import { useFormBuilder } from '../../../../feature/form/hooks/useFormBuilder'
 import type { Form, Section, SurveyFooter, SurveyHeader } from '../../../../feature/form/types'
 import { CenterCanvas } from './canvas/CenterCanvas'
@@ -84,9 +84,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const handleAddQuestion = useCallback((afterId?: string, patch?: Partial<import('../../../../feature/form/types').Question>) => {
     const newId = addQuestion(afterId)
-    if (patch && Object.keys(patch).length > 0) {
-      updateQuestion(newId, patch)
-    }
+    if (patch && Object.keys(patch).length > 0) updateQuestion(newId, patch)
     return newId
   }, [addQuestion, updateQuestion])
 
@@ -110,18 +108,18 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     await handleSave(extrasRef.current)
   }, [handleSave])
 
-  const handleSaveAll = useCallback(async () => {
-    const result = await handleSave(extrasRef.current)
-    if (result) onSave(result)
-  }, [handleSave, onSave])
-
   const handlePublishClick = useCallback(async () => {
-    // Lưu trước rồi mới publish
-    const saved = await handleSave(extrasRef.current)
-    if (!saved) return
+    const savedForm = await handleSave(extrasRef.current)
+    if (!savedForm) {
+      message.error('Vui lòng nhập tên form trước khi xuất bản.')
+      return
+    }
     const result = await handlePublish()
-    if (result) message.success('Đã xuất bản form!')
-  }, [handleSave, handlePublish])
+    if (result) {
+      message.success('Đã xuất bản form!')
+      onSave(result)
+    }
+  }, [handleSave, handlePublish, onSave])
 
   const handleUnpublishClick = useCallback(async () => {
     const result = await handleUnpublish()
@@ -129,7 +127,13 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [handleUnpublish])
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMountedRef = useRef(false)
   useEffect(() => {
+    // FIX: bỏ qua lần đầu mount — tránh auto-save ngay khi vào trang
+    if (!isMountedRef.current) {
+      isMountedRef.current = true
+      return
+    }
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => { handleSaveOnly() }, 3000)
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current) }
@@ -142,7 +146,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       {/* Topbar */}
       <Flex align="center" gap={8} style={{ borderBottom: '1px solid #e8eaed', padding: '0 12px', height: 48, flexShrink: 0, background: '#fff' }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} />
-
         <div style={{ width: 1, height: 18, background: '#e8eaed', flexShrink: 0 }} />
 
         <Input
@@ -153,138 +156,86 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           style={{ flex: 1, fontSize: isMobile ? 13 : 14, fontWeight: 600, minWidth: 0 }}
         />
 
-        <Button
-          type={saved ? 'default' : 'primary'}
-          icon={saved ? <CheckOutlined /> : <SaveOutlined />}
-          onClick={handleSaveAll}
-          loading={saving}
-          style={saved ? { background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0' } : {}}
-        >
-          {!isMobile && (saved ? 'Đã lưu' : 'Lưu')}
-        </Button>
-
-        {/* Nút Publish — chỉ hiển thị khi đang ở edit mode (form đã có id) */}
-        {form?.id && (
-          formStatus === 'published' ? (
-            <Tooltip title="Hủy xuất bản để chỉnh sửa lại">
-              <Button
-                icon={<StopOutlined />}
-                onClick={handleUnpublishClick}
-                loading={publishing}
-                style={{ borderColor: '#f59e0b', color: '#b45309', background: '#fffbeb' }}
-              >
-                {!isMobile && 'Hủy xuất bản'}
-              </Button>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Xuất bản để dùng trong đợt khảo sát">
-              <Button
-                type="primary"
-                icon={<CloudUploadOutlined />}
-                onClick={handlePublishClick}
-                loading={publishing}
-                style={{ background: '#0d7a7f', borderColor: '#0d7a7f' }}
-              >
-                {!isMobile && 'Xuất bản'}
-              </Button>
-            </Tooltip>
-          )
+        {/* Auto-save indicator */}
+        {saving && (
+          <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+            {!isMobile && 'Đang lưu...'}
+          </span>
+        )}
+        {!saving && saved && (
+          <span style={{ fontSize: 12, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <CheckOutlined style={{ fontSize: 11 }} />
+            {!isMobile && 'Đã lưu'}
+          </span>
         )}
 
-        {/* Badge trạng thái */}
-        {form?.id && !isMobile && (
+        {/* Nút Xuất bản — hiển thị luôn kể cả create mode */}
+        {formStatus === 'published' ? (
+          <Tooltip title="Hủy xuất bản để chỉnh sửa lại">
+            <Button icon={<StopOutlined />} onClick={handleUnpublishClick} loading={publishing}
+              style={{ borderColor: '#f59e0b', color: '#b45309', background: '#fffbeb' }}>
+              {!isMobile && 'Hủy xuất bản'}
+            </Button>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Lưu và xuất bản form">
+            <Button type="primary" icon={<CloudUploadOutlined />} onClick={handlePublishClick} loading={publishing}
+              style={{ background: '#0d7a7f', borderColor: '#0d7a7f' }}>
+              {!isMobile && 'Xuất bản'}
+            </Button>
+          </Tooltip>
+        )}
+
+        {/* {!isMobile && (
           <Tag color={formStatus === 'published' ? 'green' : 'default'} style={{ marginLeft: 2 }}>
-            {formStatus === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
+            {formStatus === 'published' ? '' : ''}
           </Tag>
-        )}
+        )} */}
       </Flex>
 
       {/* Main layout */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-
-        {/* Center canvas */}
         <div style={{ flex: 1, height: '100%', overflow: 'hidden', minWidth: 0 }}>
           <CenterCanvas
-            questions={questions}
-            sections={sections}
-            activeQuestionId={activeId}
-            accent={ACCENT}
-            surveyTitle={name}
-            descriptionParagraphs={descParagraphs}
-            header={header}
-            footer={footer}
-            logoUrl={logoUrl}
-            logoSize={logoSize}
-            onActivate={setActiveId}
-            onDeactivate={() => setActiveId(null)}
-            onUpdate={updateQuestion}
-            onDuplicate={duplicateQuestion}
-            onRemove={removeQuestion}
-            onMoveUp={id => moveQuestion(id, 'up')}
-            onMoveDown={id => moveQuestion(id, 'down')}
-            onAddQuestion={handleAddQuestion}
-            onAddSectionAfter={addSectionAfter}
-            onAddOption={addOption}
-            onUpdateOption={updateOption}
-            onRemoveOption={removeOption}
-            onTitleChange={setName}
-            onDescriptionParagraphsChange={setDescParagraphs}
-            onHeaderChange={setHeader}
-            onFooterChange={setFooter}
-            onSectionsChange={setSections}
-            onDrop={handleDrop}
-            onReorder={reorderQuestion}
-            onRenameSection={renameSection}
-            onDeleteSection={deleteSection}
+            questions={questions} sections={sections} activeQuestionId={activeId}
+            accent={ACCENT} surveyTitle={name} descriptionParagraphs={descParagraphs}
+            header={header} footer={footer} logoUrl={logoUrl} logoSize={logoSize}
+            onActivate={setActiveId} onDeactivate={() => setActiveId(null)}
+            onUpdate={updateQuestion} onDuplicate={duplicateQuestion} onRemove={removeQuestion}
+            onMoveUp={id => moveQuestion(id, 'up')} onMoveDown={id => moveQuestion(id, 'down')}
+            onAddQuestion={handleAddQuestion} onAddSectionAfter={addSectionAfter}
+            onAddOption={addOption} onUpdateOption={updateOption} onRemoveOption={removeOption}
+            onTitleChange={setName} onDescriptionParagraphsChange={setDescParagraphs}
+            onHeaderChange={setHeader} onFooterChange={setFooter} onSectionsChange={setSections}
+            onDrop={handleDrop} onReorder={reorderQuestion}
+            onRenameSection={renameSection} onDeleteSection={deleteSection}
           />
         </div>
 
-        {/* Right panel (desktop) */}
         {!isMobile && (
           <RightPanel
-            questions={questions}
-            sections={sections}
-            logoSize={logoSize}
-            logicRules={logicRules}
-            onAddBlank={() => addQuestion()}
-            onDropFromBank={handleDropFromBank}
-            onLogoSizeChange={setLogoSize}
-            onLogicRulesChange={setLogicRules}
+            questions={questions} sections={sections} logoSize={logoSize} logicRules={logicRules}
+            onAddBlank={() => addQuestion()} onDropFromBank={handleDropFromBank}
+            onLogoSizeChange={setLogoSize} onLogicRulesChange={setLogicRules}
           />
         )}
       </div>
 
-      {/* Mobile: Ant Design Drawer */}
       {isMobile && (
         <>
-          <Drawer
-            open={rightOpen}
-            onClose={() => setRightOpen(false)}
-            placement="right"
-            width={300}
-            styles={{ body: { padding: 0 } }}
-            title="Thư viện / Giao diện"
-          >
+          <Drawer open={rightOpen} onClose={() => setRightOpen(false)} placement="right" width={300}
+            styles={{ body: { padding: 0 } }} title="Thư viện / Giao diện">
             <RightPanel
-              questions={questions}
-              sections={sections}
-              logoSize={logoSize}
-              logicRules={logicRules}
+              questions={questions} sections={sections} logoSize={logoSize} logicRules={logicRules}
               onAddBlank={_type => { addQuestion(); setRightOpen(false) }}
               onDropFromBank={q => { handleDropFromBank(q); setRightOpen(false) }}
-              onLogoSizeChange={setLogoSize}
-              onLogicRulesChange={setLogicRules}
+              onLogoSizeChange={setLogoSize} onLogicRulesChange={setLogicRules}
             />
           </Drawer>
-
           <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 52, background: '#fff', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', zIndex: 100, boxShadow: '0 -2px 12px rgba(0,0,0,.06)' }}>
-            <Button
-              type="text"
-              icon={<AppstoreOutlined />}
-              onClick={() => setRightOpen(o => !o)}
-              block
-              style={{ height: '100%', fontSize: 12.5, fontWeight: rightOpen ? 700 : 500, color: rightOpen ? '#334155' : '#6b7280', background: rightOpen ? '#f1f5f9' : '#fff' }}
-            >
+            <Button type="text" icon={<AppstoreOutlined />} onClick={() => setRightOpen(o => !o)} block
+              style={{ height: '100%', fontSize: 12.5, fontWeight: rightOpen ? 700 : 500, color: rightOpen ? '#334155' : '#6b7280', background: rightOpen ? '#f1f5f9' : '#fff' }}>
               Thư viện / Giao diện
             </Button>
           </div>

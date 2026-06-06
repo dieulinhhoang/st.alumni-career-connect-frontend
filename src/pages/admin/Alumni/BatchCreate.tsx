@@ -188,7 +188,7 @@ export const BatchCreate: React.FC = () => {
                 }}>
                   <Text strong style={{ fontSize: 14 }}>{selectedForm.name}</Text>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Text style={{ color: '#1D9E75', fontSize: 12, fontWeight: 500 }}>Đã xuất bản</Text>
+                    {/* <Text style={{ color: '#1D9E75', fontSize: 12, fontWeight: 500 }}>Đã xuất bản</Text> */}
                     <Button size="small" icon={<ArrowLeftOutlined />} onClick={() => setSelectedForm(null)} style={{ borderRadius: 5, fontSize: 12 }}>
                       Bỏ chọn
                     </Button>

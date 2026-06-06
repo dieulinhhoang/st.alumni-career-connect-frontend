@@ -77,16 +77,16 @@ export function BankPanel({ onAddBlank: _onAddBlank, onDropFromBank }: BankPanel
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    {q.category && (
+                    {/* {q.category && (
                       <Text type="secondary" style={{ fontSize: 10.5, display: 'block', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         {q.category}
                       </Text>
-                    )}
+                    )} */}
                     <Text style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.4 }}>{q.title}</Text>
                   </div>
                   <Button
                     size="small"
-                    icon={<PlusOutlined style={{ fontSize: 10 }} />}
+                    icon={<PlusOutlined  />}
                     onClick={() => onDropFromBank(asQuestion)}
                     aria-label={`Thêm câu hỏi: ${q.title}`}
                     style={{ flexShrink: 0, opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none', transition: 'opacity .14s', width: 24, height: 24, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
