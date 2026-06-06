@@ -22,6 +22,7 @@ import ReportsPage from '../pages/admin/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
 import AuthCallback from '../pages/admin/Auth/AuthCallback';
+import FacultyReportPage from '../pages/admin/Reports/components/FacultyReportPage';
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
@@ -179,6 +180,10 @@ const routes = [
           {
             path: '/admin/profile',
             element: <Suspense fallback={<Loader />}><AdminProfile /></Suspense>
+          },
+          {
+            path: '/admin/reports/faculty/:facultyId',
+            element: <Suspense fallback={<Loader />}><FacultyReportPage /></Suspense>
           },
         ],
       },

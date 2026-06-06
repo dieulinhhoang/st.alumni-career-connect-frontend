@@ -133,3 +133,8 @@ export type ReportMeta = {
 // Option cho dropdown khoa/ngành
 export type FacultyOption = { value: string; label: string };
 export type MajorOption  = { value: string; label: string; facultyId: string };
+// Mở rộng FacultySubmissionRow với thống kê phản hồi từ backend
+export type FacultySubmissionRowExtended = FacultySubmissionRow & {
+  responseCount?: number;
+  employedCount?: number;
+};

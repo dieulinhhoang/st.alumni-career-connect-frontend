@@ -327,3 +327,18 @@
   align-items: center;
   justify-content: center;
 }
+
+ 
+.pt-card-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1;
+}
+
+.pt-card-stat-label {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}

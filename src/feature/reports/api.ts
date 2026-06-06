@@ -20,6 +20,9 @@ export type ReportApiResponse = {
   responseRows: ResponseRow[];
   facultyRows: FacultySubmissionRow[];
   reportMeta: ReportMeta;
+  /** Backend trả về khi khoa chưa nộp */
+  notSubmitted?: boolean;
+  submissionStatus?: string;
 };
 
 export type SurveyOption = {
@@ -28,60 +31,108 @@ export type SurveyOption = {
   deadline?: string | null;
 };
 
-/**
- * POST /reports
- * Gửi filters (surveyId, facultyId?, majorId?) + userIndex
- * Nhận về dữ liệu báo cáo đầy đủ
- */
+export type SubmissionStatusResponse = {
+  status: 'draft' | 'submitted' | 'returned' | 'approved';
+  submittedBy: string | null;
+  submittedAt: string | null;
+  feedback: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+};
+
+// ─── Report data ───────────────────────────────────────────────
+
 export async function fetchReportData(
   filters: FilterState,
-  userIndex: number
+  userIndex: number,
 ): Promise<ReportApiResponse> {
   const res = await api.post('/reports', { filters, userIndex });
   return res.data;
 }
 
-/**
- * GET /reports/options
- * Danh sách đợt khảo sát (ended + active) để hiển thị dropdown
- */
+// ─── Submission status ─────────────────────────────────────────
+
+export async function fetchSubmissionStatus(
+  batchId: string,
+  facultyId: string,
+): Promise<SubmissionStatusResponse> {
+  const res = await api.get('/reports/submission-status', {
+    params: { batchId, facultyId },
+  });
+  return res.data;
+}
+
+// ─── Khoa: nộp / thu hồi ──────────────────────────────────────
+
+export async function submitReport(batchId: string, facultyId: string) {
+  const res = await api.post('/reports/submit', {
+    batchId: Number(batchId),
+    facultyId: Number(facultyId),
+  });
+  return res.data;
+}
+
+export async function withdrawReport(batchId: string, facultyId: string) {
+  const res = await api.post('/reports/withdraw', {
+    batchId: Number(batchId),
+    facultyId: Number(facultyId),
+  });
+  return res.data;
+}
+
+// ─── Trường: duyệt / trả ──────────────────────────────────────
+
+export async function approveReport(batchId: string, facultyId: string) {
+  const res = await api.post('/reports/approve', {
+    batchId: Number(batchId),
+    facultyId: Number(facultyId),
+  });
+  return res.data;
+}
+
+export async function returnReport(
+  batchId: string,
+  facultyId: string,
+  feedback: string,
+) {
+  const res = await api.post('/reports/return', {
+    batchId: Number(batchId),
+    facultyId: Number(facultyId),
+    feedback,
+  });
+  return res.data;
+}
+
+// ─── Batch / Faculty / Major options ──────────────────────────
+
 export async function fetchSurveyOptions(): Promise<SurveyOption[]> {
   try {
     const res = await api.get('/reports/options');
-    const list: Array<{ value: string; label: string; deadline?: string | null }> =
-      res.data ?? [];
-    return list;
+    return res.data ?? [];
   } catch {
-    // Fallback về /statistics/batches nếu endpoint mới chưa deploy
     const res = await api.get('/statistics/batches');
-    const batches: Array<{ id: number; title: string; year?: number; graduationPeriod?: string; endDate?: string }> =
-      res.data ?? [];
+    const batches: Array<{
+      id: number; title: string; year?: number;
+      graduationPeriod?: string; endDate?: string;
+    }> = res.data ?? [];
     return batches.map((b) => ({
       value: String(b.id),
       label: b.graduationPeriod
         ? `${b.title} (${b.graduationPeriod})`
-        : b.year
-        ? `${b.title} (${b.year})`
-        : b.title,
+        : b.year ? `${b.title} (${b.year})` : b.title,
       deadline: b.endDate ?? null,
     }));
   }
 }
 
-/**
- * GET /statistics/batches
- * Dùng riêng để lấy deadline của batch được chọn
- */
-export async function fetchSurveyConfig(): Promise<{ options: SurveyOption[]; deadline: string }> {
+export async function fetchSurveyConfig(): Promise<{
+  options: SurveyOption[];
+  deadline: string;
+}> {
   const options = await fetchSurveyOptions();
-  const deadline = options[0]?.deadline ?? '';
-  return { options, deadline };
+  return { options, deadline: options[0]?.deadline ?? '' };
 }
 
-/**
- * GET /faculty
- * Danh sách khoa để hiển thị filter
- */
 export async function fetchFacultyOptions(): Promise<FacultyOption[]> {
   try {
     const res = await api.get('/faculty');
@@ -92,17 +143,14 @@ export async function fetchFacultyOptions(): Promise<FacultyOption[]> {
   }
 }
 
-/**
- * GET /major
- * Danh sách ngành để hiển thị filter (lọc theo khoa khi cần)
- */
 export async function fetchMajorOptions(facultyId?: string): Promise<MajorOption[]> {
   try {
     const params: Record<string, string> = {};
     if (facultyId) params.facultyId = facultyId;
     const res = await api.get('/major', { params });
-    const list: Array<{ id: number | string; name: string; facultyId?: number | string }> =
-      res.data ?? [];
+    const list: Array<{
+      id: number | string; name: string; facultyId?: number | string;
+    }> = res.data ?? [];
     return list.map((m) => ({
       value: String(m.id),
       label: m.name,

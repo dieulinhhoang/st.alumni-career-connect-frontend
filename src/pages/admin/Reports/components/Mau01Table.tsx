@@ -6,8 +6,9 @@ import { SheetWrapper } from './SheetWrapper';
 
 const columns: ColumnsType<MajorSummaryRow> = [
   { title: 'STT', render: (_, __, i) => i + 1, width: 42, align: 'center', fixed: 'left' },
-  { title: 'Mã ngành',          dataIndex: 'majorCode', width: 90 },
-  { title: 'Tên ngành đào tạo', dataIndex: 'majorName', width: 200 },
+  { title: 'Mã ngành',          dataIndex: 'majorCode',   width: 90 },
+  { title: 'Tên ngành đào tạo', dataIndex: 'majorName',   width: 200 },
+  { title: 'Khoa',              dataIndex: 'facultyName', width: 160 },
   {
     title: 'SV tốt nghiệp',
     children: [
@@ -76,19 +77,19 @@ export const Mau01Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, n
         const chua = pageRows.reduce((a, r) => a + (r.chuaCoViecLam || 0), 0);
         return (
           <Table.Summary.Row className="rp-summary-row">
-            <Table.Summary.Cell index={0} colSpan={3} align="center"><strong>TỔNG HỢP</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={3} align="right"><strong>{tot}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={4} align="right"><strong>{totNu}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={5} align="right"><strong>{sub}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={6} align="right"><strong>{subNu}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={7} align="right"><strong>{app}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={8} align="right"><strong>{tiep}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={9} align="right"><strong>{chua}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={10} align="right">
+            <Table.Summary.Cell index={0} colSpan={4} align="center"><strong>TỔNG HỢP</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={4} align="right"><strong>{tot}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={5} align="right"><strong>{totNu}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={6} align="right"><strong>{sub}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={7} align="right"><strong>{subNu}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={8} align="right"><strong>{app}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={9} align="right"><strong>{tiep}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={10} align="right"><strong>{chua}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={11} align="right">
               <strong>{tot > 0 ? `${Math.round(app / tot * 100)}%` : '-'}</strong>
             </Table.Summary.Cell>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Table.Summary.Cell key={i} index={11 + i} align="right">-</Table.Summary.Cell>
+              <Table.Summary.Cell key={i} index={12 + i} align="right">-</Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
         );
