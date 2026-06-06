@@ -30,6 +30,7 @@ export type MajorSummaryRow = {
   key: string;
   majorCode: string;
   majorName: string;
+  facultyName?: string;
   total: number;
   totalNu: number;
   submitted: number;
@@ -53,6 +54,8 @@ export type GraduateRow = {
   certification: string;
   cccd: string;
   majorCode: string;
+  majorName: string;
+  facultyName: string;
   decision: string;
   certDate: string;
   phone: string;
@@ -60,7 +63,6 @@ export type GraduateRow = {
   surveyMethod: string;
   status: SubmissionStatus;
   note: string;
-  majorName: string;
   cohort: string;
 };
 
@@ -72,6 +74,8 @@ export type ResponseRow = {
   gender: 'male' | 'female';
   cccd: string;
   majorCode: string;
+  majorName?: string;
+  facultyName?: string;
   dungNganh: boolean;
   lienQuan: boolean;
   khongLienQuan: boolean;

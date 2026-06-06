@@ -704,3 +704,9 @@
 .rp-kpi-sub {
   display: none; /* ảnh không có sub text */
 }
+
+/* Hàng SV chưa phản hồi — màu nền nhạt để phân biệt */
+.rp-row-no-response td {
+  background-color: #fafafa !important;
+  color: #9ca3af;
+}

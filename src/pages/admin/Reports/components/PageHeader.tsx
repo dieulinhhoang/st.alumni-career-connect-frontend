@@ -4,9 +4,16 @@ import { SendOutlined } from '@ant-design/icons';
 import { SubmissionPill } from './SubmissionPill';
 import type { SubmissionStatus, UserScope, FacultyOption, MajorOption } from '../../../../feature/reports/types';
 import type { SurveyOption } from '../../../../feature/reports/api';
-import { USER_ROLE_OPTIONS } from '../../../../feature/reports/constants';
 
 const { Option } = Select;
+
+// Format deadline từ ISO string hoặc 'YYYY-MM-DD' → 'DD/MM/YYYY'
+function formatDeadline(raw: string | null | undefined): string {
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+}
 
 interface Props {
   title: string;
@@ -34,15 +41,12 @@ interface Props {
 export const PageHeader: React.FC<Props> = ({
   title,
   subtitle,
-  scopeLabel,
   surveyId,
   surveyOptions,
   deadline,
-  userIndex,
   scope,
   submissionStatus,
   onSurveyChange,
-  onUserChange,
   onSubmit,
   onWithdraw,
   facultyOptions,
@@ -87,30 +91,21 @@ export const PageHeader: React.FC<Props> = ({
         )}
       </div>
 
-      {/* PHẢI: filter Vai trò / Đợt KS / Khoa / Ngành / Phạm vi */}
+      {/* PHẢI: Hạn nộp / Đợt KS / Khoa / Ngành */}
       <div className="rp-page-header__right">
         {deadline && (
           <div className="rp-deadline-notice">
-            Hạn nộp: <strong>{deadline}</strong>
+            Hạn nộp: <strong>{formatDeadline(deadline)}</strong>
           </div>
         )}
 
         <div className="rp-filter-row">
           <div className="rp-filter-item">
-            <span className="rp-filter-label rp-filter-label--large">Vai trò</span>
-            <Select value={userIndex} onChange={onUserChange} style={{ width: 200 }} size="middle">
-              {USER_ROLE_OPTIONS.map((o) => (
-                <Option key={o.value} value={o.value}>{o.label}</Option>
-              ))}
-            </Select>
-          </div>
-
-          <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Đợt khảo sát</span>
             <Select
               value={surveyId || undefined}
               onChange={onSurveyChange}
-              style={{ width: 240 }}
+              style={{ width: 260 }}
               size="middle"
               placeholder="Chọn đợt khảo sát"
               allowClear
@@ -156,11 +151,6 @@ export const PageHeader: React.FC<Props> = ({
               </Select>
             </div>
           )}
-
-          <div className="rp-filter-item">
-            <span className="rp-filter-label rp-filter-label--large">Phạm vi</span>
-            <div className="rp-scope-badge rp-scope-badge--large">{scopeLabel || 'Toàn trường'}</div>
-          </div>
         </div>
       </div>
 

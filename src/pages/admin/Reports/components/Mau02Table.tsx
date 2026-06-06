@@ -12,22 +12,33 @@ const columns: ColumnsType<GraduateRow> = [
     title: 'Nữ', dataIndex: 'gender', width: 40, align: 'center',
     render: (v: string) => (v === 'female' ? 'X' : ''),
   },
-  { title: 'Số QP TN',      dataIndex: 'certification', width: 90 },
   { title: 'Số CCCD',       dataIndex: 'cccd',          width: 120 },
   { title: 'Mã ngành',      dataIndex: 'majorCode',     width: 90 },
-  { title: 'Quyết định TN', dataIndex: 'decision',      width: 95 },
-  { title: 'Ngày ký QP',    dataIndex: 'certDate',      width: 90 },
+  { title: 'Tên ngành',     dataIndex: 'majorName',     width: 160 },
+  { title: 'Khoa',          dataIndex: 'facultyName',   width: 140 },
   { title: 'Số điện thoại', dataIndex: 'phone',         width: 110 },
   { title: 'Email',         dataIndex: 'email',         width: 170 },
   { title: 'Hình thức khảo sát', dataIndex: 'surveyMethod', width: 110, render: () => 'Online' },
   {
-    title: 'Có phản hồi', dataIndex: 'status', width: 90, align: 'center',
+    title: 'Đã phản hồi',
+    dataIndex: 'status',
+    width: 100,
+    align: 'center',
     render: (v: string) =>
-      v === 'submitted' || v === 'approved' ? <Tag color="green">X</Tag> : '',
+      v === 'submitted' || v === 'approved'
+        ? <Tag color="green">Đã phản hồi</Tag>
+        : <Tag color="default">Chưa phản hồi</Tag>,
+    filters: [
+      { text: 'Đã phản hồi', value: 'submitted' },
+      { text: 'Chưa phản hồi', value: 'draft' },
+    ],
+    onFilter: (value, record) =>
+      value === 'submitted'
+        ? record.status === 'submitted' || record.status === 'approved'
+        : record.status !== 'submitted' && record.status !== 'approved',
   },
-  { title: 'Ghi chú', dataIndex: 'note',      width: 120 },
-  { title: 'Ngành',   dataIndex: 'majorName', width: 140 },
-  { title: 'Khoa',    dataIndex: 'cohort',    width: 100 },
+  { title: 'Ghi chú', dataIndex: 'note', width: 120 },
+  { title: 'Đợt TN',  dataIndex: 'cohort', width: 100 },
 ];
 
 interface Props {
@@ -39,17 +50,42 @@ interface Props {
   signLabel: string;
 }
 
-export const Mau02Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, note, signLabel }) => (
-  <SheetWrapper orgLine1={orgLine1} orgLine2={orgLine2} title={title} signLabel={signLabel} note={note}>
-    <Table
-      size="small"
-      pagination={false}
-      bordered
-      className="rp-formal-table"
-      scroll={{ x: 'max-content' }}
-      columns={columns}
-      dataSource={rows}
-      rowKey="key"
-    />
-  </SheetWrapper>
-);
+export const Mau02Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, note, signLabel }) => {
+  const respondedCount = rows.filter(r => r.status === 'submitted' || r.status === 'approved').length;
+  const totalCount = rows.length;
+
+  return (
+    <SheetWrapper orgLine1={orgLine1} orgLine2={orgLine2} title={title} signLabel={signLabel}
+      note={note ?? `Tổng số sinh viên: ${totalCount} | Đã phản hồi: ${respondedCount} | Chưa phản hồi: ${totalCount - respondedCount}`}>
+      <Table
+        size="small"
+        pagination={false}
+        bordered
+        className="rp-formal-table"
+        scroll={{ x: 'max-content' }}
+        columns={columns}
+        dataSource={rows}
+        rowKey="key"
+        rowClassName={(record) =>
+          record.status === 'submitted' || record.status === 'approved'
+            ? ''
+            : 'rp-row-no-response'
+        }
+        summary={() => (
+          <Table.Summary.Row className="rp-summary-row">
+            <Table.Summary.Cell index={0} colSpan={2} align="center">
+              <strong>TỔNG</strong>
+            </Table.Summary.Cell>
+            <Table.Summary.Cell index={2} colSpan={10}>
+              <strong>
+                {totalCount} SV tốt nghiệp &nbsp;|&nbsp;
+                {respondedCount} đã phản hồi ({totalCount > 0 ? Math.round(respondedCount / totalCount * 100) : 0}%) &nbsp;|&nbsp;
+                {totalCount - respondedCount} chưa phản hồi
+              </strong>
+            </Table.Summary.Cell>
+          </Table.Summary.Row>
+        )}
+      />
+    </SheetWrapper>
+  );
+};

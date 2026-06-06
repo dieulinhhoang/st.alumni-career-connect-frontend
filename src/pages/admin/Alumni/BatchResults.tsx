@@ -20,6 +20,9 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 import type { ColumnsType } from 'antd/es/table';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
+import { useExportAllPDF, domToPdfBlob } from '../../../feature/alumni/hooks/useExportAllPDF';
+import type { ExportItem } from '../../../feature/alumni/hooks/useExportAllPDF';
+import SurveyPreview from '../Form/Preview';
 
 
 const { Text, Title } = Typography;
@@ -40,6 +43,11 @@ export const BatchResults: React.FC = () => {
   const [exporting,    setExporting]    = useState<'excel' | 'pdf' | null>(null);
   const [showFilter,   setShowFilter]   = useState(false);
   const [exportingRow, setExportingRow] = useState<number | string | null>(null);
+
+  // Export toàn bộ PDF → ZIP
+  const { exporting: exportingAll, progress: exportProgress, exportAll } = useExportAllPDF();
+  // Ref tới container ẩn dùng để render SurveyPreview cho từng response
+  const hiddenContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Hook lấy toàn bộ sinh viên của đợt tốt nghiệp (không phân trang, load hết)
   const { data: gradStudents } = useGraduationStudents(batch?.graduationId ?? 0, 1, 9999);
@@ -122,6 +130,72 @@ export const BatchResults: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Export toàn bộ phản hồi đã submit thành từng PDF → đóng ZIP tải xuống.
+   * Dùng chính SurveyPreview (readOnly) để render — đảm bảo PDF y hệt giao diện xem thật.
+   */
+  const handleExportAllPDF = async () => {
+    if (!batch || !hiddenContainerRef.current) return;
+
+    const formSnapshot = (batch as any).formSnapshot ?? null;
+    if (!formSnapshot) {
+      message.warning('Không tìm thấy form snapshot để xuất PDF.');
+      return;
+    }
+
+    const submittedRows = filtered.filter(r => r.status === 'submitted');
+    if (!submittedRows.length) {
+      message.warning('Không có phản hồi nào để xuất.');
+      return;
+    }
+
+    const container = hiddenContainerRef.current;
+    const { createRoot } = await import('react-dom/client');
+
+    const items: ExportItem[] = [];
+
+    for (const row of submittedRows) {
+      // Tạo div tạm, width 794px = A4
+      const slot = document.createElement('div');
+      slot.style.cssText = 'width:794px;background:#fff;position:relative;';
+      container.appendChild(slot);
+
+      await new Promise<void>(resolve => {
+        createRoot(slot).render(
+          <SurveyPreview
+            form={formSnapshot}
+            initialValues={(row as any).answers ?? {}}
+            compact={true}
+          />
+        );
+        // Đợi React render + ảnh logo load
+        setTimeout(resolve, 200);
+      });
+
+      // Đợi thêm nếu có ảnh chưa load xong
+      await Promise.all(
+        Array.from(slot.querySelectorAll<HTMLImageElement>('img')).map(img =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>(res => { img.onload = () => res(); img.onerror = () => res(); })
+        )
+      );
+
+      const safe = (row.studentName ?? row.studentId ?? 'unknown')
+        .replace(/[^\w\u00C0-\u024F\u1E00-\u1EFF ]/g, '')
+        .trim()
+        .replace(/\s+/g, '_');
+      const filename = `${row.studentId}_${safe}.pdf`;
+      items.push({ filename, el: slot });
+    }
+
+    const zipName = `${batch.title.replace(/\s+/g, '_')}_phan-hoi.zip`;
+    await exportAll(items, zipName);
+
+    // Dọn sạch sau khi export xong
+    container.innerHTML = '';
   };
 
   if (loading) return (
@@ -210,8 +284,49 @@ export const BatchResults: React.FC = () => {
               size="small" type="text"
               icon={<FilePdfOutlined style={{ color: '#e53e3e', fontSize: 16 }} />}
               loading={exportingRow === r.id}
+              disabled={r.status !== 'submitted'}
               onClick={async () => {
-                // TODO: export single PDF
+                if (!batch || !(batch as any).formSnapshot) return;
+                const container = hiddenContainerRef.current;
+                if (!container) return;
+                setExportingRow(r.id);
+                try {
+                  const { createRoot } = await import('react-dom/client');
+
+                  const slot = document.createElement('div');
+                  slot.style.cssText = 'width:794px;background:#fff;';
+                  container.appendChild(slot);
+
+                  await new Promise<void>(res => {
+                    createRoot(slot).render(
+                      <SurveyPreview
+                        form={(batch as any).formSnapshot}
+                        initialValues={(r as any).answers ?? {}}
+                        compact={true}
+                      />
+                    );
+                    setTimeout(res, 200);
+                  });
+
+                  await Promise.all(
+                    Array.from(slot.querySelectorAll<HTMLImageElement>('img')).map(img =>
+                      img.complete ? Promise.resolve()
+                        : new Promise<void>(res => { img.onload = () => res(); img.onerror = () => res(); })
+                    )
+                  );
+
+                  const blob = await domToPdfBlob(slot);
+                  const safe = (r.studentName ?? r.studentId ?? 'sv')
+                    .replace(/[^\w\u00C0-\u024F\u1E00-\u1EFF ]/g, '').trim().replace(/\s+/g, '_');
+                  const url = URL.createObjectURL(blob);
+                  const a   = document.createElement('a');
+                  a.href = url; a.download = `phanhoi_${r.studentId}_${safe}.pdf`;
+                  document.body.appendChild(a); a.click();
+                  document.body.removeChild(a); URL.revokeObjectURL(url);
+                  container.innerHTML = '';
+                } finally {
+                  setExportingRow(null);
+                }
               }}
             />
           </Tooltip>
@@ -313,12 +428,12 @@ export const BatchResults: React.FC = () => {
             <Button
               type="primary"
               icon={<FilePdfOutlined />}
-              loading={exporting === 'pdf'}
-              onClick={() => {
-                // TODO: export PDF
-              }}
+              loading={exportingAll}
+              onClick={handleExportAllPDF}
             >
-              Xuất PDF
+              {exportingAll
+                ? `Đang xuất... ${exportProgress}%`
+                : 'Xuất PDF (ZIP)'}
             </Button>
           </Space>
         </div>
@@ -392,6 +507,45 @@ export const BatchResults: React.FC = () => {
         batchTitle={batch.title}
         open={showLink}
         onClose={() => setShowLink(false)}
+      />
+
+      {/* Progress overlay khi đang xuất PDF */}
+      {exportingAll && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 2000,
+          background: 'rgba(0,0,0,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 12, padding: '32px 48px',
+            textAlign: 'center', minWidth: 300, boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          }}>
+            <FilePdfOutlined style={{ fontSize: 36, color: '#e53e3e', marginBottom: 16 }} />
+            <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>
+              Đang xuất PDF...
+            </div>
+            <div style={{ color: '#64748b', fontSize: 13, marginBottom: 16 }}>
+              Đang xử lý {filtered.filter(r => r.status === 'submitted').length} phản hồi
+            </div>
+            <Progress percent={exportProgress} strokeColor="#e53e3e" style={{ marginBottom: 8 }} />
+            <div style={{ fontSize: 12, color: '#94a3b8' }}>Vui lòng không đóng trang này</div>
+          </div>
+        </div>
+      )}
+
+      {/* Container ẩn dùng để render SurveyPreview khi export */}
+      <div
+        ref={hiddenContainerRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: '-9999px',
+          width: 794,
+          background: '#fff',
+          zIndex: -1,
+          pointerEvents: 'none',
+          overflow: 'hidden',
+        }}
       />
     </AdminLayout>
   );

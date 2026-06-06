@@ -136,9 +136,9 @@ export function ChartSection({ state, setField, khoaOptions = [], nganhOptions =
               Thống kê sinh viên theo đợt khảo sát
             </span>
           </div>
-          <Text style={{ fontSize: 12, color: COLOR.textFaint, marginLeft: 11 }}>
+          {/* <Text style={{ fontSize: 12, color: COLOR.textFaint, marginLeft: 11 }}>
             Phân bố tỷ lệ phần trăm – so sánh giữa các đợt khảo sát
-          </Text>
+          </Text> */}
         </div>
         <Button
           icon={<TableOutlined />}

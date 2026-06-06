@@ -15,12 +15,14 @@ const boolCol = (title: string, dataIndex: string, width = 120): any => ({
 
 const columns: ColumnsType<ResponseRow> = [
   { title: 'STT', render: (_, __, i) => i + 1, width: 42, align: 'center', fixed: 'left' },
-  { title: 'Mã SV',    dataIndex: 'studentCode', width: 80 },
-  { title: 'Họ và tên', dataIndex: 'fullName',   width: 150 },
-  { title: 'Ngày sinh', dataIndex: 'dob',        width: 90 },
-  { title: 'Giới tính', dataIndex: 'gender',     width: 70,  render: (v: string) => (v === 'female' ? 'Nữ' : 'Nam') },
-  { title: 'Số CCCD',   dataIndex: 'cccd',       width: 110 },
-  { title: 'Mã ngành',  dataIndex: 'majorCode',  width: 80 },
+  { title: 'Mã SV',     dataIndex: 'studentCode', width: 80 },
+  { title: 'Họ và tên', dataIndex: 'fullName',    width: 150 },
+  { title: 'Ngày sinh', dataIndex: 'dob',         width: 90 },
+  { title: 'Giới tính', dataIndex: 'gender',      width: 70,  render: (v: string) => (v === 'female' ? 'Nữ' : 'Nam') },
+  { title: 'Số CCCD',   dataIndex: 'cccd',        width: 110 },
+  { title: 'Mã ngành',  dataIndex: 'majorCode',   width: 80 },
+  { title: 'Tên ngành', dataIndex: 'majorName',   width: 160 },
+  { title: 'Khoa',      dataIndex: 'facultyName', width: 140 },
 
   boolCol('Có VL - Đúng ngành',        'dungNganh',        110),
   boolCol('Có VL - Liên quan',         'lienQuan',         110),
