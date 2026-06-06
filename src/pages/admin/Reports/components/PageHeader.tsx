@@ -2,7 +2,7 @@ import React from 'react';
 import { Select, Button } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { SubmissionPill } from './SubmissionPill';
-import type { SubmissionStatus, UserScope } from '../../../../feature/reports/types';
+import type { SubmissionStatus, UserScope, FacultyOption, MajorOption } from '../../../../feature/reports/types';
 import type { SurveyOption } from '../../../../feature/reports/api';
 import { USER_ROLE_OPTIONS } from '../../../../feature/reports/constants';
 
@@ -22,6 +22,13 @@ interface Props {
   onUserChange: (v: number) => void;
   onSubmit: () => void;
   onWithdraw: () => void;
+  // Filter khoa / ngành
+  facultyOptions: FacultyOption[];
+  majorOptions: MajorOption[];
+  facultyId: string;
+  majorId: string;
+  onFacultyChange: (v: string) => void;
+  onMajorChange: (v: string) => void;
 }
 
 export const PageHeader: React.FC<Props> = ({
@@ -38,6 +45,12 @@ export const PageHeader: React.FC<Props> = ({
   onUserChange,
   onSubmit,
   onWithdraw,
+  facultyOptions,
+  majorOptions,
+  facultyId,
+  majorId,
+  onFacultyChange,
+  onMajorChange,
 }) => {
   const isFacultyLike = scope === 'faculty' || scope === 'major';
 
@@ -74,17 +87,18 @@ export const PageHeader: React.FC<Props> = ({
         )}
       </div>
 
-      {/* PHẢI: filter Vai trò / Đợt KS / Phạm vi */}
+      {/* PHẢI: filter Vai trò / Đợt KS / Khoa / Ngành / Phạm vi */}
       <div className="rp-page-header__right">
         {deadline && (
           <div className="rp-deadline-notice">
             Hạn nộp: <strong>{deadline}</strong>
           </div>
         )}
+
         <div className="rp-filter-row">
           <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Vai trò</span>
-            <Select value={userIndex} onChange={onUserChange} style={{ width: 220 }} size="middle">
+            <Select value={userIndex} onChange={onUserChange} style={{ width: 200 }} size="middle">
               {USER_ROLE_OPTIONS.map((o) => (
                 <Option key={o.value} value={o.value}>{o.label}</Option>
               ))}
@@ -93,16 +107,59 @@ export const PageHeader: React.FC<Props> = ({
 
           <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Đợt khảo sát</span>
-            <Select value={surveyId} onChange={onSurveyChange} style={{ width: 260 }} size="middle">
+            <Select
+              value={surveyId || undefined}
+              onChange={onSurveyChange}
+              style={{ width: 240 }}
+              size="middle"
+              placeholder="Chọn đợt khảo sát"
+              allowClear
+            >
               {surveyOptions.map((o) => (
                 <Option key={o.value} value={o.value}>{o.label}</Option>
               ))}
             </Select>
           </div>
 
+          {facultyOptions.length > 0 && (
+            <div className="rp-filter-item">
+              <span className="rp-filter-label rp-filter-label--large">Khoa</span>
+              <Select
+                value={facultyId || undefined}
+                onChange={onFacultyChange}
+                style={{ width: 200 }}
+                size="middle"
+                placeholder="Tất cả khoa"
+                allowClear
+              >
+                {facultyOptions.map((o) => (
+                  <Option key={o.value} value={o.value}>{o.label}</Option>
+                ))}
+              </Select>
+            </div>
+          )}
+
+          {majorOptions.length > 0 && (
+            <div className="rp-filter-item">
+              <span className="rp-filter-label rp-filter-label--large">Ngành</span>
+              <Select
+                value={majorId || undefined}
+                onChange={onMajorChange}
+                style={{ width: 200 }}
+                size="middle"
+                placeholder="Tất cả ngành"
+                allowClear
+              >
+                {majorOptions.map((o) => (
+                  <Option key={o.value} value={o.value}>{o.label}</Option>
+                ))}
+              </Select>
+            </div>
+          )}
+
           <div className="rp-filter-item">
             <span className="rp-filter-label rp-filter-label--large">Phạm vi</span>
-            <div className="rp-scope-badge rp-scope-badge--large">{scopeLabel}</div>
+            <div className="rp-scope-badge rp-scope-badge--large">{scopeLabel || 'Toàn trường'}</div>
           </div>
         </div>
       </div>

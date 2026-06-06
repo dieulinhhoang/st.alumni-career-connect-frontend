@@ -1,84 +1,114 @@
 import api from '../../libs/api';
 import type {
-	FilterState,
-	CurrentUser,
-	Stats,
-	MajorSummaryRow,
-	GraduateRow,
-	ResponseRow,
-	FacultySubmissionRow,
-	ReportMeta,
+  FilterState,
+  CurrentUser,
+  Stats,
+  MajorSummaryRow,
+  GraduateRow,
+  ResponseRow,
+  FacultySubmissionRow,
+  ReportMeta,
+  FacultyOption,
+  MajorOption,
 } from './types';
 
 export type ReportApiResponse = {
-	currentUser: CurrentUser;
-	stats: Stats;
-	majorRows: MajorSummaryRow[];
-	graduateRows: GraduateRow[];
-	responseRows: ResponseRow[];
-	facultyRows: FacultySubmissionRow[];
-	reportMeta: ReportMeta;
+  currentUser: CurrentUser;
+  stats: Stats;
+  majorRows: MajorSummaryRow[];
+  graduateRows: GraduateRow[];
+  responseRows: ResponseRow[];
+  facultyRows: FacultySubmissionRow[];
+  reportMeta: ReportMeta;
 };
 
 export type SurveyOption = {
-	value: string;
-	label: string;
-};
-
-export type SurveyConfig = {
-	options: SurveyOption[];
-	deadline: string;
+  value: string;
+  label: string;
+  deadline?: string | null;
 };
 
 /**
- * Fetch comprehensive report data for the alumni survey.
+ * POST /reports
+ * Gửi filters (surveyId, facultyId?, majorId?) + userIndex
+ * Nhận về dữ liệu báo cáo đầy đủ
  */
 export async function fetchReportData(
-	filters: FilterState,
-	userIndex: number
+  filters: FilterState,
+  userIndex: number
 ): Promise<ReportApiResponse> {
-	const res = await api.post('/reports', {
-		filters,
-		userIndex,
-	});
-	return res.data;
+  const res = await api.post('/reports', { filters, userIndex });
+  return res.data;
 }
 
 /**
- * Fetch available survey batch options from ended batches.
- * Replaces the old /surveys/options endpoint which did not exist on the backend.
+ * GET /reports/options
+ * Danh sách đợt khảo sát (ended + active) để hiển thị dropdown
  */
 export async function fetchSurveyOptions(): Promise<SurveyOption[]> {
-	const res = await api.get('/statistics/batches');
-	const batches: Array<{ id: number; title: string; year?: number; graduationPeriod?: string }> =
-		res.data ?? [];
-
-	return batches.map((b) => ({
-		value: String(b.id),
-		label: b.graduationPeriod
-			? `${b.title} (${b.graduationPeriod})`
-			: b.year
-			? `${b.title} (${b.year})`
-			: b.title,
-	}));
+  try {
+    const res = await api.get('/reports/options');
+    const list: Array<{ value: string; label: string; deadline?: string | null }> =
+      res.data ?? [];
+    return list;
+  } catch {
+    // Fallback về /statistics/batches nếu endpoint mới chưa deploy
+    const res = await api.get('/statistics/batches');
+    const batches: Array<{ id: number; title: string; year?: number; graduationPeriod?: string; endDate?: string }> =
+      res.data ?? [];
+    return batches.map((b) => ({
+      value: String(b.id),
+      label: b.graduationPeriod
+        ? `${b.title} (${b.graduationPeriod})`
+        : b.year
+        ? `${b.title} (${b.year})`
+        : b.title,
+      deadline: b.endDate ?? null,
+    }));
+  }
 }
 
 /**
- * Fetch survey config including deadline.
- * /surveys/config does not exist on the backend; derive deadline from the
- * most-recently-ended batch instead (endDate of the first result).
+ * GET /statistics/batches
+ * Dùng riêng để lấy deadline của batch được chọn
  */
-export async function fetchSurveyConfig(): Promise<SurveyConfig> {
-	const res = await api.get('/statistics/batches');
-	const batches: Array<{ id: number; title: string; endDate?: string }> = res.data ?? [];
+export async function fetchSurveyConfig(): Promise<{ options: SurveyOption[]; deadline: string }> {
+  const options = await fetchSurveyOptions();
+  const deadline = options[0]?.deadline ?? '';
+  return { options, deadline };
+}
 
-	const options: SurveyOption[] = batches.map((b) => ({
-		value: String(b.id),
-		label: b.title,
-	}));
+/**
+ * GET /faculty
+ * Danh sách khoa để hiển thị filter
+ */
+export async function fetchFacultyOptions(): Promise<FacultyOption[]> {
+  try {
+    const res = await api.get('/faculty');
+    const list: Array<{ id: number | string; name: string }> = res.data ?? [];
+    return list.map((f) => ({ value: String(f.id), label: f.name }));
+  } catch {
+    return [];
+  }
+}
 
-	// Use the end date of the most recent batch as the "deadline"
-	const deadline = batches[0]?.endDate ?? '';
-
-	return { options, deadline };
+/**
+ * GET /major
+ * Danh sách ngành để hiển thị filter (lọc theo khoa khi cần)
+ */
+export async function fetchMajorOptions(facultyId?: string): Promise<MajorOption[]> {
+  try {
+    const params: Record<string, string> = {};
+    if (facultyId) params.facultyId = facultyId;
+    const res = await api.get('/major', { params });
+    const list: Array<{ id: number | string; name: string; facultyId?: number | string }> =
+      res.data ?? [];
+    return list.map((m) => ({
+      value: String(m.id),
+      label: m.name,
+      facultyId: String(m.facultyId ?? ''),
+    }));
+  } catch {
+    return [];
+  }
 }

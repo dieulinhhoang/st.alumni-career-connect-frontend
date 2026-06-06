@@ -23,36 +23,44 @@ type ReportDataState = {
   loading: boolean;
 };
 
+const DEFAULT_STATE: ReportDataState = {
+  currentUser: {
+    id: '',
+    name: '',
+    scope: 'school',
+    facultyName: null,
+    majorName: null,
+  },
+  stats: {
+    totalGraduates: 0,
+    submitted: 0,
+    submissionRate: 0,
+    employed: 0,
+    employmentRate: 0,
+    relevantJobRate: 0,
+    avgSalary: '0 triệu',
+  },
+  majorRows: [],
+  graduateRows: [],
+  responseRows: [],
+  facultyRows: [],
+  reportMeta: null,
+  loading: false,
+};
+
 export function useReportData(
   filters: FilterState,
   userIndex: number
 ): ReportDataState {
-  const [state, setState] = useState<ReportDataState>({
-    currentUser: {
-      id: '',
-      name: '',
-      scope: 'school',
-      facultyName: '',
-      majorName: '',
-    },
-    stats: {
-      totalGraduates: 0,
-      submitted: 0,
-      submissionRate: 0,
-      employed: 0,
-      employmentRate: 0,
-      relevantJobRate: 0,
-      avgSalary: '',
-    },
-    majorRows: [],
-    graduateRows: [],
-    responseRows: [],
-    facultyRows: [],
-    reportMeta: null,
-    loading: false,
-  });
+  const [state, setState] = useState<ReportDataState>(DEFAULT_STATE);
 
   useEffect(() => {
+    // Không gọi API nếu chưa có surveyId
+    if (!filters.surveyId) {
+      setState({ ...DEFAULT_STATE });
+      return;
+    }
+
     let cancelled = false;
     setState((prev) => ({ ...prev, loading: true }));
 
@@ -70,15 +78,14 @@ export function useReportData(
           loading: false,
         });
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('[useReportData] fetch failed:', err);
         if (cancelled) return;
         setState((prev) => ({ ...prev, loading: false }));
       });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [filters.surveyId, userIndex]);
+    return () => { cancelled = true; };
+  }, [filters.surveyId, filters.facultyId, filters.majorId, userIndex]);
 
   return state;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchSurveyOptions, fetchSurveyConfig } from '../api';
+import { fetchSurveyOptions } from '../api';
 import type { SurveyOption } from '../api';
 
 type UseSurveyOptionsReturn = {
@@ -11,23 +11,18 @@ type UseSurveyOptionsReturn = {
 
 export function useSurveyOptions(): UseSurveyOptionsReturn {
   const [options, setOptions] = useState<SurveyOption[]>([]);
-  const [deadline, setDeadline] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
 
-    Promise.all([fetchSurveyOptions(), fetchSurveyConfig()])
-      .then(([opts, config]) => {
-        if (cancelled) return;
-        setOptions(opts);
-        setDeadline(config?.deadline ?? '');
+    fetchSurveyOptions()
+      .then((opts) => {
+        if (!cancelled) setOptions(opts);
       })
       .catch(() => {
-        if (cancelled) return;
-        // fallback: giữ mảng rỗng, UI tự xử lý
-        setOptions([]);
+        if (!cancelled) setOptions([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -37,6 +32,8 @@ export function useSurveyOptions(): UseSurveyOptionsReturn {
   }, []);
 
   const defaultSurveyId = options[0]?.value ?? '';
+  // Lấy deadline từ survey đang chọn (options[0] là mới nhất)
+  const deadline = options[0]?.deadline ?? '';
 
   return { options, defaultSurveyId, deadline, loading };
 }

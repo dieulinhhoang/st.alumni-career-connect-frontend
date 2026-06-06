@@ -2,6 +2,8 @@ export type SubmissionStatus = 'draft' | 'submitted' | 'returned' | 'approved';
 
 export type FilterState = {
   surveyId: string;
+  facultyId?: string;   // ID khoa (optional)
+  majorId?: string;     // ID ngành (optional)
 };
 
 export type UserScope = 'school' | 'faculty' | 'major';
@@ -10,8 +12,8 @@ export type CurrentUser = {
   id: string;
   name: string;
   scope: UserScope;
-  facultyName?: string;
-  majorName?: string;
+  facultyName?: string | null;
+  majorName?: string | null;
 };
 
 export type Stats = {
@@ -123,3 +125,7 @@ export type ReportMeta = {
   mau02Note: string;
   mau03Note: string;
 };
+
+// Option cho dropdown khoa/ngành
+export type FacultyOption = { value: string; label: string };
+export type MajorOption  = { value: string; label: string; facultyId: string };
