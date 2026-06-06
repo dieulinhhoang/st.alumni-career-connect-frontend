@@ -151,7 +151,7 @@ export default function SurveyFillPage() {
             form={batch.formSnapshot}
             onSubmit={handleSubmit}
             submitLabel="Gửi phiếu khảo sát"
-            lockedCount={batch.formSnapshot.questions?.length ?? 0}
+            lockedCount={8}
             initialValues={identity ? buildInitialValues(batch.formSnapshot, identity) : undefined}
           />
         : null

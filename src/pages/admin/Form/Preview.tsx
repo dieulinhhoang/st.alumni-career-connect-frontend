@@ -629,7 +629,7 @@ export function SurveyPreview({
             onMouseEnter={(e) => { e.currentTarget.style.background = C.bg }}
             onMouseLeave={(e) => { e.currentTarget.style.background = C.surface }}
           >
-            ← Quay lại
+            Quay lại
           </button>
         </div>
       )}

@@ -4,7 +4,7 @@ import {
   ArrowLeftOutlined, UserOutlined, MailOutlined,
   IdcardOutlined, BankOutlined, CalendarOutlined,
   CheckCircleOutlined, ClockCircleOutlined,
-  BookOutlined, EditOutlined, CloseOutlined, FilePdfOutlined,
+  BookOutlined, EditOutlined, CloseOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
@@ -12,8 +12,6 @@ import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { SurveyPreview } from '../Form/Preview';
-import { useExportPDF } from '../../../feature/alumni/hooks/Useexportpdf';
-import { PDFCanvas } from '../Form/builder/form/PDFCanvas';
 
 const { Text, Title } = Typography;
 
@@ -35,11 +33,6 @@ export const ResponseDetail: React.FC = () => {
   const [response, setResponse] = useState<AlumniResponse | null>(null);
   const [loading,  setLoading]  = useState(true);
   const [saving,   setSaving]   = useState(false);
-
-  const pdfFilename = batch && response
-    ? `phanhoi_${response.studentId}_${batch.title.replace(/\s+/g, '_')}.pdf`
-    : 'phanhoi.pdf';
-  const { containerRef: pdfRef, exporting, exportPDF } = useExportPDF(pdfFilename);
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
 
@@ -202,61 +195,42 @@ export const ResponseDetail: React.FC = () => {
 
         {/* Title + toggle */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <Title level={4} style={{ margin: 0, color: '#111827' }}>
-            {isEdit
-              ? <><EditOutlined style={{ color: '#d97706', marginRight: 8 }} />Chỉnh sửa </>
-              : ""}
-          </Title>
+          <Title level={4} style={{ margin: 0, color: '#111827' }} />
           <div style={{ display: 'flex', gap: 8 }}>
-            {!isEdit && (
-              <Button
-                icon={<FilePdfOutlined />}
-                loading={exporting}
-                style={{ borderRadius: 6, borderColor: '#2563eb', color: '#2563eb' }}
-                onClick={exportPDF}
-              >
-                Xuất PDF
-              </Button>
-            )}
             {!isEdit ? (
-              <Button icon={<EditOutlined />}
+              <Button
+                icon={<EditOutlined />}
                 style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
-                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}>
-                Chỉnh sửa phản hồi
-              </Button>
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}
+              />
             ) : (
               <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
                 onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
-                Hủy chỉnh sửa
+                Hủy
               </Button>
             )}
           </div>
         </div>
 
-        {/* Layout chung — cả view lẫn edit đều dùng 2 cột */}
         <Row gutter={20}>
-          {/* Cột trái: profile */}
-          <Col span={isEdit ? 7 : 9}>
+          <Col span={9}>
             <div style={{ position: 'sticky', top: 24 }}>
               {ProfileCard}
             </div>
           </Col>
 
-          {/* Cột phải: form */}
-          <Col span={isEdit ? 17 : 15}>
-            {/* Form */}
+          <Col span={15}>
             <div style={{
-              border: isEdit ? '1px solid #fde68a' : '1px solid #e5e7eb',
+              border: '1px solid #e5e7eb',
               borderRadius: 10,
               overflow: 'hidden',
               background: '#fff',
             }}>
               {formSnapshot ? (
-                /* Khi xem: bọc pointer-events:none để không cho tương tác */
                 <div style={!isEdit ? { pointerEvents: 'none', userSelect: 'none', opacity: 0.92 } : undefined}>
                   <SurveyPreview
                     form={formSnapshot}
-                    compact={false}
+                    compact={true}
                     initialValues={answers}
                     onSubmit={isEdit ? handleSubmit : undefined}
                     submitLabel="Lưu"
@@ -271,34 +245,6 @@ export const ResponseDetail: React.FC = () => {
           </Col>
         </Row>
       </div>
-
-      {/* Hidden div for PDF export */}
-      {formSnapshot && (
-        <div
-          ref={pdfRef}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: '-9999px',
-            width: 794,
-            background: '#fff',
-            zIndex: -1,
-            pointerEvents: 'none',
-          }}
-        >
-          <PDFCanvas
-            surveyTitle={(formSnapshot as any).surveyTitle ?? batch.title}
-            descriptionParagraphs={(formSnapshot as any).descriptionParagraphs ?? []}
-            sections={(formSnapshot as any).sections ?? []}
-            questions={(formSnapshot as any).questions ?? []}
-            accent={(formSnapshot as any).accent ?? '#2563eb'}
-            header={(formSnapshot as any).header ?? {}}
-            footer={(formSnapshot as any).footer ?? {}}
-            interactive={false}
-            initialValues={answers}
-          />
-        </div>
-      )}
     </AdminLayout>
   );
 };
