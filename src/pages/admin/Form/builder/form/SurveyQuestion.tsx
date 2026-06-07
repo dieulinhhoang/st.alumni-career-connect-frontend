@@ -126,7 +126,7 @@ export function SurveyQuestion({
         >
           {index}
         </span>
-        <span style={{ flex: 1 }}>
+        <span style={{ flex: 1, wordBreak: 'break-word', whiteSpace: 'normal', minWidth: 0 }}>
           <RichTextDisplay text={q.title} style={{ display: 'inline' }} />
           {isRequired && <span style={{ color: '#ef4444' }}> *</span>}
         </span>

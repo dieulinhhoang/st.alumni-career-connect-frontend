@@ -300,7 +300,7 @@
 .stats-progress-bar__fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, var(--st-teal), var(--st-teal-mid));
+  background: #1a9ea5;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

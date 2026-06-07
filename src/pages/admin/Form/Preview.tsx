@@ -72,11 +72,7 @@ function QLabel({ num, title, required, multi }: {
     <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 10, lineHeight: 1.6 }}>
       <span style={{ marginRight: 5 }}>{num}.</span>
       <span>{title}</span>
-      {multi && (
-        <span style={{ fontWeight: 400, color: C.sub, marginLeft: 5, fontSize: 13 }}>
-          (Có thể chọn nhiều lựa chọn)
-        </span>
-      )}
+
       {required && <span style={{ color: C.danger, marginLeft: 3 }}>*</span>}
     </div>
   )
@@ -629,7 +625,7 @@ export function SurveyPreview({
             onMouseEnter={(e) => { e.currentTarget.style.background = C.bg }}
             onMouseLeave={(e) => { e.currentTarget.style.background = C.surface }}
           >
-            Quay lại
+            ← Quay lại
           </button>
         </div>
       )}
