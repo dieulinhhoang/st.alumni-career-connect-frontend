@@ -6,11 +6,9 @@ import type {
   ChartMode,
   ChartModeConfig,
 } from "./type";
+import api from "../../libs/api";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
+ 
 // Giữ lại để tương thích với các component/dashboard cũ còn import
 export const CHART_MODES: { value: ChartMode; label: string }[] = [
   { value: "coViec", label: "Tỉ lệ có việc làm / chưa có việc" },

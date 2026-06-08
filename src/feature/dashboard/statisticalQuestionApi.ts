@@ -11,10 +11,9 @@
 
 import axios from "axios";
 import type { ChartResult, StatisticalQuestion } from "./statisticalQuestion";
+import api from "../../libs/api";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
+
 
 // ---------------------------------------------------------------------------
 // MOCK — chỉ dùng làm fallback khi BE chưa sẵn sàng
