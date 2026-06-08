@@ -373,14 +373,13 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
 
         {/* Content */}
         <Content style={{ margin: 24 }}>
-          {/* Breadcrumb tiếng Việt - Bug #8 fix: hỗ trợ dynamic routes */}
           <div
             style={{
-              marginBottom: 16,
+              marginBottom: 20,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              fontSize: 12.5,
+              gap: 7,
+              fontSize: 13,
               fontWeight: 500,
               color: '#94a3b8',
             }}
@@ -408,9 +407,11 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
             style={{
               background: '#ffffff',
               borderRadius: 12,
-              padding: 24,
+              padding: 42,
               border: '1px solid #f1f5f9',
-              minHeight: 400,
+              minHeight: 500,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            
             }}
           >
             {children}
@@ -427,7 +428,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
             fontWeight: 500,
           }}
         >
-          © {new Date().getFullYear()} VNUA Alumni Career Connect
+          © {new Date().getFullYear()} ST TEAM
         </div>
       </Layout>
     </Layout>

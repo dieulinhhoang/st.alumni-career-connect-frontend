@@ -10,12 +10,12 @@ import CustomTable from '../../../components/common/customTable'
 const { Title, Text } = Typography
 
 const ACCENT_MAP: Record<string, { base: string; soft: string }> = {
-  blue:   { base: '#2563eb', soft: '#eff6ff' },
-  green:  { base: '#0f766e', soft: '#f0fdfa' },
+  blue:   { base: '#16a34a', soft: '#f0fdf4' },
+  green:  { base: '#16a34a', soft: '#f0fdf4' },
   red:    { base: '#dc2626', soft: '#fef2f2' },
   purple: { base: '#7c3aed', soft: '#f5f3ff' },
   orange: { base: '#ea580c', soft: '#fff7ed' },
-  teal:   { base: '#0d9488', soft: '#f0fdfa' },
+  teal:   { base: '#16a34a', soft: '#f0fdf4' },
   brown:  { base: '#78716c', soft: '#fafaf9' },
   gray:   { base: '#475569', soft: '#f8fafc' },
 }
@@ -53,7 +53,7 @@ export default function ListView({
       width: 48,
       align: 'center' as const,
       render: (_: any, __: Form, i: number) => (
-        <Text type="secondary" style={{ fontSize: 12, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
+        <Text type="secondary" style={{ fontSize: 14, fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
           {String(i + 1).padStart(2, '0')}
         </Text>
       ),
@@ -81,7 +81,7 @@ export default function ListView({
               }}>
                 {text}
               </div>
-              {/* <Text type="secondary" style={{ fontSize: 12 }}>
+              {/* <Text type="secondary" style={{ fontSize: 14 }}>
                 {record.description || 'Chưa có mô tả'}
               </Text> */}
             </div>
@@ -96,7 +96,7 @@ export default function ListView({
       width: 110,
       align: 'center' as const,
       render: (qs: any[]) => (
-        <Tag color="teal" style={{ borderRadius: 20, fontWeight: 600, padding: '1px 10px', margin: 0 }}>
+        <Tag color="green" style={{ borderRadius: 20, fontWeight: 600, padding: '1px 10px', margin: 0 }}>
           {qs.length} câu
         </Tag>
       ),
@@ -142,16 +142,16 @@ export default function ListView({
   ]
 
   return (
-    <div style={{ padding: '28px 32px 48px', minHeight: '100vh' }}>
+    <div >
 
       {/* Page header */}
       <Flex justify="space-between" align="flex-end" wrap="wrap" gap={12} style={{ marginBottom: 24 }}>
         <div>
-          <Text style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#0f766e', display: 'block', marginBottom: 5 }}>
+          {/* <Text style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#16a34a', display: 'block', marginBottom: 5 }}>
             Quản lý
-          </Text>
+          </Text> */}
           <Title level={3} style={{ margin: 0, letterSpacing: '-0.5px', lineHeight: 1 }}>
-            Form khảo sát
+           Quản lý Form khảo sát
           </Title>
           <Text type="secondary" style={{ fontSize: 13, marginTop: 5, display: 'block' }}>
             {forms.length} form · Tạo và quản lý bộ câu hỏi khảo sát
@@ -170,7 +170,7 @@ export default function ListView({
             type="primary"
             icon={<PlusOutlined />}
             onClick={onCreate}
-            style={{ background: '#1D9E75', borderColor: '#1D9E75' }}
+            style={{ background: '#16a34a', borderColor: '#16a34a' }}
           >
             Form mới
           </Button>
@@ -182,14 +182,14 @@ export default function ListView({
         {/* Toolbar */}
         <Flex align="center" gap={8} style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0' }}>
           <Input
-            prefix={<SearchOutlined style={{ color: '#94a3b8', fontSize: 12 }} />}
+            prefix={<SearchOutlined style={{ color: '#94a3b8', fontSize: 14 }} />}
             placeholder="Tìm kiếm form..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 220 }}
             allowClear
           />
-          <Text type="secondary" style={{ marginLeft: 'auto', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>
+          <Text type="secondary" style={{ marginLeft: 'auto', fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>
             {filtered.length} / {forms.length} form
           </Text>
         </Flex>

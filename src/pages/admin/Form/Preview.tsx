@@ -20,8 +20,8 @@ const C = {
   border:      '#e5e7eb',
   bg:          '#f9fafb',
   surface:     '#ffffff',
-  accent:      '#1D9E75',
-  accentHover: '#178763',
+  accent:      '#16a34a',
+  accentHover: '#15803d',
   accentBg:    '#f0fdf4',
   accentBorder:'#bbf7d0',
   danger:      '#dc2626',
@@ -82,7 +82,7 @@ function QLabel({ num, title, required, multi }: {
 function ErrorHint({ msg }: { msg?: string }) {
   if (!msg) return null
   return (
-    <div style={{ fontSize: 12, color: C.danger, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div style={{ fontSize: 14, color: C.danger, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
       <span>⚠</span> {msg}
     </div>
   )
@@ -764,15 +764,15 @@ export function SurveyPreview({
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     height: 36, padding: '0 20px', borderRadius: 6,
                     border: 'none',
-                    background: submitSuccess ? '#178763' : submitting ? '#9ca3af' : '#1D9E75',
+                    background: submitSuccess ? '#15803d' : submitting ? '#9ca3af' : '#16a34a',
                     color: '#fff',
                     fontSize: 13.5, fontWeight: 600,
                     cursor: submitting || submitSuccess ? 'default' : 'pointer',
                     fontFamily: 'inherit',
                     transition: 'background .15s, opacity .15s',
                   }}
-                  onMouseEnter={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#178763' }}
-                  onMouseLeave={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#1D9E75' }}
+                  onMouseEnter={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#15803d' }}
+                  onMouseLeave={e => { if (!submitting && !submitSuccess) e.currentTarget.style.background = '#16a34a' }}
                 >
                   {submitSuccess ? '✓ Đã lưu' : submitting ? 'Đang gửi…' : submitLabel}
                 </button>

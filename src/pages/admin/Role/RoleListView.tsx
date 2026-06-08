@@ -110,7 +110,7 @@ const RoleListView: React.FC<RoleListViewProps> = ({
           <Tooltip title="Chỉnh sửa">
             <EditOutlined
               onClick={() => onEdit(record)}
-              style={{ fontSize: 18, cursor: 'pointer', color: '#1677ff' }}
+              style={{ fontSize: 18, cursor: 'pointer', color: '#16a34a' }}
             />
           </Tooltip>
 
@@ -172,22 +172,22 @@ const RoleListView: React.FC<RoleListViewProps> = ({
               height: 40,
               paddingInline: 18,
               fontWeight: 500,
-              background: '#1677ff',
-              borderColor: '#1677ff',
+              background: '#16a34a',
+              borderColor: '#16a34a',
             }}
           >
             Thêm vai trò
           </Button>
         </Col>
       </Row>
-
+{/* 
       <Card
         style={{
           borderRadius: 14,
           border: '1px solid #e8edf3',
           boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
         }}
-      >
+      > */}
         <Table
           rowKey="id"
           columns={columns}
@@ -198,11 +198,16 @@ const RoleListView: React.FC<RoleListViewProps> = ({
             pageSize: query.size,
             total: listData?.total ?? 0,
             showSizeChanger: true,
+             showTotal: (total: number, range: [number, number]) =>
+              `${range[0]}–${range[1]} / ${total} bản ghi`,
             pageSizeOptions: ['10', '20', '50'],
+            locale: { items_per_page: '/ trang' },
           }}
           onChange={onTableChange}
+            scroll={{ x: 900 }}
+          locale={{ emptyText: 'Không có dữ liệu' }}
         />
-      </Card>
+      {/* </Card> */}
     </>
   )
 }

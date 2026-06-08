@@ -31,7 +31,7 @@ function Field({
         style={{
           margin: 0,
           fontSize: 14,
-          color: blue ? "#185FA5" : "rgba(0,0,0,0.85)",
+          color: blue ? "#16a34a" : "rgba(0,0,0,0.85)",
         }}
       >
         {value || "—"}
@@ -203,8 +203,8 @@ export default function StudentDetail() {
                   <span
                     style={{
                       fontSize: 14,
-                      background: "#EEEDFE",
-                      color: "#3C3489",
+                      background: "#bbe2b2",
+                      color: "#000000",
                       padding: "2px 8px",
                       borderRadius: 4,
                     }}

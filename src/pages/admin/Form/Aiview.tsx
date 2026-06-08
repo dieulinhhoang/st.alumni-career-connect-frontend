@@ -11,7 +11,7 @@ import { QTYPES, SUGGESTIONS } from '../../../feature/form/constants'
 const { TextArea } = Input
 const { Title, Text } = Typography
 type AIStatus = 'idle' | 'loading' | 'success' | 'error'
-const ACCENT = '#0f766e'
+const ACCENT = '#16a34a'
 
 interface AIViewProps {
   onSave: (form: Omit<Form, 'id' | 'createdat' | 'themeId'>) => void
@@ -70,7 +70,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
     <Card style={{ textAlign: 'center', padding: '20px 0' }}>
       <Spin size="large" />
       <Text strong style={{ display: 'block', marginTop: 16, color: '#6b7280' }}>AI đang phân tích yêu cầu...</Text>
-      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>Thường mất 3–5 giây</Text>
+      <Text type="secondary" style={{ fontSize: 14, display: 'block', marginTop: 4 }}>Thường mất 3–5 giây</Text>
     </Card>
   )
 
@@ -94,7 +94,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
                 onClick={() => { setTempName(result.name); setEditName(true) }}
                 style={{ cursor: 'text', fontSize: 15, display: 'block' }}
               >
-                {result.name} <Text type="secondary" style={{ fontSize: 12, fontWeight: 400 }}>✏️</Text>
+                {result.name} <Text type="secondary" style={{ fontSize: 14, fontWeight: 400 }}>✏️</Text>
               </Text>
             )}
             <Text type="secondary" style={{ fontSize: 12.5, lineHeight: 1.5, display: 'block', marginTop: 4 }}>
@@ -111,19 +111,19 @@ export function AIView({ onSave, onBack }: AIViewProps) {
           const qt = QTYPES.find((t) => t.value === q.type)
           return (
             <Flex key={q.id} align="flex-start" gap={10} style={{ padding: '10px 16px', borderBottom: '1px solid #f5f5f5' }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#f0fdfa', color: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#f0fdfa', color: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
                 {i + 1}
               </div>
               <div style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 5 }}>{q.title}</Text>
                 <Space size={4} wrap>
-                  <Tag style={{ fontSize: 11 }}>{qt?.icon} {qt?.label}</Tag>
-                  {q.required && <Tag color="red" style={{ fontSize: 11 }}>Bắt buộc</Tag>}
+                  <Tag style={{ fontSize: 13 }}>{qt?.icon} {qt?.label}</Tag>
+                  {q.required && <Tag color="red" style={{ fontSize: 13 }}>Bắt buộc</Tag>}
                 </Space>
                 {(q.options ?? []).length > 0 && (
                   <Flex wrap="wrap" gap={4} style={{ marginTop: 7 }}>
                     {q.options.map((o: any) => (
-                      <Tag key={o.id} style={{ fontSize: 11, borderRadius: 20 }}>{o.label}</Tag>
+                      <Tag key={o.id} style={{ fontSize: 13, borderRadius: 20 }}>{o.label}</Tag>
                     ))}
                   </Flex>
                 )}
@@ -150,7 +150,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
       <Flex align="center" gap={12} style={{ padding: '12px 20px', borderBottom: '1px solid #e4e6ea', background: '#fff' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={onBack} />
         <div>
-          <Text style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: ACCENT, display: 'block' }}>
+          <Text style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: ACCENT, display: 'block' }}>
             Công cụ AI
           </Text>
           <Text strong style={{ fontSize: 18 }}>Tạo form bằng AI</Text>
@@ -180,7 +180,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
             {/* Suggestions */}
             <Flex wrap="wrap" gap={6}>
               {SUGGESTIONS.map((s, i) => (
-                <Button key={i} size="small" onClick={() => setPrompt(s)} style={{ fontSize: 12, borderRadius: 20 }}>
+                <Button key={i} size="small" onClick={() => setPrompt(s)} style={{ fontSize: 14, borderRadius: 20 }}>
                   {s}
                 </Button>
               ))}
@@ -216,7 +216,7 @@ export function AIView({ onSave, onBack }: AIViewProps) {
               >
                 <UploadOutlined style={{ fontSize: 24, color: '#9ca3af', display: 'block', marginBottom: 8 }} />
                 <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 3 }}>Kéo thả hoặc click chọn file</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>PDF, DOC, DOCX, TXT</Text>
+                <Text type="secondary" style={{ fontSize: 14 }}>PDF, DOC, DOCX, TXT</Text>
               </div>
             )}
             <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.txt" style={{ display: 'none' }} onChange={handleFile} />

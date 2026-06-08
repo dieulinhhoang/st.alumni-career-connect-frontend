@@ -188,6 +188,7 @@ export default function GraduationStudentsPage() {
       pageSize,
       total: filtered.length,
       showSizeChanger: true,
+            locale: { items_per_page: '/ trang' },
       // showTotal: (total) => `${total} sinh viên`,
       onChange: (_nextPage, nextPageSize) => {
         if (nextPageSize && nextPageSize !== pageSize) {
@@ -200,6 +201,7 @@ export default function GraduationStudentsPage() {
       pageSize: meta.per_page || pageSize,
       total: meta.total || 0,
       showSizeChanger: true,
+            locale: { items_per_page: '/ trang' },
       // showTotal: (total) => `${total} sinh viên`,
       onChange: (nextPage, nextPageSize) => {
         if (nextPageSize && nextPageSize !== pageSize) {

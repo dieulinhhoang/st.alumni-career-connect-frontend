@@ -160,14 +160,14 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         />
 
         {saving && (
-          <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 14, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
             {!isMobile && 'Đang lưu...'}
           </span>
         )}
         {!saving && saved && (
-          <span style={{ fontSize: 12, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <CheckOutlined style={{ fontSize: 11 }} />
+          <span style={{ fontSize: 14, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <CheckOutlined style={{ fontSize: 13 }} />
             {!isMobile && 'Đã lưu'}
           </span>
         )}
@@ -182,7 +182,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         ) : (
           <Tooltip title="Lưu và xuất bản form">
             <Button type="primary" icon={<CloudUploadOutlined />} onClick={handlePublishClick} loading={publishing}
-              style={{ background: '#0d7a7f', borderColor: '#0d7a7f' }}>
+              style={{ background: '#16a34a', borderColor: '#16a34a' }}>
               {!isMobile && 'Xuất bản'}
             </Button>
           </Tooltip>

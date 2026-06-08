@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import STAlumni from '../pages/client/Home/Home';
 import Enterprise from '../pages/admin/Enterprise/index';
 import EnterpriseDetail from '../pages/admin/EnterpriseDetail/index';
 import Faculties from '../pages/admin/Faculty';
@@ -29,13 +28,13 @@ const Loader = lazy(() => import('../components/common/loader'));
 const SurveyPage = lazy(() => import('../pages/admin/Form/index'));
 const BatchFormEditor = lazy(() => import('../pages/admin/Alumni/BatchFormEditor'));
 
-//  Guards 
+//  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');
 
 const ProtectedRoute = () =>
-  isLoggedIn() ? <Outlet /> : <Navigate to="/" replace />;
+  isLoggedIn() ? <Outlet /> : <Navigate to="/admin/dashboard" replace />;
 
-//  Routes 
+//  Routes
 const routes = [
   {
     path: '/',
@@ -44,7 +43,7 @@ const routes = [
       // PUBLIC
       {
         path: '',
-        element: <Suspense fallback={<Loader />}><STAlumni /></Suspense>
+        element: <Navigate to="/admin/dashboard" replace />
       },
       {
         path: '/auth/callback',
@@ -116,15 +115,7 @@ const routes = [
             element: <Suspense fallback={<Loader />}><BatchFormEditor /></Suspense>
           },
 
-          // // Users
-          // {
-          //   path: '/admin/studentlist',
-          //   element: <Suspense fallback={<Loader />}><StudentList /></Suspense>
-          // },
-          // {
-          //   path: '/admin/stafflist',
-          //   element: <Suspense fallback={<Loader />}><StaffList /></Suspense>
-          // },
+          // Users
           {
             path: '/admin/users',
             element: <Suspense fallback={<Loader />}><UserManagement /></Suspense>
@@ -189,7 +180,7 @@ const routes = [
       },
 
       // FALLBACK
-      { path: '*', element: <Navigate to="/" replace /> },
+      { path: '*', element: <Navigate to="/admin/dashboard" replace /> },
     ],
   },
 ];

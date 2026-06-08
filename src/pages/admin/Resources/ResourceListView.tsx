@@ -133,7 +133,7 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
                   padding: '2px 8px',
                   borderRadius: 6,
                   background: '#f3f4f6',
-                  fontSize: 12,
+                  fontSize: 14,
                   color: '#374151'
                 }}
               >
@@ -165,7 +165,7 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
                   style={{
                     fontSize: 18,
                     cursor: 'pointer',
-                    color: 'rgba(37, 99, 235, 0.85)'
+                    color: '#16a34a'
                   }}
                 />
               </Tooltip>
@@ -244,8 +244,8 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
                 height: 40,
                 fontSize: 14,
                 fontWeight: 500,
-                background: '#1D9E75',
-                borderColor: '#1D9E75'
+                background: '#16a34a',
+                borderColor: '#16a34a'
               }}
             >
               Thêm mới
@@ -254,13 +254,13 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
         )}
       </Row>
 
-      <Card
+      {/* <Card
         style={{
           borderRadius: 12,
           border: '1px solid #eef0f3',
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
         }}
-      >
+      > */}
         <Table<ResourceRow>
           columns={columns}
           dataSource={[...filteredRows]}
@@ -274,12 +274,16 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
               listData?.page?.total_elements ??
               listData?.total ??
               filteredRows.length,
-            showSizeChanger: true
+            showSizeChanger: true,
+            showTotal: (total: number, range: [number, number]) =>
+              `${range[0]}–${range[1]} / ${total} bản ghi`,
+            pageSizeOptions: ['10', '20', '50'],
+            locale: { items_per_page: '/ trang' },
           }}
           scroll={{ x: 900 }}
           locale={{ emptyText: 'Không có dữ liệu' }}
         />
-      </Card>
+      {/* </Card> */}
     </>
   )
 }
