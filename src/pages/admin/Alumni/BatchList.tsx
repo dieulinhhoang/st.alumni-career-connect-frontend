@@ -91,7 +91,7 @@ export const BatchList: React.FC = () => {
               color: cfg.color,
               padding: '3px 10px',
               borderRadius: 99,
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 600,
               whiteSpace: 'nowrap',
             }}

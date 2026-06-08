@@ -95,7 +95,7 @@ export function KpiCard({
               display: 'inline-flex',
               alignItems: 'center',
               gap: 3,
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 600,
               color: trendColor,
               background: trendBg,
@@ -111,10 +111,10 @@ export function KpiCard({
       {/* Row 2: main value */}
       {isRatioMode ? (
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, lineHeight: 1 }}>
-          <span style={{ fontSize: 30, fontWeight: 700, color: accentColor, lineHeight: 1, letterSpacing: '-0.5px' }}>
+          <span style={{ fontSize: 34, fontWeight: 700, color: accentColor, lineHeight: 1, letterSpacing: '-0.5px' }}>
             {numerator}
           </span>
-          <span style={{ fontSize: 14, color: '#94a3b8' }}>/ {denominator}</span>
+          <span style={{ fontSize: 15, color: '#94a3b8' }}>/ {denominator}</span>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -133,7 +133,7 @@ export function KpiCard({
       )}
 
       {/* Row 3: label */}
-      <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, lineHeight: 1.4 }}>
+      <div style={{ fontSize: 15, color: '#64748b', fontWeight: 600, lineHeight: 1.4 }}>
         {label}
       </div>
 
@@ -165,7 +165,7 @@ export function KpiCard({
                 color: accentColor,
                 padding: '2px 9px',
                 borderRadius: 99,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: 700,
               }}
             >
@@ -185,7 +185,7 @@ export function KpiCard({
               opacity: 0.6,
             }}
           />
-          <span style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{sub}</span>
+          <span style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.4 }}>{sub}</span>
         </div>
       ) : null}
     </div>

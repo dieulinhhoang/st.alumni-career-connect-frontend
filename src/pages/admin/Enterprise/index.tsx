@@ -220,7 +220,7 @@ export default function EnterprisePage() {
             icon={<PlusOutlined />}
             size="large"
             onClick={() => setModal({ open: true, enterprise: null })}
-            style={{ height: 44, borderRadius: 10, paddingInline: 18, fontWeight: 600 }}
+            style={{ height: 34, borderRadius: 10, paddingInline: 14, fontWeight: 600 }}
           >
             Thêm doanh nghiệp
           </Button>

@@ -19,15 +19,22 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         locale={viVN}
         theme={{
           token: {
-            fontSize: 14,
+            fontSize: 15,
+            fontSizeSM: 14,
+            fontSizeLG: 17,
             fontFamily: "'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif",
             colorPrimary: '#16a34a',
             borderRadius: 8,
           },
           components: {
-            Menu: { itemHeight: 40, itemBorderRadius: 6 },
+            Menu: { itemHeight: 46, itemBorderRadius: 6, fontSize: 15 },
             Table: { fontSize: 14 },
-            Button: { borderRadius: 8 },
+            Button: { borderRadius: 8, fontSize: 14 },
+            Input: { fontSize: 14 },
+            Select: { fontSize: 14 },
+            Form: { labelFontSize: 14 },
+            Modal: { titleFontSize: 18 },
+            Card: { headerFontSize: 16 },
           },
         }}
       >

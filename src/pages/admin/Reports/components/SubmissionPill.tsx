@@ -20,7 +20,7 @@ export const SubmissionPill: React.FC<Props> = ({ status }) => {
         display: 'inline-block',
         padding: '2px 10px',
         borderRadius: 20,
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 500,
         color,
         background: bg,

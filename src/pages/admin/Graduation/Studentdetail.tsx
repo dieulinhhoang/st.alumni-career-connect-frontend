@@ -26,7 +26,7 @@ function Field({
 }) {
   return (
     <div style={{ padding: "10px 0", borderBottom: "0.5px solid #e5e7eb" }}>
-      <p style={{ margin: "0 0 2px", fontSize: 12, color: "#9ca3af" }}>{label}</p>
+      <p style={{ margin: "0 0 2px", fontSize: 14, color: "#9ca3af" }}>{label}</p>
       <p
         style={{
           margin: 0,
@@ -45,7 +45,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <p
       style={{
         margin: "0 0 10px",
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 500,
         color: "#9ca3af",
       }}
@@ -191,7 +191,7 @@ export default function StudentDetail() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <span style={{ fontSize: 12, color: "#6b7280" }}>{student.code}</span>
+                  <span style={{ fontSize: 14, color: "#6b7280" }}>{student.code}</span>
                   <span
                     style={{
                       width: 3,
@@ -202,7 +202,7 @@ export default function StudentDetail() {
                   />
                   <span
                     style={{
-                      fontSize: 12,
+                      fontSize: 14,
                       background: "#EEEDFE",
                       color: "#3C3489",
                       padding: "2px 8px",

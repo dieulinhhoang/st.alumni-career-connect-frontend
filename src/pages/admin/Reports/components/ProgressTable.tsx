@@ -312,7 +312,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Tag color={h.color} style={{ margin: 0 }}>{h.action}</Tag>
-                    <span style={{ fontSize: 12, color: '#9ca3af' }}>{h.time}</span>
+                    <span style={{ fontSize: 14, color: '#9ca3af' }}>{h.time}</span>
                   </div>
                   {h.note && (
                     <div style={{

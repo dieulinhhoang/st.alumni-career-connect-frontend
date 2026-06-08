@@ -161,7 +161,7 @@ const AdminProfile: React.FC = () => {
                     boxShadow: '0 0 0 2px rgba(74,222,128,0.4)',
                   }}
                 />
-                <Text style={{ fontSize: 12, color: '#4f46e5', fontWeight: 600 }}>
+                <Text style={{ fontSize: 14, color: '#4f46e5', fontWeight: 600 }}>
                   Hồ sơ quản trị
                 </Text>
               </div>
