@@ -68,6 +68,8 @@ const ResourceModal: React.FC<Props> = ({
       onOk={handleOk}
       onCancel={onCancel}
       confirmLoading={confirmLoading}
+      okText="Lưu"
+      cancelText="Hủy"
       width={760}
     >
       <Form layout="vertical">

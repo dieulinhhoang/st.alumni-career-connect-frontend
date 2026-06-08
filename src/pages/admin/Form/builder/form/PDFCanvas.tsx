@@ -179,7 +179,7 @@ export function PDFCanvas({
             {editable && onDescriptionParagraphsChange ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {/* Dòng đầu — bold italic căn giữa */}
-                <input
+                {/* <input
                   value={descDraft.titleLine}
                   onChange={e => {
                     const d = { ...descDraft, titleLine: e.target.value }
@@ -200,7 +200,16 @@ export function PDFCanvas({
                   }}
                   onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
                   onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
-                />
+                /> */}
+                <a  style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
+                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+                    fontWeight: 700, fontStyle: 'italic', textAlign: 'center',
+                    color: '#0f172a', background: 'transparent', outline: 'none',
+                    boxSizing: 'border-box',
+                  }}>
+                    Thân gửi Anh/Chị cựu sinh viên của Học viện Nông nghiệp Việt Nam!
+                  </a>
                 {/* Đoạn giữa — italic thụt lề */}
                 <textarea
                   value={descDraft.bodyText}
@@ -226,7 +235,7 @@ export function PDFCanvas({
                   onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
                 />
                 {/* Dòng cuối — italic căn giữa */}
-                <input
+                {/* <input
                   value={descDraft.footerLine}
                   onChange={e => {
                     const d = { ...descDraft, footerLine: e.target.value }
@@ -247,7 +256,16 @@ export function PDFCanvas({
                   }}
                   onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
                   onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
-                />
+                /> */}
+                <a style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
+                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+                    fontStyle: 'italic', textAlign: 'center',
+                    color: '#334155', background: 'transparent', outline: 'none',
+                    boxSizing: 'border-box',
+                  }}>
+                    Trân trọng cảm ơn sự cộng tác của Anh/Chị!
+                  </a>
               </div>
             ) : (
               <div style={{ padding: '16px 20px', background: `${accent}08`, borderLeft: `3px solid ${accent}`, borderRadius: '0 8px 8px 0' }}>
