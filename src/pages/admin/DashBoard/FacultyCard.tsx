@@ -15,17 +15,8 @@ type FacultyApiItem = KhoaItem & {
   color?: string;
 };
 
-function ProgressBar({
-  value,
-  total,
-  color,
-}: {
-  value: number;
-  total: number;
-  color: string;
-}) {
+function ProgressBar({ value, total, color }: { value: number; total: number; color: string }) {
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
-
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <div
@@ -35,6 +26,7 @@ function ProgressBar({
           borderRadius: RADIUS.pill,
           background: COLOR.borderSoft,
           overflow: "hidden",
+          minWidth: 60,
         }}
       >
         <div
@@ -47,16 +39,30 @@ function ProgressBar({
           }}
         />
       </div>
-      <span
-        style={{
-          fontSize: 12,
-          color: COLOR.textMuted,
-          whiteSpace: "nowrap",
-        }}
-      >
+      <span style={{ fontSize: 12, color: COLOR.textMuted, whiteSpace: "nowrap", minWidth: 44 }}>
         {value}/{total}
       </span>
     </div>
+  );
+}
+
+// FIX: Thống nhất pill badge style
+function StatusBadge({ submitted }: { submitted: boolean }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: 99,
+        fontSize: 12,
+        fontWeight: 600,
+        color: submitted ? COLOR.success : COLOR.danger,
+        background: submitted ? "#f0fdf4" : "#fff1f2",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {submitted ? "Đã nộp" : "Chưa nộp"}
+    </span>
   );
 }
 
@@ -70,29 +76,22 @@ export function FacultyCard() {
 
   useEffect(() => {
     let cancelled = false;
-
     const run = async () => {
       setLoading(true);
       setError("");
-
       try {
         const res = await fetchKhoaList();
         if (!cancelled) setItems((res as FacultyApiItem[]) ?? []);
       } catch (e) {
         if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : "Không thể tải danh sách khoa."
-          );
+          setError(e instanceof Error ? e.message : "Không thể tải danh sách khoa.");
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
-
     run();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const normalizedItems = useMemo(() => {
@@ -106,15 +105,9 @@ export function FacultyCard() {
         typeof item.daNop === "boolean"
           ? item.daNop
           : item.status === "submitted" || item.status === "done";
-
       return {
         key: String(item.facultyId ?? code ?? name),
-        name,
-        code,
-        responded,
-        total,
-        color,
-        submitted,
+        name, code, responded, total, color, submitted,
       };
     });
   }, [items]);
@@ -140,6 +133,7 @@ export function FacultyCard() {
         height: "100%",
       }}
     >
+      {/* Header */}
       <div
         style={{
           padding: "14px 20px",
@@ -152,19 +146,11 @@ export function FacultyCard() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            style={{
-              width: 4,
-              height: 20,
-              borderRadius: RADIUS.pill,
-              background: COLOR.primary,
-            }}
-          />
+          <div style={{ width: 4, height: 20, borderRadius: RADIUS.pill, background: COLOR.primary }} />
           <div style={{ fontSize: 15, fontWeight: 700, color: COLOR.textDark }}>
             Tình trạng nộp báo cáo
           </div>
         </div>
-
         <Select
           value={filter}
           onChange={(v) => setFilter(v as KhoaFilter)}
@@ -180,28 +166,22 @@ export function FacultyCard() {
 
       {error && (
         <div style={{ padding: 16 }}>
-          <Alert
-            type="error"
-            showIcon
-            message="Không thể tải danh sách khoa"
-            description={error}
-          />
+          <Alert type="error" showIcon message="Không thể tải danh sách khoa" description={error} />
         </div>
       )}
 
       {loading ? (
-        <div
-          style={{
-            minHeight: 260,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ minHeight: 260, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Spin />
         </div>
       ) : (
         <>
+          {/* FIX: Column header responsive — ẩn progress column trên màn hình nhỏ */}
+          <style>{`
+            @media (max-width: 640px) {
+              .faculty-col-progress { display: none !important; }
+            }
+          `}</style>
           <div
             style={{
               padding: "8px 20px",
@@ -218,14 +198,13 @@ export function FacultyCard() {
           >
             <span style={{ width: 28 }}>STT</span>
             <span style={{ flex: 1 }}>Khoa</span>
-            <span style={{ width: 200 }}>SV phản hồi / tổng</span>
-            <span style={{ width: 80, textAlign: "right" }}>Trạng thái</span>
+            <span className="faculty-col-progress" style={{ width: 180 }}>SV phản hồi / tổng</span>
+            <span style={{ width: 90, textAlign: "right" }}>Trạng thái</span>
           </div>
 
           <div style={{ maxHeight: 360, overflowY: "auto" }}>
             {filtered.map((k, i) => {
               const isHovered = hovered === i;
-
               return (
                 <div
                   key={k.key}
@@ -237,26 +216,13 @@ export function FacultyCard() {
                     alignItems: "center",
                     gap: 12,
                     padding: "10px 20px",
-                    background:
-                      isHovered
-                        ? COLOR.bgMuted
-                        : i % 2 === 0
-                        ? COLOR.bgCard
-                        : COLOR.bgPage,
+                    background: isHovered ? COLOR.bgMuted : i % 2 === 0 ? COLOR.bgCard : COLOR.bgPage,
                     borderBottom: `1px solid ${COLOR.borderSoft}`,
                     cursor: k.code ? "pointer" : "default",
                     transition: "background 120ms ease",
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: COLOR.textFaint,
-                      width: 28,
-                      flexShrink: 0,
-                      textAlign: "center",
-                    }}
-                  >
+                  <span style={{ fontSize: 11, color: COLOR.textFaint, width: 28, flexShrink: 0, textAlign: "center" }}>
                     {i + 1}
                   </span>
 
@@ -276,39 +242,19 @@ export function FacultyCard() {
                     {k.name}
                   </span>
 
-                  <div style={{ width: 200, flexShrink: 0 }}>
-                    <ProgressBar
-                      value={k.responded}
-                      total={k.total}
-                      color={k.color}
-                    />
+                  <div className="faculty-col-progress" style={{ width: 180, flexShrink: 0 }}>
+                    <ProgressBar value={k.responded} total={k.total} color={k.color} />
                   </div>
 
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: k.submitted ? COLOR.success : COLOR.danger,
-                      flexShrink: 0,
-                      width: 80,
-                      textAlign: "right",
-                    }}
-                  >
-                    {k.submitted ? "Đã nộp" : "Chưa nộp"}
-                  </span>
+                  <div style={{ width: 90, flexShrink: 0, textAlign: "right" }}>
+                    <StatusBadge submitted={k.submitted} />
+                  </div>
                 </div>
               );
             })}
 
             {!filtered.length && !error && (
-              <div
-                style={{
-                  padding: "32px 20px",
-                  textAlign: "center",
-                  color: COLOR.textFaint,
-                  fontSize: 13,
-                }}
-              >
+              <div style={{ padding: "32px 20px", textAlign: "center", color: COLOR.textFaint, fontSize: 13 }}>
                 Không có dữ liệu khoa
               </div>
             )}

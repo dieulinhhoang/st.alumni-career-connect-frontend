@@ -7,7 +7,7 @@ import {
   StarOutlined,
 } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
-import { StatCard } from "./Statcard";
+import { KpiCard } from "../../../components/common/KpiCard";
 import { FacultyCard } from "./FacultyCard";
 import { EnterpriseList } from "./Enterpriselist";
 import { ChartSection } from "./Chartsection";
@@ -20,7 +20,7 @@ import { COLOR, RADIUS, SHADOW } from "./theme";
 
 const { Title, Text } = Typography;
 
-type StatCardItem = {
+type KpiItem = {
   index: number;
   label: string;
   value: string;
@@ -56,17 +56,16 @@ export function DashBoard() {
     return () => { cancelled = true; };
   }, []);
 
-  const statCards: StatCardItem[] = useMemo(() => {
+  const kpiItems: KpiItem[] = useMemo(() => {
     if (!summary) return [];
     return [
       {
         index: 1,
         label: "Tỷ lệ phản hồi",
         value: `${summary.responseRate.value}%`,
-        sub:
-          summary.responseRate.total != null
-            ? `${summary.responseRate.value} / ${summary.responseRate.total} SV`
-            : "Trên tổng số SV tốt nghiệp",
+        sub: summary.responseRate.total != null
+          ? `${summary.responseRate.value} / ${summary.responseRate.total} SV`
+          : "Trên tổng số SV tốt nghiệp",
         icon: <FileTextOutlined />,
         accentColor: COLOR.primary,
         trend: summary.responseRate.trend,
@@ -103,7 +102,7 @@ export function DashBoard() {
 
   return (
     <AdminLayout>
-      <div >
+      <div>
         {/* Hero banner */}
         <div
           style={{
@@ -160,29 +159,64 @@ export function DashBoard() {
               </Text>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                background: COLOR.bgCard,
-                borderRadius: RADIUS.pill,
-                padding: "6px 14px",
-                border: `1px solid ${COLOR.borderSoft}`,
-                boxShadow: "0 1px 4px rgba(22,163,74,0.12)",
-              }}
-            >
+            {/* FIX: Chỉ hiện trạng thái phù hợp với loading/error */}
+            {loading && (
               <div
                 style={{
-                  width: 7, height: 7, borderRadius: "50%",
-                  background: "#22c55e",
-                  boxShadow: "0 0 0 2px rgba(34,197,94,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "#f8fafc",
+                  borderRadius: RADIUS.pill,
+                  padding: "6px 14px",
+                  border: `1px solid ${COLOR.borderSoft}`,
                 }}
-              />
-              <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
-                Dữ liệu cập nhật
-              </Text>
-            </div>
+              >
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#94a3b8" }} />
+                <Text style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>Đang tải...</Text>
+              </div>
+            )}
+            {!loading && error && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "#fff1f2",
+                  borderRadius: RADIUS.pill,
+                  padding: "6px 14px",
+                  border: "1px solid #fecdd3",
+                }}
+              >
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#ef4444" }} />
+                <Text style={{ fontSize: 12, color: "#ef4444", fontWeight: 600 }}>Lỗi kết nối</Text>
+              </div>
+            )}
+            {!loading && !error && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "#f0fdf4",
+                  borderRadius: RADIUS.pill,
+                  padding: "6px 14px",
+                  border: `1px solid ${COLOR.borderSoft}`,
+                  boxShadow: "0 1px 4px rgba(22,163,74,0.12)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 7, height: 7, borderRadius: "50%",
+                    background: "#22c55e",
+                    boxShadow: "0 0 0 2px rgba(34,197,94,0.35)",
+                  }}
+                />
+                <Text style={{ fontSize: 12, color: COLOR.primary, fontWeight: 600 }}>
+                  Dữ liệu cập nhật
+                </Text>
+              </div>
+            )}
           </div>
         </div>
 
@@ -202,11 +236,18 @@ export function DashBoard() {
           </div>
         ) : (
           <>
-            {/* KPI cards */}
+            {/* KPI cards — dùng KpiCard thống nhất */}
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="stretch">
-              {statCards.map((item) => (
+              {kpiItems.map((item) => (
                 <Col xs={24} sm={12} md={12} lg={6} key={item.index}>
-                  <StatCard {...item} />
+                  <KpiCard
+                    label={item.label}
+                    value={item.value}
+                    sub={item.sub}
+                    icon={item.icon}
+                    accentColor={item.accentColor}
+                    trend={item.trend}
+                  />
                 </Col>
               ))}
             </Row>
@@ -222,16 +263,14 @@ export function DashBoard() {
             </Row>
 
             {/* Chart section */}
-            <ChartSection state={state} setField={setField} khoaOptions={khoaOptions} nganhOptions={nganhOptions} />
+            <ChartSection
+              state={state}
+              setField={setField}
+              khoaOptions={khoaOptions}
+              nganhOptions={nganhOptions}
+            />
           </>
         )}
-
-        <style>{`
-          .ant-select-selector { border-radius: 8px !important; }
-          ::-webkit-scrollbar { width: 4px; }
-          ::-webkit-scrollbar-track { background: transparent; }
-          ::-webkit-scrollbar-thumb { background: ${COLOR.border}; border-radius: 99px; }
-        `}</style>
       </div>
     </AdminLayout>
   );

@@ -4,7 +4,6 @@ import { Row, Col, Input, Typography } from "antd";
 import {
   RightOutlined,
   BookOutlined,
-  TeamOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
@@ -12,15 +11,14 @@ import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 
 const { Title, Text } = Typography;
 
-const BRAND_GREEN = "#056f38";
-const BRAND_YELLOW = "#FFC20E";
-const BRAND_ORANGE = "#614525";
-
-const PRIMARY = BRAND_GREEN;
-const CARD_BG = "#f9fafb";
-const CARD_BORDER = "#e5e7eb";
-const TEXT_MAIN = "#0f172a";
-const TEXT_SECONDARY = "#6b7280";
+const COLOR = {
+  primary: "#16a34a",
+  yellow: "#f59e0b",
+  text: "#0f172a",
+  sub: "#64748b",
+  border: "#e5e7eb",
+  cardBg: "#f9fafb",
+};
 
 export default function FacultyListPage() {
   const navigate = useNavigate();
@@ -43,9 +41,7 @@ export default function FacultyListPage() {
     [list, search]
   );
 
-  // const totalStudents = list.reduce((s, f) => s + Number(f.students || 0), 0);
-  const getMajorCount = (faculty: any) =>
-  Number(faculty?.majorCount ?? 0);
+  const getMajorCount = (faculty: any) => Number(faculty?.majorCount ?? 0);
   const isEmpty = !loading && filtered.length === 0;
   const isNoFaculties = isEmpty && list.length === 0 && search === "";
   const isNoResults = isEmpty && !isNoFaculties;
@@ -67,12 +63,11 @@ export default function FacultyListPage() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 16,
+            flexWrap: "wrap",
           }}
         >
           <div>
-            <Title level={4} style={{ margin: 0, color: TEXT_MAIN }}>
-              Khoa
-            </Title>
+            <Title level={4} style={{ margin: 0, color: COLOR.text }}>Khoa</Title>
             <Text type="secondary" style={{ fontSize: 13 }}>
               Quản lý danh sách khoa và thông tin quy mô đào tạo
             </Text>
@@ -80,14 +75,11 @@ export default function FacultyListPage() {
 
           <Input
             allowClear
-            placeholder="Tìm kiếm"
+            placeholder="Tìm kiếm khoa..."
             prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              maxWidth: 340,
-              borderRadius: 999,
-            }}
+            style={{ maxWidth: 280, borderRadius: 999 }}
           />
         </div>
 
@@ -96,7 +88,7 @@ export default function FacultyListPage() {
             style={{
               marginBottom: 16,
               padding: "12px 16px",
-              borderRadius: 12,
+              borderRadius: 10,
               background: "#fff1f2",
               border: "1px solid #fecdd3",
               color: "#be123c",
@@ -107,47 +99,29 @@ export default function FacultyListPage() {
           </div>
         )}
 
-        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        {/* FIX: minHeight thay vì height cố định — tránh bị cắt khi text dài */}
+        <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
           {[
-            { label: "Tổng số khoa", value: list.length, color: BRAND_GREEN },
-            { label: "Ngành đào tạo", value: list.reduce((sum, f) => sum + getMajorCount(f), 0), color: BRAND_YELLOW },
-            // {
-            //   label: "Tổng sinh viên",
-            //   value: totalStudents.toLocaleString(),
-            //   color: BRAND_ORANGE,
-            // },
+            { label: "Tổng số khoa", value: list.length, color: COLOR.primary },
+            { label: "Ngành đào tạo", value: list.reduce((sum, f) => sum + getMajorCount(f), 0), color: COLOR.yellow },
           ].map((s) => (
             <Col key={s.label} xs={24} sm={8}>
               <div
                 style={{
-                  background: CARD_BG,
-                  borderRadius: 16,
+                  background: COLOR.cardBg,
+                  borderRadius: 14,
                   padding: "16px 20px",
-                  border: `1px solid ${CARD_BORDER}`,
+                  border: `1px solid ${COLOR.border}`,
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                  height: 70,
+                  minHeight: 70,          // FIX: minHeight, không phải height
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 700,
-                    color: s.color,
-                    lineHeight: 1.1,
-                  }}
-                >
+                <div style={{ fontSize: 24, fontWeight: 700, color: s.color, lineHeight: 1.1 }}>
                   {s.value}
                 </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: TEXT_SECONDARY,
-                    marginTop: 4,
-                    fontWeight: 500,
-                  }}
-                >
+                <div style={{ fontSize: 13, color: COLOR.sub, marginTop: 4, fontWeight: 500 }}>
                   {s.label}
                 </div>
               </div>
@@ -165,13 +139,12 @@ export default function FacultyListPage() {
                     borderRadius: 14,
                     background: "#f3f4f6",
                     animation: "pulse 1.5s infinite",
-                    border: `1px solid ${CARD_BORDER}`,
+                    border: `1px solid ${COLOR.border}`,
                   }}
                 />
               ))
             : filtered.map((f) => {
                 const isHovered = hoveredId === String(f.id);
-
                 return (
                   <div
                     key={f.id}
@@ -181,32 +154,18 @@ export default function FacultyListPage() {
                     style={{
                       background: "#ffffff",
                       borderRadius: 14,
-                      border: `1px solid ${isHovered ? CARD_BORDER : "#e5e7eb"}`,
-                      padding: "18px 20px",
+                      border: `1px solid ${isHovered ? "#d1fae5" : COLOR.border}`,
+                      padding: "16px 20px",
                       cursor: "pointer",
                       transition: "all 0.18s ease",
-                      position: "relative",
-                      overflow: "hidden",
                       transform: isHovered ? "translateY(-1px)" : "none",
                       boxShadow: isHovered
-                        ? "0 10px 24px rgba(15,23,42,0.08)"
+                        ? "0 8px 24px rgba(15,23,42,0.08)"
                         : "0 1px 3px rgba(15,23,42,0.03)",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 14,
-                        }}
-                      >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                         <div
                           style={{
                             width: 44,
@@ -219,60 +178,25 @@ export default function FacultyListPage() {
                             flexShrink: 0,
                           }}
                         >
-                          <span
-                            style={{
-                              fontWeight: 700,
-                              fontSize: 13,
-                              color: PRIMARY,
-                              textTransform: "uppercase",
-                            }}
-                          >
+                          <span style={{ fontWeight: 700, fontSize: 12, color: COLOR.primary, textTransform: "uppercase" }}>
                             {f.abbr}
                           </span>
                         </div>
 
                         <div>
-                          <div
-                            style={{
-                              fontWeight: 600,
-                              fontSize: 15,
-                              color: TEXT_MAIN,
-                              marginBottom: 4,
-                            }}
-                          >
+                          <div style={{ fontWeight: 600, fontSize: 15, color: COLOR.text, marginBottom: 4 }}>
                             {f.name}
                           </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: 12,
-                              fontSize: 12,
-                              color: TEXT_SECONDARY,
-                            }}
-                          >
-                            <span
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                              }}
-                            >
+                          <div style={{ display: "flex", gap: 12, fontSize: 12, color: COLOR.sub }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                               <BookOutlined style={{ fontSize: 11 }} />
                               {getMajorCount(f)} ngành
                             </span>
-
-                            
                           </div>
                         </div>
                       </div>
 
-                      <RightOutlined
-                        style={{
-                          fontSize: 12,
-                          color: "#9ca3af",
-                        }}
-                      />
+                      <RightOutlined style={{ fontSize: 12, color: "#9ca3af" }} />
                     </div>
                   </div>
                 );
@@ -283,30 +207,20 @@ export default function FacultyListPage() {
               style={{
                 textAlign: "center",
                 padding: "40px 0",
-                color: TEXT_SECONDARY,
+                color: COLOR.sub,
                 borderRadius: 12,
-                border: `1px dashed ${CARD_BORDER}`,
-                background: "#f9fafb",
+                border: `1px dashed ${COLOR.border}`,
+                background: COLOR.cardBg,
               }}
             >
-              <div>Chưa có khoa nào trong hệ thống</div>
+              Chưa có khoa nào trong hệ thống
             </div>
           )}
 
           {isNoResults && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 0",
-                color: TEXT_SECONDARY,
-              }}
-            >
-              <div>
-                Không tìm thấy khoa nào phù hợp với{" "}
-                <span style={{ fontWeight: 600, color: PRIMARY }}>
-                  "{search}"
-                </span>
-              </div>
+            <div style={{ textAlign: "center", padding: "40px 0", color: COLOR.sub }}>
+              Không tìm thấy khoa nào phù hợp với{" "}
+              <span style={{ fontWeight: 600, color: COLOR.primary }}>"{search}"</span>
             </div>
           )}
         </div>

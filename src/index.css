@@ -1,128 +1,77 @@
-/* Hide paid banner */
-.svc-creator__banner {
-    display: none !important;
+/* ==============================================
+   Global styles — KHÔNG override Ant Design
+   Font size, color, spacing → dùng ConfigProvider
+   ============================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
-.sjs-license-notification {
-    display: none !important;
-}
-.svc-creator {
-    height: 100vh !important;
-    width: 100vw !important;
-}
-/* ========================================
-    GLOBAL FONT SIZE
-    ======================================== */
+
 html {
-    /* Bug #5 fix: 17px → 16px để tránh phá vỡ Ant Design rem scale.
-       Ant Design 5 sử dụng 14px base (via ConfigProvider token.fontSize).
-       Đặt html font-size khác 16px sẽ làm lệch toàn bộ rem calculations. */
-    font-size: 16px;
+  font-size: 18px !important;
 }
+
 body {
-    font-size: 1rem;
-    line-height: 1.6;
-}
-/* Ant Design global override */
-/* NOTE: font size cho Table được quản lý bởi ConfigProvider token.fontSize */
-.ant-typography,
-.ant-btn,
-.ant-input,
-.ant-input-affix-wrapper,
-.ant-select,
-.ant-select-selector,
-.ant-menu-item,
-.ant-menu-submenu-title,
-.ant-form-item-label > label,
-.ant-form-item-explain,
-.ant-modal-title,
-.ant-modal-body,
-.ant-drawer-title,
-.ant-drawer-body,
-.ant-card-head-title,
-.ant-card-body,
-.ant-list-item,
-.ant-tag,
-.ant-badge,
-.ant-tooltip-inner,
-.ant-popover-title,
-.ant-popover-inner-content,
-.ant-dropdown-menu-item,
-.ant-tabs-tab,
-.ant-breadcrumb,
-.ant-pagination,
-.ant-statistic-title,
-.ant-statistic-content,
-.ant-descriptions-item-label,
-.ant-descriptions-item-content,
-.ant-radio-wrapper,
-.ant-checkbox-wrapper,
-.ant-switch,
-.ant-slider,
-.ant-upload,
-.ant-message,
-.ant-notification {
-    font-size: 1rem !important;
-}
-/* Heading scale */
-h1 { font-size: 2.2rem !important; }
-h2 { font-size: 1.8rem !important; }
-h3 { font-size: 1.5rem !important; }
-h4 { font-size: 1.25rem !important; }
-h5 { font-size: 1.1rem !important; }
-h6 { font-size: 1rem !important; }
-/* Ant Design heading overrides */
-.ant-typography.ant-typography-h1 { font-size: 2.2rem !important; }
-.ant-typography.ant-typography-h2 { font-size: 1.8rem !important; }
-.ant-typography.ant-typography-h3 { font-size: 1.5rem !important; }
-.ant-typography.ant-typography-h4 { font-size: 1.25rem !important; }
-.ant-typography.ant-typography-h5 { font-size: 1.1rem !important; }
-/* ========================================
-    Menu
-    ======================================== */
-.ant-menu-item,
-.ant-menu-submenu-title {
-    font-size: 1rem !important;
-}
-/* Pagination */
-.ant-pagination {
-    font-size: 1rem !important;
-}
-.ant-pagination-item a {
-    font-size: 1rem !important;
+  margin: 0;
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f5f5f5;
 }
 
-/* ========================================
-   Custom responsive table
-   ======================================== */
+/* =====================
+   Scrollbar toàn cục
+   ===================== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* =====================
+   SurveyJS (ẩn banner)
+   ===================== */
+.svc-creator__banner,
+.sjs-license-notification { display: none !important; }
+
+.svc-creator {
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+/* =====================
+   Custom table
+   ===================== */
 .custom-responsive-table {
-    width: 100%;
-}
-
-.custom-responsive-table .ant-table-wrapper,
-.custom-responsive-table.ant-table-wrapper {
-    width: 100%;
-}
-
-.custom-responsive-table .ant-table-container {
-    min-width: 100%;
-}
-
-.custom-responsive-table .ant-table {
-    width: max-content;
-    min-width: 100%;
+  width: 100%;
 }
 
 .custom-responsive-table .ant-table-thead > tr > th {
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    white-space: nowrap;
+  background: #f8fafc !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+  border-bottom: 1px solid #e5e7eb !important;
 }
 
-.custom-responsive-table .ant-table-tbody > tr > td {
-    font-size: 15px !important;
-    vertical-align: middle;
+.custom-responsive-table .ant-table-tbody > tr:hover > td {
+  background: #f0fdf4 !important;
 }
 
-.custom-responsive-table .ant-table-pagination {
-    padding-top: 8px;
+.custom-table-striped .custom-table-row-even > td {
+  background: #f9fafb !important;
+}
+
+/* =====================
+   Breadcrumb hover
+   ===================== */
+.breadcrumb-link-hover:hover {
+  color: #16a34a !important;
+}
+
+/* =====================
+   Ant Select border-radius
+   ===================== */
+.ant-select-selector {
+  border-radius: 8px !important;
 }

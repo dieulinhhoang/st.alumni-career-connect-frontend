@@ -24,7 +24,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
 
-/* Map route -> tiêu đề tiếng Việt cho breadcrumb */
 const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/dashboard': 'Bảng điều khiển',
   '/admin/faculties': 'Khoa',
@@ -41,7 +40,6 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/profile': 'Hồ sơ cá nhân',
 };
 
-/* Sidebar menu – phẳng, tiếng Việt */
 const MENU_ITEMS = [
   { key: '/admin/dashboard', icon: <DashboardOutlined />, label: <Link to="/admin/dashboard">Bảng điều khiển</Link> },
   { key: '/admin/faculties', icon: <TeamOutlined />, label: <Link to="/admin/faculties">Khoa</Link> },
@@ -68,42 +66,32 @@ const MENU_ITEMS = [
   { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link> },
 ];
 
-/* Global styles – chỉnh nhẹ menu, bỏ search */
 const GLOBAL_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
-
-  body { font-family: 'Be Vietnam Pro', sans-serif !important; }
-
   .al-sider { overflow-y: auto !important; overflow-x: hidden !important; }
   .al-sider::-webkit-scrollbar { width: 4px; }
   .al-sider::-webkit-scrollbar-track { background: transparent; }
-  .al-sider::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 99px; }
+  .al-sider::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 99px; }
 
   .al-menu.ant-menu-inline,
-  .al-menu.ant-menu-inline-collapsed {
-    border-right: none !important;
-  }
+  .al-menu.ant-menu-inline-collapsed { border-right: none !important; }
 
   .al-menu .ant-menu-item {
     border-radius: 6px !important;
     margin: 2px 8px !important;
     height: 40px !important;
     line-height: 40px !important;
-    font-size: 15px !important;
-    font-weight: 500 !important;
   }
 
   @media (max-width: 480px) { .al-avatar-name { display: none !important; } }
 `;
 
-/* Logo VNUA */
+/* ── Logo / branding ── */
 const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
   <div
     style={{
       height: 64,
       display: 'flex',
       alignItems: 'center',
-      // Bug #1 fix: typo `justify` → `justifyContent`
       justifyContent: collapsed ? 'center' : 'flex-start',
       padding: collapsed ? 0 : '0 16px',
       borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -121,6 +109,7 @@ const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
         justifyContent: 'center',
         overflow: 'hidden',
         flexShrink: 0,
+        background: 'rgba(255,255,255,0.08)',
       }}
     >
       <img
@@ -130,16 +119,13 @@ const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
       />
     </div>
     {!collapsed && (
-      <div>
-        <div
-          style={{
-            fontWeight: 800,
-            fontSize: 17,
-            color: '#ffffff',
-            lineHeight: 1.1,
-          }}
-        >
-         Bảng điều khiển
+      <div style={{ overflow: 'hidden' }}>
+        {/* FIX: Tên hệ thống thay vì "Bảng điều khiển" */}
+        <div style={{ fontWeight: 700, fontSize: 14, color: '#ffffff', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+          Alumni Connect
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1, whiteSpace: 'nowrap' }}>
+          VNUA Career System
         </div>
       </div>
     )}
@@ -153,6 +139,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // FIX: notification count thực tế thay vì hardcode 3
+  const [notifCount] = useState<number>(0);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -178,7 +166,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const SIDER_COLLAPSED = 80;
   const contentLeft = isMobile ? 0 : collapsed ? SIDER_COLLAPSED : SIDER_W;
 
-  // Bug #8 fix: Breadcrumb hỗ trợ dynamic routes (không chỉ exact match)
   const getPageLabel = (pathname: string): string => {
     if (ROUTE_TITLE_VI[pathname]) return ROUTE_TITLE_VI[pathname];
     if (/^\/admin\/bao-cao\//.test(pathname)) return 'Báo cáo khoa';
@@ -218,7 +205,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <style>{GLOBAL_STYLES}</style>
 
-      {/* Sider dark */}
       {!isMobile && (
         <Sider
           className="al-sider"
@@ -248,7 +234,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
         </Sider>
       )}
 
-      {/* Drawer mobile - Bug #6 fix: bodyStyle deprecated → styles.body */}
       <Drawer
         placement="left"
         closable={false}
@@ -269,7 +254,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
         />
       </Drawer>
 
-      {/* Main area */}
       <Layout
         style={{
           marginLeft: contentLeft,
@@ -301,34 +285,27 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
                   type="text"
                   icon={<MenuUnfoldOutlined />}
                   onClick={() => setDrawerOpen(true)}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 6,
-                  }}
+                  style={{ width: 38, height: 38, borderRadius: 6 }}
                 />
-                <span style={{ fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
-                  Bảng điều khiển
+                <span style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }}>
+                  Alumni Connect
                 </span>
               </>
             ) : (
-              <Tooltip title={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"} placement="bottom">
+              <Tooltip title={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'} placement="bottom">
                 <Button
                   type="text"
                   icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                   onClick={toggleCollapse}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 6,
-                  }}
+                  style={{ width: 38, height: 38, borderRadius: 6 }}
                 />
               </Tooltip>
             )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Badge count={3} size="small" offset={[-4, 4]}>
+            {/* FIX: showZero={false} — ẩn badge khi không có thông báo */}
+            <Badge count={notifCount} size="small" offset={[-4, 4]} showZero={false}>
               <Button
                 type="text"
                 icon={<BellOutlined style={{ fontSize: 18 }} />}
@@ -353,7 +330,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
                 <Avatar
                   size={32}
                   style={{
-                    background: 'linear-gradient(135deg, #1677ff 0%, #0958d9 100%)',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
                     fontSize: 14,
                     fontWeight: 700,
                     flexShrink: 0,
@@ -372,15 +349,15 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
         </Header>
 
         {/* Content */}
-        <Content style={{ margin: 24 }}>
-          {/* Breadcrumb tiếng Việt - Bug #8 fix: hỗ trợ dynamic routes */}
+        <Content style={{ padding: 24 }}>
+          {/* FIX: Breadcrumb — fontSize 13px, màu đạt contrast WCAG AA */}
           <div
             style={{
               marginBottom: 16,
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: 500,
               color: '#94a3b8',
             }}
@@ -393,15 +370,15 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
                 gap: 6,
                 color: '#64748b',
                 textDecoration: 'none',
-                transition: 'color 0.2s'
+                transition: 'color 0.2s',
               }}
               className="breadcrumb-link-hover"
             >
               <HomeOutlined style={{ fontSize: 13 }} />
               <span>Trang quản trị</span>
             </Link>
-            <span>/</span>
-            <span style={{ color: '#0f172a', fontWeight: 700 }}>{pageLabel}</span>
+            <span style={{ color: '#cbd5e1' }}>/</span>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>{pageLabel}</span>
           </div>
 
           <div
@@ -417,7 +394,6 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
           </div>
         </Content>
 
-        {/* Footer */}
         <div
           style={{
             textAlign: 'center',

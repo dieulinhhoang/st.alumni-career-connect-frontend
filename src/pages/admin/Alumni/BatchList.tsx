@@ -58,8 +58,8 @@ const useMenuItems = (
 export const BatchList: React.FC = () => {
   const { batches, loading, deleteBatch } = useBatches();
   const navigate = useNavigate();
-  const [search,    setSearch]    = useState('');
-  const [status,    setStatus]    = useState('all');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
 
   const getMenuItems = useMenuItems(navigate, deleteBatch);
@@ -79,14 +79,23 @@ export const BatchList: React.FC = () => {
       render: (_, r) => <Text style={{ fontWeight: 500 }}>{r.title}</Text>,
     },
     {
-      title: 'Trạng thái', key: 'status', width: 110,
+      title: 'Trạng thái', key: 'status', width: 120,
       render: (_, r) => {
         const cfg = STATUS_CFG[r.status] ?? STATUS_CFG.ended;
+        // FIX: borderRadius 99 (pill) thay vì 4 — nhất quán toàn app
         return (
-          <span style={{
-            background: cfg.bg, color: cfg.color,
-            padding: '3px 12px', borderRadius: 4, fontSize: 12, fontWeight: 500,
-          }}>
+          <span
+            style={{
+              display: 'inline-block',
+              background: cfg.bg,
+              color: cfg.color,
+              padding: '3px 10px',
+              borderRadius: 99,
+              fontSize: 12,
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
             {cfg.label}
           </span>
         );
@@ -99,12 +108,12 @@ export const BatchList: React.FC = () => {
       ),
     },
     {
-      title: 'Bắt đầu', key: 'startDate', width: 140,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{r.startDate}</Text>,
+      title: 'Bắt đầu', key: 'startDate', width: 130,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.startDate}</Text>,
     },
     {
-      title: 'Kết thúc', key: 'endDate', width: 140,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 12.5 }}>{r.endDate}</Text>,
+      title: 'Kết thúc', key: 'endDate', width: 130,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.endDate}</Text>,
     },
     {
       title: 'Phản hồi', key: 'rate', width: 90,
@@ -117,19 +126,19 @@ export const BatchList: React.FC = () => {
           <Button
             size="small"
             icon={<LinkOutlined style={{ color: '#1D9E75' }} />}
-            style={{ borderRadius: 6 }}
+            style={{ borderRadius: 8 }}
             title="Sao chép link khảo sát"
             onClick={() => setLinkBatch(r)}
           />
           <Button
             size="small"
             icon={<BarChartOutlined style={{ color: '#1D9E75' }} />}
-            style={{ borderRadius: 6 }}
+            style={{ borderRadius: 8 }}
             onClick={() => navigate(`/admin/alumni/batches/${r.id}/responses`)}
           />
           <Dropdown menu={{ items: getMenuItems(r) }} trigger={['click']} placement="bottomRight">
             <Button size="small" icon={<MoreOutlined />}
-              style={{ borderRadius: 6, color: '#1D9E75' }} />
+              style={{ borderRadius: 8, color: '#1D9E75' }} />
           </Dropdown>
         </Space>
       ),
@@ -139,37 +148,52 @@ export const BatchList: React.FC = () => {
   return (
     <AdminLayout>
       <div>
-        <div style={{ padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Space>
-              <Input
-                placeholder="Tìm kiếm theo tiêu đề..." allowClear
-                value={search} onChange={e => setSearch(e.target.value)}
-                style={{ width: 260, borderRadius: 6 }}
-              />
-              <Select value={status} onChange={setStatus} style={{ width: 160 }}>
-                <Select.Option value="all">Tất cả trạng thái</Select.Option>
-                <Select.Option value="active">Hoạt động</Select.Option>
-                <Select.Option value="ended">Đã kết thúc</Select.Option>
-                <Select.Option value="draft">Nháp</Select.Option>
-              </Select>
-            </Space>
-            <Button
-              type="primary" icon={<PlusOutlined />}
-              onClick={() => navigate('/admin/alumni/batches/create')}
-              style={{ background: '#1D9E75', borderColor: '#1D9E75', borderRadius: 6, fontWeight: 500 }}
-            >
-              Tạo đợt mới
-            </Button>
-          </div>
-
-          <CustomTable
-            columns={columns}
-            data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
-            loading={loading}
-            rowKey="id"
-          />
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 700, color: '#0f172a' }}>
+            Khảo sát việc làm
+          </h2>
+          <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+            Quản lý các đợt khảo sát và theo dõi phản hồi của cựu sinh viên
+          </p>
         </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+          <Space wrap>
+            <Input
+              placeholder="Tìm kiếm theo tiêu đề..."
+              allowClear
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: 260, borderRadius: 8 }}
+            />
+            <Select
+              value={status}
+              onChange={setStatus}
+              style={{ width: 160 }}
+              options={[
+                { value: 'all', label: 'Tất cả trạng thái' },
+                { value: 'active', label: 'Hoạt động' },
+                { value: 'ended', label: 'Đã kết thúc' },
+                { value: 'draft', label: 'Nháp' },
+              ]}
+            />
+          </Space>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/admin/alumni/batches/create')}
+            style={{ borderRadius: 8, fontWeight: 500 }}
+          >
+            Tạo đợt mới
+          </Button>
+        </div>
+
+        <CustomTable
+          columns={columns}
+          data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
+          loading={loading}
+          rowKey="id"
+        />
 
         <SurveyLinkModal
           batchId={linkBatch?.id}

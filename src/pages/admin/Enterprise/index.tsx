@@ -6,12 +6,8 @@ import {
   Input,
   Select,
   Button,
-  Modal,
-  Card,
-  Tag,
-  Space,
-  Typography,
   Tooltip,
+  Typography,
 } from "antd";
 import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
@@ -26,78 +22,65 @@ import {
   type Enterprise,
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
+import { KpiCard } from "../../../components/common/KpiCard";
 
 const { Text } = Typography;
 
-const T = {
-  accent: "#16a34a",
+// FIX: Dùng color token thống nhất thay vì hardcode
+const COLOR = {
+  primary: "#16a34a",
   warning: "#f59e0b",
-  text: "#1e2433",
-  sub: "#8791a6",
-  muted: "#adb5c4",
-  border: "#eceef2",
+  danger: "#ef4444",
+  info: "#1677ff",
+  text: "#0f172a",
+  sub: "#64748b",
+  muted: "#94a3b8",
+  border: "#e5e7eb",
   surface: "#ffffff",
 };
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: React.ReactNode;
-  color: string;
-}) {
+function IndustryTag({ value }: { value: string }) {
   return (
-    <div
+    <span
       style={{
-        background: "#f4f5f7",
-        borderRadius: 14,
-        padding: "20px 24px",
-        minHeight: 96,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 700,
-          color,
-          letterSpacing: "-0.5px",
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 13,
-          color: T.sub,
-          marginTop: 8,
-          fontWeight: 400,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function IndustryPill({ value }: { value: string }) {
-  return (
-    <Tag
-      style={{
-        margin: 0,
-        borderRadius: 8,
-        padding: "4px 12px",
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: 99,
         fontSize: 12,
         fontWeight: 500,
-        color: "#667085",
-        background: "#f2f4f7",
-        border: "1px solid #eaecf0",
+        color: "#475569",
+        background: "#f1f5f9",
+        border: "1px solid #e2e8f0",
+        whiteSpace: "nowrap",
       }}
     >
       {value}
-    </Tag>
+    </span>
+  );
+}
+
+function PartnerStatusBadge({ status }: { status: string }) {
+  // FIX: Thống nhất pill badge style
+  const map: Record<string, { bg: string; color: string; label: string }> = {
+    active:   { bg: "#f0fdf4", color: "#16a34a", label: "Hoạt động" },
+    inactive: { bg: "#fff7ed", color: "#ea580c", label: "Tạm ngưng" },
+  };
+  const cfg = map[status] ?? map.inactive;
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: 99,
+        fontSize: 12,
+        fontWeight: 600,
+        color: cfg.color,
+        background: cfg.bg,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {cfg.label}
+    </span>
   );
 }
 
@@ -128,10 +111,7 @@ export default function EnterprisePage() {
         !keyword ||
         e.name.toLowerCase().includes(keyword) ||
         e.email.toLowerCase().includes(keyword);
-
-      const matchIndustry =
-        industry === "Tất cả ngành" || e.industry === industry;
-
+      const matchIndustry = industry === "Tất cả ngành" || e.industry === industry;
       return matchSearch && matchIndustry;
     });
   }, [enterprises, search, industry]);
@@ -154,9 +134,9 @@ export default function EnterprisePage() {
       title: "STT",
       key: "stt",
       align: "center",
-      width: 70,
-      render: (_value, _record, index) => (
-        <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>
+      width: 60,
+      render: (_v, _r, index) => (
+        <span style={{ fontSize: 13, color: COLOR.muted, fontWeight: 500 }}>
           {(query.page - 1) * query.size + index + 1}
         </span>
       ),
@@ -166,31 +146,31 @@ export default function EnterprisePage() {
       key: "name",
       dataIndex: "name",
       render: (value: string) => (
-        <span style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{value}</span>
+        <span style={{ fontWeight: 600, fontSize: 14, color: COLOR.text }}>{value}</span>
       ),
     },
     {
       title: "Ngành",
       dataIndex: "industry",
       key: "industry",
-      width: 320,
-      render: (value: string) => <IndustryPill value={value} />,
+      width: 280,
+      render: (value: string) => <IndustryTag value={value} />,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "partnerStatus",
+      key: "partnerStatus",
+      width: 130,
+      render: (value: string) => <PartnerStatusBadge status={value} />,
     },
     {
       title: "Việc làm",
       dataIndex: "jobs",
       key: "jobs",
-      width: 120,
+      width: 100,
       align: "center",
       render: (value: number) => (
-        <span
-          style={{
-            fontWeight: 700,
-            fontSize: 14,
-            color: T.accent,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
+        <span style={{ fontWeight: 700, fontSize: 14, color: COLOR.primary }}>
           {value}
         </span>
       ),
@@ -198,9 +178,9 @@ export default function EnterprisePage() {
     {
       title: "",
       key: "action",
-      width: 80,
+      width: 60,
       align: "center",
-      render: (_value, record) => (
+      render: (_v, record) => (
         <Tooltip title="Chỉnh sửa">
           <Button
             type="text"
@@ -211,11 +191,10 @@ export default function EnterprisePage() {
             }}
             style={{
               border: "1px solid #e5e7eb",
-              borderRadius: 10,
+              borderRadius: 8,
               width: 34,
               height: 34,
-              color: "#98a2b3",
-              background: "#fff",
+              color: "#94a3b8",
             }}
           />
         </Tooltip>
@@ -225,88 +204,75 @@ export default function EnterprisePage() {
 
   return (
     <AdminLayout>
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        <Row justify="space-between" align="top" wrap style={{ gap: 12 }}>
-          <Col>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 20,
-                fontWeight: 700,
-                color: T.text,
-                letterSpacing: "-0.3px",
-              }}
-            >
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLOR.text, letterSpacing: "-0.3px" }}>
               Doanh nghiệp đối tác
             </h2>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: T.sub }}>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: COLOR.sub }}>
               Quản lý danh sách và trạng thái hợp tác
             </p>
-          </Col>
+          </div>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="large"
+            onClick={() => setModal({ open: true, enterprise: null })}
+            style={{ height: 44, borderRadius: 10, paddingInline: 18, fontWeight: 600 }}
+          >
+            Thêm doanh nghiệp
+          </Button>
+        </div>
 
-          <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              size="large"
-              onClick={() => setModal({ open: true, enterprise: null })}
-              style={{
-                height: 44,
-                borderRadius: 12,
-                paddingInline: 18,
-                fontWeight: 600,
-              }}
-            >
-              Thêm doanh nghiệp
-            </Button>
-          </Col>
-        </Row>
-
+        {/* FIX: KPI cards dùng KpiCard thống nhất, màu từ COLOR token */}
         <Row gutter={[14, 14]}>
           <Col xs={12} sm={12} md={6}>
-            <StatCard label="Tổng doanh nghiệp" value={total} color={T.accent} />
+            <KpiCard label="Tổng doanh nghiệp" value={total} accentColor={COLOR.primary} />
           </Col>
           <Col xs={12} sm={12} md={6}>
-            <StatCard label="Đang hoạt động" value={activeCount} color="#d4a106" />
+            <KpiCard label="Đang hoạt động" value={activeCount} accentColor={COLOR.info} />
           </Col>
           <Col xs={12} sm={12} md={6}>
-            <StatCard label="Tạm ngưng" value={inactiveCount} color="#6b5a3a" />
+            <KpiCard label="Tạm ngưng" value={inactiveCount} accentColor={COLOR.warning} />
           </Col>
           <Col xs={12} sm={12} md={6}>
-            <StatCard label="Vị trí tuyển dụng" value={totalJobs} color="#9a6b21" />
+            <KpiCard label="Vị trí tuyển dụng" value={totalJobs} accentColor={COLOR.danger} />
           </Col>
         </Row>
 
-        <Card
-          variant="borderless"
-          styles={{ body: { padding: 0 } }}
+        {/* Table card */}
+        <div
           style={{
-            background: T.surface,
-            borderRadius: 14,
+            background: COLOR.surface,
+            borderRadius: 12,
+            border: `1px solid ${COLOR.border}`,
             overflow: "hidden",
-            border: `1px solid ${T.border}`,
           }}
         >
+          {/* Toolbar */}
           <div
             style={{
-              padding: "16px 22px",
-              borderBottom: `1px solid ${T.border}`,
+              padding: "14px 20px",
+              borderBottom: `1px solid ${COLOR.border}`,
               display: "flex",
               alignItems: "center",
-              gap: 12,
+              gap: 10,
               flexWrap: "wrap",
-              background: "#fff",
             }}
           >
             <Input
-              prefix={<SearchOutlined style={{ color: "#98a2b3", fontSize: 12 }} />}
+              prefix={<SearchOutlined style={{ color: "#94a3b8", fontSize: 13 }} />}
               placeholder="Tìm kiếm doanh nghiệp..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{ width: 250, height: 38, fontSize: 13 }}
+              // FIX: onClear cũng reset page về 1
+              onClear={() => setQuery((prev) => ({ ...prev, page: 1 }))}
+              style={{ width: 240, height: 36, fontSize: 13 }}
               variant="filled"
               allowClear
             />
@@ -317,7 +283,7 @@ export default function EnterprisePage() {
                 setIndustry(v);
                 setQuery((prev) => ({ ...prev, page: 1 }));
               }}
-              style={{ width: 170, height: 38 }}
+              style={{ width: 170, height: 36 }}
               options={[
                 { label: "Tất cả ngành", value: "Tất cả ngành" },
                 ...INDUSTRIES.map((i) => ({ label: i, value: i })),
@@ -328,7 +294,7 @@ export default function EnterprisePage() {
               style={{
                 marginLeft: "auto",
                 fontSize: 13,
-                color: T.sub,
+                color: COLOR.sub,
                 fontVariantNumeric: "tabular-nums",
               }}
             >
@@ -362,7 +328,7 @@ export default function EnterprisePage() {
               style: { cursor: "pointer" },
             })}
           />
-        </Card>
+        </div>
 
         <EnterpriseFormModal
           open={modal.open}
