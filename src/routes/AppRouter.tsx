@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import Enterprise from '../pages/admin/Enterprise/index';
 import EnterpriseDetail from '../pages/admin/EnterpriseDetail/index';
@@ -31,8 +31,26 @@ const BatchFormEditor = lazy(() => import('../pages/admin/Alumni/BatchFormEditor
 //  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');
 
+// Khi chưa đăng nhập → redirect sang SSO của BE thay vì loop lại dashboard
+const SsoRedirect = () => {
+  const [redirecting, setRedirecting] = useState(false);
+
+  useEffect(() => {
+    if (!redirecting) {
+      setRedirecting(true);
+      window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
+    }
+  }, [redirecting]);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <span>Đang chuyển hướng đến trang đăng nhập...</span>
+    </div>
+  );
+};
+
 const ProtectedRoute = () =>
-  isLoggedIn() ? <Outlet /> : <Navigate to="/admin/dashboard" replace />;
+  isLoggedIn() ? <Outlet /> : <SsoRedirect />;
 
 //  Routes
 const routes = [
