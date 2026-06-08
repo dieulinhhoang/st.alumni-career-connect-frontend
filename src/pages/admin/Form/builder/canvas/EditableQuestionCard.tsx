@@ -397,8 +397,6 @@ export function EditableQuestionCard({
               Bắt buộc
             </Checkbox>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* <ActionIcon title="Đưa lên"   icon={<ArrowUpOutlined />}   onClick={onMoveUp}    disabled={index === 0} />
-              <ActionIcon title="Đưa xuống" icon={<ArrowDownOutlined />} onClick={onMoveDown}  disabled={index === total - 1} /> */}
               <ActionIcon title="Nhân bản"  icon={<CopyOutlined />}      onClick={onDuplicate} />
               <ActionIcon title="Xóa"       icon={<DeleteOutlined />}    onClick={onRemove}    danger />
             </div>

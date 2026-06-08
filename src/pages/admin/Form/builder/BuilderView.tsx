@@ -46,6 +46,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addQuestion, duplicateQuestion, removeQuestion, updateQuestion, moveQuestion,
     addSectionAfter, deleteSection,
     addOption, updateOption, removeOption,
+    groupQuestions, ungroupQuestion,
     saving, saved, handleSave,
     publishing, formStatus, handlePublish, handleUnpublish,
   } = useFormBuilder(mode, form?.id ?? undefined)
@@ -200,6 +201,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             onMoveUp={id => moveQuestion(id, 'up')} onMoveDown={id => moveQuestion(id, 'down')}
             onAddQuestion={handleAddQuestion} onAddSectionAfter={addSectionAfter}
             onAddOption={addOption} onUpdateOption={updateOption} onRemoveOption={removeOption}
+            onGroupQuestions={groupQuestions} onUngroupQuestion={ungroupQuestion}
             onTitleChange={setName} onDescriptionParagraphsChange={setDescParagraphs}
             onHeaderChange={setHeader} onFooterChange={setFooter} onSectionsChange={setSections}
             onDrop={handleDrop} onReorder={reorderQuestion}

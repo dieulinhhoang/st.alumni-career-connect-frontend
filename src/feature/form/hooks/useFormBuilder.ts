@@ -55,6 +55,7 @@ export interface UseFormBuilderReturn {
   moveQuestion: (id: string, dir: 'up' | 'down') => void; reorderQuestion: (dragId: string, overId: string) => void
   addSectionAfter: (afterQuestionId: string) => void; deleteSection: (id: string) => void
   addOption: (questionId: string) => void; updateOption: (questionId: string, optionId: string, label: string) => void; removeOption: (questionId: string, optionId: string) => void
+  groupQuestions: (id: string, count: 2 | 3) => void; ungroupQuestion: (id: string) => void
   loading: boolean; loadError: string
   saving: boolean; saved: boolean; saveError: string; handleSave: (extras?: SaveExtras) => Promise<Form | null>
   publishing: boolean; published: boolean; publishError: string
@@ -238,6 +239,38 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     setQs(qs => qs.map(q => q.id !== qid ? q : { ...q, options: (q.options ?? []).filter((o: QuestionOption) => o.id !== oid) }))
   }, [])
 
+  // Group N câu liên tiếp (bắt đầu từ id) vào 1 hàng
+  const groupQuestions = useCallback((id: string, count: 2 | 3) => {
+    setQs(prev => {
+      const idx = prev.findIndex(q => q.id === id)
+      if (idx < 0) return prev
+      const groupId = `rg_${id}`
+      const end = Math.min(idx + count, prev.length)
+      // xóa group cũ nếu câu này đang trong group khác
+      const oldGroup = prev[idx].rowGroup
+      return prev.map((q, i) => {
+        if (i >= idx && i < end) return { ...q, rowGroup: groupId }
+        if (oldGroup && q.rowGroup === oldGroup) return { ...q, rowGroup: undefined }
+        return q
+      })
+    })
+  }, [])
+
+  // Tách câu hỏi ra khỏi group
+  const ungroupQuestion = useCallback((id: string) => {
+    setQs(prev => {
+      const q = prev.find(q => q.id === id)
+      if (!q?.rowGroup) return prev
+      const gid = q.rowGroup
+      const members = prev.filter(q => q.rowGroup === gid)
+      if (members.length <= 2) {
+        // chỉ còn 1–2 câu → tách toàn bộ group
+        return prev.map(q => q.rowGroup === gid ? { ...q, rowGroup: undefined } : q)
+      }
+      return prev.map(q => q.id === id ? { ...q, rowGroup: undefined } : q)
+    })
+  }, [])
+
   // FIX: dùng savedFormIdRef thay vì mode+formId — tránh createForm bị gọi nhiều lần
   const handleSave = useCallback(async (extras?: SaveExtras): Promise<Form | null> => {
     if (!name.trim()) return null
@@ -319,6 +352,7 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     addQuestion, duplicateQuestion, removeQuestion, updateQuestion, moveQuestion, reorderQuestion,
     addSectionAfter, deleteSection,
     addOption, updateOption, removeOption,
+    groupQuestions, ungroupQuestion,
     loading, loadError,
     saving, saved, saveError, handleSave,
     publishing, published, publishError, handlePublish, handleUnpublish, formStatus,

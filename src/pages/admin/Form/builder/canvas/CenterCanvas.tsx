@@ -29,6 +29,27 @@ import { EditableQuestionCard } from './EditableQuestionCard'
 import { SectionBar } from './SectionBar'
 import { PDFCanvas } from '../form/PDFCanvas'
 
+// Group các câu hỏi liên tiếp cùng rowGroup thành mảng con
+function groupByRow(qs: Question[]): (Question | Question[])[] {
+  const result: (Question | Question[])[] = []
+  let i = 0
+  while (i < qs.length) {
+    const q = qs[i]
+    if (q.rowGroup) {
+      const group: Question[] = []
+      while (i < qs.length && qs[i].rowGroup === q.rowGroup) {
+        group.push(qs[i])
+        i++
+      }
+      result.push(group)
+    } else {
+      result.push(q)
+      i++
+    }
+  }
+  return result
+}
+
 interface CenterCanvasProps {
   questions: Question[]
   sections: Section[]
@@ -52,6 +73,8 @@ interface CenterCanvasProps {
   onAddOption: (qid: string) => void
   onUpdateOption: (qid: string, oid: string, label: string) => void
   onRemoveOption: (qid: string, oid: string) => void
+  onGroupQuestions: (id: string, count: 2 | 3) => void
+  onUngroupQuestion: (id: string) => void
   onTitleChange: (title: string) => void
   onDescriptionParagraphsChange: (paragraphs: string[]) => void
   onHeaderChange: (header: SurveyHeader) => void
@@ -111,9 +134,19 @@ function RailButton({
 //  Sortable wrapper cho mỗi câu hỏi 
 function SortableCard({
   id,
+  isRowLeader,
+  rowSize,
+  accent,
+  onGroup,
+  onUngroup,
   children,
 }: {
   id: string
+  isRowLeader?: boolean
+  rowSize?: number
+  accent?: string
+  onGroup?: (count: 2 | 3) => void
+  onUngroup?: () => void
   children: React.ReactNode
 }) {
   const {
@@ -126,6 +159,9 @@ function SortableCard({
     isDragging,
   } = useSortable({ id })
 
+  const [hovered, setHovered] = useState(false)
+  const ac = accent ?? '#279f2d'
+
   return (
     <div
       ref={setNodeRef}
@@ -135,37 +171,95 @@ function SortableCard({
         opacity: isDragging ? 0.35 : 1,
         position: 'relative',
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* Drag handle — truyền xuống con qua data attribute */}
-      <div
-        ref={setActivatorNodeRef}
-        {...attributes}
-        {...listeners}
-        data-drag-handle
-        style={{
-          position: 'absolute',
-          left: -28,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: 24,
-          height: 32,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: isDragging ? 'grabbing' : 'grab',
-          color: '#cbd5e1',
-          fontSize: 16,
-          zIndex: 10,
-          userSelect: 'none',
-          borderRadius: 6,
-          transition: 'color .15s',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = '#94a3b8' }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = '#cbd5e1' }}
-        title="Kéo để sắp xếp"
-      >
-        ⠿
+      {/* Cột trái: drag handle + layout buttons */}
+      <div style={{
+        position: 'absolute',
+        left: -36,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        zIndex: 10,
+      }}>
+        {/* Drag handle */}
+        <div
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          data-drag-handle
+          style={{
+            width: 24, height: 28,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            color: hovered ? '#94a3b8' : '#d1d5db',
+            fontSize: 16, userSelect: 'none', borderRadius: 6,
+            transition: 'color .15s',
+          }}
+          title="Kéo để sắp xếp"
+        >
+          ⠿
+        </div>
+
+        {/* Layout buttons — chỉ hiện khi hover */}
+        {hovered && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {isRowLeader ? (
+              // Câu đầu hàng: 3 nút chọn số cột
+              <>
+                {([
+                  { label: '1', tip: '1 câu/hàng', val: null },
+                  { label: '½', tip: '2 câu/hàng', val: 2 },
+                  { label: '⅓', tip: '3 câu/hàng', val: 3 },
+                ] as { label: string; tip: string; val: 2 | 3 | null }[]).map(({ label, tip, val }) => {
+                  const active = val === null ? (rowSize ?? 1) === 1 : (rowSize ?? 1) === val
+                  return (
+                    <Tooltip key={label} title={tip} placement="left">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); val === null ? onUngroup?.() : onGroup?.(val) }}
+                        style={{
+                          width: 26, height: 20, padding: 0,
+                          border: `1px solid ${active ? ac : '#d1d5db'}`,
+                          borderRadius: 4,
+                          background: active ? ac : '#fff',
+                          color: active ? '#fff' : '#64748b',
+                          fontSize: 10, fontWeight: 700,
+                          cursor: 'pointer', transition: 'all .1s',
+                          fontFamily: 'inherit', lineHeight: 1,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    </Tooltip>
+                  )
+                })}
+              </>
+            ) : (
+              // Câu con trong group: nút tách
+              <Tooltip title="Tách ra hàng riêng" placement="left">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onUngroup?.() }}
+                  style={{
+                    width: 26, height: 20, padding: 0,
+                    border: '1px solid #d1d5db', borderRadius: 4,
+                    background: '#fff', color: '#64748b',
+                    fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1,
+                  }}
+                >
+                  ↩
+                </button>
+              </Tooltip>
+            )}
+          </div>
+        )}
       </div>
+
       {children}
     </div>
   )
@@ -194,6 +288,8 @@ export function CenterCanvas({
   onAddOption,
   onUpdateOption,
   onRemoveOption,
+  onGroupQuestions,
+  onUngroupQuestion,
   onTitleChange,
   onDescriptionParagraphsChange,
   onHeaderChange,
@@ -367,56 +463,136 @@ export function CenterCanvas({
                         onAddQuestion(lastQ?.id, { sectionId })
                       }}
                     />
-                    {sqs.map((q) => (
-                      <SortableCard key={q.id} id={q.id}>
-                        <EditableQuestionCard
-                          question={q}
-                          index={questions.indexOf(q)}
-                          total={questions.length}
-                          isActive={activeQuestionId === q.id}
-                          accent={accent}
-                          sections={sections}
-                          onActivate={() => onActivate(q.id)}
-                          onDeactivate={onDeactivate}
-                          onUpdate={(patch) => onUpdate(q.id, patch)}
-                          onDuplicate={() => onDuplicate(q.id)}
-                          onRemove={() => onRemove(q.id)}
-                          onMoveUp={() => onMoveUp(q.id)}
-                          onMoveDown={() => onMoveDown(q.id)}
-                          onAddQuestion={() => onAddQuestion(q.id)}
-                          onAddOption={() => onAddOption(q.id)}
-                          onUpdateOption={(oid, label) => onUpdateOption(q.id, oid, label)}
-                          onRemoveOption={(oid) => onRemoveOption(q.id, oid)}
-                        />
-                      </SortableCard>
-                    ))}
+                    {groupByRow(sqs).map((item) =>
+                      Array.isArray(item) ? (
+                        <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 0 }}>
+                          {item.map((q, qIdx) => (
+                            <SortableCard key={q.id} id={q.id}
+                              isRowLeader={qIdx === 0} rowSize={item.length} accent={accent}
+                              onGroup={(count) => onGroupQuestions(q.id, count)}
+                              onUngroup={() => onUngroupQuestion(q.id)}
+                            >
+                              <EditableQuestionCard
+                                question={q}
+                                index={questions.indexOf(q)}
+                                total={questions.length}
+                                isActive={activeQuestionId === q.id}
+                                accent={accent}
+                                sections={sections}
+                                onActivate={() => onActivate(q.id)}
+                                onDeactivate={onDeactivate}
+                                onUpdate={(patch) => onUpdate(q.id, patch)}
+                                onDuplicate={() => onDuplicate(q.id)}
+                                onRemove={() => onRemove(q.id)}
+                                onMoveUp={() => onMoveUp(q.id)}
+                                onMoveDown={() => onMoveDown(q.id)}
+                                onAddQuestion={() => onAddQuestion(q.id)}
+                                onAddOption={() => onAddOption(q.id)}
+                                onUpdateOption={(oid, label) => onUpdateOption(q.id, oid, label)}
+                                onRemoveOption={(oid) => onRemoveOption(q.id, oid)}
+                                onGroup={(count) => onGroupQuestions(q.id, count)}
+                                onUngroup={() => onUngroupQuestion(q.id)}
+                              />
+                            </SortableCard>
+                          ))}
+                        </div>
+                      ) : (
+                        <SortableCard key={item.id} id={item.id}
+                          isRowLeader={true} rowSize={1} accent={accent}
+                          onGroup={(count) => onGroupQuestions(item.id, count)}
+                          onUngroup={() => onUngroupQuestion(item.id)}
+                        >
+                          <EditableQuestionCard
+                            question={item}
+                            index={questions.indexOf(item)}
+                            total={questions.length}
+                            isActive={activeQuestionId === item.id}
+                            accent={accent}
+                            sections={sections}
+                            onActivate={() => onActivate(item.id)}
+                            onDeactivate={onDeactivate}
+                            onUpdate={(patch) => onUpdate(item.id, patch)}
+                            onDuplicate={() => onDuplicate(item.id)}
+                            onRemove={() => onRemove(item.id)}
+                            onMoveUp={() => onMoveUp(item.id)}
+                            onMoveDown={() => onMoveDown(item.id)}
+                            onAddQuestion={() => onAddQuestion(item.id)}
+                            onAddOption={() => onAddOption(item.id)}
+                            onUpdateOption={(oid, label) => onUpdateOption(item.id, oid, label)}
+                            onRemoveOption={(oid) => onRemoveOption(item.id, oid)}
+                            onGroup={(count) => onGroupQuestions(item.id, count)}
+                            onUngroup={() => onUngroupQuestion(item.id)}
+                          />
+                        </SortableCard>
+                      )
+                    )}
                   </div>
                 ))}
 
                 {/* Câu hỏi chưa thuộc section nào */}
-                {unsectioned.map((q) => (
-                  <SortableCard key={q.id} id={q.id}>
-                    <EditableQuestionCard
-                      question={q}
-                      index={questions.indexOf(q)}
-                      total={questions.length}
-                      isActive={activeQuestionId === q.id}
-                      accent={accent}
-                      sections={sections}
-                      onActivate={() => onActivate(q.id)}
-                      onDeactivate={onDeactivate}
-                      onUpdate={(patch) => onUpdate(q.id, patch)}
-                      onDuplicate={() => onDuplicate(q.id)}
-                      onRemove={() => onRemove(q.id)}
-                      onMoveUp={() => onMoveUp(q.id)}
-                      onMoveDown={() => onMoveDown(q.id)}
-                      onAddQuestion={() => onAddQuestion(q.id)}
-                      onAddOption={() => onAddOption(q.id)}
-                      onUpdateOption={(oid, label) => onUpdateOption(q.id, oid, label)}
-                      onRemoveOption={(oid) => onRemoveOption(q.id, oid)}
-                    />
-                  </SortableCard>
-                ))}
+                {groupByRow(unsectioned).map((item) =>
+                  Array.isArray(item) ? (
+                    <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 0 }}>
+                      {item.map((q, qIdx) => (
+                        <SortableCard key={q.id} id={q.id}
+                          isRowLeader={qIdx === 0} rowSize={item.length} accent={accent}
+                          onGroup={(count) => onGroupQuestions(q.id, count)}
+                          onUngroup={() => onUngroupQuestion(q.id)}
+                        >
+                          <EditableQuestionCard
+                            question={q}
+                            index={questions.indexOf(q)}
+                            total={questions.length}
+                            isActive={activeQuestionId === q.id}
+                            accent={accent}
+                            sections={sections}
+                            onActivate={() => onActivate(q.id)}
+                            onDeactivate={onDeactivate}
+                            onUpdate={(patch) => onUpdate(q.id, patch)}
+                            onDuplicate={() => onDuplicate(q.id)}
+                            onRemove={() => onRemove(q.id)}
+                            onMoveUp={() => onMoveUp(q.id)}
+                            onMoveDown={() => onMoveDown(q.id)}
+                            onAddQuestion={() => onAddQuestion(q.id)}
+                            onAddOption={() => onAddOption(q.id)}
+                            onUpdateOption={(oid, label) => onUpdateOption(q.id, oid, label)}
+                            onRemoveOption={(oid) => onRemoveOption(q.id, oid)}
+                            onGroup={(count) => onGroupQuestions(q.id, count)}
+                            onUngroup={() => onUngroupQuestion(q.id)}
+                          />
+                        </SortableCard>
+                      ))}
+                    </div>
+                  ) : (
+                    <SortableCard key={item.id} id={item.id}
+                      isRowLeader={true} rowSize={1} accent={accent}
+                      onGroup={(count) => onGroupQuestions(item.id, count)}
+                      onUngroup={() => onUngroupQuestion(item.id)}
+                    >
+                      <EditableQuestionCard
+                        question={item}
+                        index={questions.indexOf(item)}
+                        total={questions.length}
+                        isActive={activeQuestionId === item.id}
+                        accent={accent}
+                        sections={sections}
+                        onActivate={() => onActivate(item.id)}
+                        onDeactivate={onDeactivate}
+                        onUpdate={(patch) => onUpdate(item.id, patch)}
+                        onDuplicate={() => onDuplicate(item.id)}
+                        onRemove={() => onRemove(item.id)}
+                        onMoveUp={() => onMoveUp(item.id)}
+                        onMoveDown={() => onMoveDown(item.id)}
+                        onAddQuestion={() => onAddQuestion(item.id)}
+                        onAddOption={() => onAddOption(item.id)}
+                        onUpdateOption={(oid, label) => onUpdateOption(item.id, oid, label)}
+                        onRemoveOption={(oid) => onRemoveOption(item.id, oid)}
+                        onGroup={(count) => onGroupQuestions(item.id, count)}
+                        onUngroup={() => onUngroupQuestion(item.id)}
+                      />
+                    </SortableCard>
+                  )
+                )}
               </SortableContext>
 
               {/* Ghost card khi đang kéo */}

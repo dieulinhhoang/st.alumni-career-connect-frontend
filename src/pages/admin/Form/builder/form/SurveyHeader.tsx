@@ -1,3 +1,4 @@
+import logoVnua from '../../../../../assets/logoVnua.jpg'
 import type { SurveyHeader as SurveyHeaderType } from '../../../../../feature/form/types'
 import { LogoUpload } from './LogoUpload'
 import { InlineInput } from '../shared/InlineInput'
@@ -32,7 +33,7 @@ export function SurveyHeader({
   const logoSrc =
     logoUrl ||
     header.logoUrl ||
-    'https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png'
+    logoVnua
 
   const ministryText = header.ministry?.trim() || (editable ? '' : 'Bộ/ngành')
   const academyText = header.academy?.trim() || (editable ? '' : 'Học viện / Trường')

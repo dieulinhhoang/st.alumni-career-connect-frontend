@@ -34,6 +34,7 @@ export interface Question {
   required: boolean;
   sectionId: string;           // which Section this belongs to
   order: number;               // order within the section
+  rowGroup?: string;           // câu hỏi cùng rowGroup render trên 1 hàng (tối đa 3)
 
   // new fields:
   visibleWhen?: ConditionalRule;      // condition for the question to be shown
