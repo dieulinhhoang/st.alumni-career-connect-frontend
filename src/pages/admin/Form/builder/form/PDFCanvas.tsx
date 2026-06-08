@@ -4,9 +4,6 @@ import { SurveyHeader as SurveyHeaderComp } from './SurveyHeader'
 import { SurveyQuestion } from './SurveyQuestion'
 import { FooterBlock } from './FooterBlock'
 import { SectionManager } from './SectionManager'
-import { ClickToEditBlock } from '../shared/ClickToEditBlock'
-import { FloatingEditPopup } from '../shared/FloatingEditPopup'
-import { RichTextEditor } from '../shared/RichTextEditor'
 import { RichTextDisplay } from '../shared/RichTextDisplay'
 import { InlineInput } from '../shared/InlineInput'
 
@@ -91,11 +88,13 @@ export function PDFCanvas({
   const isMobile = isSmall || isMedium
   const px = isSmall ? 16 : isMedium ? 20 : 36
 
-  // Description popup
-  const [descPopupOpen, setDescPopupOpen] = useState(false)
-  const [descDraft, setDescDraft] = useState(descriptionParagraphs.join('\n'))
-  const descBlockRef = useRef<HTMLDivElement>(null)
-  useEffect(() => setDescDraft(descriptionParagraphs.join('\n')), [descriptionParagraphs.join('\n')])
+  // Description inline edit — 3 fields: titleLine / bodyText / footerLine
+  const parseDesc = (paras: string[]) => ({
+    titleLine: paras[0] ?? '',
+    bodyText: paras.length > 2 ? paras.slice(1, paras.length - 1).join('\n') : (paras[1] ?? ''),
+    footerLine: paras.length > 2 ? (paras[paras.length - 1] ?? '') : '',
+  })
+  const [descDraft, setDescDraft] = useState(() => parseDesc(descriptionParagraphs))
 
   const today = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const editable = headerOnly || !!onHeaderChange
@@ -178,35 +177,97 @@ export function PDFCanvas({
         {(descriptionParagraphs.length > 0 || (editable && onDescriptionParagraphsChange)) && (
           <div style={{ marginTop: 16, textAlign: 'left', maxWidth: 680, margin: '16px auto 0' }}>
             {editable && onDescriptionParagraphsChange ? (
-              <>
-                <div ref={descBlockRef}>
-                  <ClickToEditBlock accent={accent} label="Sửa mô tả" isEmpty={descIsEmpty} emptyLabel="Nhấn thêm mô tả / lời dẫn"
-                    onClick={() => { setDescDraft(descriptionParagraphs.join('\n')); setDescPopupOpen(true) }}>
-                    {descriptionParagraphs.map((para, idx) => (
-                      <div key={idx} style={{ marginBottom: idx < descriptionParagraphs.length - 1 ? 12 : 0 }}>
-                        <div style={{ fontSize: 14, color: '#334155', lineHeight: 1.65, textAlign: 'justify' }}><RichTextDisplay text={para} /></div>
-                      </div>
-                    ))}
-                  </ClickToEditBlock>
-                </div>
-                <FloatingEditPopup open={descPopupOpen} anchorEl={descBlockRef.current} onClose={() => setDescPopupOpen(false)} title="Mô tả " accent={accent} width={620}>
-                  <RichTextEditor value={descDraft} onChange={setDescDraft} placeholder="Nhập mô tả cho khảo sát..." minHeight={260} />
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-                    <button onClick={() => setDescPopupOpen(false)} style={{ height: 32, padding: '0 14px', border: '1px solid #e2e8f0', borderRadius: 7, background: '#fff', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: '#6b7280', fontFamily: 'inherit' }}>Hủy</button>
-                    <button onClick={() => {
-                      const doc = new DOMParser().parseFromString(descDraft, 'text/html')
-                      const paras = Array.from(doc.querySelectorAll('p, h3, li')).map(el => el.textContent ?? '').filter(Boolean)
-                      onDescriptionParagraphsChange(paras.length ? paras : [descDraft])
-                      setDescPopupOpen(false)
-                    }} style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 7, background: accent, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#fff', fontFamily: 'inherit' }}>Lưu</button>
-                  </div>
-                </FloatingEditPopup>
-              </>
-            ) : descriptionParagraphs.map((para, idx) => (
-              <div key={idx} style={{ marginBottom: idx < descriptionParagraphs.length - 1 ? 12 : 0, padding: '14px 16px', background: `${accent}08`, borderLeft: `3px solid ${accent}`, borderRadius: '0 8px 8px 0' }}>
-                <div style={{ fontSize: 14, color: '#334155', lineHeight: 1.75, textAlign: 'justify' }}><RichTextDisplay text={para} /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* Dòng đầu — bold italic căn giữa */}
+                <input
+                  value={descDraft.titleLine}
+                  onChange={e => {
+                    const d = { ...descDraft, titleLine: e.target.value }
+                    setDescDraft(d)
+                    const paras: string[] = []
+                    if (d.titleLine.trim()) paras.push(d.titleLine.trim())
+                    d.bodyText.split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => paras.push(l))
+                    if (d.footerLine.trim()) paras.push(d.footerLine.trim())
+                    onDescriptionParagraphsChange(paras.length ? paras : [''])
+                  }}
+                  placeholder="Dòng đầu: Thân gửi Anh/Chị cựu sinh viên..."
+                  style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
+                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+                    fontWeight: 700, fontStyle: 'italic', textAlign: 'center',
+                    color: '#0f172a', background: 'transparent', outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
+                />
+                {/* Đoạn giữa — italic thụt lề */}
+                <textarea
+                  value={descDraft.bodyText}
+                  onChange={e => {
+                    const d = { ...descDraft, bodyText: e.target.value }
+                    setDescDraft(d)
+                    const paras: string[] = []
+                    if (d.titleLine.trim()) paras.push(d.titleLine.trim())
+                    e.target.value.split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => paras.push(l))
+                    if (d.footerLine.trim()) paras.push(d.footerLine.trim())
+                    onDescriptionParagraphsChange(paras.length ? paras : [''])
+                  }}
+                  placeholder="Đoạn giữa: nội dung giới thiệu / lời dẫn khảo sát..."
+                  rows={5}
+                  style={{
+                    width: '100%', padding: '6px 10px 6px 28px', border: '1px dashed #cbd5e1',
+                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+                    fontStyle: 'italic', color: '#334155', background: 'transparent',
+                    resize: 'vertical', outline: 'none', lineHeight: 1.75,
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
+                />
+                {/* Dòng cuối — italic căn giữa */}
+                <input
+                  value={descDraft.footerLine}
+                  onChange={e => {
+                    const d = { ...descDraft, footerLine: e.target.value }
+                    setDescDraft(d)
+                    const paras: string[] = []
+                    if (d.titleLine.trim()) paras.push(d.titleLine.trim())
+                    d.bodyText.split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => paras.push(l))
+                    if (d.footerLine.trim()) paras.push(d.footerLine.trim())
+                    onDescriptionParagraphsChange(paras.length ? paras : [''])
+                  }}
+                  placeholder="Dòng cuối: Trân trọng cảm ơn sự cộng tác..."
+                  style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
+                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+                    fontStyle: 'italic', textAlign: 'center',
+                    color: '#334155', background: 'transparent', outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
+                />
               </div>
-            ))}
+            ) : (
+              <div style={{ padding: '16px 20px', background: `${accent}08`, borderLeft: `3px solid ${accent}`, borderRadius: '0 8px 8px 0' }}>
+                {descriptionParagraphs[0] && (
+                  <div style={{ fontWeight: 700, fontStyle: 'italic', fontSize: 14, color: '#0f172a', textAlign: 'center', marginBottom: 10 }}>
+                    {descriptionParagraphs[0]}
+                  </div>
+                )}
+                {descriptionParagraphs.slice(1, descriptionParagraphs.length > 2 ? descriptionParagraphs.length - 1 : undefined).map((para, idx) => (
+                  <div key={idx} style={{ fontSize: 14, fontStyle: 'italic', color: '#334155', lineHeight: 1.75, textAlign: 'justify', paddingLeft: 24, marginBottom: 6 }}>
+                    {para}
+                  </div>
+                ))}
+                {descriptionParagraphs.length > 2 && descriptionParagraphs[descriptionParagraphs.length - 1] && (
+                  <div style={{ fontSize: 14, fontStyle: 'italic', color: '#334155', textAlign: 'center', marginTop: 6 }}>
+                    {descriptionParagraphs[descriptionParagraphs.length - 1]}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

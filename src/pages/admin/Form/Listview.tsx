@@ -81,9 +81,9 @@ export default function ListView({
               }}>
                 {text}
               </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>
+              {/* <Text type="secondary" style={{ fontSize: 12 }}>
                 {record.description || 'Chưa có mô tả'}
-              </Text>
+              </Text> */}
             </div>
           </Flex>
         )

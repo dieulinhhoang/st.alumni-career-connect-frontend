@@ -55,7 +55,10 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const [logoUrl, setLogoUrl] = useState<string>((form as any)?.logoUrl ?? '')
   const [logoSize, setLogoSize] = useState<number>((form as any)?.logoSize ?? 120)
   const [logicRules, setLogicRules] = useState<LogicRule[]>((form as any)?.logicRules ?? [])
-  const [descParagraphs, setDescParagraphs] = useState<string[]>((form as any)?.descriptionParagraphs ?? [])
+  const [descParagraphs, setDescParagraphs] = useState<string[]>(() => {
+    const desc: string = (form as any)?.description ?? ''
+    return desc ? desc.split('\n').filter(Boolean) : []
+  })
 
   const [winWidth, setWinWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200)
   const [rightOpen, setRightOpen] = useState(false)
@@ -66,8 +69,8 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [])
   const isMobile = winWidth < 768
 
-  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descParagraphs })
-  useEffect(() => { extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descParagraphs } }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs })
+  useEffect(() => { extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs } }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
 
   const renameSection = useCallback((id: string, title: string) => {
     setSections(prev => prev.map((s: Section) => s.id === id ? { ...s, title } : s))
@@ -129,7 +132,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isMountedRef = useRef(false)
   useEffect(() => {
-    // FIX: bỏ qua lần đầu mount — tránh auto-save ngay khi vào trang
     if (!isMountedRef.current) {
       isMountedRef.current = true
       return
@@ -156,7 +158,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           style={{ flex: 1, fontSize: isMobile ? 13 : 14, fontWeight: 600, minWidth: 0 }}
         />
 
-        {/* Auto-save indicator */}
         {saving && (
           <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
@@ -170,7 +171,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           </span>
         )}
 
-        {/* Nút Xuất bản — hiển thị luôn kể cả create mode */}
         {formStatus === 'published' ? (
           <Tooltip title="Hủy xuất bản để chỉnh sửa lại">
             <Button icon={<StopOutlined />} onClick={handleUnpublishClick} loading={publishing}
@@ -186,12 +186,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             </Button>
           </Tooltip>
         )}
-
-        {/* {!isMobile && (
-          <Tag color={formStatus === 'published' ? 'green' : 'default'} style={{ marginLeft: 2 }}>
-            {formStatus === 'published' ? '' : ''}
-          </Tag>
-        )} */}
       </Flex>
 
       {/* Main layout */}

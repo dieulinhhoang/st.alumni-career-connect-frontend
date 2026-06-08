@@ -245,7 +245,15 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     setSaveError('')
     setSaved(false)
     try {
-      const payload = { name, description: desc, questions, sections, ...(extras ?? {}) }
+      const payload = {
+        name,
+        description: extras?.descriptionParagraphs
+          ? extras.descriptionParagraphs.join('\n')
+          : desc,
+        questions,
+        sections,
+        ...(extras ? (({ descriptionParagraphs: _dp, ...rest }) => rest)(extras) : {}),
+      }
       const currentId = savedFormIdRef.current
       let result: Form
       if (currentId != null) {

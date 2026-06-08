@@ -603,7 +603,7 @@ export function SurveyPreview({
       color: C.text,
     }}>
 
-      {onBack && !compact && (
+      {/* {onBack && !compact && (
         <div style={{
           position: 'sticky', top: 0, zIndex: 10,
           background: '#fff',
@@ -628,7 +628,7 @@ export function SurveyPreview({
             ← Quay lại
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Form card */}
       <div style={{ maxWidth: 780, margin: '0 auto', padding: compact ? '0' : '28px 16px 72px' }}>
