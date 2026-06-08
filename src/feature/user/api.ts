@@ -1,5 +1,5 @@
- import axios from 'axios'
-import {
+import api from '../../libs/api'
+import type {
   IUser,
   IUserListResponse,
   IUserQuery,
@@ -7,13 +7,8 @@ import {
   IUpdateUserBody,
 } from './type'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-})
-
 export const getListUserAPI = async (params: IUserQuery): Promise<IUserListResponse> => {
   const { data } = await api.get('/users', { params })
-  console.log('API Response:', data) // Debug log to check the response structure
   return data
 }
 
@@ -36,7 +31,30 @@ export const deleteUserAPI = async (id: string): Promise<void> => {
   await api.delete(`/users/${id}`)
 }
 
-export const updateUserSuspendAPI = async (id: string, isSuspended: boolean): Promise<IUser> => {
-  const { data } = await api.patch(`/users/${id}/suspend`, { isSuspended })
+export const updateUserSuspendAPI = async (id: string): Promise<IUser> => {
+  const { data } = await api.patch(`/users/${id}/suspend`)
+  return data
+}
+
+//  Roles 
+
+/**
+ * GET /users/:id/roles
+ * Response: { assignedRoleIds: number[], roles: IRole[] }
+ */
+export const getUserRolesAPI = async (id: string) => {
+  const { data } = await api.get(`/users/${id}/roles`)
+  return data
+}
+
+/**
+ * POST /users/:id/roles
+ * Body: { roleIds: number[] }
+ */
+export const assignUserRolesAPI = async (
+  id: string,
+  roleIds: number[],
+) => {
+  const { data } = await api.post(`/users/${id}/roles`, { roleIds })
   return data
 }

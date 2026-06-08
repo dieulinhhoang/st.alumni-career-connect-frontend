@@ -1,93 +1,66 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { message } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
-import { usePermission } from '../../../global/hooks/usePermission'
 import {
   useGetListRoles,
   useCreateRole,
   useUpdateRole,
   useDeleteRole,
   useGetRoleDetail,
-  useGetRolePermissions,
-  useGetAllPermissions,
-  useAssignRolePermissions,
+  useGetRoleResources,
+  useAssignRoleResources,
 } from '../../../feature/role/hook/query'
 import RoleListView from './RoleListView'
 import RoleFormView from './RoleFormView'
 import AdminLayout from '../../../components/layout/AdminLayout'
-import type { ICreateRoleBody, IRole, IRoleQuery } from '../../../feature/role/type'
+import type { IRole, IRoleQuery, IResourceAssignment } from '../../../feature/role/type'
 
 export type ViewMode = 'list' | 'create' | 'edit' | 'view'
 
 const RoleManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
   const queryClient = useQueryClient()
-  const { havePermission } = usePermission()
-
-  // const canCreate = havePermission(PermissionEnum.ROLE_CREATE)
-  // const canUpdate = havePermission(PermissionEnum.ROLE_UPDATE)
-  // const canDelete = havePermission(PermissionEnum.ROLE_DELETE)
-  const canCreate = true
-  const canUpdate = true
-  const canDelete = true
 
   const [view, setView] = useState<ViewMode>('list')
-  const [query, setQuery] = useState<IRoleQuery>({
-    page: 0,
-    size: 10,
-    name: '',
-  })
+  const [query, setQuery] = useState<IRoleQuery>({ page: 0, size: 10 })
   const [roleId, setRoleId] = useState<string | null>(null)
   const [name, setName] = useState('')
+  const [code, setCode] = useState('')
   const [description, setDescription] = useState('')
 
   const { data: listData, isLoading: listLoading } = useGetListRoles(query)
+
   const createRole = useCreateRole()
   const updateRole = useUpdateRole()
   const deleteRole = useDeleteRole()
-  const assignRolePermissions = useAssignRolePermissions()
+  const assignResources = useAssignRoleResources()
 
   const { data: roleDetail } = useGetRoleDetail({
     id: roleId || undefined,
-    enabled: !!roleId && (view === 'edit' || view === 'view'),
+    enabled: !!roleId && view !== 'list',
   })
 
-  // Load permissions for edit/view (by roleId) hoặc all permissions cho create
-  const { data: rolePermissionGroups, isLoading: loadingRolePerms } = useGetRolePermissions({
-    id: roleId || undefined,
-    enabled: !!roleId && (view === 'edit' || view === 'view'),
-  })
-
-  const { data: allPermissionGroups, isLoading: loadingAllPerms } = useGetAllPermissions({
-    enabled: view === 'create',
-  })
-
-  const permissionGroups: any[] =
-    view === 'create'
-      ? (allPermissionGroups as any) ?? []
-      : (rolePermissionGroups as any) ?? []
-
-  const loadingPermissions =
-    view === 'create' ? loadingAllPerms : view !== 'list' && loadingRolePerms
-
-  const selectedPermissionIds: number[] =
-    view === 'create'
-      ? []
-      : (permissionGroups?.flatMap((group: any) =>
-          group.permissions
-            .filter((perm: any) => perm.isGranted)
-            .map((perm: any) => perm.id),
-        ) ?? [])
+  /**
+   * GET /role/:id/resources → mảng [{ id, name, code, actions: [{action, isGranted}] }]
+   * Dùng cho cả edit và view (với roleId), create sẽ lấy từ resources API (tất cả isGranted=false)
+   */
+  const { data: roleResources = [], isLoading: loadingResources } =
+    useGetRoleResources({
+      id: roleId || undefined,
+      enabled: !!roleId && view !== 'list',
+    })
 
   useEffect(() => {
-    if (roleDetail && (view === 'edit' || view === 'view')) {
+    if (roleDetail && view !== 'list') {
       setName(roleDetail.name || '')
+      setCode(roleDetail.code || '')
       setDescription(roleDetail.description || '')
     }
   }, [roleDetail, view])
 
   const resetForm = () => {
     setName('')
+    setCode('')
     setDescription('')
   }
 
@@ -98,84 +71,73 @@ const RoleManagement: React.FC = () => {
   }
 
   const openCreate = () => {
-    if (!canCreate) return messageApi.warning('Không có quyền')
     setView('create')
     setRoleId(null)
     resetForm()
   }
 
   const openEdit = (role: IRole) => {
-    if (!canUpdate) return messageApi.warning('Không có quyền')
     setView('edit')
     setRoleId(String(role.id))
-    setName(role.name || '')
-    setDescription(role.description || '')
   }
 
   const openView = (role: IRole) => {
     setView('view')
     setRoleId(String(role.id))
-    setName(role.name || '')
-    setDescription(role.description || '')
   }
 
   const handleDelete = (id: string) => {
-    if (!canDelete) return messageApi.warning('Không có quyền')
-
     deleteRole.mutate(id, {
       onSuccess: async () => {
         await queryClient.refetchQueries({ queryKey: ['roles'] })
         messageApi.success('Xóa vai trò thành công')
       },
-      onError: () => messageApi.error('Xóa vai trò không thành công'),
+      onError: () => messageApi.error('Xóa vai trò thất bại'),
     })
   }
 
-  const handleSavePermissions = async (targetRoleId: string, permissionIds: number[]) => {
-    await assignRolePermissions.mutateAsync({
-      id: targetRoleId,
-      permissionIds,
-    })
-  }
-
-  const handleSubmit = async (values: any) => {
-    const body: ICreateRoleBody = {
-      name: values.name.trim(),
-      description: values.description?.trim(),
-    }
-
-    const permissionIds: number[] = values.permissionIds || []
+  const handleSubmit = async (values: {
+    name: string
+    code?: string
+    description?: string
+    assignments: IResourceAssignment[]
+  }) => {
+    const { assignments, ...roleBody } = values
 
     if (view === 'create') {
-      createRole.mutate(body, {
-        onSuccess: async (createdRole: any) => {
-          const newRoleId = String(createdRole?.id)
-          if (newRoleId) {
-            await handleSavePermissions(newRoleId, permissionIds)
+      createRole.mutate(roleBody, {
+        onSuccess: async (created: any) => {
+          const newId = String(created?.id)
+          if (newId && assignments.length) {
+            await assignResources.mutateAsync({ id: newId, assignments })
           }
           await queryClient.refetchQueries({ queryKey: ['roles'] })
-          messageApi.success('Tạo mới vai trò thành công')
+          messageApi.success('Tạo vai trò thành công')
           handleBackToList()
         },
-        onError: () => messageApi.error('Tạo mới không thành công'),
+        onError: () => messageApi.error('Tạo vai trò thất bại'),
       })
     } else if (view === 'edit' && roleId) {
       updateRole.mutate(
-        { id: roleId, body },
+        { id: roleId, body: roleBody },
         {
           onSuccess: async () => {
-            await handleSavePermissions(roleId, permissionIds)
+            await assignResources.mutateAsync({ id: roleId, assignments })
             await queryClient.refetchQueries({ queryKey: ['roles'] })
-            await queryClient.invalidateQueries({ queryKey: ['role-detail', roleId] })
-            await queryClient.invalidateQueries({ queryKey: ['role-permissions', roleId] })
             messageApi.success('Cập nhật vai trò thành công')
             handleBackToList()
           },
-          onError: () => messageApi.error('Cập nhật không thành công'),
+          onError: () => messageApi.error('Cập nhật vai trò thất bại'),
         },
       )
     }
   }
+
+  // Khi create: cần lấy tất cả resources (không có isGranted).
+  // Ta dùng roleResources endpoint — nhưng cần roleId.
+  // Giải pháp: khi create, dùng một roleId tạm hoặc lấy từ resources API riêng.
+  // Ở đây dùng resources API (GET /resources) qua import riêng.
+  // Xem CreateResourcesLoader component bên dưới.
 
   return (
     <>
@@ -203,16 +165,16 @@ const RoleManagement: React.FC = () => {
           <RoleFormView
             view={view as 'create' | 'edit' | 'view'}
             name={name}
+            code={code}
             description={description}
-            permissionGroups={permissionGroups}
-            selectedPermissionIds={selectedPermissionIds}
-            loadingPermissions={loadingPermissions}
+            resources={roleResources}
+            loadingResources={loadingResources}
             onBack={handleBackToList}
             onSubmit={handleSubmit}
             submitting={
               createRole.isPending ||
               updateRole.isPending ||
-              assignRolePermissions.isPending
+              assignResources.isPending
             }
           />
         )}

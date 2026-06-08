@@ -10,18 +10,20 @@ import {
   useGetListUsers,
   useIsSuspended,
   useUpdateUser,
+  useAssignUserRoles,
 } from '../../../feature/user/hook/query'
 
 const UserManagement: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage()
+
   const [query, setQuery] = useState({
-  page: 0,
-  size: 10,
-  sso_id: '',
-  fullName: '',
-  code: '',
-  status: '',
-  type: '',
+    page: 0,
+    size: 10,
+    sso_id: '',
+    fullName: '',
+    code: '',
+    status: '',
+    type: '',
   })
 
   const [ssoId, setSsoId] = useState('')
@@ -39,6 +41,7 @@ const UserManagement: React.FC = () => {
   const updateUser = useUpdateUser()
   const deleteUser = useDeleteUser()
   const isSuspended = useIsSuspended()
+  const assignRoles = useAssignUserRoles()
 
   const resetForm = () => {
     setSsoId('')
@@ -76,7 +79,7 @@ const UserManagement: React.FC = () => {
     setType(user.type || 'officer')
     setIsUserModalOpen(true)
   }
-console.log('List Data:', listData) // Debug log to check the data structure
+
   const handleDelete = (id: string) => {
     deleteUser.mutate(id, {
       onSuccess: () => messageApi.success('Xóa người dùng thành công'),
@@ -84,7 +87,11 @@ console.log('List Data:', listData) // Debug log to check the data structure
     })
   }
 
-  const handleSubmit = () => {
+  /**
+   * handleSubmit: lưu thông tin user.
+   * Role assignment được xử lý bên trong UserModal (tab Vai trò).
+   */
+  const handleSubmit = (roleIds?: number[]) => {
     if (mode === 'create') {
       const body = {
         sso_id: ssoId.trim(),
@@ -95,7 +102,14 @@ console.log('List Data:', listData) // Debug log to check the data structure
       }
 
       createUser.mutate(body as any, {
-        onSuccess: () => {
+        onSuccess: async (created: any) => {
+          // Nếu có roles được chọn trong lúc tạo
+          if (roleIds?.length && created?.id) {
+            await assignRoles.mutateAsync({
+              id: String(created.id),
+              roleIds,
+            })
+          }
           messageApi.success('Tạo người dùng thành công')
           setIsUserModalOpen(false)
           resetForm()
@@ -114,7 +128,14 @@ console.log('List Data:', listData) // Debug log to check the data structure
       updateUser.mutate(
         { id: currentUserId, body: body as any },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            // Gán roles nếu có thay đổi
+            if (roleIds !== undefined) {
+              await assignRoles.mutateAsync({
+                id: currentUserId,
+                roleIds,
+              })
+            }
             messageApi.success('Cập nhật người dùng thành công')
             setIsUserModalOpen(false)
             resetForm()
@@ -125,17 +146,14 @@ console.log('List Data:', listData) // Debug log to check the data structure
     }
   }
 
-  const onToggleStatus = (record: IUser, checked: boolean) => {
+  const onToggleStatus = (record: IUser) => {
     isSuspended.mutate(
+      { id: String(record.id) },
       {
-        id: String(record.id),
-        isSuspended: !checked,
-      },
-      {
-        onSuccess: () => {
-          messageApi.success('Cập nhật trạng thái người dùng thành công')
-        },
-        onError: () => messageApi.error('Cập nhật trạng thái người dùng thất bại'),
+        onSuccess: () =>
+          messageApi.success('Cập nhật trạng thái thành công'),
+        onError: () =>
+          messageApi.error('Cập nhật trạng thái thất bại'),
       },
     )
   }
@@ -144,44 +162,50 @@ console.log('List Data:', listData) // Debug log to check the data structure
     <>
       {contextHolder}
       <AdminLayout>
-        <div>
-          <UserListView
-            query={query}
-            setQuery={setQuery}
-            listData={listData}
-            loading={listLoading}
-            onCreate={openCreate}
-            onEdit={openEdit}
-            onView={openView}
-            onDelete={handleDelete}
-            onToggleStatus={onToggleStatus}
-            onTableChange={(p: any) =>
-              setQuery((prev) => ({
-                ...prev,
-                page: (p.current ?? 1) - 1,
-                size: p.pageSize ?? 10,
-              }))
-            }
-          />
+        <UserListView
+          query={query}
+          setQuery={setQuery}
+          listData={listData}
+          loading={listLoading}
+          onCreate={openCreate}
+          onEdit={openEdit}
+          onView={openView}
+          onDelete={handleDelete}
+          onToggleStatus={onToggleStatus}
+          onTableChange={(p: any) =>
+            setQuery((prev) => ({
+              ...prev,
+              page: (p.current ?? 1) - 1,
+              size: p.pageSize ?? 10,
+            }))
+          }
+        />
 
-          <UserModal
-            isOpen={isUserModalOpen}
-            mode={mode}
-            ssoId={ssoId}
-            setSsoId={setSsoId}
-            fullName={fullName}
-            setFullName={setFullName}
-            code={code}
-            setCode={setCode}
-            status={status}
-            setStatus={setStatus}
-            type={type}
-            setType={setType}
-            onOk={handleSubmit}
-            onCancel={() => setIsUserModalOpen(false)}
-            confirmLoading={createUser.isPending || updateUser.isPending}
-          />
-        </div>
+        <UserModal
+          isOpen={isUserModalOpen}
+          mode={mode}
+          userId={currentUserId}
+          ssoId={ssoId}
+          setSsoId={setSsoId}
+          fullName={fullName}
+          setFullName={setFullName}
+          code={code}
+          setCode={setCode}
+          status={status}
+          setStatus={setStatus}
+          type={type}
+          setType={setType}
+          onOk={handleSubmit}
+          onCancel={() => {
+            setIsUserModalOpen(false)
+            resetForm()
+          }}
+          confirmLoading={
+            createUser.isPending ||
+            updateUser.isPending ||
+            assignRoles.isPending
+          }
+        />
       </AdminLayout>
     </>
   )

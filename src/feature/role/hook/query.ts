@@ -5,25 +5,25 @@ import {
   updateRoleAPI,
   deleteRoleAPI,
   getRoleDetailAPI,
-  getRolePermissionsAPI,
-  assignRolePermissionsAPI,
-  getAllPermissionsAPI,
+  getRoleResourcesAPI,
+  assignRoleResourcesAPI,
 } from '../api'
-import {
+import type {
   IRoleListResponse,
   IRoleQuery,
   ICreateRoleBody,
   IUpdateRoleBody,
   IRole,
+  IRoleResource,
+  IResourceAssignment,
 } from '../type'
 import { message } from 'antd'
 
-export const useGetListRoles = (params: IRoleQuery) => {
-  return useQuery<IRoleListResponse>({
+export const useGetListRoles = (params: IRoleQuery) =>
+  useQuery<IRoleListResponse>({
     queryKey: ['roles', params],
     queryFn: () => getListRoleAPI(params),
   })
-}
 
 export const useGetRoleDetail = ({
   id,
@@ -31,88 +31,78 @@ export const useGetRoleDetail = ({
 }: {
   id?: string
   enabled?: boolean
-}) => {
-  return useQuery<IRole>({
+}) =>
+  useQuery<IRole>({
     queryKey: ['role-detail', id],
     queryFn: () => getRoleDetailAPI(id!),
-    enabled: !!id && enabled,
+    enabled: !!id && enabled !== false,
   })
-}
 
-export const useGetRolePermissions = ({
+/**
+ * Lấy danh sách resources + isGranted cho role.
+ * Dùng cho form chỉnh sửa / xem.
+ */
+export const useGetRoleResources = ({
   id,
   enabled,
 }: {
   id?: string
   enabled?: boolean
-}) => {
-  return useQuery({
-    queryKey: ['role-permissions', id],
-    queryFn: () => getRolePermissionsAPI(id!),
-    enabled: !!id && enabled,
+}) =>
+  useQuery<IRoleResource[]>({
+    queryKey: ['role-resources', id],
+    queryFn: () => getRoleResourcesAPI(id!),
+    enabled: !!id && enabled !== false,
   })
-}
 
-export const useGetAllPermissions = ({ enabled }: { enabled?: boolean } = {}) => {
-  return useQuery({
-    queryKey: ['permissions-all'],
-    queryFn: () => getAllPermissionsAPI(),
-    enabled: enabled !== false,
-  })
-}
-
-export const useAssignRolePermissions = () => {
+export const useAssignRoleResources = () => {
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: ({
       id,
-      permissionIds,
+      assignments,
     }: {
       id: string
-      permissionIds: number[]
-    }) => assignRolePermissionsAPI(id, permissionIds),
+      assignments: IResourceAssignment[]
+    }) => assignRoleResourcesAPI(id, assignments),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['role-resources', vars.id] })
+    },
+    onError: () => message.error('Lưu phân quyền thất bại'),
   })
 }
 
 export const useCreateRole = () => {
   const qc = useQueryClient()
-
   return useMutation({
     mutationFn: (body: ICreateRoleBody) => createRoleAPI(body),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['role'] })
-    },
-    onError: (error: any) => {
-      message.error(error?.response?.data?.message || 'Tạo mới không thành công')
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['roles'] }),
+    onError: (err: any) =>
+      message.error(err?.response?.data?.message || 'Tạo mới không thành công'),
   })
 }
 
 export const useUpdateRole = () => {
   const qc = useQueryClient()
-
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: IUpdateRoleBody }) =>
       updateRoleAPI(id, body),
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: ['role'] })
-      qc.invalidateQueries({ queryKey: ['role-detail', variables.id] })
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['roles'] })
+      qc.invalidateQueries({ queryKey: ['role-detail', vars.id] })
+      qc.invalidateQueries({ queryKey: ['role-resources', vars.id] })
     },
-    onError: (error: any) => {
-      message.error(error?.response?.data?.message || 'Cập nhật không thành công')
-    },
+    onError: (err: any) =>
+      message.error(err?.response?.data?.message || 'Cập nhật không thành công'),
   })
 }
 
 export const useDeleteRole = () => {
   const qc = useQueryClient()
-
   return useMutation({
     mutationFn: (id: string) => deleteRoleAPI(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['role'] })
-    },
-    onError: (error: any) => {
-      message.error(error?.response?.data?.message || 'Xóa không thành công')
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['roles'] }),
+    onError: (err: any) =>
+      message.error(err?.response?.data?.message || 'Xóa không thành công'),
   })
 }
