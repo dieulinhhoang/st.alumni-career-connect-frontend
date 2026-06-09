@@ -226,7 +226,7 @@ interface EditableQuestionCardProps {
 }
 
 const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
-  { value: 'text',    label: 'Trả lời ngắn' },
+  { value: 'short',    label: 'Trả lời ngắn' },
   { value: 'long',     label: 'Đoạn văn' },
   { value: 'radio',    label: 'Trắc nghiệm' },
   { value: 'checkbox', label: 'Hộp kiểm' },
