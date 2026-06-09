@@ -441,6 +441,7 @@ function mapForm(form: Form) {
       required: q.required,
       sectionId,
       order: q.order ?? order++,
+      rowGroup: q.rowGroup,
       reportFieldKey: q.reportFieldKey,
       visibleWhen: q.visibleWhen,
     }
@@ -466,6 +467,27 @@ function mapForm(form: Form) {
   return { sections, questions, header, footer, descParagraphs }
 }
 
+
+// Group các câu hỏi liên tiếp cùng rowGroup thành mảng con (giống CenterCanvas)
+function groupByRow(qs: Question[]): (Question | Question[])[] {
+  const result: (Question | Question[])[] = []
+  let i = 0
+  while (i < qs.length) {
+    const q = qs[i]
+    if (q.rowGroup) {
+      const group: Question[] = []
+      while (i < qs.length && qs[i].rowGroup === q.rowGroup) {
+        group.push(qs[i])
+        i++
+      }
+      result.push(group)
+    } else {
+      result.push(q)
+      i++
+    }
+  }
+  return result
+}
 
 function isVisible(q: Question, answers: Record<string, any>): boolean {
   if (!q.visibleWhen) return true
@@ -711,16 +733,47 @@ export function SurveyPreview({
             {bySection.map(({ section, qs }) => (
               <div key={section.id}>
                 {showSectionHeaders && <SectionHeader title={section.title} />}
-                {qs.map(q => {
+                {groupByRow(qs).map(item => {
+                  if (Array.isArray(item)) {
+                    // Nhóm 2-3 câu trên cùng 1 hàng
+                    return (
+                      <div
+                        key={item[0].id}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: `repeat(${item.length}, 1fr)`,
+                          gap: 16,
+                          marginBottom: 24,
+                        }}
+                      >
+                        {item.map(q => {
+                          num++
+                          const isLocked = lockedQIds.has(q.id)
+                          return (
+                            <div key={q.id} id={`q-${q.id}`} style={{ marginBottom: 0 }}>
+                              <QuestionItem
+                                q={q} num={num}
+                                value={answers[q.id]}
+                                onChange={v => setAnswer(q.id, v)}
+                                hasError={errors.has(q.id)}
+                                readOnly={isViewOnly || isLocked}
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  }
+                  // Câu hỏi đơn
                   num++
-                  const isLocked = lockedQIds.has(q.id)
+                  const isLocked = lockedQIds.has(item.id)
                   return (
-                    <div key={q.id} id={`q-${q.id}`}>
+                    <div key={item.id} id={`q-${item.id}`}>
                       <QuestionItem
-                        q={q} num={num}
-                        value={answers[q.id]}
-                        onChange={v => setAnswer(q.id, v)}
-                        hasError={errors.has(q.id)}
+                        q={item} num={num}
+                        value={answers[item.id]}
+                        onChange={v => setAnswer(item.id, v)}
+                        hasError={errors.has(item.id)}
                         readOnly={isViewOnly || isLocked}
                       />
                     </div>

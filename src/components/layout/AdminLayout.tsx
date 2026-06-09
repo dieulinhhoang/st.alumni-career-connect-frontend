@@ -190,7 +190,10 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     return 'Trang hiện tại';
   };
   const pageLabel = getPageLabel(location.pathname);
-
+const handleLogout = () => {
+  localStorage.removeItem('accessToken');
+  window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
+};
   const userDropdownMenu = {
     items: [
       {
@@ -210,7 +213,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     ],
     onClick: ({ key }: { key: string }) => {
       if (key === '/admin/profile') navigate('/admin/profile');
-      else if (key === 'logout') navigate('/');
+      else if (key === 'logout') handleLogout();
     },
   };
 
