@@ -190,11 +190,11 @@ export function JobCard({
         }}
       >
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {job.tags.map((tag) => (
-            <Tag key={tag} color="purple" style={{ fontSize: 11, margin: 0 }}>
-              {tag}
-            </Tag>
-          ))}
+          {(job.tags || []).slice(0, 1).map(tag => (
+          <span key={tag} style={{ fontSize: 11, padding: '5px 10px', background: 'rgba(255,255,255,0.02)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 12, fontWeight: 500 }}>
+            {tag}
+          </span>
+        ))}
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {facultyLabel && (

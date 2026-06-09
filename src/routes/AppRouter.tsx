@@ -19,6 +19,7 @@ import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDe
 import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
 import ReportsPage from '../pages/admin/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
+import { DoneScreen } from '../pages/client/Survey/DoneScreen';
 import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
 import AuthCallback from '../pages/admin/Auth/AuthCallback';
 import FacultyReportPage from '../pages/admin/Reports/components/FacultyReportPage';
@@ -70,6 +71,10 @@ const routes = [
       {
         path: '/survey/:id/:slug',
         element: <Suspense fallback={<Loader />}><SurveyFillPage /></Suspense>
+      },
+      {
+        path: '/survey/:id/done',
+        element: <Suspense fallback={<Loader />}><DoneScreen /></Suspense>
       },
 
       // PROTECTED
