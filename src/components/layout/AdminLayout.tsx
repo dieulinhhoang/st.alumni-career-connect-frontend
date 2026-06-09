@@ -21,6 +21,7 @@ import {
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useGetAdminProfile } from '../../feature/adminProfile/hook/query';
 
 const { Header, Sider, Content } = Layout;
 
@@ -157,6 +158,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { data: profile } = useGetAdminProfile();
+  const displayName = profile?.fullName || profile?.userName || 'Người dùng';
+  const displayRole = profile?.roleName || 'Quản trị viên';
+  const displayEmail = profile?.email || '';
+  const avatarLetter = displayName.trim().charAt(0).toUpperCase();
+
   useEffect(() => {
     const check = () => {
       const mobile = window.innerWidth < 768;
@@ -200,8 +207,8 @@ const handleLogout = () => {
         key: 'header',
         label: (
           <div style={{ padding: '2px 0 4px' }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>Quản trị viên</div>
-            <div style={{ fontSize: 11.5, color: '#94a3b8' }}>admin@example.com</div>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>{displayName}</div>
+            <div style={{ fontSize: 11.5, color: '#94a3b8' }}>{displayEmail}</div>
           </div>
         ),
         disabled: true,
@@ -362,11 +369,11 @@ const handleLogout = () => {
                     flexShrink: 0,
                   }}
                 >
-                  A
+                  {avatarLetter}
                 </Avatar>
                 <div className="al-avatar-name" style={{ lineHeight: 1.3 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Admin</div>
-                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Quản trị viên</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{displayName}</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>{displayRole}</div>
                 </div>
                 <DownOutlined style={{ fontSize: 10, color: '#94a3b8' }} />
               </div>
