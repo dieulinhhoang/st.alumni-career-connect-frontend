@@ -147,6 +147,7 @@ export function SurveyHeader({
                   letterSpacing: '0.06em',
                   textAlign: isMobile ? 'center' : 'right',
                 }}
+                
               >
                 {ministryText}
               </div>

@@ -210,7 +210,7 @@ export function PDFCanvas({
                   }}>
                     Thân gửi Anh/Chị cựu sinh viên của Học viện Nông nghiệp Việt Nam!
                   </a>
-                {/* Đoạn giữa — italic thụt lề */}
+                {/* Đổi logoạn giữa — italic thụt lề */}
                 <textarea
                   value={descDraft.bodyText}
                   onChange={e => {

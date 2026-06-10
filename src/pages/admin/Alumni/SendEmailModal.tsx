@@ -12,10 +12,10 @@ interface Props {
 export const SendEmailModal: React.FC<Props> = ({ batchId, batchTitle, open, onClose }) => {
     const [subject, setSubject] = useState(`Mời tham gia khảo sát việc làm - ${batchTitle}`);
     const [htmlBody, setHtmlBody] = useState(
-        `<p>Kính gửi Anh/Chị,</p>
-<p>Học viện Nông nghiệp Việt Nam kính mời Anh/Chị tham gia khảo sát việc làm sau tốt nghiệp.</p>
-<p>Thông tin khảo sát của Anh/Chị sẽ giúp Học viện nâng cao chất lượng đào tạo.</p>
-<p>Trân trọng cảm ơn!</p>`
+        `Kính gửi Anh/Chị,
+        Học viện Nông nghiệp Việt Nam kính mời Anh/Chị tham gia khảo sát việc làm sau tốt nghiệp.
+        Thông tin khảo sát của Anh/Chị sẽ giúp Học viện nâng cao chất lượng đào tạo.
+        Trân trọng cảm ơn!`
     );
     const [loading, setLoading] = useState(false);
 

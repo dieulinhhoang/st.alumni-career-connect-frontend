@@ -671,7 +671,7 @@ export function SurveyPreview({
               <img
                 src={header.logoUrl}
                 alt="Logo"
-                style={{ width: 90, height: 90, objectFit: 'contain', flexShrink: 0 }}
+                style={{ width: 180, height: 170, objectFit: 'contain', flexShrink: 0 }}
               />
               <div style={{ flex: 1, textAlign: 'right' }}>
                 <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6, fontStyle: 'italic' }}>
