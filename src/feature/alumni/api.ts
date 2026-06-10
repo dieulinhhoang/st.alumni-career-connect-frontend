@@ -137,3 +137,41 @@ export async function checkStudentInGraduation(
   const student = await getStudentFromGraduation(graduationId, studentCode);
   return student !== null;
 }
+
+export async function sendInviteEmails(
+  batchId: number,
+  payload: { subject: string; htmlBody: string },
+): Promise<{ sent: number; failed: number; skipped: number }> {
+  const res = await api.post(`/alumni/batches/${batchId}/send-email`, payload);
+  return res.data;
+}
+
+export async function verifyStudentByFields(
+  graduationId: number,
+  fields: { fullName?: string; dob?: string; phone?: string; studentCode?: string },
+): Promise<StudentData | null> {
+    // console.log('verifyStudentByFields called:', { graduationId, ...fields }) // thêm dòng này
+
+  try {
+    const res = await api.post('/graduation/verify-student', { graduationId: Number(graduationId), ...fields });
+    const s = res.data;
+    console.log('verifyStudentByFields response:', res.data);
+    if (!s) return null;
+    return {
+      id: s.id,
+      code: s.code,
+      full_name: s.fullName ?? s.full_name ?? '',
+      email: s.email ?? null,
+      phone: s.phone ?? null,
+      dob: s.dob ?? null,
+      gender: s.gender ?? null,
+      citizen_identification: s.citizenIdentification ?? s.citizen_identification ?? null,
+      training_industry_code: s.trainingIndustryCode ?? s.training_industry_code ?? null,
+      training_industry_name: s.trainingIndustryName ?? s.training_industry_name ?? null,
+      school_year_end: s.schoolYearEnd ?? s.school_year_end ?? null,
+    };
+    
+  } catch {
+    return null;
+  }
+}

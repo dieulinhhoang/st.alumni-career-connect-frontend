@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getBatchByIdPublic } from '../../../feature/alumni/api'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { getBatchByIdPublic, getStudentFromGraduation, verifyStudentByFields } from '../../../feature/alumni/api'
 import type { SurveyBatch } from '../../../feature/alumni/types'
 import { SurveyPreview } from '../../admin/Form/Preview'
 import { IdentifyStep } from './IdentifyStep'
@@ -66,9 +66,9 @@ function buildInitialValues(
   if (sd) {
     // Câu 3: Giới tính — chuyển enum → tiếng Việt để hiển thị đúng trong form
     const genderMap: Record<string, string> = {
-      male:   'Nam',
+      male: 'Nam',
       female: 'Nữ',
-      other:  'Khác',
+      other: 'Khác',
     }
     set(2, sd.gender ? (genderMap[sd.gender] ?? sd.gender) : null)
 
@@ -108,20 +108,55 @@ export default function SurveyFillPage() {
   const navigate = useNavigate()
 
   const [pageState, setPageState] = useState<PageState>('loading')
-  const [batch,     setBatch]     = useState<SurveyBatch | null>(null)
-  const [identity,  setIdentity]  = useState<Identity | null>(null)
+  const [batch, setBatch] = useState<SurveyBatch | null>(null)
+  const [identity, setIdentity] = useState<Identity | null>(null)
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     if (!id) { setPageState('error'); return }
     getBatchByIdPublic(Number(id))
-      .then(b => {
+      .then(async b => {
         setBatch(b)
-        const now   = new Date()
+        const now = new Date()
         const start = new Date(b.startDate)
-        const end   = new Date(b.endDate)
+        const end = new Date(b.endDate)
         if (b.status !== 'active' || now < start || now > end) {
           setPageState('not-active')
         } else {
+          const token = searchParams.get('token')
+          // console.log('Token từ URL:', token)
+          if (token) {
+            // Nếu có token → bỏ qua bước xác thực, đi thẳng vào form
+            try {
+              // atob() giải mã base64 → chuỗi gốc
+              // "ODoxMjM=" → "8:123"
+              // (backend encode là batchId:studentId
+              const decoded = atob(token)
+              // console.log('Token đã giải mã:', decoded)
+              // Tách chuỗi "8:123" theo dấu ":"
+              // [0] = "8"   → batchId (bỏ qua, dùng dấu phẩy)
+              // [1] = "123" → studentId → lấy cái này để xác định danh tính sinh viên
+              const [, studentCode] = decoded.split(':')
+ 
+
+              // const studentData = b.graduationId
+              //   ? await verifyStudentByFields(b.graduationId, { studentCode })
+              //   : null
+              const studentData = b.graduationId
+                ? await getStudentFromGraduation(b.graduationId, studentCode)
+                : null
+              setIdentity({
+                studentId: studentData?.code ?? studentCode,
+                studentName: studentData?.full_name ?? '',
+                studentEmail: studentData?.email ?? '',
+                studentData,
+              })
+              setPageState('fill')
+              return
+       
+            } catch {
+            }
+          }
           setPageState('identify')
         }
       })
@@ -140,19 +175,19 @@ export default function SurveyFillPage() {
   }
 
   switch (pageState) {
-    case 'loading':    return <LoadingScreen />
-    case 'error':      return <ErrorScreen />
+    case 'loading': return <LoadingScreen />
+    case 'error': return <ErrorScreen />
     case 'not-active': return <NotActiveScreen batch={batch} />
-    case 'identify':   return batch ? <IdentifyStep batch={batch} onContinue={handleIdentify} /> : null
+    case 'identify': return batch ? <IdentifyStep batch={batch} onContinue={handleIdentify} /> : null
     case 'fill':
       return batch?.formSnapshot
         ? <SurveyPreview
-            form={batch.formSnapshot}
-            onSubmit={handleSubmit}
-            submitLabel="Gửi phiếu khảo sát"
-            lockedCount={8}
-            initialValues={identity ? buildInitialValues(batch.formSnapshot, identity) : undefined}
-          />
+          form={batch.formSnapshot}
+          onSubmit={handleSubmit}
+          submitLabel="Gửi phiếu khảo sát"
+          lockedCount={8}
+          initialValues={identity ? buildInitialValues(batch.formSnapshot, identity) : undefined}
+        />
         : null
     default: return null
   }

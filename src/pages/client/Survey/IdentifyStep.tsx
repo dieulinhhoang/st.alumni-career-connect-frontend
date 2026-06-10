@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { WarningOutlined, LoadingOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import type { SurveyBatch } from '../../../feature/alumni/types'
-import { getStudentFromGraduation } from '../../../feature/alumni/api'
 import type { StudentData } from '../../../feature/alumni/api'
-
+import { getStudentFromGraduation, verifyStudentByFields } from '../../../feature/alumni/api'
 export interface Identity {
   studentId: string
   studentName: string
@@ -33,12 +32,12 @@ function focusOut(e: React.FocusEvent<HTMLInputElement>) {
 }
 
 export function IdentifyStep({ batch, onContinue }: Props) {
-  const [studentName,  setStudentName]  = useState('')
-  const [studentId,    setStudentId]    = useState('')
-  const [phone,        setPhone]        = useState('')
-  const [dob,          setDob]          = useState('')
-  const [err,          setErr]          = useState('')
-  const [checking,     setChecking]     = useState(false)
+  const [studentName, setStudentName] = useState('')
+  const [studentId, setStudentId] = useState('')
+  const [phone, setPhone] = useState('')
+  const [dob, setDob] = useState('')
+  const [err, setErr] = useState('')
+  const [checking, setChecking] = useState(false)
 
   const submit = async () => {
     setErr('')
@@ -54,12 +53,17 @@ export function IdentifyStep({ batch, onContinue }: Props) {
 
     let studentData: StudentData | null = null
 
-    if (batch.graduationId && studentId.trim()) {
+    if (batch.graduationId ) {
       setChecking(true)
       try {
-        studentData = await getStudentFromGraduation(batch.graduationId, studentId.trim())
+        studentData = await verifyStudentByFields(batch.graduationId, {
+          fullName: studentName.trim() || undefined,
+          studentCode: studentId.trim() || undefined,
+          phone: phone.trim() || undefined,
+          dob: dob.trim() || undefined,
+        })
         if (!studentData) {
-          setErr('Mã sinh viên không thuộc đợt tốt nghiệp này. Vui lòng kiểm tra lại.')
+          setErr('Không tìm thấy sinh viên nào khớp với thông tin đã nhập. Vui lòng kiểm tra lại.')
           return
         }
       } catch {
@@ -70,8 +74,8 @@ export function IdentifyStep({ batch, onContinue }: Props) {
     }
 
     onContinue({
-      studentId:    studentId.trim(),
-      studentName:  studentData?.full_name || studentName.trim(),
+      studentId: studentId.trim(),
+      studentName: studentData?.full_name || studentName.trim(),
       studentEmail: studentData?.email || '',
       studentData,
     })
@@ -110,10 +114,10 @@ export function IdentifyStep({ batch, onContinue }: Props) {
         {/* Fields */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {([
-            { label: 'Họ và tên',       placeholder: 'Nhập họ và tên của Anh/Chị',  value: studentName,  set: setStudentName,  type: 'text' },
-            { label: 'Mã sinh viên',    placeholder: 'Nhập mã sinh viên (nếu nhớ)', value: studentId,    set: setStudentId,    type: 'text' },
-            { label: 'Số điện thoại',   placeholder: 'Nhập số điện thoại liên hệ',  value: phone,        set: setPhone,        type: 'tel'  },
-            { label: 'Ngày sinh',       placeholder: '',                             value: dob,          set: setDob,          type: 'date' },
+            { label: 'Họ và tên', placeholder: 'Nhập họ và tên của Anh/Chị', value: studentName, set: setStudentName, type: 'text' },
+            { label: 'Mã sinh viên', placeholder: 'Nhập mã sinh viên (nếu nhớ)', value: studentId, set: setStudentId, type: 'text' },
+            { label: 'Số điện thoại', placeholder: 'Nhập số điện thoại liên hệ', value: phone, set: setPhone, type: 'tel' },
+            { label: 'Ngày sinh', placeholder: '', value: dob, set: setDob, type: 'date' },
           ] as const).map(f => (
             <div key={f.label}>
               <label style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', display: 'block', marginBottom: 7 }}>

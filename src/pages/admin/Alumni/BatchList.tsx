@@ -17,17 +17,19 @@ import { PctBadge } from './components/PctBadge';
 import { SurveyLinkModal } from './components/SurveyLinkModal';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
+import { SendEmailModal } from './SendEmailModal';
 
 const { Text } = Typography;
 
 const useMenuItems = (
   navigate: ReturnType<typeof useNavigate>,
   deleteBatch: (id: number) => void,
+  setEmailBatch: (batch: SurveyBatchWithStats) => void, 
 ) =>
   (r: SurveyBatchWithStats): MenuProps['items'] => [
     {
       key: 'email', icon: <MailOutlined />, label: 'Gửi email khảo sát',
-      onClick: () => message.info('Tính năng đang phát triển'),
+      onClick: () => setEmailBatch(r),
     },
     {
       key: 'pdf-zip', icon: <FilePdfOutlined style={{ color: '#2563eb' }} />,
@@ -35,9 +37,9 @@ const useMenuItems = (
       onClick: () => message.info('Tính năng đang phát triển'),
     },
     { type: 'divider' },
-    { key: 'report1', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 1', onClick: () => message.info('Tính năng đang phát triển') },
-    { key: 'report2', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 2', onClick: () => message.info('Tính năng đang phát triển') },
-    { key: 'report3', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 3', onClick: () => message.info('Tính năng đang phát triển') },
+    // { key: 'report1', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 1', onClick: () => message.info('Tính năng đang phát triển') },
+    // { key: 'report2', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 2', onClick: () => message.info('Tính năng đang phát triển') },
+    // { key: 'report3', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 3', onClick: () => message.info('Tính năng đang phát triển') },
     { type: 'divider' },
     ...(r.status === 'draft'
       ? [{
@@ -56,13 +58,14 @@ const useMenuItems = (
   ];
 
 export const BatchList: React.FC = () => {
+  const [emailBatch, setEmailBatch] = useState<SurveyBatchWithStats | null>(null);
   const { batches, loading, deleteBatch } = useBatches();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
 
-  const getMenuItems = useMenuItems(navigate, deleteBatch);
+  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch);
   const safeBatches = Array.isArray(batches) ? batches : [];
 
   const filtered = safeBatches.filter(b => {
@@ -72,7 +75,6 @@ export const BatchList: React.FC = () => {
       (status === 'all' || b.status === status)
     );
   });
-
   const columns: ColumnsType<SurveyBatchWithStats> = [
     {
       title: 'Tiêu đề khảo sát', key: 'title',
@@ -205,6 +207,16 @@ export const BatchList: React.FC = () => {
           onClose={() => setLinkBatch(null)}
         />
       </div>
+      {emailBatch && (
+        <SendEmailModal
+          batchId={emailBatch.id}
+          batchTitle={emailBatch.title}
+          open={!!emailBatch}
+          onClose={() => setEmailBatch(null)}
+        />
+      )}
     </AdminLayout>
   );
 };
+
+
