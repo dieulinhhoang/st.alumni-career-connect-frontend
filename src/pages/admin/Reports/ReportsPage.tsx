@@ -75,8 +75,8 @@ export default function ReportsPage() {
     setFilters((f) => ({ ...f, majorId: v || undefined }));
   };
 
-  const handleDownload = (mau: 'mau01' | 'mau02' | 'mau03') => {
-    console.log('Download', mau, filters);
+  const handleDownload = (_mau: 'mau01' | 'mau02' | 'mau03') => {
+    // console.log('Download', mau, filters);
     // TODO: call real export API
   };
 

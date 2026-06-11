@@ -9,7 +9,7 @@ import type {
 
 export async function getBatches(): Promise<(SurveyBatch & { submittedCount: number })[]> {
   const res = await api.get('/alumni/batches');
-  console.log('Fetched batches:', res.data);
+  // console.log('Fetched batches:', res.data);
   return res.data;
 }
 
@@ -155,7 +155,7 @@ export async function verifyStudentByFields(
   try {
     const res = await api.post('/graduation/verify-student', { graduationId: Number(graduationId), ...fields });
     const s = res.data;
-    console.log('verifyStudentByFields response:', res.data);
+    // console.log('verifyStudentByFields response:', res.data);
     if (!s) return null;
     return {
       id: s.id,

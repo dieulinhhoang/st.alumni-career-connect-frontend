@@ -131,7 +131,7 @@ export async function fetchDashboardChartData(
 
 export async function fetchKhoaList(): Promise<KhoaItem[]> {
   const res = await api.get("/dashboard/faculty-report-status");
-  console.log("API Request - fetchKhoaList, received data:", res.data); // Debug log to check the response data
+  // console.log("API Request - fetchKhoaList, received data:", res.data); // Debug log to check the response data
   return toArray<KhoaItem>(res.data);
 }
 

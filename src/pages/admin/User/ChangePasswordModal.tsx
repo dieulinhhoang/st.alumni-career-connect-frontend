@@ -30,8 +30,8 @@ const ChangePasswordModal: React.FC<Props> = ({
       .then((values) => {
         onOk(values.newPassword.trim())
       })
-      .catch((info) => {
-        console.log('Validate lỗi:', info)
+      .catch(() => {
+        // console.log('Validate lỗi:', info)
       })
   }
 

@@ -28,27 +28,7 @@ import type { Question, Section, SurveyHeader, SurveyFooter } from '../../../../
 import { EditableQuestionCard } from './EditableQuestionCard'
 import { SectionBar } from './SectionBar'
 import { PDFCanvas } from '../form/PDFCanvas'
-
-// Group các câu hỏi liên tiếp cùng rowGroup thành mảng con
-function groupByRow(qs: Question[]): (Question | Question[])[] {
-  const result: (Question | Question[])[] = []
-  let i = 0
-  while (i < qs.length) {
-    const q = qs[i]
-    if (q.rowGroup) {
-      const group: Question[] = []
-      while (i < qs.length && qs[i].rowGroup === q.rowGroup) {
-        group.push(qs[i])
-        i++
-      }
-      result.push(group)
-    } else {
-      result.push(q)
-      i++
-    }
-  }
-  return result
-}
+import { groupByRow } from '../../../../../feature/form/hooks/Useformutils'
 
 interface CenterCanvasProps {
   questions: Question[]
@@ -221,7 +201,7 @@ function SortableCard({
                     <Tooltip key={label} title={tip} placement="left">
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); val === null ? onUngroup?.() : onGroup?.(val) }}
+                        onClick={(e) => { e.stopPropagation(); /* console.log('[btn click] val=', val, 'onGroup=', !!onGroup) */ val === null ? onUngroup?.() : onGroup?.(val) }}
                         style={{
                           width: 26, height: 20, padding: 0,
                           border: `1px solid ${active ? ac : '#d1d5db'}`,
@@ -465,7 +445,7 @@ export function CenterCanvas({
                     />
                     {groupByRow(sqs).map((item) =>
                       Array.isArray(item) ? (
-                        <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 0 }}>
+                        <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 8, marginBottom: 0 }}>
                           {item.map((q, qIdx) => (
                             <SortableCard key={q.id} id={q.id}
                               isRowLeader={qIdx === 0} rowSize={item.length} accent={accent}
@@ -532,7 +512,7 @@ export function CenterCanvas({
                 {/* Câu hỏi chưa thuộc section nào */}
                 {groupByRow(unsectioned).map((item) =>
                   Array.isArray(item) ? (
-                    <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 0 }}>
+                    <div key={item[0].id} style={{ display: 'grid', gridTemplateColumns: `repeat(${item.length}, 1fr)`, gap: 8, marginBottom: 0 }}>
                       {item.map((q, qIdx) => (
                         <SortableCard key={q.id} id={q.id}
                           isRowLeader={qIdx === 0} rowSize={item.length} accent={accent}

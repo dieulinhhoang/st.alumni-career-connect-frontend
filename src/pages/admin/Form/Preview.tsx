@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Form, Question, Section } from '../../../feature/form/types'
-import logoVnua from '../../../assets/logoVnua.jpg'
+import { groupByRow } from '../../../feature/form/hooks/Useformutils'
+
 
 //  Utility 
 
@@ -448,7 +449,7 @@ function mapForm(form: Form) {
   })
 
   const header = {
-    logoUrl: (form as any).logoUrl ?? logoVnua,
+    logoUrl:  (form as any).logoUrl   ?? 'https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png',
     ministry: (form as any).header?.ministry ?? 'BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG',
     academy:  (form as any).header?.academy  ?? 'HỌC VIỆN NÔNG NGHIỆP VIỆT NAM',
     address:  (form as any).header?.address  ?? 'Xã Gia Lâm, Thành phố Hà Nội',
@@ -467,27 +468,6 @@ function mapForm(form: Form) {
   return { sections, questions, header, footer, descParagraphs }
 }
 
-
-// Group các câu hỏi liên tiếp cùng rowGroup thành mảng con (giống CenterCanvas)
-function groupByRow(qs: Question[]): (Question | Question[])[] {
-  const result: (Question | Question[])[] = []
-  let i = 0
-  while (i < qs.length) {
-    const q = qs[i]
-    if (q.rowGroup) {
-      const group: Question[] = []
-      while (i < qs.length && qs[i].rowGroup === q.rowGroup) {
-        group.push(qs[i])
-        i++
-      }
-      result.push(group)
-    } else {
-      result.push(q)
-      i++
-    }
-  }
-  return result
-}
 
 function isVisible(q: Question, answers: Record<string, any>): boolean {
   if (!q.visibleWhen) return true
@@ -671,7 +651,7 @@ export function SurveyPreview({
               <img
                 src={header.logoUrl}
                 alt="Logo"
-                style={{ width: 180, height: 170, objectFit: 'contain', flexShrink: 0 }}
+                style={{ width: 90, height: 90, objectFit: 'contain', flexShrink: 0 }}
               />
               <div style={{ flex: 1, textAlign: 'right' }}>
                 <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6, fontStyle: 'italic' }}>

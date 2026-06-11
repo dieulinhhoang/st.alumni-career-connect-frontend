@@ -66,8 +66,8 @@ export default function FacultyReportPage() {
 
   const selectedDeadline = surveyOptions.find((o) => o.value === filters.surveyId)?.deadline ?? deadline;
 
-  const handleDownload = (mau: 'mau01' | 'mau02' | 'mau03') => {
-    console.log('Download', mau, filters);
+  const handleDownload = (_mau: 'mau01' | 'mau02' | 'mau03') => {
+    // console.log('Download', mau, filters);
     // TODO: call export API
   };
 

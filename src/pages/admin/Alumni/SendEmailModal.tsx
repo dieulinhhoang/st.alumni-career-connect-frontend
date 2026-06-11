@@ -38,16 +38,16 @@ export const SendEmailModal: React.FC<Props> = ({ batchId, batchTitle, open, onC
     //     }
     // };
 const handleSend = async () => {
-  console.log('Bắt đầu gửi email...', { subject, htmlBody }); // thêm dòng này
+  // console.log('Bắt đầu gửi email...', { subject, htmlBody }); // thêm dòng này
   if (!subject.trim() || !htmlBody.trim()) {
     message.error('Vui lòng nhập tiêu đề và nội dung email');
     return;
   }
   setLoading(true);
   try {
-    console.log('Gọi API...', batchId); // thêm dòng này
+    // console.log('Gọi API...', batchId); // thêm dòng này
     const result = await sendInviteEmails(batchId, { subject, htmlBody });
-    console.log('Kết quả:', result); // thêm dòng này
+    // console.log('Kết quả:', result); // thêm dòng này
     message.success(
       `Gửi thành công ${result.sent} email, thất bại ${result.failed}, bỏ qua ${result.skipped}`
     );

@@ -58,7 +58,7 @@ export function ChartSection({ state, setField, khoaOptions = [], nganhOptions =
       setChart(null);
       return;
     }
-    console.log('[ChartSection] fetch chart', { questionId, khoa, nganh });
+    // console.log('[ChartSection] fetch chart', { questionId, khoa, nganh });
     setChartLoading(true);
     getChartByQuestionId(questionId, { khoa, nganh }).then(res => {
       if (cancelled) return;

@@ -26,8 +26,13 @@ import FacultyReportPage from '../pages/admin/Reports/components/FacultyReportPa
 
 const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
-const SurveyPage = lazy(() => import('../pages/admin/Form/index'));
 const BatchFormEditor = lazy(() => import('../pages/admin/Alumni/BatchFormEditor'));
+
+// Form pages — mỗi view 1 route riêng
+const FormListPage    = lazy(() => import('../pages/admin/Form/pages/FormListPage'));
+const FormBuilderPage = lazy(() => import('../pages/admin/Form/pages/FormBuilderPage'));
+const FormPreviewPage = lazy(() => import('../pages/admin/Form/pages/FormPreviewPage'));
+const FormAIPage      = lazy(() => import('../pages/admin/Form/pages/FormAIPage'));
 
 //  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');
@@ -96,10 +101,30 @@ const routes = [
             element: <Suspense fallback={<Loader />}><StatIndicatorConfig /></Suspense>
           },
 
-          // Forms
+          // Forms — mỗi view 1 route riêng
           {
             path: '/admin/allforms',
-            element: <Suspense fallback={<Loader />}><SurveyPage /></Suspense>
+            element: <Navigate to="/admin/forms" replace />
+          },
+          {
+            path: '/admin/forms',
+            element: <Suspense fallback={<Loader />}><FormListPage /></Suspense>
+          },
+          {
+            path: '/admin/forms/create',
+            element: <Suspense fallback={<Loader />}><FormBuilderPage /></Suspense>
+          },
+          {
+            path: '/admin/forms/ai',
+            element: <Suspense fallback={<Loader />}><FormAIPage /></Suspense>
+          },
+          {
+            path: '/admin/forms/:id/edit',
+            element: <Suspense fallback={<Loader />}><FormBuilderPage /></Suspense>
+          },
+          {
+            path: '/admin/forms/:id/preview',
+            element: <Suspense fallback={<Loader />}><FormPreviewPage /></Suspense>
           },
 
           // Reports

@@ -31,7 +31,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/faculties': 'Khoa',
   '/admin/enterprises': 'Doanh nghiệp đối tác',
   '/admin/graduation': 'Đợt tốt nghiệp',
-  '/admin/allforms': 'Cấu hình form',
+  '/admin/forms': 'Cấu hình form',
   '/admin/alumni/batches': 'Khảo sát việc làm',
   '/admin/statistics': 'Biểu đồ thống kê',
   '/admin/employment-stats': 'Thống kê việc làm',
@@ -54,7 +54,7 @@ const MENU_ITEMS = [
 
   { type: 'divider' as const },
 
-  { key: '/admin/allforms', icon: <FileTextOutlined />, label: <Link to="/admin/allforms">Cấu hình form</Link> },
+  { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link> },
   { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link> },
 
   { type: 'divider' as const },
@@ -194,6 +194,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     if (/^\/admin\/graduation\//.test(pathname)) return 'Chi tiết đợt tốt nghiệp';
     if (/^\/admin\/alumni\/batches\//.test(pathname)) return 'Chi tiết đợt khảo sát';
     if (/^\/admin\/statistics\//.test(pathname)) return 'Chỉ số thống kê';
+    if (/^\/admin\/forms\//.test(pathname)) return 'Cấu hình form';
     return 'Trang hiện tại';
   };
   const pageLabel = getPageLabel(location.pathname);

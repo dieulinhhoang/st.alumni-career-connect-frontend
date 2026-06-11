@@ -2,39 +2,56 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { getFormById, createForm, updateForm, publishForm, unpublishForm } from '../api'
 import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../types'
 import type { LogicRule } from '../../../pages/admin/Form/builder/BuilderView'
+import { genId } from './Useformutils'
 
 export type BuilderMode = 'create' | 'edit'
 
-const _genId = () => Math.random().toString(36).slice(2, 8)
-
 type QuestionOption = { id: string; label: string }
 
-const _newQuestion = (sectionId?: string): Question => ({
-  id: _genId(),
-  type: 'short',
-  title: '',
-  required: false,
-  options: [],
-  sectionId: sectionId ?? '',
-  order: 0,
+const newQuestion = (sectionId = '', patch: Partial<Question> = {}): Question => ({
+  id: genId(), type: 'short', title: '', required: false, options: [], sectionId, order: 0, ...patch,
 })
 
-const _defaultSection = (): Section => ({
-  id: _genId(),
-  title: 'Phần I. Thông tin cá nhân',
-  order: 0,
-})
+const newSection = (): Section => ({ id: genId(), title: 'Phần I. Thông tin cá nhân', order: 0 })
 
-const _defaultQuestions = (sectionId: string): Question[] => [
-  { id: _genId(), type: 'short', title: 'Mã sinh viên', required: true, options: [], sectionId, order: 0, reportFieldKey: 'student_code' },
-  { id: _genId(), type: 'short', title: 'Họ và tên', required: true, options: [], sectionId, order: 1, reportFieldKey: 'fullname' },
-  { id: _genId(), type: 'radio', title: 'Giới tính', required: true, options: [{ id: _genId(), label: 'Nam' }, { id: _genId(), label: 'Nữ' }, { id: _genId(), label: 'Khác' }], sectionId, order: 2, reportFieldKey: 'gender' },
-  { id: _genId(), type: 'date', title: 'Ngày sinh', required: true, options: [], sectionId, order: 3, reportFieldKey: 'dob' },
-  { id: _genId(), type: 'short', title: 'Mã ngành đào tạo', required: true, options: [], sectionId, order: 4, reportFieldKey: 'industrycode' },
-  { id: _genId(), type: 'short', title: 'Số CCCD', required: true, options: [], sectionId, order: 5, reportFieldKey: 'citizen_identification' },
-  { id: _genId(), type: 'short', title: 'Khóa học', required: true, options: [], sectionId, order: 6, reportFieldKey: 'courseyear' },
-  { id: _genId(), type: 'short', title: 'Tên ngành được đào tạo', required: true, options: [], sectionId, order: 7, reportFieldKey: 'industryname' },
+const reindex = <T extends { order?: number }>(arr: T[]): T[] => arr.map((x, i) => ({ ...x, order: i }))
+
+// Câu hỏi mặc định khi tạo form mới: [tiêu đề, reportFieldKey, type?, options?]
+const DEFAULT_FIELDS: [title: string, reportFieldKey: string, type?: Question['type'], optionLabels?: string[]][] = [
+  ['Mã sinh viên', 'student_code'],
+  ['Họ và tên', 'fullname'],
+  ['Giới tính', 'gender', 'radio', ['Nam', 'Nữ', 'Khác']],
+  ['Ngày sinh', 'dob', 'date', []],
+  ['Mã ngành đào tạo', 'industrycode'],
+  ['Số CCCD', 'citizen_identification'],
+  ['Khóa học', 'courseyear'],
+  ['Tên ngành được đào tạo', 'industryname'],
 ]
+
+const defaultQuestions = (sectionId: string): Question[] =>
+  DEFAULT_FIELDS.map(([title, reportFieldKey, type = 'short', optionLabels = []], order) =>
+    newQuestion(sectionId, {
+      title, reportFieldKey, type, order, required: true,
+      options: optionLabels.map(label => ({ id: genId(), label })),
+    }))
+
+async function runAsync<T>(
+  fn: () => Promise<T>,
+  setBusy: (b: boolean) => void,
+  setError: (s: string) => void,
+  fallbackMsg: string,
+): Promise<T | null> {
+  setBusy(true)
+  setError('')
+  try {
+    return await fn()
+  } catch (e) {
+    setError(e instanceof Error ? e.message : fallbackMsg)
+    return null
+  } finally {
+    setBusy(false)
+  }
+}
 
 export interface SaveExtras {
   header?: SurveyHeader
@@ -63,15 +80,18 @@ export interface UseFormBuilderReturn {
 }
 
 export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuilderReturn {
-  const defaultSection = _defaultSection()
-  const initialQs = mode === 'create' ? _defaultQuestions(defaultSection.id) : []
+  // Khởi tạo 1 lần (lazy) để id không bị sinh lại mỗi render
+  const [initial] = useState(() => {
+    const section = newSection()
+    return { section, qs: mode === 'create' ? defaultQuestions(section.id) : [] }
+  })
 
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
-  const [questions, setQs] = useState<Question[]>(initialQs)
-  const [activeId, setActiveId] = useState<string | null>(initialQs[0]?.id ?? null)
-  const [sections, setSections] = useState<Section[]>([defaultSection])
-  const [activeSectionId, setActiveSectionId] = useState<string | null>(defaultSection.id)
+  const [questions, setQs] = useState<Question[]>(initial.qs)
+  const [activeId, setActiveId] = useState<string | null>(initial.qs[0]?.id ?? null)
+  const [sections, setSections] = useState<Section[]>([initial.section])
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(initial.section.id)
 
   const [loading, setLoading] = useState(mode === 'edit')
   const [loadError, setLoadError] = useState('')
@@ -87,6 +107,7 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
   // FIX: track real form id — tránh auto-save tạo bản mới mỗi lần
   const savedFormIdRef = useRef<number | null>(formId ?? null)
 
+  //  Load form khi edit
   useEffect(() => {
     if (mode !== 'edit' || !formId) return
     let cancelled = false
@@ -98,16 +119,17 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
         setDesc(form.description)
         setFormStatus(form.status)
         const formQuestions: Question[] = Array.isArray(form.questions) ? form.questions : []
-        const rawSections = (form as any).sections
-        const serverSections: Section[] = Array.isArray(rawSections) ? rawSections : []
+        const serverSections: Section[] = Array.isArray((form as any).sections) ? (form as any).sections : []
+        // Ưu tiên sections từ server; nếu không có thì suy ra từ sectionId của câu hỏi
         const loadedSections: Section[] = serverSections.length > 0
           ? serverSections
           : formQuestions.length > 0
-          ? Array.from(new Set(formQuestions.map(q => q.sectionId).filter(Boolean))).map((sectionId, index) => ({ id: sectionId, title: `Phần ${index + 1}`, order: index }))
-          : [_defaultSection()]
+          ? Array.from(new Set(formQuestions.map(q => q.sectionId).filter(Boolean)))
+              .map((sectionId, index) => ({ id: sectionId, title: `Phần ${index + 1}`, order: index }))
+          : [newSection()]
         setSections(loadedSections)
         setActiveSectionId(loadedSections[0]?.id ?? null)
-        const qs = formQuestions.length > 0 ? formQuestions : [_newQuestion(loadedSections[0]?.id)]
+        const qs = formQuestions.length > 0 ? formQuestions : [newQuestion(loadedSections[0]?.id)]
         setQs(qs)
         setActiveId(qs[0]?.id ?? null)
       })
@@ -116,23 +138,23 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     return () => { cancelled = true }
   }, [mode, formId])
 
+  //  Question CRUD
   const addQuestion = useCallback((afterId?: string, patch?: Partial<Question>): string => {
-    const newId = _genId()
+    const newId = genId()
     setQs(qs => {
       const afterQ = afterId ? qs.find(q => q.id === afterId) : null
       const sid = afterQ?.sectionId || activeSectionId || sections[0]?.id || ''
-      const q: Question = { ..._newQuestion(sid), ...patch, id: newId, sectionId: patch?.sectionId ?? sid }
-      let next: Question[]
+      const q: Question = { ...newQuestion(sid), ...patch, id: newId, sectionId: patch?.sectionId ?? sid }
+      // Chèn sau câu chỉ định, hoặc sau câu cuối cùng của section đang active
+      let at: number
       if (afterId) {
-        const idx = qs.findIndex(q => q.id === afterId)
-        next = idx === -1 ? [...qs, q] : [...qs.slice(0, idx + 1), q, ...qs.slice(idx + 1)]
+        const idx = qs.findIndex(x => x.id === afterId)
+        at = idx === -1 ? qs.length : idx + 1
       } else {
-        let lastIdx = -1
-        qs.forEach((cur, i) => { if (cur.sectionId === sid) lastIdx = i })
-        const insertAt = lastIdx >= 0 ? lastIdx + 1 : qs.length
-        next = [...qs.slice(0, insertAt), q, ...qs.slice(insertAt)]
+        const lastInSection = qs.reduce((last, cur, i) => (cur.sectionId === sid ? i : last), -1)
+        at = lastInSection >= 0 ? lastInSection + 1 : qs.length
       }
-      return next.map((item, index) => ({ ...item, order: index }))
+      return reindex([...qs.slice(0, at), q, ...qs.slice(at)])
     })
     setActiveId(newId)
     return newId
@@ -142,7 +164,7 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     setQs(qs => {
       const idx = qs.findIndex(q => q.id === id)
       if (idx === -1) return qs
-      const copy: Question = { ...qs[idx], id: _genId(), options: (qs[idx].options ?? []).map((o: QuestionOption) => ({ ...o, id: _genId() })) }
+      const copy: Question = { ...qs[idx], id: genId(), options: (qs[idx].options ?? []).map((o: QuestionOption) => ({ ...o, id: genId() })) }
       setActiveId(copy.id)
       return [...qs.slice(0, idx + 1), copy, ...qs.slice(idx + 1)]
     })
@@ -163,12 +185,10 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
   const moveQuestion = useCallback((id: string, dir: 'up' | 'down') => {
     setQs(qs => {
       const idx = qs.findIndex(q => q.id === id)
-      if (idx === -1) return qs
-      if (dir === 'up' && idx === 0) return qs
-      if (dir === 'down' && idx === qs.length - 1) return qs
+      const swap = dir === 'up' ? idx - 1 : idx + 1
+      if (idx === -1 || swap < 0 || swap >= qs.length) return qs
       const next = [...qs]
-      const swapIdx = dir === 'up' ? idx - 1 : idx + 1
-      ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
+      ;[next[idx], next[swap]] = [next[swap], next[idx]]
       return next
     })
   }, [])
@@ -178,48 +198,63 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
       const from = qs.findIndex(q => q.id === dragId)
       const to = qs.findIndex(q => q.id === overId)
       if (from === -1 || to === -1 || from === to) return qs
+
       const next = [...qs]
       const [moved] = next.splice(from, 1)
       next.splice(to, 0, moved)
-      return next
+
+      // Group bị đứt sau khi reorder (member không còn liền kề / khác section) → tách cả group
+      const byGroup = new Map<string, number[]>()
+      next.forEach((q, i) => {
+        if (q.rowGroup) byGroup.set(q.rowGroup, [...(byGroup.get(q.rowGroup) ?? []), i])
+      })
+      const broken = new Set(
+        [...byGroup].filter(([, idxs]) =>
+          idxs.some((v, j) => j > 0 && v !== idxs[j - 1] + 1) ||
+          new Set(idxs.map(i => next[i].sectionId)).size > 1
+        ).map(([gid]) => gid)
+      )
+      return broken.size === 0 ? next
+        : next.map(q => broken.has(q.rowGroup ?? '') ? { ...q, rowGroup: undefined } : q)
     })
   }, [])
 
+  //  Sections
   const addSectionAfter = useCallback((afterQuestionId: string) => {
     const afterIdx = questions.findIndex(q => q.id === afterQuestionId)
     if (afterIdx === -1) return
     const currentSectionId = questions[afterIdx].sectionId
-    const newSectionId = _genId()
-    let firstQuestionInNewSectionId: string | null = null
-    let movedCount = 0
-    const updatedQs = questions.map((q, i) => {
+    const newSectionId = genId()
+
+    // Chuyển các câu phía sau (cùng section) vào section mới
+    let firstMovedId: string | null = null
+    let next = questions.map((q, i) => {
       if (i > afterIdx && q.sectionId === currentSectionId) {
-        movedCount += 1
-        if (!firstQuestionInNewSectionId) firstQuestionInNewSectionId = q.id
+        firstMovedId ??= q.id
         return { ...q, sectionId: newSectionId }
       }
       return q
     })
-    let finalQs = updatedQs
-    const hasQuestionAfter = afterIdx < questions.length - 1
-    if (movedCount === 0 && !hasQuestionAfter) {
-      const newQuestion = _newQuestion(newSectionId)
-      firstQuestionInNewSectionId = newQuestion.id
-      finalQs = [...updatedQs.slice(0, afterIdx + 1), newQuestion, ...updatedQs.slice(afterIdx + 1)]
+    // Không có câu nào để chuyển và đây là câu cuối → tạo câu trống cho section mới
+    if (!firstMovedId && afterIdx === questions.length - 1) {
+      const blank = newQuestion(newSectionId)
+      firstMovedId = blank.id
+      next = [...next.slice(0, afterIdx + 1), blank, ...next.slice(afterIdx + 1)]
     }
-    const currentSectionIndex = sections.findIndex(s => s.id === currentSectionId)
-    const insertAt = currentSectionIndex >= 0 ? currentSectionIndex + 1 : sections.length
-    const newSection: Section = { id: newSectionId, title: `Phần ${sections.length + 1}`, order: insertAt }
-    setQs(finalQs.map((q, index) => ({ ...q, order: index })))
-    setSections([...sections.slice(0, insertAt), newSection, ...sections.slice(insertAt)].map((s, index) => ({ ...s, order: index })))
+
+    const curIdx = sections.findIndex(s => s.id === currentSectionId)
+    const insertAt = curIdx >= 0 ? curIdx + 1 : sections.length
+    const section: Section = { id: newSectionId, title: `Phần ${sections.length + 1}`, order: insertAt }
+    setQs(reindex(next))
+    setSections(reindex([...sections.slice(0, insertAt), section, ...sections.slice(insertAt)]))
     setActiveSectionId(newSectionId)
-    setActiveId(firstQuestionInNewSectionId)
+    setActiveId(firstMovedId)
   }, [questions, sections])
 
   const deleteSection = useCallback((id: string) => {
     setSections(prev => {
       if (prev.length <= 1) return prev
-      const remaining = prev.filter(s => s.id !== id).map((s, i) => ({ ...s, order: i }))
+      const remaining = reindex(prev.filter(s => s.id !== id))
       const fallback = remaining[0]?.id
       setQs(qs => qs.map(q => q.sectionId === id ? { ...q, sectionId: fallback } : q))
       setActiveSectionId(fallback ?? null)
@@ -227,121 +262,101 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
     })
   }, [])
 
-  const addOption = useCallback((qid: string) => {
-    setQs(qs => qs.map(q => q.id !== qid ? q : { ...q, options: [...(q.options ?? []), { id: _genId(), label: '' }] }))
-  }, [])
+  //  Options
+  const patchOptions = (qid: string, fn: (opts: QuestionOption[]) => QuestionOption[]) =>
+    setQs(qs => qs.map(q => q.id !== qid ? q : { ...q, options: fn(q.options ?? []) }))
 
-  const updateOption = useCallback((qid: string, oid: string, label: string) => {
-    setQs(qs => qs.map(q => q.id !== qid ? q : { ...q, options: (q.options ?? []).map((o: QuestionOption) => o.id === oid ? { ...o, label } : o) }))
-  }, [])
+  const addOption = useCallback((qid: string) =>
+    patchOptions(qid, opts => [...opts, { id: genId(), label: '' }]), [])
+  const updateOption = useCallback((qid: string, oid: string, label: string) =>
+    patchOptions(qid, opts => opts.map(o => o.id === oid ? { ...o, label } : o)), [])
+  const removeOption = useCallback((qid: string, oid: string) =>
+    patchOptions(qid, opts => opts.filter(o => o.id !== oid)), [])
 
-  const removeOption = useCallback((qid: string, oid: string) => {
-    setQs(qs => qs.map(q => q.id !== qid ? q : { ...q, options: (q.options ?? []).filter((o: QuestionOption) => o.id !== oid) }))
-  }, [])
-
-  // Group N câu liên tiếp (bắt đầu từ id) vào 1 hàng
+  //  Row group (2-3 câu / hàng)
+  // Group `count` câu liên tiếp cùng section, leader là câu đầu group hiện tại (giữ groupId ổn định)
   const groupQuestions = useCallback((id: string, count: 2 | 3) => {
     setQs(prev => {
       const idx = prev.findIndex(q => q.id === id)
       if (idx < 0) return prev
-      const groupId = `rg_${id}`
-      const end = Math.min(idx + count, prev.length)
-      // xóa group cũ nếu câu này đang trong group khác
-      const oldGroup = prev[idx].rowGroup
-      return prev.map((q, i) => {
-        if (i >= idx && i < end) return { ...q, rowGroup: groupId }
-        if (oldGroup && q.rowGroup === oldGroup) return { ...q, rowGroup: undefined }
-        return q
-      })
+
+      const currentGroup = prev[idx].rowGroup
+      const leaderIdx = currentGroup ? prev.findIndex(q => q.rowGroup === currentGroup) : idx
+      const leader = prev[leaderIdx] ?? prev[idx]
+      const groupId = `rg_${leader.id}`
+
+      // Thu thập đúng `count` câu liên tiếp cùng section, bắt đầu từ leader
+      const targetIds = new Set<string>()
+      for (let i = leaderIdx; i < prev.length && targetIds.size < count; i++) {
+        if (prev[i].sectionId !== leader.sectionId) break
+        targetIds.add(prev[i].id)
+      }
+
+      // Mọi group cũ dính tới range mới (kể cả group hiện tại của leader) đều bị giải tán
+      const dissolve = new Set<string>()
+      if (currentGroup) dissolve.add(currentGroup)
+      prev.forEach(q => { if (targetIds.has(q.id) && q.rowGroup) dissolve.add(q.rowGroup) })
+
+      return prev.map(q =>
+        targetIds.has(q.id) ? { ...q, rowGroup: groupId }
+        : dissolve.has(q.rowGroup ?? '') ? { ...q, rowGroup: undefined }
+        : q)
     })
   }, [])
 
-  // Tách câu hỏi ra khỏi group
+  // Tách 1 câu khỏi group; nếu group chỉ còn 2 câu thì giải tán cả group
   const ungroupQuestion = useCallback((id: string) => {
     setQs(prev => {
-      const q = prev.find(q => q.id === id)
-      if (!q?.rowGroup) return prev
-      const gid = q.rowGroup
-      const members = prev.filter(q => q.rowGroup === gid)
-      if (members.length <= 2) {
-        // chỉ còn 1–2 câu → tách toàn bộ group
-        return prev.map(q => q.rowGroup === gid ? { ...q, rowGroup: undefined } : q)
-      }
-      return prev.map(q => q.id === id ? { ...q, rowGroup: undefined } : q)
+      const gid = prev.find(q => q.id === id)?.rowGroup
+      if (!gid) return prev
+      const dissolveAll = prev.filter(q => q.rowGroup === gid).length <= 2
+      return prev.map(q =>
+        (dissolveAll ? q.rowGroup === gid : q.id === id) ? { ...q, rowGroup: undefined } : q)
     })
   }, [])
 
+  //  Save / publish
   // FIX: dùng savedFormIdRef thay vì mode+formId — tránh createForm bị gọi nhiều lần
   const handleSave = useCallback(async (extras?: SaveExtras): Promise<Form | null> => {
     if (!name.trim()) return null
-    setSaving(true)
-    setSaveError('')
     setSaved(false)
-    try {
-      const payload = {
-        name,
-        description: extras?.descriptionParagraphs
-          ? extras.descriptionParagraphs.join('\n')
-          : desc,
-        questions,
-        sections,
-        ...(extras ? (({ descriptionParagraphs: _dp, ...rest }) => rest)(extras) : {}),
-      }
-      const currentId = savedFormIdRef.current
-      let result: Form
-      if (currentId != null) {
-        result = await updateForm(currentId, payload)
-      } else {
-        result = await createForm(payload)
-        savedFormIdRef.current = result.id as number
-      }
+    const { descriptionParagraphs, ...rest } = extras ?? {}
+    const payload = {
+      name,
+      description: descriptionParagraphs ? descriptionParagraphs.join('\n') : desc,
+      questions, sections, ...rest,
+    }
+    const result = await runAsync(async () => {
+      const id = savedFormIdRef.current
+      const form = id != null ? await updateForm(id, payload) : await createForm(payload)
+      savedFormIdRef.current = form.id as number
+      return form
+    }, setSaving, setSaveError, 'Lưu thất bại.')
+    if (result) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
-      return result
-    } catch (e) {
-      setSaveError(e instanceof Error ? e.message : 'Lưu thất bại.')
-      return null
-    } finally {
-      setSaving(false)
     }
+    return result
   }, [name, desc, questions, sections])
 
-  const handlePublish = useCallback(async (): Promise<Form | null> => {
+  const setPublishStatus = useCallback(async (publish: boolean): Promise<Form | null> => {
     const id = savedFormIdRef.current
     if (!id) return null
-    setPublishing(true)
-    setPublishError('')
-    try {
-      const result = await publishForm(id)
-      setFormStatus('published')
-      setPublished(true)
-      setTimeout(() => setPublished(false), 2500)
-      return result
-    } catch (e) {
-      setPublishError(e instanceof Error ? e.message : 'Xuất bản thất bại.')
-      return null
-    } finally {
-      setPublishing(false)
+    const result = await runAsync(
+      () => (publish ? publishForm(id) : unpublishForm(id)),
+      setPublishing, setPublishError,
+      publish ? 'Xuất bản thất bại.' : 'Hủy xuất bản thất bại.',
+    )
+    if (result) {
+      setFormStatus(publish ? 'published' : 'draft')
+      setPublished(publish)
+      if (publish) setTimeout(() => setPublished(false), 2500)
     }
+    return result
   }, [])
 
-  const handleUnpublish = useCallback(async (): Promise<Form | null> => {
-    const id = savedFormIdRef.current
-    if (!id) return null
-    setPublishing(true)
-    setPublishError('')
-    try {
-      const result = await unpublishForm(id)
-      setFormStatus('draft')
-      setPublished(false)
-      return result
-    } catch (e) {
-      setPublishError(e instanceof Error ? e.message : 'Hủy xuất bản thất bại.')
-      return null
-    } finally {
-      setPublishing(false)
-    }
-  }, [])
+  const handlePublish = useCallback(() => setPublishStatus(true), [setPublishStatus])
+  const handleUnpublish = useCallback(() => setPublishStatus(false), [setPublishStatus])
 
   return {
     name, desc, setName, setDesc,

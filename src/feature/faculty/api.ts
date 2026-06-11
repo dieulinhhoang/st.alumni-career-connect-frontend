@@ -11,7 +11,7 @@ import type { Faculty, FacultyListResponse, FacultyQuery, Major } from "./types"
 export async function fetchFaculties(
   query: FacultyQuery = {}
 ): Promise<FacultyListResponse> {
-  console.log("API Request - fetchFaculties with query:", query); // Debug log to check the query parameters
+  // console.log("API Request - fetchFaculties with query:", query); // Debug log to check the query parameters
   const res = await api.get("/faculty", { params: query });
   return res.data;
 }

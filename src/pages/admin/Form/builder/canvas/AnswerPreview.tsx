@@ -1,3 +1,4 @@
+import React from 'react'
 import type { Question } from '../../../../../feature/form/types'
 
 const base: React.CSSProperties = {
@@ -8,7 +9,7 @@ const base: React.CSSProperties = {
 
 export function AnswerPreview({ question }: { question: Question }) {
   switch (question.type) {
-    case 'short':
+    case 'text':
     case 'email':
     case 'tel':
       return <div style={base}>Câu trả lời...</div>
@@ -19,20 +20,30 @@ export function AnswerPreview({ question }: { question: Question }) {
     case 'date':
       return <div style={{ ...base, fontStyle: 'normal', fontSize: 12 }}>dd / mm / yyyy</div>
     case 'radio':
-    case 'checkbox':
+    case 'checkbox': {
+      const opts = question.options ?? []
+      const shown = opts.slice(0, 3)
+      const rest = opts.length - 3
       return (
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {(question.options ?? []).slice(0, 3).map((o) => (
+          {shown.map((o) => (
             <div key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
               <div style={{ width: 14, height: 14, borderRadius: question.type === 'radio' ? '50%' : 3, border: '1.5px solid #d1d5db', flexShrink: 0 }} />
               <span style={{ fontSize: 12, color: '#6b7280' }}>{o.label}</span>
             </div>
           ))}
-          {(question.options?.length ?? 0) > 3 && (
-            <div style={{ fontSize: 12, color: '#9ca3af', paddingLeft: 23 }}>+{(question.options?.length ?? 0) - 3} lựa chọn khác</div>
+          {rest > 0 && (
+            <div style={{ fontSize: 12, color: '#9ca3af', paddingLeft: 23 }}>+{rest} lựa chọn khác</div>
+          )}
+          {question.allowOther && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <div style={{ width: 14, height: 14, borderRadius: question.type === 'radio' ? '50%' : 3, border: '1.5px solid #d1d5db', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: '#9ca3af', fontStyle: 'italic' }}>Khác (ô nhập sẽ hiện)</span>
+            </div>
           )}
         </div>
       )
+    }
     case 'rating':
       return (
         <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
