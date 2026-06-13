@@ -13,6 +13,7 @@ import {
   Tag,
 } from 'antd'
 import { useGetUserRoles, useAssignUserRoles } from '../../../feature/user/hook/query'
+import { useFaculties } from '../../../feature/faculty/hooks/useFaculties'
 import type { IRole } from '../../../feature/role/type'
 
 type Props = {
@@ -30,6 +31,8 @@ type Props = {
   setStatus: (v: string) => void
   type: string
   setType: (v: string) => void
+  facultyId: number | null
+  setFacultyId: (v: number | null) => void
 
   onOk: () => void
   onCancel: () => void
@@ -50,6 +53,8 @@ const UserModal: React.FC<Props> = ({
   setStatus,
   type,
   setType,
+  facultyId,
+  setFacultyId,
   onOk,
   onCancel,
   confirmLoading,
@@ -58,6 +63,8 @@ const UserModal: React.FC<Props> = ({
   const isEdit = mode === 'edit'
   const isView = mode === 'view'
   const isCreate = mode === 'create'
+
+  const { faculties, loading: loadingFaculties } = useFaculties()
 
   // Role assignment state
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([])
@@ -80,7 +87,7 @@ const UserModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (isOpen) {
-      form.setFieldsValue({ ssoId, fullName, code, status, type })
+      form.setFieldsValue({ ssoId, fullName, code, status, type, facultyId })
       if (isCreate) {
         setSelectedRoleIds([])
         setRolesDirty(false)
@@ -90,7 +97,7 @@ const UserModal: React.FC<Props> = ({
       setSelectedRoleIds([])
       setRolesDirty(false)
     }
-  }, [isOpen, ssoId, fullName, code, status, type, isCreate, form])
+  }, [isOpen, ssoId, fullName, code, status, type, facultyId, isCreate, form])
 
   const handleOk = async () => {
     // Lưu thông tin user trước
@@ -180,6 +187,21 @@ const UserModal: React.FC<Props> = ({
                 { value: 'officer', label: 'Nhân viên' },
                 { value: 'admin', label: 'Quản trị viên' },
               ]}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item label="Khoa" name="facultyId">
+            <Select
+              value={facultyId ?? undefined}
+              onChange={(v) => setFacultyId(v ?? null)}
+              disabled={isView}
+              allowClear
+              loading={loadingFaculties}
+              placeholder="Chọn khoa"
+              style={{ borderRadius: 8 }}
+              options={faculties.map((f) => ({ value: f.id, label: f.name }))}
             />
           </Form.Item>
         </Col>

@@ -6,6 +6,8 @@ export interface IUser {
   accessToken?: string | null
   status: string
   type: string
+  facultyId?: number | null
+  faculty?: { id: number; name: string } | null
   createdAt: string
   updatedAt: string
 }
@@ -29,6 +31,7 @@ export interface IUserQuery {
   code?: string
   status?: string
   type?: string
+  facultyId?: number | string
 }
 
 export interface ICreateUserBody {
@@ -37,6 +40,7 @@ export interface ICreateUserBody {
   code?: string
   status?: string
   type?: string
+  facultyId?: number | null
 }
 
 export interface IUpdateUserBody {
@@ -44,6 +48,7 @@ export interface IUpdateUserBody {
   code?: string
   status?: string
   type?: string
+  facultyId?: number | null
 }
 
 export interface IToggleSuspendUserBody {

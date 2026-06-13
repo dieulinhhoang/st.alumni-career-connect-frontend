@@ -9,7 +9,7 @@ import {
   AuditOutlined,
 } from '@ant-design/icons';
 import type { Stats, FacultySubmissionRow } from '../types';
-import { KpiItem } from '../../../pages/admin/Reports/components/KpiGrid';
+import { KpiItem } from '../../../pages/system/Reports/components/KpiGrid';
  
 export function useKpiItems(
   isSchoolView: boolean,

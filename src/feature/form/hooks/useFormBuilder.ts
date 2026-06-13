@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { getFormById, createForm, updateForm, publishForm, unpublishForm } from '../api'
 import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../types'
-import type { LogicRule } from '../../../pages/admin/Form/builder/BuilderView'
+import type { LogicRule } from '../../../pages/system/Form/builder/BuilderView'
 import { genId } from './Useformutils'
 
 export type BuilderMode = 'create' | 'edit'

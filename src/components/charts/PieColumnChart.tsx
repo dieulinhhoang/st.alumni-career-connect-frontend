@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Col, Row, Typography } from 'antd'
 import { Pie as G2Pie, Column as G2Column } from '@antv/g2plot'
-import { COLOR } from '../../pages/admin/DashBoard/theme'
+import { COLOR } from '../../pages/system/DashBoard/theme'
 
 const { Text } = Typography
 

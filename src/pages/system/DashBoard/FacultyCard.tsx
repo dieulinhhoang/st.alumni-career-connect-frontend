@@ -207,7 +207,7 @@ export function FacultyCard() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 4, height: 20, borderRadius: RADIUS.pill, background: COLOR.primary }} />
           <div style={{ fontSize: 15, fontWeight: 700, color: COLOR.textDark }}>
-            {isOwnFacultyView ? "Báo cáo khoa của bạn" : "Tình trạng nộp báo cáo"}
+            {isOwnFacultyView ? "Báo cáo khoa " : "Tình trạng nộp báo cáo"}
           </div>
         </div>
         {!isOwnFacultyView && (

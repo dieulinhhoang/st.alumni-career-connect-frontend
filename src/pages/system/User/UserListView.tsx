@@ -17,6 +17,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 
 import type { IUser, IUserQuery } from '../../../feature/user/type'
+import { useFaculties } from '../../../feature/faculty/hooks/useFaculties'
 import FilterContainer from '../../../components/common/FilterContainer'
 import CustomTable from '../../../components/common/customTable'
 
@@ -45,6 +46,8 @@ const UserListView: React.FC<UserListViewProps> = ({
 }) => {
   const canUpdate = true
   const canView = true
+
+  const { faculties } = useFaculties()
 
   const columns: ColumnsType<IUser> = [
     {
@@ -84,6 +87,22 @@ const UserListView: React.FC<UserListViewProps> = ({
           }}
         >
           {code || '-'}
+        </span>
+      ),
+    },
+    {
+      title: 'Khoa',
+      dataIndex: 'faculty',
+      render: (_: any, record: IUser) => (
+        <span
+          style={{
+            color:
+              record.status === 'inactive'
+                ? 'rgba(182, 176, 173, 0.9)'
+                : '#111827',
+          }}
+        >
+          {record.faculty?.name || '-'}
         </span>
       ),
     },
@@ -186,6 +205,7 @@ const UserListView: React.FC<UserListViewProps> = ({
             code = '',
             status = '',
             type = '',
+            facultyId = '',
           } = values || {}
 
           setQuery((prev) => ({
@@ -196,6 +216,7 @@ const UserListView: React.FC<UserListViewProps> = ({
             code,
             status,
             type,
+            facultyId,
           }))
         }}
         onResetFields={() => {
@@ -207,6 +228,7 @@ const UserListView: React.FC<UserListViewProps> = ({
             code: '',
             status: '',
             type: '',
+            facultyId: '',
           }))
         }}
       >
@@ -229,6 +251,15 @@ const UserListView: React.FC<UserListViewProps> = ({
                   { label: 'Hoạt động', value: 'active' },
                   { label: 'Ngưng hoạt động', value: 'inactive' },
                 ]}
+              />
+            </Form.Item>
+
+            <Form.Item name="facultyId" style={{ marginBottom: 12 }}>
+              <Select
+                allowClear
+                placeholder="Khoa"
+                style={inputStyle}
+                options={faculties.map((f) => ({ label: f.name, value: f.id }))}
               />
             </Form.Item>
           </>

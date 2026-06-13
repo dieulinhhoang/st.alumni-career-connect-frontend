@@ -32,6 +32,15 @@ export const MAU01_COLUMNS: { value: string; label: string }[] = [
 ]
 
 export const MAU03_COLUMNS: { value: string; label: string }[] = [
+  // ── Câu hỏi "gộp" (radio/checkbox nhiều lựa chọn) — 1 câu hỏi này quyết định
+  // nhiều cột thống kê con bên dưới (xem FIELD_SOURCE/FIELD_MATCH_LABELS ở BE) ──
+  { value: 'employmentStatus',     label: '[Gộp] Tình trạng việc làm (Đã có VL/Tiếp tục học/Chưa có VL...)' },
+  { value: 'jobRelevance',         label: '[Gộp] Mức độ phù hợp ngành đào tạo (Đúng/Liên quan/Không liên quan)' },
+  { value: 'workSector',           label: '[Gộp] Khu vực làm việc (Nhà nước/Tư nhân/Nước ngoài/Tự tạo)' },
+  { value: 'jobSearchDuration',    label: '[Gộp] Thời gian có việc làm sau tốt nghiệp' },
+  { value: 'trainingFit',          label: '[Gộp] Mức độ học được kiến thức/kỹ năng từ nhà trường' },
+  { value: 'softSkills',           label: '[Gộp] Kỹ năng mềm cần cho công việc (chọn nhiều)' },
+
   { value: 'dungNganh',            label: 'Có VL - Đúng ngành' },
   { value: 'lienQuan',             label: 'Có VL - Liên quan' },
   { value: 'khongLienQuan',        label: 'Có VL - Không liên quan' },
@@ -83,11 +92,18 @@ interface StatConfigProps {
 function StatConfig({ question: q, accent, onUpdate }: StatConfigProps) {
   const colList = q.reportTemplate === 'mau01' ? MAU01_COLUMNS : MAU03_COLUMNS
 
+  // Các câu hỏi thông tin cá nhân (Giới tính, Mã SV...) đã có reportFieldKey
+  // đặc biệt (vd 'gender') được report-export dùng để loại khỏi cột động Mẫu 3.
+  // Không được ghi đè key này bằng rk_<id> khi bật/tắt toggle.
+  const isPersonalKey = !!q.reportFieldKey && !q.reportFieldKey.startsWith('rk_')
+
   const handleChartToggle = (on: boolean) => {
     onUpdate({
       showInChart: on,
       chartType: on ? (q.chartType ?? 'pie') : undefined,
-      reportFieldKey: (on || q.excelColumn) ? genKey(q.id) : undefined,
+      reportFieldKey: isPersonalKey
+        ? q.reportFieldKey
+        : (on || q.excelColumn) ? genKey(q.id) : undefined,
     })
   }
 
@@ -95,7 +111,9 @@ function StatConfig({ question: q, accent, onUpdate }: StatConfigProps) {
     onUpdate({
       reportTemplate: on ? (q.reportTemplate ?? 'mau03') : undefined,
       excelColumn: on ? q.excelColumn : undefined,
-      reportFieldKey: (on || q.showInChart) ? genKey(q.id) : undefined,
+      reportFieldKey: isPersonalKey
+        ? q.reportFieldKey
+        : (on || q.showInChart) ? genKey(q.id) : undefined,
     })
   }
 

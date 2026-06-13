@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { Alert, Col, Row, Spin, Typography } from "antd";
 import {
   FileTextOutlined,
@@ -12,6 +13,7 @@ import { FacultyCard } from "./FacultyCard";
 import { EnterpriseList } from "./Enterpriselist";
 import { ChartSection } from "./Chartsection";
 import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
+import { getCurrentUser } from "../../../feature/auth/permission";
 import {
   fetchDashboardSummary,
   type DashboardSummary,
@@ -31,6 +33,7 @@ type KpiItem = {
 };
 
 export function DashBoard() {
+  const currentUser = getCurrentUser();
   const { state, setField, khoaOptions, nganhOptions } = useChartFilter();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +67,7 @@ export function DashBoard() {
         label: "Tỷ lệ phản hồi",
         value: `${summary.responseRate.value}%`,
         sub: summary.responseRate.total != null
-          ? `${summary.responseRate.value} / ${summary.responseRate.total} SV`
+          ? `${summary.responseRate.count ?? 0} / ${summary.responseRate.total} SV`
           : "Trên tổng số SV tốt nghiệp",
         icon: <FileTextOutlined />,
         accentColor: COLOR.primary,
@@ -99,6 +102,10 @@ export function DashBoard() {
       },
     ];
   }, [summary]);
+
+  if (!currentUser.isAdmin && currentUser.facultyId) {
+    return <Navigate to="/khoa/dashboard" replace />;
+  }
 
   return (
     <AdminLayout>

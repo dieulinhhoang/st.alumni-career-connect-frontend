@@ -84,6 +84,7 @@ export interface ChartDataPoint {
 
 export interface DashboardSummaryMetric {
   value: number;
+  count?: number;
   total?: number;
   trend?: string;
 }

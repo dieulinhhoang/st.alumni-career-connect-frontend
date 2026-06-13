@@ -1,38 +1,39 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import Enterprise from '../pages/admin/Enterprise/index';
-import EnterpriseDetail from '../pages/admin/EnterpriseDetail/index';
-import Faculties from '../pages/admin/Faculty';
-import MajorDetail from '../pages/admin/Faculty/MajorDetail';
-import FacultyDetail from '../pages/admin/Faculty/FacultyDetail';
-import GraduationStudents from '../pages/admin/Graduation/GraduationStudents';
-import GraduationList from '../pages/admin/Graduation/index';
-import StudentDetail from '../pages/admin/Graduation/Studentdetail';
-import UserManagement from '../pages/admin/User/UserManagement';
-import RoleManagement from '../pages/admin/Role/RoleManagement';
-import ResourceManagement from '../pages/admin/Resources/ResourceManagement';
-import { ResponseDetail } from '../pages/admin/Alumni/ResponseDetail';
-import { BatchResults } from '../pages/admin/Alumni/BatchResults';
-import { BatchCreate } from '../pages/admin/Alumni/BatchCreate';
-import { BatchList } from '../pages/admin/Alumni/BatchList';
-import FormStatisticsDetailPage from '../pages/admin/Statistics/FormStatisticsDetail';
-import AdminProfile from '../pages/admin/AdminProfile/AdminProfile';
-import ReportsPage from '../pages/admin/Reports/ReportsPage';
+import Enterprise from '../pages/system/Enterprise/index';
+import EnterpriseDetail from '../pages/system/EnterpriseDetail/index';
+import Faculties from '../pages/system/Faculty';
+import MajorDetail from '../pages/system/Faculty/MajorDetail';
+import FacultyDetail from '../pages/system/Faculty/FacultyDetail';
+import GraduationStudents from '../pages/system/Graduation/GraduationStudents';
+import GraduationList from '../pages/system/Graduation/index';
+import StudentDetail from '../pages/system/Graduation/Studentdetail';
+import UserManagement from '../pages/system/User/UserManagement';
+import RoleManagement from '../pages/system/Role/RoleManagement';
+import ResourceManagement from '../pages/system/Resources/ResourceManagement';
+import { ResponseDetail } from '../pages/system/Alumni/ResponseDetail';
+import { BatchResults } from '../pages/system/Alumni/BatchResults';
+import { BatchCreate } from '../pages/system/Alumni/BatchCreate';
+import { BatchList } from '../pages/system/Alumni/BatchList';
+import FormStatisticsDetailPage from '../pages/system/Statistics/FormStatisticsDetail';
+import AdminProfile from '../pages/system/AdminProfile/AdminProfile';
+import ReportsPage from '../pages/system/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 import { DoneScreen } from '../pages/client/Survey/DoneScreen';
-import StatIndicatorConfig from '../pages/admin/Statistics/StatIndicatorConfig';
-import AuthCallback from '../pages/admin/Auth/AuthCallback';
-import FacultyReportPage from '../pages/admin/Reports/components/FacultyReportPage';
+import StatIndicatorConfig from '../pages/system/Statistics/StatIndicatorConfig';
+import AuthCallback from '../pages/system/Auth/AuthCallback';
+import FacultyReportPage from '../pages/system/Reports/components/FacultyReportPage';
 
-const DashBoard = lazy(() => import('../pages/admin/DashBoard/index'));
+const DashBoard = lazy(() => import('../pages/system/DashBoard/index'));
+const KhoaDashBoard = lazy(() => import('../pages/customFaculty/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
-const BatchFormEditor = lazy(() => import('../pages/admin/Alumni/BatchFormEditor'));
+const BatchFormEditor = lazy(() => import('../pages/system/Alumni/BatchFormEditor'));
 
 // Form pages — mỗi view 1 route riêng
-const FormListPage    = lazy(() => import('../pages/admin/Form/pages/FormListPage'));
-const FormBuilderPage = lazy(() => import('../pages/admin/Form/pages/FormBuilderPage'));
-const FormPreviewPage = lazy(() => import('../pages/admin/Form/pages/FormPreviewPage'));
-const FormAIPage      = lazy(() => import('../pages/admin/Form/pages/FormAIPage'));
+const FormListPage    = lazy(() => import('../pages/system/Form/pages/FormListPage'));
+const FormBuilderPage = lazy(() => import('../pages/system/Form/pages/FormBuilderPage'));
+const FormPreviewPage = lazy(() => import('../pages/system/Form/pages/FormPreviewPage'));
+const FormAIPage      = lazy(() => import('../pages/system/Form/pages/FormAIPage'));
 
 //  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');
@@ -90,6 +91,10 @@ const routes = [
           {
             path: '/admin/dashboard',
             element: <Suspense fallback={<Loader />}><DashBoard /></Suspense>
+          },
+          {
+            path: '/khoa/dashboard',
+            element: <Suspense fallback={<Loader />}><KhoaDashBoard /></Suspense>
           },
 
           // Statistics

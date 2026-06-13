@@ -24,6 +24,7 @@ const UserManagement: React.FC = () => {
     code: '',
     status: '',
     type: '',
+    facultyId: '',
   })
 
   const [ssoId, setSsoId] = useState('')
@@ -31,6 +32,7 @@ const UserManagement: React.FC = () => {
   const [code, setCode] = useState('')
   const [status, setStatus] = useState('active')
   const [type, setType] = useState('officer')
+  const [facultyId, setFacultyId] = useState<number | null>(null)
 
   const [mode, setMode] = useState<'create' | 'edit' | 'view'>('view')
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -49,6 +51,7 @@ const UserManagement: React.FC = () => {
     setCode('')
     setStatus('active')
     setType('officer')
+    setFacultyId(null)
     setCurrentUserId(null)
   }
 
@@ -66,6 +69,7 @@ const UserManagement: React.FC = () => {
     setCode(user.code || '')
     setStatus(user.status || 'active')
     setType(user.type || 'officer')
+    setFacultyId(user.facultyId ?? null)
     setIsUserModalOpen(true)
   }
 
@@ -77,6 +81,7 @@ const UserManagement: React.FC = () => {
     setCode(user.code || '')
     setStatus(user.status || 'active')
     setType(user.type || 'officer')
+    setFacultyId(user.facultyId ?? null)
     setIsUserModalOpen(true)
   }
 
@@ -99,6 +104,7 @@ const UserManagement: React.FC = () => {
         code: code.trim() || undefined,
         status,
         type,
+        facultyId,
       }
 
       createUser.mutate(body as any, {
@@ -123,6 +129,7 @@ const UserManagement: React.FC = () => {
         code: code.trim() || undefined,
         status,
         type,
+        facultyId,
       }
 
       updateUser.mutate(
@@ -195,6 +202,8 @@ const UserManagement: React.FC = () => {
           setStatus={setStatus}
           type={type}
           setType={setType}
+          facultyId={facultyId}
+          setFacultyId={setFacultyId}
           onOk={handleSubmit}
           onCancel={() => {
             setIsUserModalOpen(false)

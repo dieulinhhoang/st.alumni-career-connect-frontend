@@ -22,7 +22,7 @@ import {
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGetAdminProfile } from '../../feature/adminProfile/hook/query';
-import { havePermission } from '../../feature/auth/permission';
+import { getCurrentUser, havePermission } from '../../feature/auth/permission';
 import { PermissionEnum } from '../../feature/auth/type';
 
 const { Header, Sider, Content } = Layout;
@@ -30,6 +30,7 @@ const { Header, Sider, Content } = Layout;
 /* Map route -> tiêu đề tiếng Việt cho breadcrumb */
 const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/dashboard': 'Bảng điều khiển',
+  '/khoa/dashboard': 'Bảng điều khiển',
   '/admin/faculties': 'Khoa',
   '/admin/enterprises': 'Doanh nghiệp đối tác',
   '/admin/graduation': 'Đợt tốt nghiệp',
@@ -77,8 +78,21 @@ const MENU_ITEMS = [
 /* Lọc menu theo quyền của user (đọc từ localStorage 'permissions'),
  * đồng thời gọn các divider thừa (đầu/cuối/liên tiếp) sau khi lọc.
  */
+const getDashboardPath = () => {
+  const currentUser = getCurrentUser();
+  return !currentUser.isAdmin && currentUser.facultyId ? '/khoa/dashboard' : '/admin/dashboard';
+};
+
 const getVisibleMenuItems = () => {
-  const filtered = MENU_ITEMS.filter((item) => !('permission' in item) || havePermission(item.permission!));
+  const dashboardPath = getDashboardPath();
+
+  const items = MENU_ITEMS.map((item) =>
+    item.key === '/admin/dashboard'
+      ? { ...item, key: dashboardPath, label: <Link to={dashboardPath}>Bảng điều khiển</Link> }
+      : item
+  );
+
+  const filtered = items.filter((item) => !('permission' in item) || havePermission(item.permission!));
 
   const result: typeof filtered = [];
   filtered.forEach((item, idx) => {
@@ -301,7 +315,7 @@ const handleLogout = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          items={MENU_ITEMS}
+          items={visibleMenuItems}
           onClick={() => setDrawerOpen(false)}
           style={{ padding: '8px 0 16px' }}
         />
@@ -423,7 +437,7 @@ const handleLogout = () => {
             }}
           >
             <Link
-              to="/admin/dashboard"
+              to={getDashboardPath()}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
