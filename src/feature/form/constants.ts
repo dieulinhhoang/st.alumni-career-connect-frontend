@@ -3,7 +3,7 @@ import type { QuestionTypeOption, FontOption, RadiusOption } from "./types";
 
 //  QUESTION TYPES
 export const QTYPES: QuestionTypeOption[] = [
-  { value: "short",    label: "Văn bản ngắn",        icon: "" },
+  { value: "text",    label: "Văn bản ngắn",        icon: "" },
   { value: "long",     label: "Văn bản dài",          icon: "" },
   { value: "radio",    label: "Một lựa chọn",         icon: "" },
   { value: "checkbox", label: "Nhiều lựa chọn",       icon: "" },
@@ -74,13 +74,13 @@ export const MOCK_FORMS: Form[] = [
     questions: [
       //  THÔNG TIN CÁ NHÂN 
       {
-        id: "q01", type: "short", title: "Mã sinh viên",
+        id: "q01", type: "text", title: "Mã sinh viên",
         required: true, options: [],
         sectionId: "sec-info", order: 1,
         reportFieldKey: "student_code",
       },
       {
-        id: "q02", type: "short", title: "Họ và tên",
+        id: "q02", type: "text", title: "Họ và tên",
         required: true, options: [],
         sectionId: "sec-info", order: 2,
         reportFieldKey: "fullname",
@@ -102,25 +102,25 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "dob",
       },
       {
-        id: "q05", type: "short", title: "Mã ngành đào tạo",
+        id: "q05", type: "text", title: "Mã ngành đào tạo",
         required: true, options: [],
         sectionId: "sec-info", order: 5,
         reportFieldKey: "industrycode",
       },
       {
-        id: "q06", type: "short", title: "Số CCCD",
+        id: "q06", type: "text", title: "Số CCCD",
         required: true, options: [],
         sectionId: "sec-info", order: 6,
         reportFieldKey: "citizen_identification",
       },
       {
-        id: "q07", type: "short", title: "Khóa học",
+        id: "q07", type: "text", title: "Khóa học",
         required: true, options: [],
         sectionId: "sec-info", order: 7,
         reportFieldKey: "courseyear",
       },
       {
-        id: "q08", type: "short", title: "Tên ngành được đào tạo",
+        id: "q08", type: "text", title: "Tên ngành được đào tạo",
         required: true, options: [],
         sectionId: "sec-info", order: 8,
         reportFieldKey: "industryname",
@@ -140,7 +140,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "employmentstatus",
       },
       {
-        id: "q10", type: "short", title: "Tên đơn vị tuyển dụng",
+        id: "q10", type: "text", title: "Tên đơn vị tuyển dụng",
         required: false, options: [],
         sectionId: "sec-job", order: 2,
         visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
@@ -154,7 +154,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "recruitmentdate",
       },
       {
-        id: "q12", type: "short", title: "Chức vụ / Vị trí việc làm",
+        id: "q12", type: "text", title: "Chức vụ / Vị trí việc làm",
         required: false, options: [],
         sectionId: "sec-job", order: 4,
         visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
@@ -222,7 +222,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "skillslearned",
       },
       {
-        id: "q18", type: "short", title: "Mức lương khởi điểm (triệu đồng/tháng)",
+        id: "q18", type: "text", title: "Mức lương khởi điểm (triệu đồng/tháng)",
         required: false, options: [],
         sectionId: "sec-job", order: 10,
         visibleWhen: { questionId: "q09", operator: "equals", value: "o1" },
@@ -336,7 +336,7 @@ export const MOCK_FORMS: Form[] = [
     ],
     questions: [
       {
-        id: "q1", type: "short", title: "Mã sinh viên",
+        id: "q1", type: "text", title: "Mã sinh viên",
         required: true, options: [],
         sectionId: "sec-info", order: 1,
       },
@@ -353,7 +353,7 @@ export const MOCK_FORMS: Form[] = [
     ],
     questions: [
       {
-        id: "q1", type: "short", title: "Tên doanh nghiệp",
+        id: "q1", type: "text", title: "Tên doanh nghiệp",
         required: true, options: [],
         sectionId: "sec-info", order: 1,
       },

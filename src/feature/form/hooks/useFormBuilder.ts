@@ -9,7 +9,7 @@ export type BuilderMode = 'create' | 'edit'
 type QuestionOption = { id: string; label: string }
 
 const newQuestion = (sectionId = '', patch: Partial<Question> = {}): Question => ({
-  id: genId(), type: 'short', title: '', required: false, options: [], sectionId, order: 0, ...patch,
+  id: genId(), type: 'text', title: '', required: false, options: [], sectionId, order: 0, ...patch,
 })
 
 const newSection = (): Section => ({ id: genId(), title: 'Phần I. Thông tin cá nhân', order: 0 })
@@ -29,7 +29,7 @@ const DEFAULT_FIELDS: [title: string, reportFieldKey: string, type?: Question['t
 ]
 
 const defaultQuestions = (sectionId: string): Question[] =>
-  DEFAULT_FIELDS.map(([title, reportFieldKey, type = 'short', optionLabels = []], order) =>
+  DEFAULT_FIELDS.map(([title, reportFieldKey, type = 'text', optionLabels = []], order) =>
     newQuestion(sectionId, {
       title, reportFieldKey, type, order, required: true,
       options: optionLabels.map(label => ({ id: genId(), label })),

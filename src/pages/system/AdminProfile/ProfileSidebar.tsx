@@ -27,7 +27,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, avatarUrl, displayName }) =>
           height: 96,
           margin: '0 auto 16px',
           borderRadius: '50%',
-          border: '3px solid #7c3aed',
+          border: '3px solid #2563eb',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -37,7 +37,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, avatarUrl, displayName }) =>
           size={64}
           src={avatarUrl}
           icon={!avatarUrl ? <UserOutlined /> : undefined}
-          style={{ background: '#ffffff', color: '#7c3aed' }}
+          style={{ background: '#ffffff', color: '#2563eb' }}
         />
       </div>
 
@@ -72,8 +72,8 @@ const ProfileSidebar: React.FC<Props> = ({ profile, avatarUrl, displayName }) =>
               style={{
                 padding: '6px 12px',
                 borderRadius: 999,
-                background: '#f5f3ff',
-                color: '#7c3aed',
+                background: '#eff6ff',
+                color: '#2563eb',
                 fontSize: 13,
                 fontWeight: 500,
                 display: 'inline-block',

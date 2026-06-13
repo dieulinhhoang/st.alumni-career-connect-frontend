@@ -13,7 +13,7 @@ function makeBlankForm(): Form {
   const sectionId = `section_${Date.now()}`
   const defaultSection: Section = { id: sectionId, title: 'Phần 1', order: 0 }
   const defaultQuestion: Question = {
-    id: `q_${Date.now()}`, type: 'short', title: 'Câu hỏi 1',
+    id: `q_${Date.now()}`, type: 'text', title: 'Câu hỏi 1',
     placeholder: 'Câu trả lời của bạn', required: false, sectionId, order: 0, options: [],
   }
   return {

@@ -127,7 +127,7 @@
 .stats-kpi-icon--teal   { background: #e6f4f5; color: var(--st-teal); }
 .stats-kpi-icon--blue   { background: #eff6ff; color: #3b82f6; }
 .stats-kpi-icon--amber  { background: #fffbeb; color: #d97706; }
-.stats-kpi-icon--purple { background: #f5f3ff; color: #7c3aed; }
+.stats-kpi-icon--purple { background: #eff6ff; color: #2563eb; }
 
 .stats-kpi-body {
   flex: 1;

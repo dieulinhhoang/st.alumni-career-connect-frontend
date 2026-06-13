@@ -16,7 +16,7 @@ export default function MajorDetailPage() {
   const { faculty } = useFacultyDetail(facultySlug);
   const { major, loading } = useMajorDetail(majorSlug);
 
-  const color = faculty?.color ?? "#7c3aed";
+  const color = faculty?.color ?? "#2563eb";
 
   if (loading) return (
     <AdminLayout>

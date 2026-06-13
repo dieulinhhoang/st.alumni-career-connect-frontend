@@ -43,7 +43,7 @@ export function normalizeFormData(form: Form): LoadResult {
     ? formQuestions
     : [{
         id: 'q_default',
-        type: 'short',
+        type: 'text',
         title: '',
         required: false,
         options: [],

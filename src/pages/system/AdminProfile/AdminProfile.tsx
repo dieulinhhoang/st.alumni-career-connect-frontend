@@ -89,7 +89,7 @@ const AdminProfile: React.FC = () => {
             style={{
               marginBottom: 24,
               background:
-                'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)',
+                'linear-gradient(135deg, #eff6ff 0%, #eff6ff 50%, #f0f9ff 100%)',
               borderRadius: 20,
               padding: '20px 24px',
               position: 'relative',

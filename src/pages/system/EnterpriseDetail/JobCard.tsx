@@ -80,14 +80,14 @@ function getJobFacultyLabel(job: Job, faculties: Faculty[] = []): string | null 
 
 function getJobFacultyColor(job: Job, faculties: Faculty[] = []): string {
   const raw = job.faculty;
-  if (!raw) return "#6d28d9";
+  if (!raw) return "#1d4ed8";
   if (typeof raw === "object") {
-    return (raw as Faculty).color ?? "#6d28d9";
+    return (raw as Faculty).color ?? "#1d4ed8";
   }
   const matched = faculties.find(
     (f) => String(f.id) === String(raw) || f.code === raw || f.name === raw,
   );
-  return matched?.color ?? "#6d28d9";
+  return matched?.color ?? "#1d4ed8";
 }
 export function JobCard({
   job,

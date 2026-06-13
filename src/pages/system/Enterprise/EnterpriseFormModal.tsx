@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal, Form, Input, Select, Row, Col } from "antd";
 import {
   ENTERPRISE_SIZES,
@@ -11,27 +11,36 @@ import {
 interface Props {
   open: boolean;
   enterprise: Enterprise | null;
-  faculties: Faculty[];
+  faculties?: Faculty[];
   onClose: () => void;
   onSave: (data: EnterpriseFormValues) => Promise<void>;
 }
 
-function normalizeFacultyValue(enterprise: Enterprise | null): string | undefined {
-  const raw = (enterprise as any)?.faculty;
-  if (!raw) return undefined;
-  if (typeof raw === "string") return raw;
-  return String(raw.id ?? raw.code ?? raw.name ?? "");
+function normalizeFacultyIds(enterprise: Enterprise | null): string[] {
+  if (!enterprise) return [];
+  const faculties = enterprise.faculties;
+  if (!Array.isArray(faculties) || faculties.length === 0) return [];
+  return faculties.map((f) => String(f.id));
 }
 
 export function EnterpriseFormModal({
   open,
   enterprise,
-  faculties,
+  faculties = [],
   onClose,
   onSave,
 }: Props) {
   const [form] = Form.useForm<EnterpriseFormValues>();
   const [saving, setSaving] = useState(false);
+
+  const facultyOptions = useMemo(
+    () =>
+      faculties.map((f) => ({
+        label: f.name,
+        value: String(f.id),
+      })),
+    [faculties],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -43,7 +52,7 @@ export function EnterpriseFormModal({
       abbr: enterprise?.abbr ?? "",
       industry: enterprise?.industry ?? undefined,
       size: enterprise?.size ?? undefined,
-      faculty: normalizeFacultyValue(enterprise),
+      faculties: normalizeFacultyIds(enterprise),
       email: enterprise?.email ?? "",
       phone: enterprise?.phone ?? "",
       website: enterprise?.website ?? "",
@@ -56,14 +65,17 @@ export function EnterpriseFormModal({
     const values = await form.validateFields();
     setSaving(true);
     try {
-      await onSave({ ...values, faculty: values.faculty ?? null });
+      await onSave({
+        ...values,
+        faculties: values.faculties ?? [],
+      });
       form.resetFields();
       onClose();
     } finally {
       setSaving(false);
     }
   };
-
+console.log("test",faculties)
   return (
     <Modal
       title={enterprise ? "Chỉnh sửa doanh nghiệp" : "Thêm doanh nghiệp"}
@@ -74,6 +86,8 @@ export function EnterpriseFormModal({
       cancelText="Hủy"
       width={600}
       confirmLoading={saving}
+      destroyOnClose
+      okButtonProps={{ style: { background: "#2563eb", border: "none" } }}
     >
       <Form<EnterpriseFormValues>
         form={form}
@@ -124,24 +138,16 @@ export function EnterpriseFormModal({
           </Col>
         </Row>
 
-        <Form.Item name="faculty" label="Khoa đối tác">
+        <Form.Item name="faculties" label="Khoa đối tác">
           <Select
+            mode="multiple"
             allowClear
             showSearch
-            placeholder="Chọn khoa liên kết"
-            optionFilterProp="children"
+            placeholder="Chọn khoa liên kết (có thể chọn nhiều)"
+            options={facultyOptions}
+            optionFilterProp="label"
             notFoundContent="Không có khoa"
-            getPopupContainer={(trigger) => trigger.parentElement!}
-          >
-            {(faculties ?? []).map((f: any) => (
-              <Select.Option
-                key={String(f.id ?? f.facultyId)}
-                value={String(f.id ?? f.facultyId)}
-              >
-                {f.name ?? f.facultyName ?? `Khoa #${f.id ?? ""}`}
-              </Select.Option>
-            ))}
-          </Select>
+          />
         </Form.Item>
 
         <Row gutter={16}>

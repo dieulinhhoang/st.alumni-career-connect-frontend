@@ -6,7 +6,7 @@ export type QuestionType =
   | 'date'
   | 'select'
   | 'long'
-  | 'short'
+  | 'text'
   | 'radio'
   | 'dropdown'
   | 'email'

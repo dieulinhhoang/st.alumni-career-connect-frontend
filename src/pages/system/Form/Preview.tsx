@@ -96,7 +96,7 @@ interface FieldProps {
 }
 
 
-function ShortField({ placeholder, value, onChange, hasError, readOnly }: FieldProps & {
+function textField({ placeholder, value, onChange, hasError, readOnly }: FieldProps & {
   placeholder?: string
   value?: string
   onChange?: (v: string) => void
@@ -373,7 +373,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
 
   const renderInput = () => {
     switch (q.type) {
-      case 'short':    return <ShortField    {...fp} placeholder={q.placeholder} value={value} onChange={onChange} />
+      case 'text':    return <textField    {...fp} placeholder={q.placeholder} value={value} onChange={onChange} />
       case 'long':     return <LongField     {...fp} value={value} onChange={onChange} />
       case 'email':    return <EmailField    {...fp} value={value} onChange={onChange} />
       case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
@@ -383,7 +383,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
       case 'select':
       case 'dropdown': return <SelectField   {...fp} options={opts} value={value} onChange={onChange} />
-      default:         return <ShortField    {...fp} value={value} onChange={onChange} />
+      default:         return <textField    {...fp} value={value} onChange={onChange} />
     }
   }
 
@@ -424,7 +424,7 @@ function mapForm(form: Form) {
   const sectionIds = new Set(sections.map((s: Section) => s.id))
 
   const typeMap: Record<string, Question['type']> = {
-    short: 'short', long: 'long', radio: 'radio', checkbox: 'checkbox',
+    text: 'text', long: 'long', radio: 'radio', checkbox: 'checkbox',
     dropdown: 'select', select: 'select', date: 'date',
     address: 'address', email: 'email', tel: 'tel',
   }
@@ -435,9 +435,9 @@ function mapForm(form: Form) {
     const sectionId = q.sectionId && sectionIds.has(q.sectionId) ? q.sectionId : defaultSectionId
     return {
       id: q.id,
-      type: typeMap[q.type] ?? 'short',
+      type: typeMap[q.type] ?? 'text',
       title: q.title,
-      placeholder: q.placeholder ?? (q.type === 'short' ? 'Câu trả lời của bạn' : undefined),
+      placeholder: q.placeholder ?? (q.type === 'text' ? 'Câu trả lời của bạn' : undefined),
       options: q.options?.map((o: any) => (typeof o === 'string' ? { id: o, label: o } : o)),
       required: q.required,
       sectionId,

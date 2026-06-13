@@ -32,7 +32,7 @@ export default function FacultyDetailPage() {
     }));
   }, [faculty]);
 
-  const color = (faculty as any)?.color ?? "#7c3aed";
+  const color = (faculty as any)?.color ?? "#2563eb";
 
   const columns: ColumnsType<MajorRow> = [
     {

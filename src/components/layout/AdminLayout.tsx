@@ -15,6 +15,7 @@ import {
   FileSearchOutlined,
   SolutionOutlined,
   IdcardOutlined,
+  ImportOutlined,
   UsergroupAddOutlined,
   BellOutlined,
   HomeOutlined,
@@ -36,6 +37,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/graduation': 'Đợt tốt nghiệp',
   '/admin/forms': 'Cấu hình form',
   '/admin/alumni/batches': 'Khảo sát việc làm',
+  '/admin/legacy-import': 'Nhập dữ liệu Excel',
   '/admin/statistics': 'Biểu đồ thống kê',
   '/admin/employment-stats': 'Thống kê việc làm',
   '/admin/reports': 'Báo cáo tổng hợp',
@@ -62,6 +64,7 @@ const MENU_ITEMS = [
 
   { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
   { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link>, permission: PermissionEnum.SURVEYS_READ },
+  { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
 
   { type: 'divider' as const },
 

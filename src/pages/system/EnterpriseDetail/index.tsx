@@ -27,7 +27,7 @@ import { JobFormModal } from "./JobFormModal";
 import { JobCard } from "./JobCard";
 import { EnterpriseFormModal } from "./EditEnterpriseModal";
 
-const DEFAULT_FACULTY_COLOR = "#6d28d9";
+const DEFAULT_FACULTY_COLOR = "#1d4ed8";
 
 const IconBuilding = () => (
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -155,7 +155,7 @@ export default function EnterpriseDetailPage() {
           style={{
             borderRadius: 16,
             marginBottom: 20,
-            border: "1px solid #ede9fe",
+            border: "1px solid #dbeafe",
             overflow: "hidden",
             padding: 0,
           }}
@@ -292,7 +292,7 @@ export default function EnterpriseDetailPage() {
           <Col xs={24} lg={8}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
+                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thông tin liên hệ</span>}
               >
                 {[
@@ -324,7 +324,7 @@ export default function EnterpriseDetailPage() {
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
+                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Khoa đối tác</span>}
               >
                 {enterpriseFaculties.length === 0 ? (
@@ -355,7 +355,7 @@ export default function EnterpriseDetailPage() {
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
+                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thống kê tuyển dụng</span>}
               >
                 <Row gutter={[12, 12]}>
@@ -379,7 +379,7 @@ export default function EnterpriseDetailPage() {
           <Col xs={24} lg={16}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
+                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Giới thiệu</span>}
               >
                 <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.8, margin: 0 }}>
@@ -388,7 +388,7 @@ export default function EnterpriseDetailPage() {
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #ede9fe" }}
+                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
                 title={
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 14, fontWeight: 700 }}>Tin tuyển dụng</span>

@@ -244,7 +244,7 @@ interface EditableQuestionCardProps {
 }
 
 const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
-  { value: 'short',    label: 'Văn  bản ngắn' },
+  { value: 'text',    label: 'Văn  bản ngắn' },
   { value: 'long',     label: 'Đoạn văn' },
   { value: 'radio',    label: 'Trắc nghiệm' },
   { value: 'checkbox', label: 'Hộp kiểm' },
@@ -284,7 +284,7 @@ export function EditableQuestionCard({
   onActivate, onDeactivate, onUpdate, onDuplicate, onRemove,
   onMoveUp, onMoveDown, onAddQuestion, onAddOption, onUpdateOption, onRemoveOption,
 }: EditableQuestionCardProps) {
-  const qType = (question.type ?? 'short') as QuestionType
+  const qType = (question.type ?? 'text') as QuestionType
   const options = Array.isArray(question.options) ? question.options : []
   const isChoiceType = ['radio', 'checkbox', 'select'].includes(qType)
   const isChartable  = CHARTABLE_TYPES.includes(qType)
@@ -341,7 +341,7 @@ export function EditableQuestionCard({
 
           {/* Input preview */}
           <div style={{ marginTop: 14 }}>
-            {(qType === 'short' || qType === 'email' || qType === 'tel') && (
+            {(qType === 'text' || qType === 'email' || qType === 'tel') && (
               <input value={question.placeholder ?? ''} onClick={(e) => e.stopPropagation()}
                 onChange={(e) => onUpdate({ placeholder: e.target.value })} placeholder="Văn bản gợi ý"
                 style={{ width: '100%', height: 42, border: '1px solid #e5e7eb', borderRadius: 10, padding: '0 14px', fontSize: 14, outline: 'none', color: '#334155', background: '#fff' }} />

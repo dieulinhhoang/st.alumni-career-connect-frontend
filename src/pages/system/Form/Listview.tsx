@@ -13,7 +13,7 @@ const ACCENT_MAP: Record<string, { base: string; soft: string }> = {
   blue:   { base: '#16a34a', soft: '#f0fdf4' },
   green:  { base: '#16a34a', soft: '#f0fdf4' },
   red:    { base: '#dc2626', soft: '#fef2f2' },
-  purple: { base: '#7c3aed', soft: '#f5f3ff' },
+  purple: { base: '#2563eb', soft: '#eff6ff' },
   orange: { base: '#ea580c', soft: '#fff7ed' },
   teal:   { base: '#16a34a', soft: '#f0fdf4' },
   brown:  { base: '#78716c', soft: '#fafaf9' },

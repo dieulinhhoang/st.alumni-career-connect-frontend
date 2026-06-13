@@ -13,9 +13,9 @@ export function useFacultyColors() {
   //   });
   // }, []);
 
-  /** Trả về màu của khoa, fallback về tím mặc định */
+  /** Trả về màu của khoa, fallback về xanh mặc định */
   const getColor = (faculty: string): string =>
-    colors[faculty as FacultyKey] ?? "#7c3aed";
+    colors[faculty as FacultyKey] ?? "#2563eb";
 
   return { colors, loaded, getColor };
 }

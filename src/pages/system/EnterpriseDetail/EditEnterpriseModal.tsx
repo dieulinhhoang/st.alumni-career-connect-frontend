@@ -91,7 +91,7 @@ export function EnterpriseFormModal({
       width={600}
       confirmLoading={saving}
       destroyOnClose
-      okButtonProps={{ style: { background: "#7c3aed", border: "none" } }}
+      okButtonProps={{ style: { background: "#2563eb", border: "none" } }}
     >
       <Form<EnterpriseFormValues>
         form={form}

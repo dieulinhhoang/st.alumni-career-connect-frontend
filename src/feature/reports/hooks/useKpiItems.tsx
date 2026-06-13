@@ -78,7 +78,7 @@ export function useKpiItems(
     },
     {
       icon: <PieChartOutlined />,
-      color: '#7c3aed', bg: '#ede9fe',
+      color: '#2563eb', bg: '#dbeafe',
       label: 'Làm đúng/ngành liên quan',
       value: `${stats.relevantJobRate}%`,
       sub: `TB lương: ${stats.avgSalary}`,

@@ -30,7 +30,7 @@ export function FilterBar({
       safeForms.map((f) => ({
         label: f.name,
         value: f.id,
-        shortLabel: f.name.length > 24 ? `${f.name.slice(0, 24)}...` : f.name,
+        textLabel: f.name.length > 24 ? `${f.name.slice(0, 24)}...` : f.name,
       })),
     [safeForms]
   )
@@ -40,7 +40,7 @@ export function FilterBar({
       safeQuestions.map((q) => ({
         label: q.title,
         value: q.id,
-        shortLabel:
+        textLabel:
           q.title.length > 28 ? `${q.title.slice(0, 28)}...` : q.title,
       })),
     [safeQuestions]
@@ -67,7 +67,7 @@ export function FilterBar({
         showSearch
         optionFilterProp="label"
         style={{ width: 220 }}
-        labelRender={() => selectedForm?.shortLabel || ''}
+        labelRender={() => selectedForm?.textLabel || ''}
       />
 
       <Select
@@ -79,7 +79,7 @@ export function FilterBar({
         showSearch
         optionFilterProp="label"
         style={{ width: 260 }}
-        labelRender={() => selectedQuestion?.shortLabel || ''}
+        labelRender={() => selectedQuestion?.textLabel || ''}
       />
 
       {onReset && (

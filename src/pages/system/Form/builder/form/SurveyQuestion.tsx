@@ -133,7 +133,7 @@ export function SurveyQuestion({
       </div>
 
       {/* Ngắn / text */}
-      {(q.type === 'short' || q.type === 'text') && (
+      {(q.type === 'text' || q.type === 'text') && (
         <input
           type="text"
           placeholder={q.placeholder || 'Câu trả lời của bạn'}

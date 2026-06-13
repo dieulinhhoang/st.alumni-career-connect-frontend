@@ -39,7 +39,7 @@ const DEFAULT_PAGINATION: TablePaginationConfig = {
     `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
   position: ['bottomCenter'],
   locale: {
-    items_per_page: 'trang',
+    items_per_page: '/trang',
   },
 }
 
@@ -96,7 +96,7 @@ function resolvePagination<T extends object>(
       showSizeChanger: true,
       position: ['bottomCenter'],
       locale: {
-        items_per_page: 'trang',
+        items_per_page: '/trang',
       },
     },
     overridePagination,

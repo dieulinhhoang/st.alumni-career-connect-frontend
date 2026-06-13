@@ -11,7 +11,7 @@ const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL    = "llama-3.3-70b-versatile"; 
 
 const SYSTEM_PROMPT = `Bạn là máy chủ JSON. Nhiệm vụ: Phân tích văn bản từ tài liệu và tạo JSON form khảo sát.
-Cấu trúc: {"name":"...","description":"...","questions":[{"type":"short|long|radio|checkbox|rating|date","title":"...","required":true,"options":[{"label":"..."}]}]}
+Cấu trúc: {"name":"...","description":"...","questions":[{"type":"text|long|radio|checkbox|rating|date","title":"...","required":true,"options":[{"label":"..."}]}]}
 Chỉ trả về JSON duy nhất, không giải thích. Ngôn ngữ: Tiếng Việt.`;
 
 // Hàm phụ để đọc text từ File

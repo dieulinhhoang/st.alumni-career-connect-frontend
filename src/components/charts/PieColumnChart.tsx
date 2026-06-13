@@ -10,7 +10,7 @@ export const CHART_COLORS = [
   '#f59e0b', // vàng cam
   '#457be6', // blue
   '#e9480e', // cam đậm
-  '#a855f7', // purple
+  '#60a5fa', // blue
   '#06b6d4', // cyan
   '#f43f5e', // rose
 ]
