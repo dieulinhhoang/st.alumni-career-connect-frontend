@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Select, Spin } from "antd";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { fetchKhoaList } from "../../../feature/dashboard/api";
 import type { KhoaFilter, KhoaItem } from "../../../feature/dashboard/type";
+import { getCurrentUser } from "../../../feature/auth/permission";
 import { COLOR, RADIUS, SHADOW } from "./theme";
 
 type FacultyApiItem = KhoaItem & {
@@ -13,6 +15,16 @@ type FacultyApiItem = KhoaItem & {
   total?: number;
   status?: string;
   color?: string;
+};
+
+type NormalizedFaculty = {
+  key: string;
+  name: string;
+  code: string;
+  responded: number;
+  total: number;
+  color: string;
+  submitted: boolean;
 };
 
 function ProgressBar({ value, total, color }: { value: number; total: number; color: string }) {
@@ -66,8 +78,50 @@ function StatusBadge({ submitted }: { submitted: boolean }) {
   );
 }
 
+// Khối tóm tắt cho cán bộ khoa — chỉ 1 khoa của chính họ, không cần bảng/filter
+function OwnFacultySummary({ item, onClick }: { item?: NormalizedFaculty; onClick: () => void }) {
+  if (!item) {
+    return (
+      <div style={{ padding: "32px 20px", textAlign: "center", color: COLOR.textFaint, fontSize: 13 }}>
+        Không có dữ liệu khoa
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onClick}
+      style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16, cursor: "pointer" }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: COLOR.textDark }}>{item.name}</div>
+        <StatusBadge submitted={item.submitted} />
+      </div>
+
+      <div>
+        <div
+          style={{
+            fontSize: 11, fontWeight: 600, color: COLOR.textFaint,
+            textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8,
+          }}
+        >
+          Sinh viên phản hồi khảo sát
+        </div>
+        <ProgressBar value={item.responded} total={item.total} color={item.color} />
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: COLOR.primary }}>
+        Xem báo cáo khoa <ArrowRightOutlined style={{ fontSize: 12 }} />
+      </div>
+    </div>
+  );
+}
+
 export function FacultyCard() {
   const navigate = useNavigate();
+  const currentUser = useMemo(() => getCurrentUser(), []);
+  const isOwnFacultyView = !currentUser.isAdmin && !!currentUser.facultyId;
+
   const [filter, setFilter] = useState<KhoaFilter>("all");
   const [hovered, setHovered] = useState<number | null>(null);
   const [items, setItems] = useState<FacultyApiItem[]>([]);
@@ -95,7 +149,12 @@ export function FacultyCard() {
   }, []);
 
   const normalizedItems = useMemo(() => {
-    return items.map((item) => {
+    // Cán bộ khoa: chỉ xem tình trạng của khoa mình, không xem được khoa khác
+    const visibleItems = isOwnFacultyView
+      ? items.filter((item) => String(item.facultyId ?? "") === currentUser.facultyId)
+      : items;
+
+    return visibleItems.map((item): NormalizedFaculty => {
       const name = item.facultyName ?? item.ten ?? "—";
       const code = item.facultyCode ?? item.viet_tat ?? "";
       const responded = Number(item.responded ?? item.soSV ?? 0);
@@ -110,7 +169,7 @@ export function FacultyCard() {
         name, code, responded, total, color, submitted,
       };
     });
-  }, [items]);
+  }, [items, isOwnFacultyView, currentUser.facultyId]);
 
   const filtered = useMemo(() => {
     return normalizedItems.filter((k) =>
@@ -148,20 +207,22 @@ export function FacultyCard() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 4, height: 20, borderRadius: RADIUS.pill, background: COLOR.primary }} />
           <div style={{ fontSize: 15, fontWeight: 700, color: COLOR.textDark }}>
-            Tình trạng nộp báo cáo
+            {isOwnFacultyView ? "Báo cáo khoa của bạn" : "Tình trạng nộp báo cáo"}
           </div>
         </div>
-        <Select
-          value={filter}
-          onChange={(v) => setFilter(v as KhoaFilter)}
-          size="small"
-          style={{ width: 175 }}
-          options={[
-            { value: "all", label: `Tất cả (${totalAll})` },
-            { value: "daNop", label: `Đã nộp (${totalDaNop})` },
-            { value: "chuaNop", label: `Chưa nộp (${totalChuaNop})` },
-          ]}
-        />
+        {!isOwnFacultyView && (
+          <Select
+            value={filter}
+            onChange={(v) => setFilter(v as KhoaFilter)}
+            size="small"
+            style={{ width: 175 }}
+            options={[
+              { value: "all", label: `Tất cả (${totalAll})` },
+              { value: "daNop", label: `Đã nộp (${totalDaNop})` },
+              { value: "chuaNop", label: `Chưa nộp (${totalChuaNop})` },
+            ]}
+          />
+        )}
       </div>
 
       {error && (
@@ -174,6 +235,11 @@ export function FacultyCard() {
         <div style={{ minHeight: 260, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Spin />
         </div>
+      ) : isOwnFacultyView ? (
+        <OwnFacultySummary
+          item={normalizedItems[0]}
+          onClick={() => navigate(`/admin/reports/faculty/${currentUser.facultyId}`)}
+        />
       ) : (
         <>
           {/* FIX: Column header responsive — ẩn progress column trên màn hình nhỏ */}
@@ -208,7 +274,7 @@ export function FacultyCard() {
               return (
                 <div
                   key={k.key}
-                  onClick={() => k.code && navigate(`/admin/bao-cao/${k.code.toLowerCase()}`)}
+                  onClick={() => navigate(`/admin/reports/faculty/${k.key}`)}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
                   style={{
@@ -218,7 +284,7 @@ export function FacultyCard() {
                     padding: "10px 20px",
                     background: isHovered ? COLOR.bgMuted : i % 2 === 0 ? COLOR.bgCard : COLOR.bgPage,
                     borderBottom: `1px solid ${COLOR.borderSoft}`,
-                    cursor: k.code ? "pointer" : "default",
+                    cursor: "pointer",
                     transition: "background 120ms ease",
                   }}
                 >

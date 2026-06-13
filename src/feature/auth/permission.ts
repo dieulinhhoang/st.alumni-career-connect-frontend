@@ -1,4 +1,29 @@
-import { PermissionEnum } from './type'
+import { PermissionEnum } from "./type"
+
+export type StoredUser = {
+  id: string
+  name: string
+  isAdmin: boolean
+  facultyId: string | null
+}
+
+/** Đọc thông tin tài khoản đăng nhập (lưu lúc login) từ localStorage. */
+export const getCurrentUser = (): StoredUser => {
+  try {
+    const raw = localStorage.getItem('currentUser')
+    if (!raw) return { id: '', name: '', isAdmin: false, facultyId: null }
+    const parsed = JSON.parse(raw)
+    return {
+      id: parsed.id ?? '',
+      name: parsed.name ?? '',
+      isAdmin: !!parsed.isAdmin,
+      facultyId: parsed.facultyId ?? null,
+    }
+  } catch {
+    return { id: '', name: '', isAdmin: false, facultyId: null }
+  }
+}
+
 
 export const havePermission = (permission: PermissionEnum | string): boolean => {
   try {

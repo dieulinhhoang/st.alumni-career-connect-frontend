@@ -31,6 +31,8 @@ interface Props {
   orgLine2: string;
   signLabel: string;
   onDownload: (mau: 'mau01' | 'mau02' | 'mau03') => void;
+  batchId: string;
+  showProgress?: boolean;
 }
 
 export const ReportTabs: React.FC<Props> = ({
@@ -43,6 +45,8 @@ export const ReportTabs: React.FC<Props> = ({
   orgLine2,
   signLabel,
   onDownload,
+  batchId,
+  showProgress = true,
 }) => {
   const downloadMenu: MenuProps = {
     items: [
@@ -110,11 +114,11 @@ export const ReportTabs: React.FC<Props> = ({
               />
             ),
           },
-          {
+          ...(showProgress ? [{
             key: 'progress',
             label: <span><SendOutlined /> Tiến độ nộp báo cáo</span>,
-            children: <ProgressTable rows={facultyRows} />,
-          },
+            children: <ProgressTable rows={facultyRows} batchId={batchId} />,
+          }] : []),
         ]}
       />
     </div>

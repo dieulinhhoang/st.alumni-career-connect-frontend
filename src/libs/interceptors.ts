@@ -26,6 +26,9 @@ export const successInterceptor = (response: AxiosResponse): AxiosResponse => {
 
 const logout = () => {
   localStorage.removeItem('accessToken')
+  localStorage.removeItem('permissions')
+  localStorage.removeItem('isAdmin')
+  localStorage.removeItem('currentUser')
   // Redirect về BE để login lại qua SSO
   window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`
 }

@@ -12,6 +12,8 @@ export type CurrentUser = {
   id: string;
   name: string;
   scope: UserScope;
+  isAdmin?: boolean;
+  facultyId?: string | null;
   facultyName?: string | null;
   majorName?: string | null;
 };

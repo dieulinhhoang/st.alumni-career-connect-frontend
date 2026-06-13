@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Spin, Button, Select, Breadcrumb } from 'antd';
+import { Spin, Button, Select, Breadcrumb, message } from 'antd';
 import { ArrowLeftOutlined, HomeOutlined } from '@ant-design/icons';
 import AdminLayout from '../../../../components/layout/AdminLayout';
-import type { FilterState, SubmissionStatus } from '../../../../feature/reports/types';
+import type { FilterState } from '../../../../feature/reports/types';
 import { useReportData } from '../../../../feature/reports/hooks/useReportData';
 import { useKpiItems } from '../../../../feature/reports/hooks/useKpiItems';
 import { useSurveyOptions } from '../../../../feature/reports/hooks/useSurveyOptions';
-import { fetchFacultyOptions } from '../../../../feature/reports/api';
+import { useSubmissionStatus } from '../../../../feature/reports/hooks/useSubmissionStatus';
+import { fetchFacultyOptions, exportReportExcel } from '../../../../feature/reports/api';
 import type { FacultyOption } from '../../../../feature/reports/types';
 import { ORG_NAME } from '../../../../feature/reports/constants';
+import { getCurrentUser } from '../../../../feature/auth/permission';
 import { KpiGrid } from '../components/KpiGrid';
 import { ReportTabs } from '../components/ReportTabs';
 import { SubmissionPill } from '../components/SubmissionPill';
@@ -27,12 +29,13 @@ function formatDeadline(raw: string | null | undefined): string {
 export default function FacultyReportPage() {
   const { facultyId } = useParams<{ facultyId: string }>();
   const navigate = useNavigate();
+  const currentAccount = getCurrentUser();
+  const isOwnFaculty = !!facultyId && currentAccount.facultyId === facultyId;
 
   const [filters, setFilters] = useState<FilterState>({
     surveyId: '',
     facultyId: facultyId,
   });
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('draft');
   const [facultyOptions, setFacultyOptions] = useState<FacultyOption[]>([]);
 
   const { options: surveyOptions, defaultSurveyId, deadline, loading: surveyLoading } = useSurveyOptions();
@@ -55,9 +58,12 @@ export default function FacultyReportPage() {
   }, [facultyId]);
 
   const { currentUser, stats, majorRows, graduateRows, responseRows, facultyRows, reportMeta, loading } =
-    useReportData(filters, 0);
+    useReportData(filters);
 
   const kpiItems = useKpiItems(false, stats, facultyRows);
+
+  const { status: submissionStatus, submit: submitOwnReport, withdraw: withdrawOwnReport } =
+    useSubmissionStatus(filters.surveyId, facultyId);
 
   const facultyName =
     facultyOptions.find((f) => f.value === facultyId)?.label ??
@@ -66,9 +72,12 @@ export default function FacultyReportPage() {
 
   const selectedDeadline = surveyOptions.find((o) => o.value === filters.surveyId)?.deadline ?? deadline;
 
-  const handleDownload = (_mau: 'mau01' | 'mau02' | 'mau03') => {
-    // console.log('Download', mau, filters);
-    // TODO: call export API
+  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03') => {
+    try {
+      await exportReportExcel(mau, filters);
+    } catch {
+      message.error('Xuất báo cáo Excel thất bại.');
+    }
   };
 
   return (
@@ -76,31 +85,35 @@ export default function FacultyReportPage() {
       <Spin spinning={surveyLoading}>
         <div style={{ padding: '0 0 32px' }}>
 
-          {/* ── Breadcrumb ── */}
-          <Breadcrumb
-            style={{ marginBottom: 16, fontSize: 13 }}
-            items={[
-              {
-                href: '/admin/reports',
-                title: <><HomeOutlined style={{ marginRight: 4 }} />Báo cáo toàn trường</>,
-              },
-              {
-                title: facultyName,
-              },
-            ]}
-          />
+          {/* ── Breadcrumb (chỉ trường mới có nút quay lại tổng hợp) ── */}
+          {currentAccount.isAdmin && (
+            <Breadcrumb
+              style={{ marginBottom: 16, fontSize: 13 }}
+              items={[
+                {
+                  href: '/admin/reports',
+                  title: <><HomeOutlined style={{ marginRight: 4 }} />Báo cáo toàn trường</>,
+                },
+                {
+                  title: facultyName,
+                },
+              ]}
+            />
+          )}
 
           {/* ── Header ── */}
           <div className="rp-page-header">
             <div className="rp-page-header__left">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                <Button
-                  type="text"
-                  icon={<ArrowLeftOutlined />}
-                  size="small"
-                  onClick={() => navigate('/admin/reports')}
-                  style={{ padding: '0 4px' }}
-                />
+                {currentAccount.isAdmin && (
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    size="small"
+                    onClick={() => navigate('/admin/reports')}
+                    style={{ padding: '0 4px' }}
+                  />
+                )}
                 <h1 className="rp-page-header__title" style={{ margin: 0 }}>
                   Báo cáo tình hình việc làm
                 </h1>
@@ -112,22 +125,18 @@ export default function FacultyReportPage() {
               {/* Trạng thái nộp */}
               <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <SubmissionPill status={submissionStatus} />
-                {submissionStatus === 'draft' && (
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => setSubmissionStatus('submitted')}
-                  >
+                {isOwnFaculty && submissionStatus === 'draft' && (
+                  <Button size="small" type="primary" onClick={submitOwnReport}>
                     Nộp báo cáo lên trường
                   </Button>
                 )}
-                {submissionStatus === 'submitted' && (
-                  <Button size="small" danger onClick={() => setSubmissionStatus('draft')}>
+                {isOwnFaculty && submissionStatus === 'submitted' && (
+                  <Button size="small" danger onClick={withdrawOwnReport}>
                     Thu hồi
                   </Button>
                 )}
-                {submissionStatus === 'returned' && (
-                  <Button size="small" type="primary" onClick={() => setSubmissionStatus('submitted')}>
+                {isOwnFaculty && submissionStatus === 'returned' && (
+                  <Button size="small" type="primary" onClick={submitOwnReport}>
                     Nộp lại lên trường
                   </Button>
                 )}
@@ -179,6 +188,8 @@ export default function FacultyReportPage() {
               orgLine2={facultyName.toUpperCase()}
               signLabel="TRƯỞNG KHOA"
               onDownload={handleDownload}
+              batchId={filters.surveyId}
+              showProgress={currentAccount.isAdmin}
             />
           </Spin>
 

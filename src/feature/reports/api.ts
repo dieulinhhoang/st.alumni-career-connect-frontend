@@ -44,10 +44,41 @@ export type SubmissionStatusResponse = {
 
 export async function fetchReportData(
   filters: FilterState,
-  userIndex: number,
 ): Promise<ReportApiResponse> {
-  const res = await api.post('/reports', { filters, userIndex });
+  const res = await api.post('/reports', { filters });
   return res.data;
+}
+
+// ─── Export Excel ──────────────────────────────────────────────
+
+/** Tải báo cáo Excel theo mẫu (mau01/mau02/mau03/all) từ backend rồi trigger download */
+export async function exportReportExcel(
+  mau: 'mau01' | 'mau02' | 'mau03' | 'all',
+  filters: FilterState,
+): Promise<void> {
+  const res = await api.get('/reports/export', {
+    params: {
+      mau,
+      surveyId: filters.surveyId || undefined,
+      facultyId: filters.facultyId || undefined,
+      majorId: filters.majorId || undefined,
+    },
+    responseType: 'blob',
+  });
+
+  // Lấy tên file từ Content-Disposition, fallback tự đặt
+  const disposition: string = res.headers?.['content-disposition'] ?? '';
+  const match = disposition.match(/filename="?([^";]+)"?/);
+  const fileName = match?.[1] ?? `${mau}-${Date.now()}.xlsx`;
+
+  const url = URL.createObjectURL(new Blob([res.data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ─── Submission status ─────────────────────────────────────────
@@ -135,8 +166,10 @@ export async function fetchSurveyConfig(): Promise<{
 
 export async function fetchFacultyOptions(): Promise<FacultyOption[]> {
   try {
-    const res = await api.get('/faculty');
-    const list: Array<{ id: number | string; name: string }> = res.data ?? [];
+    const res = await api.get('/faculty', { params: { size: 200, page: 0 } });
+    const list: Array<{ id: number | string; name: string }> = Array.isArray(res.data)
+      ? res.data
+      : res.data?.items ?? [];
     return list.map((f) => ({ value: String(f.id), label: f.name }));
   } catch {
     return [];

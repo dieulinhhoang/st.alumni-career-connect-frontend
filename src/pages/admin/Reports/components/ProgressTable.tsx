@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Input, Timeline, Tag, Empty, Progress, Tooltip, Badge } from 'antd';
+import { Button, Modal, Input, Timeline, Tag, Empty, Progress, Tooltip, Badge, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
   EyeOutlined,
@@ -11,10 +11,12 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import type { FacultySubmissionRow, FacultySubmissionRowExtended, SubmissionStatus } from '../../../../feature/reports/types';
+import { approveReport, returnReport, submitReport } from '../../../../feature/reports/api';
 import { SubmissionPill } from './SubmissionPill';
 
 interface Props {
   rows: FacultySubmissionRowExtended[];
+  batchId: string;
   onViewFaculty?: (facultyCode: string) => void;
 }
 
@@ -40,9 +42,10 @@ const STATUS_PROGRESS: Record<SubmissionStatus, number> = {
   approved: 100,
 };
 
-export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
+export const ProgressTable: React.FC<Props> = ({ rows, batchId, onViewFaculty }) => {
   const navigate = useNavigate();
   const [statusMap, setStatusMap]   = useState<Record<string, SubmissionStatus>>({});
+  const [actingKey, setActingKey]   = useState<string | null>(null);
   const [historyMap, setHistoryMap] = useState<Record<string, HistoryEntry[]>>({});
   const [returnModal, setReturnModal] = useState<{ open: boolean; key: string }>({ open: false, key: '' });
   const [returnNote, setReturnNote]   = useState('');
@@ -60,23 +63,50 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
     setHistoryMap((prev) => ({ ...prev, [key]: [entry, ...(prev[key] ?? [])] }));
   const now = () => new Date().toLocaleString('vi-VN');
 
-  const handleApprove = (key: string) => {
-    setStatusMap((prev) => ({ ...prev, [key]: 'approved' }));
-    addHistory(key, { time: now(), action: 'Đã duyệt', color: 'green' });
+  const handleApprove = async (key: string) => {
+    setActingKey(key);
+    try {
+      await approveReport(batchId, key);
+      setStatusMap((prev) => ({ ...prev, [key]: 'approved' }));
+      addHistory(key, { time: now(), action: 'Đã duyệt', color: 'green' });
+      message.success('Đã duyệt báo cáo.');
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? 'Duyệt báo cáo thất bại.');
+    } finally {
+      setActingKey(null);
+    }
   };
   const handleOpenReturn = (key: string) => {
     setReturnNote('');
     setReturnModal({ open: true, key });
   };
-  const handleConfirmReturn = () => {
+  const handleConfirmReturn = async () => {
     const key = returnModal.key;
-    setStatusMap((prev) => ({ ...prev, [key]: 'returned' }));
-    addHistory(key, { time: now(), action: 'Trả bổ sung', note: returnNote || undefined, color: 'orange' });
-    setReturnModal({ open: false, key: '' });
+    setActingKey(key);
+    try {
+      await returnReport(batchId, key, returnNote);
+      setStatusMap((prev) => ({ ...prev, [key]: 'returned' }));
+      addHistory(key, { time: now(), action: 'Trả bổ sung', note: returnNote || undefined, color: 'orange' });
+      setReturnModal({ open: false, key: '' });
+      message.success('Đã trả báo cáo về cho khoa bổ sung.');
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? 'Trả báo cáo thất bại.');
+    } finally {
+      setActingKey(null);
+    }
   };
-  const handleResubmit = (key: string) => {
-    setStatusMap((prev) => ({ ...prev, [key]: 'submitted' }));
-    addHistory(key, { time: now(), action: 'Nộp lại', color: 'blue' });
+  const handleResubmit = async (key: string) => {
+    setActingKey(key);
+    try {
+      await submitReport(batchId, key);
+      setStatusMap((prev) => ({ ...prev, [key]: 'submitted' }));
+      addHistory(key, { time: now(), action: 'Nộp lại', color: 'blue' });
+      message.success('Đã nộp lại báo cáo.');
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? 'Nộp lại báo cáo thất bại.');
+    } finally {
+      setActingKey(null);
+    }
   };
 
   // Thống kê tổng hợp
@@ -243,6 +273,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
                         size="small"
                         type="primary"
                         icon={<CheckCircleOutlined />}
+                        loading={actingKey === row.key}
                         onClick={() => handleApprove(row.key)}
                       >
                         Duyệt
@@ -251,6 +282,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
                         size="small"
                         danger
                         icon={<CloseCircleOutlined />}
+                        disabled={actingKey === row.key}
                         onClick={() => handleOpenReturn(row.key)}
                       >
                         Trả
@@ -261,6 +293,7 @@ export const ProgressTable: React.FC<Props> = ({ rows, onViewFaculty }) => {
                     <Button
                       size="small"
                       icon={<SendOutlined />}
+                      loading={actingKey === row.key}
                       onClick={() => handleResubmit(row.key)}
                     >
                       Nộp lại

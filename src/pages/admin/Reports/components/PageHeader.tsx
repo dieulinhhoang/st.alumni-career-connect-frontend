@@ -1,8 +1,5 @@
 import React from 'react';
-import { Select, Button } from 'antd';
-import { SendOutlined } from '@ant-design/icons';
-import { SubmissionPill } from './SubmissionPill';
-import type { SubmissionStatus, UserScope, FacultyOption, MajorOption } from '../../../../feature/reports/types';
+import { Select } from 'antd';
 import type { SurveyOption } from '../../../../feature/reports/api';
 
 const { Option } = Select;
@@ -18,24 +15,10 @@ function formatDeadline(raw: string | null | undefined): string {
 interface Props {
   title: string;
   subtitle: string;
-  scopeLabel: string;
   surveyId: string;
   surveyOptions: SurveyOption[];
   deadline: string;
-  userIndex: number;
-  scope: UserScope;
-  submissionStatus: SubmissionStatus;
   onSurveyChange: (v: string) => void;
-  onUserChange: (v: number) => void;
-  onSubmit: () => void;
-  onWithdraw: () => void;
-  // Filter khoa / ngành
-  facultyOptions: FacultyOption[];
-  majorOptions: MajorOption[];
-  facultyId: string;
-  majorId: string;
-  onFacultyChange: (v: string) => void;
-  onMajorChange: (v: string) => void;
 }
 
 export const PageHeader: React.FC<Props> = ({
@@ -44,54 +27,18 @@ export const PageHeader: React.FC<Props> = ({
   surveyId,
   surveyOptions,
   deadline,
-  scope,
-  submissionStatus,
   onSurveyChange,
-  onSubmit,
-  onWithdraw,
-  facultyOptions,
-  majorOptions,
-  facultyId,
-  majorId,
-  onFacultyChange,
-  onMajorChange,
 }) => {
-  const isFacultyLike = scope === 'faculty' || scope === 'major';
-
   return (
     <div className="rp-page-header">
 
-      {/* TRÁI: title + subtitle + nút nộp */}
+      {/* TRÁI: title + subtitle */}
       <div className="rp-page-header__left">
         <h1 className="rp-page-header__title">{title}</h1>
         <span className="rp-page-header__subtitle">{subtitle}</span>
-
-        {isFacultyLike && (
-          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <SubmissionPill status={submissionStatus} />
-            {submissionStatus === 'draft' && (
-              <Button size="small" type="primary" icon={<SendOutlined />} onClick={onSubmit}>
-                Nộp báo cáo lên trường
-              </Button>
-            )}
-            {submissionStatus === 'submitted' && (
-              <Button size="small" danger onClick={onWithdraw}>
-                Thu hồi
-              </Button>
-            )}
-            {submissionStatus === 'returned' && (
-              <Button size="small" type="primary" icon={<SendOutlined />} onClick={onSubmit}>
-                Nộp lại lên trường
-              </Button>
-            )}
-            {submissionStatus === 'approved' && (
-              <span style={{ color: '#52c41a', fontSize: 13 }}>Trường đã duyệt báo cáo</span>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* PHẢI: Hạn nộp / Đợt KS / Khoa / Ngành */}
+      {/* PHẢI: Hạn nộp / Đợt KS */}
       <div className="rp-page-header__right">
         {deadline && (
           <div className="rp-deadline-notice">
@@ -115,42 +62,6 @@ export const PageHeader: React.FC<Props> = ({
               ))}
             </Select>
           </div>
-
-          {facultyOptions.length > 0 && (
-            <div className="rp-filter-item">
-              <span className="rp-filter-label rp-filter-label--large">Khoa</span>
-              <Select
-                value={facultyId || undefined}
-                onChange={onFacultyChange}
-                style={{ width: 200 }}
-                size="middle"
-                placeholder="Tất cả khoa"
-                allowClear
-              >
-                {facultyOptions.map((o) => (
-                  <Option key={o.value} value={o.value}>{o.label}</Option>
-                ))}
-              </Select>
-            </div>
-          )}
-
-          {majorOptions.length > 0 && (
-            <div className="rp-filter-item">
-              <span className="rp-filter-label rp-filter-label--large">Ngành</span>
-              <Select
-                value={majorId || undefined}
-                onChange={onMajorChange}
-                style={{ width: 200 }}
-                size="middle"
-                placeholder="Tất cả ngành"
-                allowClear
-              >
-                {majorOptions.map((o) => (
-                  <Option key={o.value} value={o.value}>{o.label}</Option>
-                ))}
-              </Select>
-            </div>
-          )}
         </div>
       </div>
 

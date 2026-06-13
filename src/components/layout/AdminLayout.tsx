@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -22,6 +22,8 @@ import {
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGetAdminProfile } from '../../feature/adminProfile/hook/query';
+import { havePermission } from '../../feature/auth/permission';
+import { PermissionEnum } from '../../feature/auth/type';
 
 const { Header, Sider, Content } = Layout;
 
@@ -42,32 +44,52 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/profile': 'Hồ sơ cá nhân',
 };
 
-/* Sidebar menu – phẳng, tiếng Việt */
+/* Sidebar menu – phẳng, tiếng Việt
+ * `permission`: nếu có thì chỉ hiển thị khi user có quyền tương ứng (xem feature/auth/permission.ts).
+ * Item không khai báo `permission` thì luôn hiển thị.
+ */
 const MENU_ITEMS = [
   { key: '/admin/dashboard', icon: <DashboardOutlined />, label: <Link to="/admin/dashboard">Bảng điều khiển</Link> },
-  { key: '/admin/faculties', icon: <TeamOutlined />, label: <Link to="/admin/faculties">Khoa</Link> },
+  { key: '/admin/faculties', icon: <TeamOutlined />, label: <Link to="/admin/faculties">Khoa</Link>, permission: PermissionEnum.STUDENTS_READ },
 
   { type: 'divider' as const },
 
-  { key: '/admin/enterprises', icon: <BankOutlined />, label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link> },
-  { key: '/admin/graduation', icon: <SolutionOutlined />, label: <Link to="/admin/graduation">Đợt tốt nghiệp</Link> },
+  { key: '/admin/enterprises', icon: <BankOutlined />, label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>, permission: PermissionEnum.ENTERPRISES_READ },
+  { key: '/admin/graduation', icon: <SolutionOutlined />, label: <Link to="/admin/graduation">Đợt tốt nghiệp</Link>, permission: PermissionEnum.GRADUATION_READ },
 
   { type: 'divider' as const },
 
-  { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link> },
-  { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link> },
+  { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
+  { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link>, permission: PermissionEnum.SURVEYS_READ },
 
   { type: 'divider' as const },
 
-  { key: '/admin/statistics', icon: <BarChartOutlined />, label: <Link to="/admin/statistics">Biểu đồ thống kê</Link> },
-  { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link> },
+  { key: '/admin/statistics', icon: <BarChartOutlined />, label: <Link to="/admin/statistics">Biểu đồ thống kê</Link>, permission: PermissionEnum.REPORTS_READ },
+  { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link>, permission: PermissionEnum.REPORTS_READ },
 
   { type: 'divider' as const },
 
-  { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link> },
-  { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link> },
-  { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link> },
+  { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
+  { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
+  { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
 ];
+
+/* Lọc menu theo quyền của user (đọc từ localStorage 'permissions'),
+ * đồng thời gọn các divider thừa (đầu/cuối/liên tiếp) sau khi lọc.
+ */
+const getVisibleMenuItems = () => {
+  const filtered = MENU_ITEMS.filter((item) => !('permission' in item) || havePermission(item.permission!));
+
+  const result: typeof filtered = [];
+  filtered.forEach((item, idx) => {
+    if (item.type === 'divider') {
+      const prev = result[result.length - 1];
+      if (!prev || prev.type === 'divider' || idx === filtered.length - 1) return;
+    }
+    result.push(item);
+  });
+  return result;
+};
 
 /* Global styles – chỉnh nhẹ menu, bỏ search */
 const GLOBAL_STYLES = `
@@ -181,6 +203,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     onCollapse?.(next);
   };
 
+  const visibleMenuItems = useMemo(() => getVisibleMenuItems(), []);
+
   const SIDER_W = 240;
   const SIDER_COLLAPSED = 80;
   const contentLeft = isMobile ? 0 : collapsed ? SIDER_COLLAPSED : SIDER_W;
@@ -200,6 +224,9 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const pageLabel = getPageLabel(location.pathname);
 const handleLogout = () => {
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('permissions');
+  localStorage.removeItem('isAdmin');
+  localStorage.removeItem('currentUser');
   window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
 };
   const userDropdownMenu = {
@@ -253,7 +280,7 @@ const handleLogout = () => {
             theme="dark"
             mode="inline"
             selectedKeys={[location.pathname]}
-            items={MENU_ITEMS}
+            items={visibleMenuItems}
             style={{ padding: '8px 0 16px' }}
           />
         </Sider>

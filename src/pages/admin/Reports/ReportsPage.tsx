@@ -1,28 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Select } from 'antd';
+import { Navigate } from 'react-router-dom';
+import { Spin, message } from 'antd';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import type { FilterState, SubmissionStatus } from '../../../feature/reports/types';
+import type { FilterState } from '../../../feature/reports/types';
 import { useReportData } from '../../../feature/reports/hooks/useReportData';
 import { useKpiItems } from '../../../feature/reports/hooks/useKpiItems';
 import { useSurveyOptions } from '../../../feature/reports/hooks/useSurveyOptions';
-import { fetchFacultyOptions, fetchMajorOptions } from '../../../feature/reports/api';
-import type { FacultyOption, MajorOption } from '../../../feature/reports/types';
+import { exportReportExcel } from '../../../feature/reports/api';
 import { ORG_NAME } from '../../../feature/reports/constants';
+import { getCurrentUser } from '../../../feature/auth/permission';
 import { PageHeader } from './components/PageHeader';
 import { KpiGrid } from './components/KpiGrid';
 import { ReportTabs } from './components/ReportTabs';
 import './styles.css';
 
-const { Option } = Select;
-
 export default function ReportsPage() {
-  const [userIndex, setUserIndex] = useState(0);
-  const [filters, setFilters] = useState<FilterState>({ surveyId: '' });
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('draft');
+  const currentAccount = getCurrentUser();
 
-  // Dropdown khoa / ngành
-  const [facultyOptions, setFacultyOptions] = useState<FacultyOption[]>([]);
-  const [majorOptions, setMajorOptions] = useState<MajorOption[]>([]);
+  const [filters, setFilters] = useState<FilterState>({ surveyId: '' });
 
   const { options: surveyOptions, defaultSurveyId, deadline, loading: surveyLoading } = useSurveyOptions();
 
@@ -33,87 +28,42 @@ export default function ReportsPage() {
     }
   }, [defaultSurveyId]);
 
-  // Load danh sách khoa
-  useEffect(() => {
-    fetchFacultyOptions().then(setFacultyOptions).catch(() => setFacultyOptions([]));
-  }, []);
+  const { stats, majorRows, graduateRows, responseRows, facultyRows, reportMeta, loading } =
+    useReportData(filters);
 
-  // Load ngành theo khoa được chọn
-  useEffect(() => {
-    fetchMajorOptions(filters.facultyId).then(setMajorOptions).catch(() => setMajorOptions([]));
-  }, [filters.facultyId]);
-
-  const { currentUser, stats, majorRows, graduateRows, responseRows, facultyRows, reportMeta, loading } =
-    useReportData(filters, userIndex);
-
-  const isSchoolView  = currentUser.scope === 'school';
-  const isFacultyLike = currentUser.scope === 'faculty' || currentUser.scope === 'major';
-  const kpiItems      = useKpiItems(isSchoolView, stats, facultyRows);
-
-  const scopeLabel =
-    currentUser.scope === 'school'
-      ? 'Toàn trường'
-      : currentUser.scope === 'faculty'
-      ? (currentUser.facultyName ?? '')
-      : (currentUser.majorName ?? '');
-
-  const orgLine2 = !isSchoolView
-    ? (currentUser.facultyName ?? currentUser.majorName ?? '').toUpperCase()
-    : '';
-  const signLabel = isSchoolView ? 'GIÁM ĐỐC' : 'TRƯỞNG KHOA';
+  const kpiItems = useKpiItems(true, stats, facultyRows);
 
   const handleSurveyChange = (v: string) => {
     setFilters((f) => ({ ...f, surveyId: v }));
   };
 
-  const handleFacultyChange = (v: string) => {
-    // Reset ngành khi đổi khoa
-    setFilters((f) => ({ ...f, facultyId: v || undefined, majorId: undefined }));
-  };
-
-  const handleMajorChange = (v: string) => {
-    setFilters((f) => ({ ...f, majorId: v || undefined }));
-  };
-
-  const handleDownload = (_mau: 'mau01' | 'mau02' | 'mau03') => {
-    // console.log('Download', mau, filters);
-    // TODO: call real export API
+  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03') => {
+    try {
+      await exportReportExcel(mau, filters);
+    } catch {
+      message.error('Xuất báo cáo Excel thất bại.');
+    }
   };
 
   // Lấy deadline của survey đang chọn
   const selectedDeadline = surveyOptions.find((o) => o.value === filters.surveyId)?.deadline ?? deadline;
+
+  // Cán bộ khoa: vào thẳng báo cáo của khoa mình để rà soát & nộp lên trường
+  if (currentAccount.facultyId) {
+    return <Navigate to={`/admin/reports/faculty/${currentAccount.facultyId}`} replace />;
+  }
 
   return (
     <AdminLayout>
       <Spin spinning={surveyLoading}>
         <div>
           <PageHeader
-            title={isSchoolView ? 'Tổng hợp báo cáo cấp trường' : 'Báo cáo tình hình việc làm sinh viên'}
-            subtitle={
-              isSchoolView
-                ? 'Theo dõi các khoa/ngành nộp báo cáo lên trường'
-                : 'Rà soát dữ liệu và nộp báo cáo lên trường'
-            }
-            scopeLabel={scopeLabel}
+            title="Tổng hợp báo cáo cấp trường"
+            subtitle="Theo dõi các khoa/ngành nộp báo cáo lên trường"
             surveyId={filters.surveyId}
             surveyOptions={surveyOptions}
             deadline={selectedDeadline}
-            userIndex={userIndex}
-            scope={currentUser.scope}
-            submissionStatus={submissionStatus}
             onSurveyChange={handleSurveyChange}
-            onUserChange={setUserIndex}
-            onSubmit={() => setSubmissionStatus('submitted')}
-            onWithdraw={() => setSubmissionStatus('draft')}
-            // Thêm filter khoa / ngành
-            facultyOptions={facultyOptions}
-            majorOptions={majorOptions.filter(
-              (m) => !filters.facultyId || m.facultyId === filters.facultyId
-            )}
-            facultyId={filters.facultyId ?? ''}
-            majorId={filters.majorId ?? ''}
-            onFacultyChange={handleFacultyChange}
-            onMajorChange={handleMajorChange}
           />
 
           <KpiGrid items={kpiItems} />
@@ -126,9 +76,10 @@ export default function ReportsPage() {
               facultyRows={facultyRows}
               reportMeta={reportMeta}
               orgLine1={ORG_NAME}
-              orgLine2={orgLine2}
-              signLabel={signLabel}
+              orgLine2=""
+              signLabel="GIÁM ĐỐC"
               onDownload={handleDownload}
+              batchId={filters.surveyId}
             />
           </Spin>
         </div>

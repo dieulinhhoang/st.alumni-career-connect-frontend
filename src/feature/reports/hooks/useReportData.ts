@@ -28,6 +28,8 @@ const DEFAULT_STATE: ReportDataState = {
     id: '',
     name: '',
     scope: 'school',
+    isAdmin: false,
+    facultyId: null,
     facultyName: null,
     majorName: null,
   },
@@ -50,7 +52,6 @@ const DEFAULT_STATE: ReportDataState = {
 
 export function useReportData(
   filters: FilterState,
-  userIndex: number
 ): ReportDataState {
   const [state, setState] = useState<ReportDataState>(DEFAULT_STATE);
 
@@ -64,7 +65,7 @@ export function useReportData(
     let cancelled = false;
     setState((prev) => ({ ...prev, loading: true }));
 
-    fetchReportData(filters, userIndex)
+    fetchReportData(filters)
       .then((res: ReportApiResponse) => {
         if (cancelled) return;
         setState({
@@ -85,7 +86,7 @@ export function useReportData(
       });
 
     return () => { cancelled = true; };
-  }, [filters.surveyId, filters.facultyId, filters.majorId, userIndex]);
+  }, [filters.surveyId, filters.facultyId, filters.majorId]);
 
   return state;
 }

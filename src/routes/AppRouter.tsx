@@ -50,7 +50,8 @@ const SsoRedirect = () => {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <span>Đang chuyển hướng đến trang đăng nhập...</span>
+      {/* <span>Đang chuyển hướng đến trang đăng nhập...</span> */}
+      <Loader />
     </div>
   );
 };

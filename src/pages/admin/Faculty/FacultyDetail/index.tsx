@@ -92,8 +92,6 @@ export default function FacultyDetailPage() {
       </AdminLayout>
     );
   }
-  localStorage.removeItem("accessToken")
-  // console.log("dd", localStorage.getItem("accessToken"));
   return (
     <AdminLayout>
       <div>
