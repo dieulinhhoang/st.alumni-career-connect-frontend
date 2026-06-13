@@ -23,7 +23,7 @@ import { SurveyLinkModal } from './components/SurveyLinkModal';
 import { useExportAllPDF, domToPdfBlob } from '../../../feature/alumni/hooks/useExportAllPDF';
 import type { ExportItem } from '../../../feature/alumni/hooks/useExportAllPDF';
 import SurveyPreview from '../Form/Preview';
-
+import * as XLSX from 'xlsx';
 
 const { Text, Title } = Typography;
 
@@ -420,7 +420,24 @@ export const BatchResults: React.FC = () => {
               icon={<FileExcelOutlined style={{ color: '#16a34a' }} />}
               loading={exporting === 'excel'}
               onClick={() => {
-                // TODO: export Excel
+                // 1. Lấy div bao quanh bảng
+               const tableContainer = document.getElementById('alumni-table');
+  
+                // 2. Tìm thẻ table thực tế bên trong div đó
+                const table = tableContainer.querySelector('table');
+                
+                if (!table) {
+                  alert('Không tìm thấy dữ liệu bảng để xuất!');
+                  return;
+                }
+
+                // 3. Tiến hành chuyển đổi và tải file
+                const ws = XLSX.utils.table_to_sheet(table);
+                const wb = XLSX.utils.book_new();
+                
+                XLSX.utils.book_append_sheet(wb, ws, 'Danh sách SV');
+                
+                XLSX.writeFile(wb, 'Danh_sach_sinh_vien.xlsx');
               }}
             >
               Xuất Excel
@@ -493,12 +510,14 @@ export const BatchResults: React.FC = () => {
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text strong>Danh sách sinh viên ({filtered.length})</Text>
           </div>
+          <div id="alumni-table">
           <CustomTable
             columns={columns}
             data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
             loading={false}
             rowKey="id"
           />
+          </div>
         </div>
       </div>
 

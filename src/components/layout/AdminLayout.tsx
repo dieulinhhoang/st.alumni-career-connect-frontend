@@ -62,9 +62,7 @@ const MENU_ITEMS = [
 
   { type: 'divider' as const },
 
-  { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
   { key: '/admin/alumni/batches', icon: <IdcardOutlined />, label: <Link to="/admin/alumni/batches">Khảo sát việc làm</Link>, permission: PermissionEnum.SURVEYS_READ },
-  { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
 
   { type: 'divider' as const },
 
@@ -72,7 +70,8 @@ const MENU_ITEMS = [
   { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link>, permission: PermissionEnum.REPORTS_READ },
 
   { type: 'divider' as const },
-
+   { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
+  { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
   { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
   { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
   { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
