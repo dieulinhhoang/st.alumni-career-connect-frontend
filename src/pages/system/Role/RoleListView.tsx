@@ -197,11 +197,9 @@ const RoleListView: React.FC<RoleListViewProps> = ({
             current: query.page + 1,
             pageSize: query.size,
             total: listData?.total ?? 0,
-            showSizeChanger: true,
+            showSizeChanger: false,
              showTotal: (total: number, range: [number, number]) =>
               `${range[0]}–${range[1]} / ${total} bản ghi`,
-            pageSizeOptions: ['10', '20', '50'],
-            locale: { items_per_page: '/ trang' },
           }}
           onChange={onTableChange}
             scroll={{ x: 900 }}

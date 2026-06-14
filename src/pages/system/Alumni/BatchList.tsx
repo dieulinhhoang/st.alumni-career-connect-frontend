@@ -10,6 +10,7 @@ import {
   FilePdfOutlined, FileTextOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useBatches, type SurveyBatchWithStats } from '../../../feature/alumni/hooks/useBatches';
 import { STATUS_CFG } from '../../../feature/alumni/constants';
@@ -111,11 +112,11 @@ export const BatchList: React.FC = () => {
     },
     {
       title: 'Bắt đầu', key: 'startDate', width: 130,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.startDate}</Text>,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.startDate ? dayjs(r.startDate).format('DD/MM/YYYY') : '--'}</Text>,
     },
     {
       title: 'Kết thúc', key: 'endDate', width: 130,
-      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.endDate}</Text>,
+      render: (_, r) => <Text type="secondary" style={{ fontSize: 13 }}>{r.endDate ? dayjs(r.endDate).format('DD/MM/YYYY') : '--'}</Text>,
     },
     {
       title: 'Phản hồi', key: 'rate', width: 90,
@@ -192,7 +193,7 @@ export const BatchList: React.FC = () => {
 
         <CustomTable
           columns={columns}
-          data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
+          data={filtered}
           loading={loading}
           rowKey="id"
         />

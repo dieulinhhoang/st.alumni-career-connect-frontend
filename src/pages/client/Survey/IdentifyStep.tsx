@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { WarningOutlined, LoadingOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { DatePicker } from 'antd'
+import type { Dayjs } from 'dayjs'
 import type { SurveyBatch } from '../../../feature/alumni/types'
 import type { StudentData } from '../../../feature/alumni/api'
 import { getStudentFromGraduation, verifyStudentByFields } from '../../../feature/alumni/api'
@@ -35,15 +37,17 @@ export function IdentifyStep({ batch, onContinue }: Props) {
   const [studentName, setStudentName] = useState('')
   const [studentId, setStudentId] = useState('')
   const [phone, setPhone] = useState('')
-  const [dob, setDob] = useState('')
+  const [dob, setDob] = useState<Dayjs | null>(null)
   const [err, setErr] = useState('')
   const [checking, setChecking] = useState(false)
 
   const submit = async () => {
     setErr('')
 
+    const dobStr = dob ? dob.format('YYYY-MM-DD') : ''
+
     // Đếm số trường được điền (ít nhất 2 trong 4)
-    const filled = [studentName.trim(), studentId.trim(), phone.trim(), dob.trim()]
+    const filled = [studentName.trim(), studentId.trim(), phone.trim(), dobStr]
       .filter(Boolean).length
 
     if (filled < 2) {
@@ -60,7 +64,7 @@ export function IdentifyStep({ batch, onContinue }: Props) {
           fullName: studentName.trim() || undefined,
           studentCode: studentId.trim() || undefined,
           phone: phone.trim() || undefined,
-          dob: dob.trim() || undefined,
+          dob: dobStr || undefined,
         })
         if (!studentData) {
           setErr('Không tìm thấy sinh viên nào khớp với thông tin đã nhập. Vui lòng kiểm tra lại.')
@@ -117,7 +121,6 @@ export function IdentifyStep({ batch, onContinue }: Props) {
             { label: 'Họ và tên', placeholder: 'Nhập họ và tên của Anh/Chị', value: studentName, set: setStudentName, type: 'text' },
             { label: 'Mã sinh viên', placeholder: 'Nhập mã sinh viên (nếu nhớ)', value: studentId, set: setStudentId, type: 'text' },
             { label: 'Số điện thoại', placeholder: 'Nhập số điện thoại liên hệ', value: phone, set: setPhone, type: 'tel' },
-            { label: 'Ngày sinh', placeholder: '', value: dob, set: setDob, type: 'date' },
           ] as const).map(f => (
             <div key={f.label}>
               <label style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', display: 'block', marginBottom: 7 }}>
@@ -134,6 +137,18 @@ export function IdentifyStep({ batch, onContinue }: Props) {
               />
             </div>
           ))}
+          <div>
+            <label style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', display: 'block', marginBottom: 7 }}>
+              Ngày sinh
+            </label>
+            <DatePicker
+              value={dob}
+              onChange={d => { setDob(d); setErr('') }}
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày sinh"
+              style={{ width: '100%', height: 48, borderRadius: 10 }}
+            />
+          </div>
         </div>
 
         {/* Error */}

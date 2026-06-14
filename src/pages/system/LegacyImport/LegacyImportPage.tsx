@@ -160,7 +160,10 @@ export default function LegacyImportPage() {
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="dateRange" label="Thời gian khảo sát" rules={[{ required: true, message: 'Chọn khoảng thời gian' }]}>
-                <RangePicker style={{ width: '100%' }} />
+                <RangePicker
+                  placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
+                  style={{ width: '100%' }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>

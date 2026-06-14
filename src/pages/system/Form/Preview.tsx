@@ -96,7 +96,7 @@ interface FieldProps {
 }
 
 
-function textField({ placeholder, value, onChange, hasError, readOnly }: FieldProps & {
+function TextField({ placeholder, value, onChange, hasError, readOnly }: FieldProps & {
   placeholder?: string
   value?: string
   onChange?: (v: string) => void
@@ -373,7 +373,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
 
   const renderInput = () => {
     switch (q.type) {
-      case 'text':    return <textField    {...fp} placeholder={q.placeholder} value={value} onChange={onChange} />
+      case 'text':    return <TextField    {...fp} placeholder={q.placeholder} value={value} onChange={onChange} />
       case 'long':     return <LongField     {...fp} value={value} onChange={onChange} />
       case 'email':    return <EmailField    {...fp} value={value} onChange={onChange} />
       case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
@@ -383,7 +383,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
       case 'select':
       case 'dropdown': return <SelectField   {...fp} options={opts} value={value} onChange={onChange} />
-      default:         return <textField    {...fp} value={value} onChange={onChange} />
+      default:         return <TextField    {...fp} value={value} onChange={onChange} />
     }
   }
 

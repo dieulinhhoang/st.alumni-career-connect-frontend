@@ -20,7 +20,7 @@ const reindex = <T extends { order?: number }>(arr: T[]): T[] => arr.map((x, i) 
 const DEFAULT_FIELDS: [title: string, reportFieldKey: string, type?: Question['type'], optionLabels?: string[]][] = [
   ['Mã sinh viên', 'student_code'],
   ['Họ và tên', 'fullname'],
-  ['Giới tính', 'gender', 'radio', ['Nam', 'Nữ', 'Khác']],
+  ['Giới tính', 'gender', 'radio', ['Nam', 'Nữ']],
   ['Ngày sinh', 'dob', 'date', []],
   ['Mã ngành đào tạo', 'industrycode'],
   ['Số CCCD', 'citizen_identification'],

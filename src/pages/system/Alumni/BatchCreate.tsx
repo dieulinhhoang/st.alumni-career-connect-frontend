@@ -109,7 +109,12 @@ export const BatchCreate: React.FC = () => {
               </Form.Item>
 
               <Form.Item label="Thời gian khảo sát" name="dateRange" rules={[{ required: true, message: 'Vui lòng chọn thời gian' }]}>
-                <RangePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%', borderRadius: 6 }} />
+                <RangePicker
+                  showTime
+                  format="DD/MM/YYYY HH:mm"
+                  placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
+                  style={{ width: '100%', borderRadius: 6 }}
+                />
               </Form.Item>
 
               {/* Single graduation dropdown — replaces separate year + graduationPeriod */}

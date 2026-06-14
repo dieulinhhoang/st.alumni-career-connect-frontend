@@ -274,11 +274,9 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
               listData?.page?.total_elements ??
               listData?.total ??
               filteredRows.length,
-            showSizeChanger: true,
+            showSizeChanger: false,
             showTotal: (total: number, range: [number, number]) =>
               `${range[0]}–${range[1]} / ${total} bản ghi`,
-            pageSizeOptions: ['10', '20', '50'],
-            locale: { items_per_page: '/ trang' },
           }}
           scroll={{ x: 900 }}
           locale={{ emptyText: 'Không có dữ liệu' }}

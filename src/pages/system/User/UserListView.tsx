@@ -285,12 +285,9 @@ const UserListView: React.FC<UserListViewProps> = ({
             current: query.page + 1,
             pageSize: query.size,
             total: listData?.total ?? 0,
-            showSizeChanger: true,
+            showSizeChanger: false,
             showTotal: (total: number, range: [number, number]) =>
               `${range[0]}–${range[1]} / ${total} bản ghi`,
-            pageSizeOptions: ['10', '20', '50'],
-            locale: { items_per_page: '/ trang' },
-            
           }}
             scroll={{ x: 900 }}
           locale={{ emptyText: 'Không có dữ liệu' }}

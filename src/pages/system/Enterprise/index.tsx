@@ -311,10 +311,10 @@ export default function EnterprisePage() {
               current: query.page,
               pageSize: query.size,
               total: filtered.length,
-              showSizeChanger: true,
-              pageSizeOptions: [8, 10, 20, 50],
+              showSizeChanger: false,
               showTotal: (total, range) =>
                 `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
+              position: ["bottomRight"],
             }}
             handleTableChange={(pagination) => {
               const newPage = pagination.current || 1;

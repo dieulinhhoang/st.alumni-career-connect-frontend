@@ -513,7 +513,7 @@ export const BatchResults: React.FC = () => {
           <div id="alumni-table">
           <CustomTable
             columns={columns}
-            data={{ data: filtered, page: { total_elements: filtered.length, size: 10, page: 0 } }}
+            data={filtered}
             loading={false}
             rowKey="id"
           />

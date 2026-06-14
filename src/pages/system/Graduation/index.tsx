@@ -56,7 +56,7 @@ export default function GraduationList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
 
   const { data: graduations, meta, loading, error } = useGraduations(page, pageSize);
 
@@ -169,16 +169,9 @@ export default function GraduationList() {
     current: page,
     pageSize,
     total: search.trim() ? filtered.length : meta.total,
-    showSizeChanger: true,
+    showSizeChanger: false,
     showTotal: (total, range) => `${range[0]}-${range[1]} / ${total} đợt`,
-    pageSizeOptions: ['10', '20', '50', '100'],
-    locale: { items_per_page: '/ trang' },
-    onChange: (nextPage, nextPageSize) => {
-      if (nextPageSize !== pageSize) {
-        setPage(1);
-        setPageSize(nextPageSize || 10);
-        return;
-      }
+    onChange: (nextPage) => {
       setPage(nextPage);
     },
   };

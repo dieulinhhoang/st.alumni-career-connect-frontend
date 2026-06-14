@@ -34,7 +34,7 @@ export default function GraduationStudentsPage() {
   const location = useLocation();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [search, setSearch] = useState("");
 
   const graduationName =
@@ -187,28 +187,14 @@ export default function GraduationStudentsPage() {
       current: 1,
       pageSize,
       total: filtered.length,
-      showSizeChanger: true,
-            locale: { items_per_page: '/ trang' },
-      // showTotal: (total) => `${total} sinh viên`,
-      onChange: (_nextPage, nextPageSize) => {
-        if (nextPageSize && nextPageSize !== pageSize) {
-          setPageSize(nextPageSize);
-        }
-      },
+      showSizeChanger: false,
     }
     : {
       current: page,
       pageSize: meta.per_page || pageSize,
       total: meta.total || 0,
-      showSizeChanger: true,
-            locale: { items_per_page: '/ trang' },
-      // showTotal: (total) => `${total} sinh viên`,
-      onChange: (nextPage, nextPageSize) => {
-        if (nextPageSize && nextPageSize !== pageSize) {
-          setPage(1);
-          setPageSize(nextPageSize);
-          return;
-        }
+      showSizeChanger: false,
+      onChange: (nextPage) => {
         setPage(nextPage);
       },
     };

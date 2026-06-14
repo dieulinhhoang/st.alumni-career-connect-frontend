@@ -33,14 +33,10 @@ function resolveDataSource<T extends object>(data: TableData<T>): T[] {
 
 const DEFAULT_PAGINATION: TablePaginationConfig = {
   pageSize: 10,
-  showSizeChanger: true,
-  pageSizeOptions: ['10', '20', '50', '100'],
+  showSizeChanger: false,
   showTotal: (total: number, range: [number, number]) =>
     `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
   position: ['bottomCenter'],
-  locale: {
-    items_per_page: '/trang',
-  },
 }
 
 function mergePagination(
@@ -93,11 +89,8 @@ function resolvePagination<T extends object>(
 
   return mergePagination(
     {
-      showSizeChanger: true,
+      showSizeChanger: false,
       position: ['bottomCenter'],
-      locale: {
-        items_per_page: '/trang',
-      },
     },
     overridePagination,
   )
