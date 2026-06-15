@@ -417,13 +417,13 @@ const handleLogout = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Badge count={3} size="small" offset={[-4, 4]}>
+            {/* <Badge count={3} size="small" offset={[-4, 4]}>
               <Button
                 type="text"
                 icon={<BellOutlined style={{ fontSize: 18 }} />}
                 style={{ width: 38, height: 38, borderRadius: 6 }}
               />
-            </Badge>
+            </Badge> */}
 
             <Dropdown menu={userDropdownMenu} trigger={['click']} placement="bottomRight">
               <div
