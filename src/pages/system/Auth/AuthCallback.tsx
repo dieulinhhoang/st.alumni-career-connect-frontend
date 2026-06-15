@@ -33,9 +33,14 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
 function flattenPermissions(payload: Record<string, any>): string[] {
   if (payload.permissions === '*') return ['*'];
 
-  const map: Record<string, string[]> = payload.permissions ?? {};
-  return Object.entries(map).flatMap(([resource, actions]) =>
-    (actions as string[]).map((action) => `${resource}:${action}`),
+  const perms = payload.permissions ?? [];
+
+  // Backend trả string[] dạng ['reports:read', 'students:read']
+  if (Array.isArray(perms)) return perms;
+
+  // Fallback: dạng object cũ { reports: ['read'] }
+  return Object.entries(perms as Record<string, string[]>).flatMap(
+    ([resource, actions]) => (actions as string[]).map((action) => `${resource}:${action}`),
   );
 }
 
@@ -71,13 +76,14 @@ export default function AuthCallback() {
     }
 
     if (error) {
-      window.history.replaceState({}, '', '/');
-      navigate('/', { replace: true });
+      const target = `/login?error=${encodeURIComponent(error)}`;
+      window.history.replaceState({}, '', target);
+      navigate(target, { replace: true });
       return;
     }
 
-    window.history.replaceState({}, '', '/');
-    navigate('/', { replace: true });
+    window.history.replaceState({}, '', '/login');
+    navigate('/login', { replace: true });
   }, [navigate]);
 
   return   

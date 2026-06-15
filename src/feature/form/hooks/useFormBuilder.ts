@@ -23,7 +23,7 @@ const DEFAULT_FIELDS: [title: string, reportFieldKey: string, type?: Question['t
   ['Giới tính', 'gender', 'radio', ['Nam', 'Nữ']],
   ['Ngày sinh', 'dob', 'date', []],
   ['Mã ngành đào tạo', 'industrycode'],
-  ['Số CCCD', 'citizen_identification'],
+  ['Số CCCD', 'citizen_identification', 'cccd', []],
   ['Khóa học', 'courseyear'],
   ['Tên ngành được đào tạo', 'industryname'],
 ]

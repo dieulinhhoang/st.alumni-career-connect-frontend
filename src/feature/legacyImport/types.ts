@@ -1,31 +1,14 @@
-export interface RosterRow {
-  tt: number | null;
+/** 1 dòng = 1 sinh viên trong file Excel "Báo cáo tổng hợp" (format mới, 1 sheet) */
+export interface FlatRow {
+  rowIndex: number;
   code: string;
   fullName: string;
   isFemale: boolean;
   cccd: string;
   majorCode: string;
-  decisionNo: string;
-  decisionDate: string;
+  majorName: string;
   phone: string;
   email: string;
-  hasResponse: boolean;
-  note: string;
-}
-
-export interface ResponseRow {
-  tt: number | null;
-  code: string;
-  fullName: string;
-  dob: any;
-  gender: string;
-  cccd: string;
-  majorCode: string;
-  phone: string;
-  email: string;
-  city: string;
-  salary: any;
-  marked: number[];
   answers: Record<string, any>;
 }
 
@@ -60,8 +43,8 @@ export interface PreviewStatRow {
 
 export interface PreviewImportResult {
   formId: number;
-  roster: RosterRow[];
-  responses: ResponseRow[];
+  roster: FlatRow[];
+  responses: FlatRow[];
   majorGroups: MajorGroup[];
   previewStats: PreviewStatRow[];
 }
@@ -89,8 +72,8 @@ export interface ConfirmImportPayload {
     graduationName: string;
   };
   majorGroups: MajorGroupDecision[];
-  roster: RosterRow[];
-  responses: ResponseRow[];
+  roster: FlatRow[];
+  responses: FlatRow[];
 }
 
 export interface ConfirmImportResult {

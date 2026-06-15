@@ -140,12 +140,41 @@ const GLOBAL_STYLE = `
   0%,100% { transform: translateY(0) scale(1); }
   50%      { transform: translateY(-3px) scale(1.02); }
 }
+@keyframes heroIn {
+  0%   { opacity:0; transform: translateY(-16px); }
+  100% { opacity:1; transform: translateY(0); }
+}
+@keyframes checkPop {
+  0%   { transform: scale(0); opacity:0; }
+  60%  { transform: scale(1.12); opacity:1; }
+  100% { transform: scale(1); opacity:1; }
+}
+@keyframes checkDraw {
+  from { stroke-dashoffset: 32; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes ringPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.35); }
+  100% { box-shadow: 0 0 0 22px rgba(52,211,153,0); }
+}
 
 .gift-idle  { animation: floatIdle 3.5s ease-in-out infinite; }
 .gift-shake { animation: giftShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 .lid-fly    { animation: lidFly 0.7s cubic-bezier(0.2, 1, 0.4, 1) forwards; }
 .bow-fly    { animation: bowFly 0.55s cubic-bezier(0.2, 1, 0.4, 1) forwards; }
 .hint-pop   { animation: hintPop 2.5s ease-in-out infinite; }
+
+.hero-in     { animation: heroIn 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+.check-pop   { animation: checkPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.15s both, ringPulse 1.8s ease-out 0.75s; }
+.check-path  { stroke-dasharray: 32; stroke-dashoffset: 32; animation: checkDraw 0.5s ease-out 0.45s forwards; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px; padding: 6px 16px; margin-bottom: 22px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase;
+  color: #94a3b8;
+}
 
 .jobs-grid {
   display: grid;
@@ -295,6 +324,42 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
   )
 }
 
+// ── SuccessHero ───────────────────────────────────────────────────────────────
+function SuccessHero() {
+  return (
+    <div className="hero-in" style={{
+      width:'100%', maxWidth:680, margin:'0 auto', textAlign:'center',
+      padding:'72px 24px 8px', position:'relative', zIndex:2,
+    }}>
+      <span className="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/>
+        </svg>
+        Học viện Nông nghiệp Việt Nam
+      </span>
+
+      <div className="check-pop" style={{
+        width:84, height:84, margin:'0 auto 26px', borderRadius:'50%',
+        background:'linear-gradient(160deg, rgba(52,211,153,0.22), rgba(52,211,153,0.04))',
+        border:'1px solid rgba(52,211,153,0.35)',
+        display:'flex', alignItems:'center', justifyContent:'center',
+      }}>
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path className="check-path" d="M20 6L9 17l-5-5"/>
+        </svg>
+      </div>
+
+      <h1 style={{ fontSize:34, fontWeight:800, color:'#f8fafc', margin:'0 0 14px', letterSpacing:'-0.5px', lineHeight:1.25 }}>
+        Cảm ơn bạn đã hoàn thành khảo sát!
+      </h1>
+      <p style={{ fontSize:15, color:'rgba(203,213,225,0.85)', margin:'0 auto', maxWidth:520, lineHeight:1.75 }}>
+        Mỗi câu trả lời của bạn đều góp phần giúp Học viện nâng cao chất lượng đào tạo
+        và kết nối tốt hơn với cộng đồng cựu sinh viên. Cảm ơn bạn đã dành thời gian!
+      </p>
+    </div>
+  )
+}
+
 // ── GiftBox ───────────────────────────────────────────────────────────────────
 const DOT_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#F97316','#EC4899']
 
@@ -359,7 +424,7 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
         flex:1, display:'flex', flexDirection:'column',
         alignItems:'center',
         justifyContent: isOpen ? 'flex-start' : 'center',
-        position:'relative', minHeight:'100vh',
+        position:'relative', minHeight:'62vh',
       }}
     >
       {/* Dot burst layer */}
@@ -553,6 +618,7 @@ export function DoneScreen() {
     }}>
       <style>{GLOBAL_STYLE}</style>
       <Fireworks active={fireworks}/>
+      <SuccessHero/>
       <GiftBox jobs={jobs} loading={loading}/>
     </div>
   )

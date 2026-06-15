@@ -44,3 +44,37 @@ export async function fetchMajorBySlug(slug: string): Promise<Major> {
   const res = await api.get(`/majors/${slug}`);
   return res.data;
 }
+
+export interface FacultyPayload {
+  name: string;
+  abbr?: string;
+  slug?: string;
+  color?: string;
+  status?: number;
+}
+
+/**
+ * Tạo mới một khoa.
+ * BE: POST /faculty
+ */
+export async function createFaculty(payload: FacultyPayload): Promise<Faculty> {
+  const res = await api.post("/faculty", payload);
+  return res.data;
+}
+
+/**
+ * Cập nhật thông tin khoa.
+ * BE: PATCH /faculty/:id
+ */
+export async function updateFaculty(id: number, payload: Partial<FacultyPayload>): Promise<Faculty> {
+  const res = await api.patch(`/faculty/${id}`, payload);
+  return res.data;
+}
+
+/**
+ * Xoá một khoa.
+ * BE: DELETE /faculty/:id
+ */
+export async function deleteFaculty(id: number): Promise<void> {
+  await api.delete(`/faculty/${id}`);
+}

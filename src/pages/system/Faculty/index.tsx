@@ -1,13 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Row, Col, Input, Typography } from "antd";
+import { Row, Col, Input, Typography, Button, Modal, Form, Switch, Popconfirm, message } from "antd";
 import {
   RightOutlined,
   BookOutlined,
   SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
+import { updateFaculty, deleteFaculty } from "../../../feature/faculty/api";
+import type { Faculty } from "../../../feature/faculty/types";
+import { toSlug } from "../../../components/common/utils";
 
 const { Title, Text } = Typography;
 
@@ -24,9 +29,65 @@ export default function FacultyListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const { faculties, loading, error } = useFaculties();
+  const { faculties, loading, error, reload } = useFaculties();
+
+  const [form] = Form.useForm();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const slugTouched = useRef(false);
 
   const list = Array.isArray(faculties) ? faculties : [];
+
+  const openEditModal = (faculty: Faculty) => {
+    setEditingFaculty(faculty);
+    slugTouched.current = !!faculty.slug;
+    form.setFieldsValue({
+      name: faculty.name,
+      abbr: faculty.abbr,
+      slug: faculty.slug ?? toSlug(faculty.name),
+      status: faculty.status !== 0,
+    });
+    setModalOpen(true);
+  };
+
+  // Tự sinh slug từ tên cho đến khi người dùng tự sửa slug
+  const handleNameChange = (name: string) => {
+    if (!slugTouched.current) {
+      form.setFieldValue("slug", toSlug(name));
+    }
+  };
+
+  const handleDelete = async (faculty: Faculty) => {
+    try {
+      await deleteFaculty(faculty.id);
+      message.success("Đã xoá khoa");
+      reload();
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? "Xoá khoa thất bại");
+    }
+  };
+
+  const handleSubmit = async (values: { name: string; abbr?: string; slug?: string; status?: boolean }) => {
+    if (!editingFaculty) return;
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: values.name,
+        abbr: values.abbr,
+        slug: values.slug?.trim() || toSlug(values.name),
+        status: values.status === false ? 0 : 1,
+      };
+      await updateFaculty(editingFaculty.id, payload);
+      message.success("Đã cập nhật khoa");
+      setModalOpen(false);
+      reload();
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? "Lưu khoa thất bại");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filtered = useMemo(
     () =>
@@ -73,14 +134,16 @@ export default function FacultyListPage() {
             </Text>
           </div>
 
-          <Input
-            allowClear
-            placeholder="Tìm kiếm khoa..."
-            prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ maxWidth: 280, borderRadius: 999 }}
-          />
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Input
+              allowClear
+              placeholder="Tìm kiếm khoa..."
+              prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ maxWidth: 280, borderRadius: 999 }}
+            />
+          </div>
         </div>
 
         {error && (
@@ -196,7 +259,38 @@ export default function FacultyListPage() {
                         </div>
                       </div>
 
-                      <RightOutlined style={{ fontSize: 12, color: "#9ca3af" }} />
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(f);
+                          }}
+                        />
+                        <Popconfirm
+                          title="Xoá khoa này?"
+                          description="Hành động này không thể hoàn tác."
+                          okText="Xoá"
+                          cancelText="Huỷ"
+                          okButtonProps={{ danger: true }}
+                          onConfirm={(e) => {
+                            e?.stopPropagation();
+                            handleDelete(f);
+                          }}
+                          onCancel={(e) => e?.stopPropagation()}
+                        >
+                          <Button
+                            type="text"
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </Popconfirm>
+                        <RightOutlined style={{ fontSize: 12, color: "#9ca3af" }} />
+                      </div>
                     </div>
                   </div>
                 );
@@ -225,6 +319,46 @@ export default function FacultyListPage() {
           )}
         </div>
       </div>
+
+      <Modal
+        title="Sửa khoa"
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        okText="Lưu"
+        cancelText="Huỷ"
+        confirmLoading={submitting}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ status: true }}>
+          <Form.Item
+            label="Tên khoa"
+            name="name"
+            rules={[{ required: true, message: "Vui lòng nhập tên khoa" }]}
+          >
+            <Input placeholder="VD: Công nghệ Thông tin" onChange={(e) => handleNameChange(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Viết tắt" name="abbr">
+            <Input placeholder="VD: CNTT" />
+          </Form.Item>
+          <Form.Item
+            label="Slug"
+            name="slug"
+            rules={[{ required: true, message: "Vui lòng nhập slug" }]}
+            extra="Dùng cho đường dẫn URL, tự sinh từ tên khoa — có thể sửa tay."
+          >
+            <Input
+              placeholder="VD: cong-nghe-thong-tin"
+              onChange={() => {
+                slugTouched.current = true;
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="Đang hoạt động" name="status" valuePropName="checked">
+            <Switch />
+          </Form.Item>
+        </Form>
+      </Modal>
     </AdminLayout>
   );
 }

@@ -10,7 +10,15 @@ export type QuestionType =
   | 'radio'
   | 'dropdown'
   | 'email'
-  | 'tel';
+  | 'tel'
+  | 'cccd';
+
+// Giá trị câu trả lời cho câu hỏi loại 'cccd' (Số CCCD + Ngày cấp + Nơi cấp)
+export interface CccdValue {
+  number?: string;
+  issueDate?: string;
+  issuePlace?: string;
+}
 
 // Option for question choices
 export interface QuestionOption {

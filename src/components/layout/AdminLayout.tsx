@@ -19,6 +19,7 @@ import {
   UsergroupAddOutlined,
   BellOutlined,
   HomeOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -51,6 +52,9 @@ const ROUTE_TITLE_VI: Record<string, string> = {
  * `permission`: nếu có thì chỉ hiển thị khi user có quyền tương ứng (xem feature/auth/permission.ts).
  * Item không khai báo `permission` thì luôn hiển thị.
  */
+const SYSTEM_CONFIG_KEY = 'system-config';
+const SYSTEM_CONFIG_CHILD_KEYS = ['/admin/forms', '/admin/legacy-import', '/admin/resources', '/admin/roles', '/admin/users'];
+
 const MENU_ITEMS = [
   { key: '/admin/dashboard', icon: <DashboardOutlined />, label: <Link to="/admin/dashboard">Bảng điều khiển</Link> },
   { key: '/admin/faculties', icon: <TeamOutlined />, label: <Link to="/admin/faculties">Khoa</Link>, permission: PermissionEnum.STUDENTS_READ },
@@ -70,11 +74,18 @@ const MENU_ITEMS = [
   { key: '/admin/reports', icon: <FileSearchOutlined />, label: <Link to="/admin/reports">Báo cáo tổng hợp</Link>, permission: PermissionEnum.REPORTS_READ },
 
   { type: 'divider' as const },
-   { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
-  { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
-  { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
-  { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
-  { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
+  {
+    key: SYSTEM_CONFIG_KEY,
+    icon: <SettingOutlined />,
+    label: 'Cấu hình hệ thống',
+    children: [
+      { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
+      { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
+      { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
+      { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
+      { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
+    ],
+  },
 ];
 
 /* Lọc menu theo quyền của user (đọc từ localStorage 'permissions'),
@@ -94,7 +105,17 @@ const getVisibleMenuItems = () => {
       : item
   );
 
-  const filtered = items.filter((item) => !('permission' in item) || havePermission(item.permission!));
+  const withFilteredChildren = items.map((item) =>
+    'children' in item && Array.isArray(item.children)
+      ? { ...item, children: item.children.filter((child) => !('permission' in child) || havePermission(child.permission!)) }
+      : item
+  );
+
+  const filtered = withFilteredChildren.filter((item) =>
+    'children' in item && Array.isArray(item.children)
+      ? item.children.length > 0
+      : !('permission' in item) || havePermission(item.permission!)
+  );
 
   const result: typeof filtered = [];
   filtered.forEach((item, idx) => {
@@ -130,6 +151,11 @@ const GLOBAL_STYLES = `
     line-height: 40px !important;
     font-size: 15px !important;
     font-weight: 500 !important;
+  }
+
+  /* Submenu mở rộng giữ cùng màu nền với sidebar, không tách màu riêng */
+  .al-menu .ant-menu-sub.ant-menu-inline {
+    background: transparent !important;
   }
 
   @media (max-width: 480px) { .al-avatar-name { display: none !important; } }
@@ -196,6 +222,10 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [openKeys, setOpenKeys] = useState<string[]>(() =>
+    SYSTEM_CONFIG_CHILD_KEYS.some((k) => location.pathname.startsWith(k)) ? [SYSTEM_CONFIG_KEY] : []
+  );
+
   const { data: profile } = useGetAdminProfile();
   const displayName = profile?.fullName || profile?.userName || 'Người dùng';
   const displayRole = profile?.roleName || 'Quản trị viên';
@@ -243,7 +273,8 @@ const handleLogout = () => {
   localStorage.removeItem('permissions');
   localStorage.removeItem('isAdmin');
   localStorage.removeItem('currentUser');
-  window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
+  // Đăng xuất khỏi app, không bắn thẳng sang SSO (gây tự động đăng nhập lại = vòng lặp)
+  navigate('/login', { replace: true });
 };
   const userDropdownMenu = {
     items: [
@@ -296,6 +327,8 @@ const handleLogout = () => {
             theme="dark"
             mode="inline"
             selectedKeys={[location.pathname]}
+            openKeys={openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys as string[])}
             items={visibleMenuItems}
             style={{ padding: '8px 0 16px' }}
           />
@@ -317,6 +350,8 @@ const handleLogout = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          openKeys={openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys as string[])}
           items={visibleMenuItems}
           onClick={() => setDrawerOpen(false)}
           style={{ padding: '8px 0 16px' }}

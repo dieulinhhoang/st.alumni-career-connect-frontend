@@ -29,13 +29,15 @@ const logout = () => {
   localStorage.removeItem('permissions')
   localStorage.removeItem('isAdmin')
   localStorage.removeItem('currentUser')
-  // Redirect về BE để login lại qua SSO
-  window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`
+  // Đưa về trang đăng nhập, không bắn thẳng sang SSO (SSO còn session sẽ tự cấp lại token = vòng lặp)
+  if (window.location.pathname !== '/login') {
+    window.location.href = '/login'
+  }
 }
 
 export const errorInterceptor = async (error: AxiosError): Promise<void> => {
   if (error.response?.status === 401) {
-    // JWT hết hạn hoặc không hợp lệ → logout và SSO lại
+    // JWT hết hạn hoặc không hợp lệ → logout về trang đăng nhập
     logout()
     return
   }

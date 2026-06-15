@@ -21,6 +21,8 @@ export interface GraduationStudent {
   dob: string;
   gender: string; // "male" | "female"
   citizen_identification: string;
+  citizen_identification_issue_date?: string | null;
+  citizen_identification_issue_place?: string | null;
   training_industry_id: number;
   training_industry_code?: string;
   training_industry_name?: string;

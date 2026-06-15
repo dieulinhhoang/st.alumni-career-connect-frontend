@@ -209,6 +209,47 @@ export function SurveyQuestion({
         />
       )}
 
+      {/* CCCD: Số / Cấp ngày / Tại */}
+      {q.type === 'cccd' && (() => {
+        let cccd: { number?: string; issueDate?: string; issuePlace?: string } = {}
+        try { cccd = textValue ? JSON.parse(textValue) : {} } catch { cccd = {} }
+        const update = (patch: Partial<typeof cccd>) => onChangeText(JSON.stringify({ ...cccd, ...patch }))
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input
+              type="text" placeholder="Nhập số CCCD"
+              value={cccd.number ?? ''}
+              onChange={(e) => update({ number: e.target.value })}
+              style={underlineInput}
+              onFocus={handleFocus} onBlur={handleBlur}
+              {...commonInputProps}
+            />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>Cấp ngày:</div>
+              <input
+                type="date"
+                value={cccd.issueDate ?? ''}
+                onChange={(e) => update({ issueDate: e.target.value })}
+                style={{ ...underlineInput, width: 'auto', minWidth: 200 }}
+                onFocus={handleFocus} onBlur={handleBlur}
+                {...commonInputProps}
+              />
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>Tại:</div>
+              <input
+                type="text" placeholder="Nhập nơi cấp"
+                value={cccd.issuePlace ?? ''}
+                onChange={(e) => update({ issuePlace: e.target.value })}
+                style={underlineInput}
+                onFocus={handleFocus} onBlur={handleBlur}
+                {...commonInputProps}
+              />
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Radio / Multiple choice */}
       {(q.type === 'radio' || q.type === 'multiple-choice') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

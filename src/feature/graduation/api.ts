@@ -54,6 +54,70 @@ function buildPaginated<T>(
   };
 }
 
+export interface ImportGraduationStudentsResult {
+  totalRows: number;
+  studentsCreated: number;
+  studentsLinked: number;
+  alreadyLinked: number;
+  errors: { row: number; message: string }[];
+}
+
+/**
+ * Upload file Excel danh sách sinh viên tốt nghiệp cho 1 đợt tốt nghiệp.
+ * Path: POST /graduation/import-excel
+ */
+export async function importGraduationStudents(
+  graduationId: number,
+  file: File
+): Promise<ImportGraduationStudentsResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("graduationId", String(graduationId));
+  const res = await api.post("/graduation/import-excel", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+}
+
+export interface CreateGraduationPayload {
+  name: string;
+  certification?: string;
+  certificationDate?: string;
+  schoolYear?: number;
+  facultyId?: number;
+}
+
+/**
+ * Tạo mới một đợt tốt nghiệp.
+ * Path: POST /graduation
+ */
+export async function createGraduation(
+  payload: CreateGraduationPayload
+): Promise<{ id: number }> {
+  const res = await api.post("/graduation", payload);
+  return res.data;
+}
+
+/**
+ * Cập nhật một đợt tốt nghiệp.
+ * Path: PATCH /graduation/:id
+ */
+export async function updateGraduation(
+  id: number,
+  payload: Partial<CreateGraduationPayload>
+): Promise<Graduation> {
+  const res = await api.patch(`/graduation/${id}`, payload);
+  return res.data;
+}
+
+/**
+ * Xoá một đợt tốt nghiệp.
+ * Path: DELETE /graduation/:id
+ */
+export async function deleteGraduation(id: number): Promise<void> {
+  await api.delete(`/graduation/${id}`);
+}
+
 /**
  * Fetch list of graduation ceremonies with pagination.
  * Path: GET /graduation

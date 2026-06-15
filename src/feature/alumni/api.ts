@@ -87,6 +87,8 @@ export interface StudentData {
   dob: string | null
   gender: 'male' | 'female' | 'other' | null
   citizen_identification: string | null
+  citizen_identification_issue_date: string | null
+  citizen_identification_issue_place: string | null
   training_industry_code: string | null
   training_industry_name: string | null
   school_year_end: string | null
@@ -120,6 +122,8 @@ export async function getStudentFromGraduation(
       dob:                    s.dob ?? null,
       gender:                 s.gender ?? null,
       citizen_identification: s.citizen_identification ?? s.citizenIdentification ?? null,
+      citizen_identification_issue_date: s.citizen_identification_issue_date ?? s.citizenIdentificationIssueDate ?? null,
+      citizen_identification_issue_place: s.citizen_identification_issue_place ?? s.citizenIdentificationIssuePlace ?? null,
       training_industry_code: s.training_industry_code ?? s.trainingIndustryCode ?? null,
       training_industry_name: s.training_industry_name ?? s.trainingIndustryName ?? null,
       school_year_end:        s.school_year_end ?? s.schoolYearEnd ?? null,
@@ -166,6 +170,8 @@ export async function verifyStudentByFields(
       dob: s.dob ?? null,
       gender: s.gender ?? null,
       citizen_identification: s.citizenIdentification ?? s.citizen_identification ?? null,
+      citizen_identification_issue_date: s.citizenIdentificationIssueDate ?? s.citizen_identification_issue_date ?? null,
+      citizen_identification_issue_place: s.citizenIdentificationIssuePlace ?? s.citizen_identification_issue_place ?? null,
       training_industry_code: s.trainingIndustryCode ?? s.training_industry_code ?? null,
       training_industry_name: s.trainingIndustryName ?? s.training_industry_name ?? null,
       school_year_end: s.schoolYearEnd ?? s.school_year_end ?? null,

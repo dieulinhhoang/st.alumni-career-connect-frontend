@@ -22,6 +22,7 @@ import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
 import { DoneScreen } from '../pages/client/Survey/DoneScreen';
 import StatIndicatorConfig from '../pages/system/Statistics/StatIndicatorConfig';
 import AuthCallback from '../pages/system/Auth/AuthCallback';
+import LoginPage from '../pages/system/Auth/LoginPage';
 import FacultyReportPage from '../pages/system/Reports/components/FacultyReportPage';
 import { PermissionRoute } from './PermissionRoute';
 import { PermissionEnum } from '../feature/auth/type';
@@ -78,6 +79,10 @@ const routes = [
       {
         path: '/auth/callback',
         element: <Suspense fallback={<Loader />}><AuthCallback /></Suspense>
+      },
+      {
+        path: '/login',
+        element: <Suspense fallback={<Loader />}><LoginPage /></Suspense>
       },
       {
         path: '/survey/:id/:slug',

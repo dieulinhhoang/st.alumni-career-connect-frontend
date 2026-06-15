@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchGraduations, fetchGraduationStudents } from "../api";
 import type { Graduation, GraduationStudent, PaginationMeta } from "../type";
 
@@ -18,7 +18,7 @@ export function useGraduations(page = 1, pageSize = 10) {
     error: null,
   });
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let cancelled = false;
     setState(s => ({ ...s, loading: true, error: null }));
 
@@ -33,7 +33,12 @@ export function useGraduations(page = 1, pageSize = 10) {
     return () => { cancelled = true; };
   }, [page, pageSize]);
 
-  return state;
+  useEffect(() => {
+    const cancel = load();
+    return cancel;
+  }, [load]);
+
+  return { ...state, reload: load };
 }
 
 //  useGraduationStudents

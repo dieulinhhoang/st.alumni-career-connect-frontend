@@ -12,6 +12,7 @@ export const QTYPES: QuestionTypeOption[] = [
   { value: "tel",      label: "Số điện thoại",        icon: "" },
   { value: "address",  label: "Địa chỉ",              icon: "" },
   { value: "dropdown", label: "Danh sách thả xuống",  icon: "" },
+  { value: "cccd",     label: "Số CCCD (Số/Ngày cấp/Nơi cấp)", icon: "" },
 ];
 
 //  THEMES
@@ -108,7 +109,7 @@ export const MOCK_FORMS: Form[] = [
         reportFieldKey: "industrycode",
       },
       {
-        id: "q06", type: "text", title: "Số CCCD",
+        id: "q06", type: "cccd", title: "Số CCCD",
         required: true, options: [],
         sectionId: "sec-info", order: 6,
         reportFieldKey: "citizen_identification",

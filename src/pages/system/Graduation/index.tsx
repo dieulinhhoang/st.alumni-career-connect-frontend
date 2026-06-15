@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Col, Row, Input, Typography, Alert, Table, Button } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Col, Row, Input, Typography, Alert, Table, Button, Modal, Form, InputNumber, DatePicker, Popconfirm, message } from "antd";
 import type { TablePaginationConfig, ColumnsType } from "antd/es/table";
-import { SearchOutlined, UploadOutlined } from "@ant-design/icons";
+import { SearchOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
+import { updateGraduation, deleteGraduation } from "../../../feature/graduation/api";
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
 
@@ -52,13 +54,66 @@ function Pill({ children }: { children: React.ReactNode }) {
   return <span style={{ fontSize: 13, color: T.sub, fontWeight: 500 }}>{children}</span>;
 }
 
+interface EditFormValues {
+  name: string;
+  schoolYear?: number;
+  certification?: string;
+  certificationDate?: dayjs.Dayjs;
+}
+
 export default function GraduationList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [pageSize] = useState(10);
 
-  const { data: graduations, meta, loading, error } = useGraduations(page, pageSize);
+  const { data: graduations, meta, loading, error, reload } = useGraduations(page, pageSize);
+
+  const [form] = Form.useForm<EditFormValues>();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingGraduation, setEditingGraduation] = useState<Graduation | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const openEditModal = (graduation: Graduation) => {
+    setEditingGraduation(graduation);
+    form.setFieldsValue({
+      name: graduation.name,
+      schoolYear: graduation.school_year ? Number(graduation.school_year) : undefined,
+      certification: graduation.certification ?? undefined,
+      certificationDate: graduation.certification_date ? dayjs(graduation.certification_date) : undefined,
+    });
+    setModalOpen(true);
+  };
+
+  const handleDelete = async (graduation: Graduation) => {
+    try {
+      await deleteGraduation(graduation.id);
+      message.success("Đã xoá đợt tốt nghiệp");
+      reload();
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? "Xoá đợt tốt nghiệp thất bại");
+    }
+  };
+
+  const handleSubmit = async (values: EditFormValues) => {
+    if (!editingGraduation) return;
+    setSubmitting(true);
+    try {
+      await updateGraduation(editingGraduation.id, {
+        name: values.name,
+        schoolYear: values.schoolYear,
+        certification: values.certification,
+        certificationDate: values.certificationDate ? values.certificationDate.format("YYYY-MM-DD") : undefined,
+      });
+      message.success("Đã cập nhật đợt tốt nghiệp");
+      setModalOpen(false);
+      reload();
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? "Cập nhật đợt tốt nghiệp thất bại");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return graduations;
@@ -163,6 +218,27 @@ export default function GraduationList() {
         </Text>
       ),
     },
+    {
+      title: "Hành động",
+      key: "actions",
+      width: 110,
+      align: "center",
+      render: (_value, record) => (
+        <div style={{ display: "flex", justifyContent: "center", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+          <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)} />
+          <Popconfirm
+            title="Xoá đợt tốt nghiệp này?"
+            description="Hành động này không thể hoàn tác."
+            okText="Xoá"
+            cancelText="Huỷ"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record)}
+          >
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </div>
+      ),
+    },
   ];
 
   const pagination: TablePaginationConfig = {
@@ -259,6 +335,36 @@ export default function GraduationList() {
           </div>
         </div>
       {/* </div> */}
+
+      <Modal
+        title="Sửa đợt tốt nghiệp"
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        okText="Lưu"
+        cancelText="Huỷ"
+        confirmLoading={submitting}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Form.Item
+            label="Tên đợt tốt nghiệp"
+            name="name"
+            rules={[{ required: true, message: "Vui lòng nhập tên đợt tốt nghiệp" }]}
+          >
+            <Input placeholder="VD: Đợt tốt nghiệp tháng 6/2026" />
+          </Form.Item>
+          <Form.Item label="Năm học" name="schoolYear">
+            <InputNumber style={{ width: "100%" }} placeholder="VD: 2026" />
+          </Form.Item>
+          <Form.Item label="Số quyết định" name="certification">
+            <Input placeholder="VD: 123/QĐ-ĐHKHTN" />
+          </Form.Item>
+          <Form.Item label="Ngày quyết định" name="certificationDate">
+            <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Chọn ngày" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </AdminLayout>
   );
 }

@@ -237,6 +237,19 @@ export default function StudentDetail() {
                 <div style={{ paddingLeft: 16 }}>
                   <Field label="CCCD" value={student.citizen_identification} />
                 </div>
+                <div style={{ paddingRight: 16 }}>
+                  <Field
+                    label="Ngày cấp CCCD"
+                    value={
+                      student.citizen_identification_issue_date
+                        ? new Date(student.citizen_identification_issue_date).toLocaleDateString("vi-VN")
+                        : undefined
+                    }
+                  />
+                </div>
+                <div style={{ paddingLeft: 16 }}>
+                  <Field label="Nơi cấp CCCD" value={student.citizen_identification_issue_place} />
+                </div>
               </div>
             </div>
 

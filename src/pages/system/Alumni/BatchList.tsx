@@ -8,6 +8,7 @@ import {
   PlusOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
   FilePdfOutlined, FileTextOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -26,6 +27,7 @@ const useMenuItems = (
   navigate: ReturnType<typeof useNavigate>,
   deleteBatch: (id: number) => void,
   setEmailBatch: (batch: SurveyBatchWithStats) => void, 
+  // showForm:(r)=>void,
 ) =>
   (r: SurveyBatchWithStats): MenuProps['items'] => [
     {
@@ -33,10 +35,14 @@ const useMenuItems = (
       onClick: () => setEmailBatch(r),
     },
     {
-      key: 'pdf-zip', icon: <FilePdfOutlined style={{ color: '#2563eb' }} />,
-      label: 'Tải toàn bộ file PDF (ZIP)',
-      onClick: () => message.info('Tính năng đang phát triển'),
+      key: 'view', icon: <EyeOutlined />, label: 'Xem form khảo sát',
+      onClick: () => navigate(`/admin/forms/${r.formId}/preview`),
     },
+    // {
+    //   key: 'pdf-zip', icon: <FilePdfOutlined style={{ color: '#2563eb' }} />,
+    //   label: 'Tải toàn bộ file PDF (ZIP)',
+    //   onClick: () => message.info('Tính năng đang phát triển'),
+    // },
     { type: 'divider' },
     // { key: 'report1', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 1', onClick: () => message.info('Tính năng đang phát triển') },
     // { key: 'report2', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 2', onClick: () => message.info('Tính năng đang phát triển') },
@@ -65,8 +71,9 @@ export const BatchList: React.FC = () => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
+  const [showForm,setshowForm]= useState();
 
-  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch);
+  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch );
   const safeBatches = Array.isArray(batches) ? batches : [];
 
   const filtered = safeBatches.filter(b => {

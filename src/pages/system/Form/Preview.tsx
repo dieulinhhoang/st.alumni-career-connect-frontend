@@ -180,6 +180,42 @@ function DateField({ value, onChange, hasError, readOnly }: FieldProps & {
 interface AddressValue { address?: string; city?: string }
 
 
+interface CccdValue { number?: string; issueDate?: string; issuePlace?: string }
+
+
+function CccdField({ value, onChange, hasError, readOnly }: FieldProps & {
+  value?: CccdValue
+  onChange?: (v: CccdValue) => void
+}) {
+  const v: CccdValue = value ?? {}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <input type="text" readOnly={readOnly} placeholder="Nhập số CCCD"
+        value={v.number ?? ''} onChange={e => onChange?.({ ...v, number: e.target.value })}
+        style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
+        onFocus={applyFocus} onBlur={removeFocus}
+      />
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 6 }}>Cấp ngày:</div>
+        <input type="date" readOnly={readOnly}
+          value={v.issueDate ?? ''} onChange={e => onChange?.({ ...v, issueDate: e.target.value })}
+          style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer' }}
+          onFocus={applyFocus} onBlur={removeFocus}
+        />
+      </div>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 6 }}>Tại:</div>
+        <input type="text" readOnly={readOnly} placeholder="Nhập nơi cấp"
+          value={v.issuePlace ?? ''} onChange={e => onChange?.({ ...v, issuePlace: e.target.value })}
+          style={baseInput}
+          onFocus={applyFocus} onBlur={removeFocus}
+        />
+      </div>
+    </div>
+  )
+}
+
+
 function AddressField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: AddressValue
   onChange?: (v: AddressValue) => void
@@ -379,6 +415,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
       case 'date':     return <DateField     {...fp} value={value} onChange={onChange} />
       case 'address':  return <AddressField  {...fp} value={value} onChange={onChange} />
+      case 'cccd':     return <CccdField     {...fp} value={value} onChange={onChange} />
       case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
       case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
       case 'select':
@@ -426,7 +463,7 @@ function mapForm(form: Form) {
   const typeMap: Record<string, Question['type']> = {
     text: 'text', long: 'long', radio: 'radio', checkbox: 'checkbox',
     dropdown: 'select', select: 'select', date: 'date',
-    address: 'address', email: 'email', tel: 'tel',
+    address: 'address', email: 'email', tel: 'tel', cccd: 'cccd',
   }
 
   let order = 0
@@ -491,7 +528,10 @@ function isEmpty(val: any): boolean {
     return val.trim() === ''
   }
   if (Array.isArray(val)) return val.length === 0
-  if (typeof val === 'object') return !val.address?.trim() && !val.city?.trim()
+  if (typeof val === 'object') {
+    if ('number' in val || 'issueDate' in val || 'issuePlace' in val) return !val.number?.trim()
+    return !val.address?.trim() && !val.city?.trim()
+  }
   return false
 }
 

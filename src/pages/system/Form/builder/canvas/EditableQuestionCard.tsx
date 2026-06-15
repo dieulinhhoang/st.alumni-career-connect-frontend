@@ -178,7 +178,7 @@ function StatConfig({ question: q, accent, onUpdate }: StatConfigProps) {
         {q.reportTemplate && (
           <>
             {/* Chọn mẫu */}
-            <Select
+            {/* <Select
               size="small"
               value={q.reportTemplate}
               onChange={(v) => onUpdate({ reportTemplate: v as 'mau01' | 'mau03', excelColumn: undefined })}
@@ -187,7 +187,7 @@ function StatConfig({ question: q, accent, onUpdate }: StatConfigProps) {
                 { value: 'mau01', label: 'Mẫu 1' },
                 { value: 'mau03', label: 'Mẫu 3' },
               ]}
-            />
+            /> */}
 
             {/* Chọn cột */}
             <Select
@@ -253,6 +253,7 @@ const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'email',    label: 'Email' },
   { value: 'tel',      label: 'Số điện thoại' },
   { value: 'address',  label: 'Địa chỉ' },
+  { value: 'cccd',     label: 'Số CCCD (Số/Ngày cấp/Nơi cấp)' },
 ]
 
 const iconBtnBase: React.CSSProperties = {
@@ -359,6 +360,19 @@ export function EditableQuestionCard({
             {qType === 'address' && (
               <div style={{ padding: '12px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#64748b', fontSize: 14, background: '#f8fafc' }}>
                 Trường địa chỉ sẽ hiển thị ở chế độ điền biểu mẫu
+              </div>
+            )}
+            {qType === 'cccd' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, fontStyle: 'italic', background: '#f8fafc' }}>
+                  Số CCCD...
+                </div>
+                <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 13, background: '#f8fafc' }}>
+                  Cấp ngày: <span>dd / mm / yyyy</span>
+                </div>
+                <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, fontStyle: 'italic', background: '#f8fafc' }}>
+                  Tại...
+                </div>
               </div>
             )}
             {isChoiceType && (

@@ -45,28 +45,25 @@ export function useFaculties() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const load = useCallback(() => {
     setLoading(true);
-    fetchAllFaculties()
+    setError(null);
+    return fetchAllFaculties()
       .then((data) => {
-        if (!cancelled) {
-          setFaculties(data);
-          setLoading(false);
-        }
+        setFaculties(data);
+        setLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setError("Không thể tải danh sách khoa.");
-          setLoading(false);
-        }
+        setError("Không thể tải danh sách khoa.");
+        setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  return { faculties, loading, error };
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { faculties, loading, error, reload: load };
 }
 
 // useFacultyDetail — chi tiết 1 khoa theo ID
@@ -133,7 +130,7 @@ export function useFacultyDetailBySlug(slug: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!slug) {
       setData(null);
       setLoading(false);
@@ -141,29 +138,24 @@ export function useFacultyDetailBySlug(slug: string) {
       return;
     }
 
-    let cancelled = false;
     setLoading(true);
     setError(null);
 
-    fetchFacultyBySlug(slug)
+    return fetchFacultyBySlug(slug)
       .then((res) => {
-        if (!cancelled) {
-          setData(res);
-          setLoading(false);
-        }
+        setData(res);
+        setLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setData(null);
-          setError("Không tìm thấy khoa.");
-          setLoading(false);
-        }
+        setData(null);
+        setError("Không tìm thấy khoa.");
+        setLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [slug]);
 
-  return { data, loading, error };
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { data, loading, error, reload: load };
 }
