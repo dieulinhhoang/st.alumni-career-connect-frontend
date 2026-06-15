@@ -6,9 +6,10 @@ import {
   Input,
   Select,
   Button,
+  Tooltip,
   Typography,
 } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
@@ -176,6 +177,33 @@ export default function EnterprisePage() {
         </span>
       ),
     },
+    ...(havePermission(PermissionEnum.ENTERPRISES_UPDATE)
+      ? [{
+          title: "",
+          key: "action",
+          width: 60,
+          align: "center" as const,
+          render: (_v: unknown, record: Enterprise) => (
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModal({ open: true, enterprise: record });
+                }}
+                style={{
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                  width: 34,
+                  height: 34,
+                  color: "#94a3b8",
+                }}
+              />
+            </Tooltip>
+          ),
+        }]
+      : []),
   ];
 
   return (
