@@ -7,12 +7,15 @@ import {
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
-import { updateFaculty, deleteFaculty } from "../../../feature/faculty/api";
+import { createFaculty, updateFaculty, deleteFaculty } from "../../../feature/faculty/api";
 import type { Faculty } from "../../../feature/faculty/types";
 import { toSlug } from "../../../components/common/utils";
+import { havePermission } from "../../../feature/auth/permission";
+import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Title, Text } = Typography;
 
@@ -51,6 +54,13 @@ export default function FacultyListPage() {
     setModalOpen(true);
   };
 
+  const openCreateModal = () => {
+    setEditingFaculty(null);
+    slugTouched.current = false;
+    form.resetFields();
+    setModalOpen(true);
+  };
+
   // Tự sinh slug từ tên cho đến khi người dùng tự sửa slug
   const handleNameChange = (name: string) => {
     if (!slugTouched.current) {
@@ -69,7 +79,6 @@ export default function FacultyListPage() {
   };
 
   const handleSubmit = async (values: { name: string; abbr?: string; slug?: string; status?: boolean }) => {
-    if (!editingFaculty) return;
     setSubmitting(true);
     try {
       const payload = {
@@ -78,8 +87,13 @@ export default function FacultyListPage() {
         slug: values.slug?.trim() || toSlug(values.name),
         status: values.status === false ? 0 : 1,
       };
-      await updateFaculty(editingFaculty.id, payload);
-      message.success("Đã cập nhật khoa");
+      if (editingFaculty) {
+        await updateFaculty(editingFaculty.id, payload);
+        message.success("Đã cập nhật khoa");
+      } else {
+        await createFaculty(payload);
+        message.success("Đã thêm khoa");
+      }
       setModalOpen(false);
       reload();
     } catch (err: any) {
@@ -143,6 +157,11 @@ export default function FacultyListPage() {
               onChange={(e) => setSearch(e.target.value)}
               style={{ maxWidth: 280, borderRadius: 999 }}
             />
+            {/* {havePermission(PermissionEnum.FACULTY_CREATE) && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+                Thêm khoa
+              </Button>
+            )} */}
           </div>
         </div>
 
@@ -260,15 +279,17 @@ export default function FacultyListPage() {
                       </div>
 
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<EditOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditModal(f);
-                          }}
-                        />
+                        {havePermission(PermissionEnum.FACULTY_UPDATE) && (
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(f);
+                            }}
+                          />
+                        )}
                         <Popconfirm
                           title="Xoá khoa này?"
                           description="Hành động này không thể hoàn tác."
@@ -281,6 +302,8 @@ export default function FacultyListPage() {
                           }}
                           onCancel={(e) => e?.stopPropagation()}
                         >
+                      {havePermission(PermissionEnum.FACULTY_DELETE) && (
+
                           <Button
                             type="text"
                             size="small"
@@ -288,6 +311,7 @@ export default function FacultyListPage() {
                             icon={<DeleteOutlined />}
                             onClick={(e) => e.stopPropagation()}
                           />
+                      )}
                         </Popconfirm>
                         <RightOutlined style={{ fontSize: 12, color: "#9ca3af" }} />
                       </div>
@@ -321,7 +345,7 @@ export default function FacultyListPage() {
       </div>
 
       <Modal
-        title="Sửa khoa"
+        title={editingFaculty ? "Sửa khoa" : "Thêm khoa"}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}

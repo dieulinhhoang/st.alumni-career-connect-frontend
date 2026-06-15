@@ -20,6 +20,8 @@ import { SurveyLinkModal } from './components/SurveyLinkModal';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import CustomTable from '../../../components/common/customTable';
 import { SendEmailModal } from './SendEmailModal';
+import { havePermission } from '../../../feature/auth/permission';
+import { PermissionEnum } from '../../../feature/auth/type';
 
 const { Text } = Typography;
 
@@ -48,20 +50,22 @@ const useMenuItems = (
     // { key: 'report2', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 2', onClick: () => message.info('Tính năng đang phát triển') },
     // { key: 'report3', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 3', onClick: () => message.info('Tính năng đang phát triển') },
     { type: 'divider' },
-    ...(r.status === 'draft'
+    ...(r.status === 'draft' && havePermission(PermissionEnum.SURVEYS_UPDATE)
       ? [{
         key: 'edit', icon: <EditOutlined style={{ color: '#1D9E75' }} />, label: 'Chỉnh sửa',
         onClick: () => navigate(`/admin/alumni/batches/${r.id}/edit-form`),
       }]
       : []),
-    {
-      key: 'delete',
-      icon: <DeleteOutlined style={{ color: '#ef4444' }} />,
-      label: <span style={{ color: '#ef4444' }}>Xóa khảo sát</span>,
-      onClick: () => {
-        if (window.confirm(`Xóa đợt khảo sát "${r.title}"?`)) deleteBatch(r.id);
-      },
-    },
+    ...(havePermission(PermissionEnum.SURVEYS_DELETE)
+      ? [{
+        key: 'delete',
+        icon: <DeleteOutlined style={{ color: '#ef4444' }} />,
+        label: <span style={{ color: '#ef4444' }}>Xóa khảo sát</span>,
+        onClick: () => {
+          if (window.confirm(`Xóa đợt khảo sát "${r.title}"?`)) deleteBatch(r.id);
+        },
+      }]
+      : []),
   ];
 
 export const BatchList: React.FC = () => {
@@ -188,14 +192,16 @@ export const BatchList: React.FC = () => {
               ]}
             />
           </Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/alumni/batches/create')}
-            style={{ borderRadius: 8, fontWeight: 500 }}
-          >
-            Tạo đợt mới
-          </Button>
+          {havePermission(PermissionEnum.SURVEYS_CREATE) && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/admin/alumni/batches/create')}
+              style={{ borderRadius: 8, fontWeight: 500 }}
+            >
+              Tạo đợt mới
+            </Button>
+          )}
         </div>
 
         <CustomTable

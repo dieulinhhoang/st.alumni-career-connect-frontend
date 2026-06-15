@@ -9,6 +9,8 @@ import { useGraduations } from "../../../feature/graduation/hooks/useGraduation"
 import { updateGraduation, deleteGraduation } from "../../../feature/graduation/api";
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
+import { PermissionEnum } from "../../../feature/auth/type";
+import { havePermission } from "../../../feature/auth/permission";
 
 const { Text } = Typography;
 
@@ -225,7 +227,9 @@ export default function GraduationList() {
       align: "center",
       render: (_value, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-          <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)} />
+          {havePermission(PermissionEnum.GRADUATION_UPDATE) && (
+            <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)} />
+          )}
           <Popconfirm
             title="Xoá đợt tốt nghiệp này?"
             description="Hành động này không thể hoàn tác."
@@ -234,7 +238,9 @@ export default function GraduationList() {
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record)}
           >
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+            {havePermission(PermissionEnum.GRADUATION_DELETE) && (
+              <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+            )}
           </Popconfirm>
         </div>
       ),
@@ -310,9 +316,11 @@ export default function GraduationList() {
                 variant="filled"
                 allowClear
               />
-              <Button type="primary" icon={<UploadOutlined />}   onClick={() => navigate('/admin/graduation-import')}>
-                       Tải lên đợt tốt nghiệp
-            </Button>
+              {havePermission(PermissionEnum.GRADUATION_CREATE) && (
+                <Button type="primary" icon={<UploadOutlined />} onClick={() => navigate('/admin/graduation-import')}>
+                  Tải lên đợt tốt nghiệp
+                </Button>
+              )}
               <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
                 {search.trim() ? filtered.length : meta.total} đợt
               </span>

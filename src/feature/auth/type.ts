@@ -22,7 +22,13 @@ export const PermissionEnum = {
   SURVEYS_DELETE: 'surveys:delete',
   SURVEYS_EXPORT: 'surveys:export',
 
-  //  enterprises 
+  //  forms (cấu hình form, tách riêng với surveys)
+  FORMS_READ:   'forms:read',
+  FORMS_CREATE: 'forms:create',
+  FORMS_UPDATE: 'forms:update',
+  FORMS_DELETE: 'forms:delete',
+
+  //  enterprises
   ENTERPRISES_READ:   'enterprises:read',
   ENTERPRISES_CREATE: 'enterprises:create',
   ENTERPRISES_UPDATE: 'enterprises:update',
@@ -54,6 +60,13 @@ export const PermissionEnum = {
   GRADUATION_READ:   'graduation:read',
   GRADUATION_CREATE: 'graduation:create',
   GRADUATION_UPDATE: 'graduation:update',
+  GRADUATION_DELETE: 'graduation:delete',
+
+  //  faculty
+  FACULTY_READ:   'faculty:read',
+  FACULTY_CREATE: 'faculty:create',
+  FACULTY_UPDATE: 'faculty:update',
+  FACULTY_DELETE: 'faculty:delete',
 
 } as const;
 

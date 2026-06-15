@@ -79,7 +79,7 @@ const MENU_ITEMS = [
     icon: <SettingOutlined />,
     label: 'Cấu hình hệ thống',
     children: [
-      { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.SURVEYS_READ },
+      { key: '/admin/forms', icon: <FileTextOutlined />, label: <Link to="/admin/forms">Cấu hình form</Link>, permission: PermissionEnum.FORMS_READ },
       { key: '/admin/legacy-import', icon: <ImportOutlined />, label: <Link to="/admin/legacy-import">Nhập dữ liệu Excel</Link>, permission: PermissionEnum.SURVEYS_READ },
       { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
       { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },

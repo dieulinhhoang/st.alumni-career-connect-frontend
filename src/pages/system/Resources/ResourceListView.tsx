@@ -15,6 +15,8 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { IResource, IResourceQuery } from '../../../feature/resources/type'
 import FilterContainer from '../../../components/common/FilterContainer'
+import { havePermission } from '../../../feature/auth/permission'
+import { PermissionEnum } from '../../../feature/auth/type'
 
 interface ResourceListViewProps {
   query: IResourceQuery
@@ -48,9 +50,9 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
   onDelete,
   onTableChange
 }) => {
-  const canCreate = true
-  const canUpdate = true
-  const canDelete = true
+  const canCreate = havePermission(PermissionEnum.ROLES_CREATE)
+  const canUpdate = havePermission(PermissionEnum.ROLES_UPDATE)
+  const canDelete = havePermission(PermissionEnum.ROLES_DELETE)
 
   const inputStyle: React.CSSProperties = {
     height: 38,

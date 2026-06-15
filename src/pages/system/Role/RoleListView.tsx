@@ -19,6 +19,8 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import FilterContainer from '../../../components/common/FilterContainer'
+import { havePermission } from '../../../feature/auth/permission'
+import { PermissionEnum } from '../../../feature/auth/type'
 
 interface IRole {
   id: string | number
@@ -107,21 +109,25 @@ const RoleListView: React.FC<RoleListViewProps> = ({
             />
           </Tooltip>
 
-          <Tooltip title="Chỉnh sửa">
-            <EditOutlined
-              onClick={() => onEdit(record)}
-              style={{ fontSize: 18, cursor: 'pointer', color: '#16a34a' }}
-            />
-          </Tooltip>
+          {havePermission(PermissionEnum.ROLES_UPDATE) && (
+            <Tooltip title="Chỉnh sửa">
+              <EditOutlined
+                onClick={() => onEdit(record)}
+                style={{ fontSize: 18, cursor: 'pointer', color: '#16a34a' }}
+              />
+            </Tooltip>
+          )}
 
-          <Popconfirm
-            title="Xóa vai trò?"
-            onConfirm={() => onDelete(String(record.id))}
-          >
-            <DeleteOutlined
-              style={{ fontSize: 18, cursor: 'pointer', color: '#ef4444' }}
-            />
-          </Popconfirm>
+          {havePermission(PermissionEnum.ROLES_DELETE) && (
+            <Popconfirm
+              title="Xóa vai trò?"
+              onConfirm={() => onDelete(String(record.id))}
+            >
+              <DeleteOutlined
+                style={{ fontSize: 18, cursor: 'pointer', color: '#ef4444' }}
+              />
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -161,25 +167,27 @@ const RoleListView: React.FC<RoleListViewProps> = ({
         )}
       </FilterContainer>
 
-      <Row justify="end" style={{ marginBottom: 16, marginTop: 8 }}>
-        <Col>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={onCreate}
-            style={{
-              borderRadius: 8,
-              height: 40,
-              paddingInline: 18,
-              fontWeight: 500,
-              background: '#16a34a',
-              borderColor: '#16a34a',
-            }}
-          >
-            Thêm vai trò
-          </Button>
-        </Col>
-      </Row>
+      {havePermission(PermissionEnum.ROLES_CREATE) && (
+        <Row justify="end" style={{ marginBottom: 16, marginTop: 8 }}>
+          <Col>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={onCreate}
+              style={{
+                borderRadius: 8,
+                height: 40,
+                paddingInline: 18,
+                fontWeight: 500,
+                background: '#16a34a',
+                borderColor: '#16a34a',
+              }}
+            >
+              Thêm vai trò
+            </Button>
+          </Col>
+        </Row>
+      )}
 {/* 
       <Card
         style={{

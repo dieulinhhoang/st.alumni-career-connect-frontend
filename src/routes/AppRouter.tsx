@@ -133,11 +133,10 @@ const routes = [
             ],
           },
 
-          // Forms, alumni batches & legacy import
+          // Forms — quyền riêng, tách khỏi surveys
           {
-            element: <PermissionRoute permission={PermissionEnum.SURVEYS_READ} />,
+            element: <PermissionRoute permission={PermissionEnum.FORMS_READ} />,
             children: [
-              // Forms — mỗi view 1 route riêng
               {
                 path: '/admin/allforms',
                 element: <Navigate to="/admin/forms" replace />
@@ -162,7 +161,13 @@ const routes = [
                 path: '/admin/forms/:id/preview',
                 element: <Suspense fallback={<Loader />}><FormPreviewPage /></Suspense>
               },
+            ],
+          },
 
+          // Alumni batches & legacy import
+          {
+            element: <PermissionRoute permission={PermissionEnum.SURVEYS_READ} />,
+            children: [
               // Alumni batches
               {
                 path: '/admin/alumni/batches',

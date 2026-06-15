@@ -20,6 +20,8 @@ import type { IUser, IUserQuery } from '../../../feature/user/type'
 import { useFaculties } from '../../../feature/faculty/hooks/useFaculties'
 import FilterContainer from '../../../components/common/FilterContainer'
 import CustomTable from '../../../components/common/customTable'
+import { havePermission } from '../../../feature/auth/permission'
+import { PermissionEnum } from '../../../feature/auth/type'
 
 interface UserListViewProps {
   query: IUserQuery
@@ -44,7 +46,7 @@ const UserListView: React.FC<UserListViewProps> = ({
   onTableChange,
   onToggleStatus,
 }) => {
-  const canUpdate = true
+  const canUpdate = havePermission(PermissionEnum.USERS_UPDATE)
   const canView = true
 
   const { faculties } = useFaculties()

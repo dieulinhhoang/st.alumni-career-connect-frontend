@@ -6,10 +6,9 @@ import {
   Input,
   Select,
   Button,
-  Tooltip,
   Typography,
 } from "antd";
-import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
@@ -23,6 +22,8 @@ import {
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { KpiCard } from "../../../components/common/KpiCard";
+import { havePermission } from "../../../feature/auth/permission";
+import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Text } = Typography;
 
@@ -175,31 +176,6 @@ export default function EnterprisePage() {
         </span>
       ),
     },
-    {
-      title: "",
-      key: "action",
-      width: 60,
-      align: "center",
-      render: (_v, record) => (
-        <Tooltip title="Chỉnh sửa">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              setModal({ open: true, enterprise: record });
-            }}
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-              width: 34,
-              height: 34,
-              color: "#94a3b8",
-            }}
-          />
-        </Tooltip>
-      ),
-    },
   ];
 
   return (
@@ -215,6 +191,8 @@ export default function EnterprisePage() {
               Quản lý danh sách và trạng thái hợp tác
             </p>
           </div>
+        {havePermission(PermissionEnum.ENTERPRISES_CREATE) && (
+          
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -224,6 +202,7 @@ export default function EnterprisePage() {
           >
             Thêm doanh nghiệp
           </Button>
+     )}
         </div>
 
         {/* FIX: KPI cards dùng KpiCard thống nhất, màu từ COLOR token */}

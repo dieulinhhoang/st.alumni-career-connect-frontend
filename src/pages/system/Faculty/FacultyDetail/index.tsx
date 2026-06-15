@@ -8,6 +8,8 @@ import { useFacultyDetailBySlug } from "../../../../feature/faculty/hooks/useFac
 import { createMajor, updateMajor, deleteMajor } from "../../../../feature/major/api";
 import { toSlug } from "../../../../components/common/utils";
 import CustomTable from "../../../../components/common/customTable";
+import { havePermission } from "../../../../feature/auth/permission";
+import { PermissionEnum } from "../../../../feature/auth/type";
 
 const { Title, Text } = Typography;
 
@@ -159,22 +161,26 @@ export default function FacultyDetailPage() {
       align: "center",
       render: (_value, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openEditModal(record)}
-          />
-          <Popconfirm
-            title="Xoá ngành này?"
-            description="Hành động này không thể hoàn tác."
-            okText="Xoá"
-            cancelText="Huỷ"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => handleDelete(record)}
-          >
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          {havePermission(PermissionEnum.FACULTY_UPDATE) && (
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => openEditModal(record)}
+            />
+          )}
+          {havePermission(PermissionEnum.FACULTY_DELETE) && (
+            <Popconfirm
+              title="Xoá ngành này?"
+              description="Hành động này không thể hoàn tác."
+              okText="Xoá"
+              cancelText="Huỷ"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => handleDelete(record)}
+            >
+              <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          )}
         </div>
       ),
     },
@@ -269,11 +275,13 @@ export default function FacultyDetailPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-            Thêm ngành
-          </Button>
-        </div>
+        {havePermission(PermissionEnum.FACULTY_CREATE) && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+              Thêm ngành
+            </Button>
+          </div>
+        )}
 
         <Table
           columns={columns}

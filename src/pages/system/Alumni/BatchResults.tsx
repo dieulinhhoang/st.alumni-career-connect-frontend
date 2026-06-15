@@ -23,6 +23,8 @@ import { SurveyLinkModal } from './components/SurveyLinkModal';
 import { useExportAllPDF, domToPdfBlob } from '../../../feature/alumni/hooks/useExportAllPDF';
 import type { ExportItem } from '../../../feature/alumni/hooks/useExportAllPDF';
 import SurveyPreview from '../Form/Preview';
+import { havePermission } from '../../../feature/auth/permission';
+import { PermissionEnum } from '../../../feature/auth/type';
 import * as XLSX from 'xlsx';
 
 const { Text, Title } = Typography;
@@ -337,13 +339,15 @@ export const BatchResults: React.FC = () => {
               onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}`)}
             />
           </Tooltip>
-          <Tooltip title="Sửa">
-            <Button
-              size="small" type="text"
-              icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
-              onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
-            />
-          </Tooltip>
+          {havePermission(PermissionEnum.SURVEYS_UPDATE) && (
+            <Tooltip title="Sửa">
+              <Button
+                size="small" type="text"
+                icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
+                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
+              />
+            </Tooltip>
+          )}
         </Space>
       ),
     },

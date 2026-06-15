@@ -26,6 +26,8 @@ import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 import { JobFormModal } from "./JobFormModal";
 import { JobCard } from "./JobCard";
 import { EnterpriseFormModal } from "./EditEnterpriseModal";
+import { havePermission } from "../../../feature/auth/permission";
+import { PermissionEnum } from "../../../feature/auth/type";
 
 const DEFAULT_FACULTY_COLOR = "#1d4ed8";
 
@@ -235,14 +237,16 @@ export default function EnterpriseDetailPage() {
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingBottom: 2 }}>
-              <Button
-                icon={<PlusOutlined />}
-                type="primary"
-                style={{ background: ent.color, border: "none", borderRadius: 8 }}
-                onClick={() => setJobModal({ open: true, job: null })}
-              >
-                {/* Thêm tin tuyển dụng */}
-              </Button>
+              {havePermission(PermissionEnum.JOBS_CREATE) && (
+                <Button
+                  icon={<PlusOutlined />}
+                  type="primary"
+                  style={{ background: ent.color, border: "none", borderRadius: 8 }}
+                  onClick={() => setJobModal({ open: true, job: null })}
+                >
+                  {/* Thêm tin tuyển dụng */}
+                </Button>
+              )}
 
               <Button
                 icon={<EditOutlined />}

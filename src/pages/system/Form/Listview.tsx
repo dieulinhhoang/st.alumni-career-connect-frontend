@@ -6,6 +6,8 @@ import {
 } from '@ant-design/icons'
 import type { Form } from '../../../feature/form/types'
 import CustomTable from '../../../components/common/customTable'
+import { havePermission } from '../../../feature/auth/permission'
+import { PermissionEnum } from '../../../feature/auth/type'
 
 const { Title, Text } = Typography
 
@@ -124,23 +126,27 @@ export default function ListView({
             <Button type="text" size="small" icon={<EyeOutlined />}
               onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
           </Tooltip>
-          
-          <Tooltip
-            title={
-              record.isSystem ? 'Form hệ thống, không thể sửa'
-              : record.usedInBatch ? 'Form đang gắn với đợt khảo sát, không thể sửa'
-              : 'Chỉnh sửa'
-            }
-            mouseEnterDelay={0.4}
-          >
-            <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.usedInBatch}
-              onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
-          </Tooltip>
-          <Tooltip title="Nhân bản" mouseEnterDelay={0.4}>
-            <Button type="text" size="small" icon={<CopyOutlined />}
-              onClick={(e) => { e.stopPropagation(); onDup(record) }} />
-          </Tooltip>
-          {!record.isSystem && !record.usedInBatch && (
+
+          {havePermission(PermissionEnum.FORMS_UPDATE) && (
+            <Tooltip
+              title={
+                record.isSystem ? 'Form hệ thống, không thể sửa'
+                : record.usedInBatch ? 'Form đang gắn với đợt khảo sát, không thể sửa'
+                : 'Chỉnh sửa'
+              }
+              mouseEnterDelay={0.4}
+            >
+              <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.usedInBatch}
+                onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
+            </Tooltip>
+          )}
+          {havePermission(PermissionEnum.FORMS_CREATE) && (
+            <Tooltip title="Nhân bản" mouseEnterDelay={0.4}>
+              <Button type="text" size="small" icon={<CopyOutlined />}
+                onClick={(e) => { e.stopPropagation(); onDup(record) }} />
+            </Tooltip>
+          )}
+          {havePermission(PermissionEnum.FORMS_DELETE) && !record.isSystem && !record.usedInBatch && (
             <Tooltip title="Xóa" mouseEnterDelay={0.4}>
               <Button type="text" size="small" danger icon={<DeleteOutlined />}
                 onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} />
@@ -176,14 +182,16 @@ export default function ListView({
           >
             Tạo bằng AI
           </Button> */}
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={onCreate}
-            style={{ background: '#16a34a', borderColor: '#16a34a' }}
-          >
-            Form mới
-          </Button>
+          {havePermission(PermissionEnum.FORMS_CREATE) && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={onCreate}
+              style={{ background: '#16a34a', borderColor: '#16a34a' }}
+            >
+              Form mới
+            </Button>
+          )}
         </Space>
       </Flex>
 

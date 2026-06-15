@@ -8,6 +8,8 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import type { Job, Faculty } from "../../../feature/enterprise/type";
+import { havePermission } from "../../../feature/auth/permission";
+import { PermissionEnum } from "../../../feature/auth/type";
 
 interface Props {
   job: Job;
@@ -222,33 +224,37 @@ export function JobCard({
           borderTop: "1px solid #f5f5f5",
         }}
       >
-        <Button
-          size="small"
-          icon={<EditOutlined />}
-          style={{ fontSize: 11, borderRadius: 6 }}
-          onClick={() => onEdit(job)}
-        >
-          Chỉnh sửa
-        </Button>
-        <Button
-          size="small"
-          icon={<DeleteOutlined />}
-          danger
-          style={{ fontSize: 11, borderRadius: 6 }}
-          onClick={
-            () =>
-              Modal.confirm({
-                title: "Xóa tin tuyển dụng?",
-                content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
-                okText: "Xóa",
-                okType: "danger",
-                cancelText: "Hủy",
-                onOk: () => onDelete(job.id),
-              })
-          }
-        >
-          Xóa
-        </Button>
+        {havePermission(PermissionEnum.JOBS_UPDATE) && (
+          <Button
+            size="small"
+            icon={<EditOutlined />}
+            style={{ fontSize: 11, borderRadius: 6 }}
+            onClick={() => onEdit(job)}
+          >
+            Chỉnh sửa
+          </Button>
+        )}
+        {havePermission(PermissionEnum.JOBS_DELETE) && (
+          <Button
+            size="small"
+            icon={<DeleteOutlined />}
+            danger
+            style={{ fontSize: 11, borderRadius: 6 }}
+            onClick={
+              () =>
+                Modal.confirm({
+                  title: "Xóa tin tuyển dụng?",
+                  content: `Tin "${job.title}" sẽ bị xóa vĩnh viễn.`,
+                  okText: "Xóa",
+                  okType: "danger",
+                  cancelText: "Hủy",
+                  onOk: () => onDelete(job.id),
+                })
+            }
+          >
+            Xóa
+          </Button>
+        )}
       </div>
       <style>{`
         .job-card:hover {

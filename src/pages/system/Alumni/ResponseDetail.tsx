@@ -12,6 +12,8 @@ import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { SurveyPreview } from '../Form/Preview';
+import { havePermission } from '../../../feature/auth/permission';
+import { PermissionEnum } from '../../../feature/auth/type';
 
 const { Text, Title } = Typography;
 
@@ -198,11 +200,13 @@ export const ResponseDetail: React.FC = () => {
           <Title level={4} style={{ margin: 0, color: '#111827' }} />
           <div style={{ display: 'flex', gap: 8 }}>
             {!isEdit ? (
-              <Button
-                icon={<EditOutlined />}
-                style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
-                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}
-              />
+              havePermission(PermissionEnum.SURVEYS_UPDATE) && (
+                <Button
+                  icon={<EditOutlined />}
+                  style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
+                  onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}
+                />
+              )
             ) : (
               <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
                 onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}`)}>
