@@ -130,6 +130,25 @@ export async function fetchDashboardChartData(
   return res.data as ChartDataPoint[];
 }
 
+export interface EmploymentChartResponse {
+  dotData: Record<string, DotEntry>;
+  latestKey: string;
+}
+
+/**
+ * Dữ liệu chart "Thống kê sinh viên theo đợt khảo sát" (dashboard) —
+ * tổng hợp theo từng đợt, dùng cùng logic tính toán với báo cáo (reports.service).
+ */
+export async function fetchEmploymentChartData(
+  khoa: string = "all",
+  nganh: string = "all",
+): Promise<EmploymentChartResponse> {
+  const res = await api.get("/dashboard/employment-chart", {
+    params: { khoa, nganh },
+  });
+  return res.data as EmploymentChartResponse;
+}
+
 export async function fetchKhoaList(): Promise<KhoaItem[]> {
   const res = await api.get("/dashboard/faculty-report-status");
    console.log("API Request - fetchKhoaList, received data:", res.data); // Debug log to check the response data

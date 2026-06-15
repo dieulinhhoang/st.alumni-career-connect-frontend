@@ -9,7 +9,7 @@ interface JobWithEnterprise extends Job {
   enterpriseColor?: string
 }
 
-// ── Fireworks ─────────────────────────────────────────────────────────────────
+//  Fireworks ─
 function Fireworks({ active }: { active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef    = useRef<number>(0)
@@ -25,60 +25,91 @@ function Fireworks({ active }: { active: boolean }) {
     type Particle = {
       x: number; y: number; vx: number; vy: number
       alpha: number; color: string; size: number
-      decay: number; friction: number; gravity: number; flicker: boolean
+      decay: number; friction: number; gravity: number
+    }
+    type Rocket = {
+      x: number; y: number; vx: number; vy: number
+      targetY: number; color: string
     }
     let particles: Particle[] = []
+    let rockets: Rocket[] = []
 
     const PALETTES = [
-      ['#FFD700','#FFA500','#FF8C00'],
-      ['#FF2A6D','#05D9E8','#ffffff'],
-      ['#A78BFA','#F472B6','#F43F5E'],
-      ['#34D399','#059669','#6EE7B7'],
-      ['#38BDF8','#818CF8','#C084FC'],
+      ['#FDE68A','#FCA5A5','#FFFFFF'],
+      ['#BFDBFE','#C7D2FE','#FFFFFF'],
+      ['#A7F3D0','#BBF7D0','#FFFFFF'],
+      ['#FBCFE8','#FDE2E4','#FFFFFF'],
     ]
 
-    function burst(x: number, y: number) {
+    function burst(x: number, y: number, color: string) {
       const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)]
-      const count   = 120 + Math.floor(Math.random() * 60)
+      const count   = 40 + Math.floor(Math.random() * 20)
       for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4
-        const speed = 1.5 + Math.random() * 6.5
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3
+        const speed = 0.8 + Math.random() * 2.4
         particles.push({
           x, y,
-          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 0.8,
-          alpha: 1, color: palette[Math.floor(Math.random() * palette.length)],
-          size: 1 + Math.random() * 1.8,
-          decay: 0.006 + Math.random() * 0.009,
-          friction: 0.96, gravity: 0.07,
-          flicker: Math.random() > 0.4,
+          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          alpha: 0.85, color: Math.random() > 0.5 ? color : palette[Math.floor(Math.random() * palette.length)],
+          size: 0.8 + Math.random() * 1.4,
+          decay: 0.008 + Math.random() * 0.01,
+          friction: 0.97, gravity: 0.035,
         })
       }
     }
 
-    const fireBursts = () => {
-      const P = [[0.25,0.3],[0.75,0.25],[0.5,0.35],[0.15,0.45],[0.85,0.4]]
-      P.forEach(([px,py],i) => setTimeout(() => burst(canvas.width*px, canvas.height*py), i*280))
+    function launch(fromLeft: boolean) {
+      const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)]
+      const startX = fromLeft
+        ? canvas.width * (0.05 + Math.random() * 0.08)
+        : canvas.width * (0.87 + Math.random() * 0.08)
+      rockets.push({
+        x: startX, y: canvas.height,
+        vx: (fromLeft ? 1 : -1) * (0.5 + Math.random() * 0.7),
+        vy: -(5 + Math.random() * 2),
+        targetY: canvas.height * (0.25 + Math.random() * 0.25),
+        color: palette[0],
+      })
     }
-    fireBursts()
-    const t2 = setTimeout(fireBursts, 1600)
+
+    const fireRockets = () => {
+      ;[true,false,true,false].forEach((fromLeft,i) => setTimeout(() => launch(fromLeft), i*850))
+    }
+    fireRockets()
+    const t2 = setTimeout(fireRockets, 2600)
 
     function loop() {
-      ctx.fillStyle = 'rgba(8,15,26,0.18)'
+      ctx.fillStyle = 'rgba(8,15,26,0.14)'
       ctx.fillRect(0,0,canvas.width,canvas.height)
       ctx.globalCompositeOperation = 'lighter'
+
+      for (let i = rockets.length-1; i >= 0; i--) {
+        const r = rockets[i]
+        r.x += r.vx; r.y += r.vy; r.vy += 0.02
+        if (r.y <= r.targetY || r.vy >= 0) {
+          burst(r.x, r.y, r.color)
+          rockets.splice(i,1); continue
+        }
+        ctx.save()
+        ctx.globalAlpha = 0.7
+        ctx.fillStyle   = r.color
+        ctx.shadowColor = r.color
+        ctx.shadowBlur  = 6
+        ctx.beginPath(); ctx.arc(r.x, r.y, 1.6, 0, Math.PI*2); ctx.fill()
+        ctx.restore()
+      }
+
       for (let i = particles.length-1; i >= 0; i--) {
         const p = particles[i]
         p.vx *= p.friction; p.vy *= p.friction; p.vy += p.gravity
         p.x += p.vx; p.y += p.vy; p.alpha -= p.decay
         if (p.alpha <= 0) { particles.splice(i,1); continue }
         ctx.save()
-        let a = p.alpha
-        if (p.flicker && p.alpha < 0.7) a = Math.random() > 0.3 ? p.alpha : p.alpha * 0.2
-        ctx.globalAlpha = a
+        ctx.globalAlpha = p.alpha
         ctx.fillStyle   = p.color
         ctx.shadowColor = p.color
-        ctx.shadowBlur  = p.alpha * 10
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size*(p.alpha*1.2), 0, Math.PI*2); ctx.fill()
+        ctx.shadowBlur  = p.alpha * 6
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size*(p.alpha*1.1), 0, Math.PI*2); ctx.fill()
         ctx.restore()
       }
       ctx.globalCompositeOperation = 'source-over'
@@ -92,7 +123,7 @@ function Fireworks({ active }: { active: boolean }) {
   return <canvas ref={canvasRef} style={{ position:'fixed', inset:0, zIndex:1, pointerEvents:'none' }} />
 }
 
-// ── Global CSS ─────────────────────────────────────────────────────────────────
+//  Global CSS ─
 const GLOBAL_STYLE = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *, *::before, *::after { font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important; box-sizing: border-box; }
@@ -122,6 +153,14 @@ const GLOBAL_STYLE = `
   0%   { opacity:1; transform: translate(0,0) scale(1); }
   100% { opacity:0; transform: translate(var(--bx),var(--by)) scale(0.2); }
 }
+@keyframes giftFade {
+  0%   { opacity:1; transform: scale(1); }
+  100% { opacity:0; transform: scale(0.6) translateY(-20px); }
+}
+@keyframes glowPulse {
+  0%,100% { opacity:0.25; transform: scale(1); }
+  50%      { opacity:0.45; transform: scale(1.1); }
+}
 @keyframes cardsRise {
   0%   { opacity:0; transform: translateY(48px) scale(0.97); }
   60%  { opacity:1; }
@@ -132,14 +171,6 @@ const GLOBAL_STYLE = `
   100% { opacity:1; transform: translateY(0); }
 }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
-@keyframes glowPulse {
-  0%,100% { opacity:0.25; transform: scale(1); }
-  50%      { opacity:0.45; transform: scale(1.1); }
-}
-@keyframes hintPop {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-3px) scale(1.02); }
-}
 @keyframes heroIn {
   0%   { opacity:0; transform: translateY(-16px); }
   100% { opacity:1; transform: translateY(0); }
@@ -157,12 +188,17 @@ const GLOBAL_STYLE = `
   0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.35); }
   100% { box-shadow: 0 0 0 22px rgba(52,211,153,0); }
 }
+@keyframes hintPop {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-3px) scale(1.02); }
+}
 
 .gift-idle  { animation: floatIdle 3.5s ease-in-out infinite; }
 .gift-shake { animation: giftShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 .lid-fly    { animation: lidFly 0.7s cubic-bezier(0.2, 1, 0.4, 1) forwards; }
 .bow-fly    { animation: bowFly 0.55s cubic-bezier(0.2, 1, 0.4, 1) forwards; }
 .hint-pop   { animation: hintPop 2.5s ease-in-out infinite; }
+.gift-fade  { animation: giftFade 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 .hero-in     { animation: heroIn 0.7s cubic-bezier(0.16,1,0.3,1) both; }
 .check-pop   { animation: checkPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.15s both, ringPulse 1.8s ease-out 0.75s; }
@@ -170,10 +206,10 @@ const GLOBAL_STYLE = `
 
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
   border-radius: 100px; padding: 6px 16px; margin-bottom: 22px;
   font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.9);
 }
 
 .jobs-grid {
@@ -184,10 +220,8 @@ const GLOBAL_STYLE = `
 }
 
 .job-card {
-  background: rgba(15, 26, 46, 0.6);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #ffffff;
+  border: 1px solid rgba(255,255,255,0.6);
   border-radius: 20px;
   display: flex; flex-direction: column;
   overflow: hidden; cursor: pointer; position: relative;
@@ -198,13 +232,12 @@ const GLOBAL_STYLE = `
 .job-card::after {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 90% 10%, var(--eg, rgba(29,158,117,0.18)) 0%, transparent 65%);
+  background: radial-gradient(ellipse at 90% 10%, var(--eg, rgba(29,158,117,0.14)) 0%, transparent 65%);
   opacity: 0; transition: opacity 0.35s ease; pointer-events: none; z-index: 0;
 }
 .job-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(255,255,255,0.15);
-  box-shadow: 0 28px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  box-shadow: 0 24px 48px rgba(6,40,30,0.22) !important;
 }
 .job-card:hover::after { opacity: 1; }
 .job-card:hover .cta-btn {
@@ -216,30 +249,30 @@ const GLOBAL_STYLE = `
 .skeleton-shimmer { position: relative; overflow: hidden; }
 .skeleton-shimmer::after {
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
   animation: shimmer 1.6s infinite;
 }
 `
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+//  Skeleton 
 function SkeletonCard() {
   return (
     <div className="skeleton-shimmer" style={{
-      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+      background: '#ffffff', border: '1px solid rgba(255,255,255,0.6)',
       borderRadius: 20, padding: 24, height: 200,
     }}>
-      <div style={{ height:11, width:'32%', background:'rgba(255,255,255,0.05)', borderRadius:6, marginBottom:14 }}/>
-      <div style={{ height:20, width:'80%', background:'rgba(255,255,255,0.07)', borderRadius:6, marginBottom:10 }}/>
-      <div style={{ height:13, width:'52%', background:'rgba(255,255,255,0.04)', borderRadius:6, marginBottom:22 }}/>
+      <div style={{ height:11, width:'32%', background:'rgba(15,23,42,0.06)', borderRadius:6, marginBottom:14 }}/>
+      <div style={{ height:20, width:'80%', background:'rgba(15,23,42,0.08)', borderRadius:6, marginBottom:10 }}/>
+      <div style={{ height:13, width:'52%', background:'rgba(15,23,42,0.05)', borderRadius:6, marginBottom:22 }}/>
       <div style={{ display:'flex', gap:8 }}>
-        <div style={{ height:24, width:72, borderRadius:10, background:'rgba(255,255,255,0.03)' }}/>
-        <div style={{ height:24, width:88, borderRadius:10, background:'rgba(255,255,255,0.03)' }}/>
+        <div style={{ height:24, width:72, borderRadius:10, background:'rgba(15,23,42,0.04)' }}/>
+        <div style={{ height:24, width:88, borderRadius:10, background:'rgba(15,23,42,0.04)' }}/>
       </div>
     </div>
   )
 }
 
-// ── JobCard ───────────────────────────────────────────────────────────────────
+//  JobCard ─
 function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
   const fmt = (s: string|null) => {
     if (!s) return null
@@ -247,26 +280,20 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
   }
 
-  const color = job.enterpriseColor ?? '#1D9E75'
-  const getRgb = (hex: string) => {
-    const fb = {r:29,g:158,b:117}
-    if (!hex || hex.length < 7) return fb
-    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
-    return isNaN(r)||isNaN(g)||isNaN(b) ? fb : {r,g,b}
-  }
-  const {r,g,b} = getRgb(color)
+  const color = '#1D9E75'
+  const {r,g,b} = {r:29,g:158,b:117}
 
   return (
     <div
       className="job-card"
       style={{
         animation: `cardIn 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms both`,
-        boxShadow: `0 12px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05)`,
+        boxShadow: `0 12px 28px rgba(6,40,30,0.12)`,
         ['--ec' as any]: color,
-        ['--eg' as any]: `rgba(${r},${g},${b},0.22)`,
+        ['--eg' as any]: `rgba(${r},${g},${b},0.14)`,
       }}
-      onMouseEnter={e => e.currentTarget.style.boxShadow = `0 20px 44px rgba(${r},${g},${b},0.14), inset 0 1px 0 rgba(255,255,255,0.1)`}
-      onMouseLeave={e => e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05)`}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = `0 24px 48px rgba(${r},${g},${b},0.22)`}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = `0 12px 28px rgba(6,40,30,0.12)`}
     >
       {/* Accent strip */}
       <div style={{ height:3, background:`linear-gradient(90deg, ${color}, transparent)`, opacity:0.7 }}/>
@@ -283,13 +310,13 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
           )}
         </div>
 
-        <div style={{ fontSize:16, fontWeight:700, color:'#f8fafc', lineHeight:1.4, flex:1 }}>
+        <div style={{ fontSize:16, fontWeight:700, color:'#0f172a', lineHeight:1.4, flex:1 }}>
           {job.title}
         </div>
 
         <div style={{ display:'flex', flexWrap:'wrap', gap:7 }}>
           {job.location && (
-            <span style={{ fontSize:11.5, padding:'4px 11px', background:'rgba(255,255,255,0.04)', color:'#cbd5e1', border:'1px solid rgba(255,255,255,0.06)', borderRadius:10, display:'inline-flex', alignItems:'center', gap:5 }}>
+            <span style={{ fontSize:11.5, padding:'4px 11px', background:'rgba(15,23,42,0.04)', color:'#475569', border:'1px solid rgba(15,23,42,0.06)', borderRadius:10, display:'inline-flex', alignItems:'center', gap:5 }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
               </svg>
@@ -305,18 +332,18 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
             </span>
           )}
           {job.tags?.slice(0,1).map(tag => (
-            <span key={tag} style={{ fontSize:11, padding:'4px 10px', background:'rgba(255,255,255,0.02)', color:'#94a3b8', border:'1px solid rgba(255,255,255,0.04)', borderRadius:10 }}>
+            <span key={tag} style={{ fontSize:11, padding:'4px 10px', background:'rgba(15,23,42,0.03)', color:'#94a3b8', border:'1px solid rgba(15,23,42,0.05)', borderRadius:10 }}>
               {tag}
             </span>
           ))}
         </div>
       </div>
 
-      <div style={{ padding:'12px 22px 16px', borderTop:'1px solid rgba(255,255,255,0.04)', display:'flex', justifyContent:'space-between', alignItems:'center', background:'rgba(8,15,28,0.3)', position:'relative', zIndex:1 }}>
-        <span style={{ fontSize:11, color:'rgba(148,163,184,0.7)' }}>
+      <div style={{ padding:'12px 22px 16px', borderTop:'1px solid rgba(15,23,42,0.05)', display:'flex', justifyContent:'space-between', alignItems:'center', background:'rgba(15,23,42,0.02)', position:'relative', zIndex:1 }}>
+        <span style={{ fontSize:11, color:'#94a3b8' }}>
           {job.postedAt ? `Đăng ${fmt(job.postedAt)}` : ''}
         </span>
-        <span className="cta-btn" style={{ fontSize:11.5, padding:'6px 14px', background:'rgba(255,255,255,0.05)', color:'#e2e8f0', borderRadius:9, fontWeight:600, border:'1px solid rgba(255,255,255,0.07)', transition:'all 0.25s ease', cursor:'pointer' }}>
+        <span className="cta-btn" style={{ fontSize:11.5, padding:'6px 14px', background:'rgba(15,23,42,0.04)', color:'#334155', borderRadius:9, fontWeight:600, border:'1px solid rgba(15,23,42,0.07)', transition:'all 0.25s ease', cursor:'pointer' }}>
           Xem chi tiết →
         </span>
       </div>
@@ -324,7 +351,7 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
   )
 }
 
-// ── SuccessHero ───────────────────────────────────────────────────────────────
+//  SuccessHero ─
 function SuccessHero() {
   return (
     <div className="hero-in" style={{
@@ -333,7 +360,7 @@ function SuccessHero() {
     }}>
       <span className="hero-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/>
+          {/* <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/> */}
         </svg>
         Học viện Nông nghiệp Việt Nam
       </span>
@@ -344,9 +371,10 @@ function SuccessHero() {
         border:'1px solid rgba(52,211,153,0.35)',
         display:'flex', alignItems:'center', justifyContent:'center',
       }}>
-        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <img src="/logovua.png" alt="Logo" style={{ width:48, height:48, objectFit:'contain' }}/>
+        {/* <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           <path className="check-path" d="M20 6L9 17l-5-5"/>
-        </svg>
+        </svg> */}
       </div>
 
       <h1 style={{ fontSize:34, fontWeight:800, color:'#f8fafc', margin:'0 0 14px', letterSpacing:'-0.5px', lineHeight:1.25 }}>
@@ -360,8 +388,8 @@ function SuccessHero() {
   )
 }
 
-// ── GiftBox ───────────────────────────────────────────────────────────────────
-const DOT_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#F97316','#EC4899']
+//  GiftBox ─
+const DOT_COLORS = ['#EF4444','#F59E0B','#3B82F6','#A855F7','#EC4899','#FFFFFF','#FDE68A']
 
 function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolean }) {
   const [clicks, setClicks] = useState(0)
@@ -430,127 +458,124 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
       {/* Dot burst layer */}
       <div ref={confettiRef} style={{ position:'absolute', inset:0, pointerEvents:'none', overflow:'hidden', zIndex:10 }} />
 
-      {/* ── GIFT AREA ── */}
-      <div style={{
-        display:'flex', flexDirection:'column', alignItems:'center',
-        position: isOpen ? 'absolute' : 'relative',
-        top: isOpen ? 20 : undefined,
-        zIndex:5,
-        opacity:    isOpening||isOpen ? 0.12 : 1,
-        transform:  isOpening||isOpen ? 'scale(0.55) translateY(-30px)' : 'scale(1)',
-        transition: 'opacity 0.6s cubic-bezier(0.4,0,0.2,1), transform 0.6s cubic-bezier(0.4,0,0.2,1)',
-        pointerEvents: isOpen ? 'none' : 'auto',
-      }}>
-        {/* Ambient glow ring */}
-        {!isOpen && (
+      {/*  GIFT AREA  */}
+      {!isOpen && (
+        <div
+          className={isOpening ? 'gift-fade' : ''}
+          style={{
+            display:'flex', flexDirection:'column', alignItems:'center',
+            position:'relative', zIndex:5,
+          }}
+        >
+          {/* Ambient glow ring */}
           <div style={{
             position:'absolute', width:280, height:280, borderRadius:'50%',
-            background:'radial-gradient(circle, rgba(239,68,68,0.18) 0%, transparent 70%)',
+            background:'radial-gradient(circle, rgba(252,211,77,0.25) 0%, transparent 70%)',
             top:-60, zIndex:0, pointerEvents:'none',
             animation:'glowPulse 3s ease-in-out infinite',
           }}/>
-        )}
 
-        <div
-          ref={giftRef}
-          className={phase==='idle' ? 'gift-idle' : phase==='shaking' ? 'gift-shake' : ''}
-          onClick={handleClick}
-          style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', cursor:'pointer', userSelect:'none', zIndex:2 }}
-        >
-          {/* Bow */}
           <div
-            className={isOpening||isOpen ? 'bow-fly' : ''}
-            style={{ position:'absolute', top:-28, left:'50%', transform:'translateX(-50%)', width:72, height:38, zIndex:4 }}
+            ref={giftRef}
+            className={phase==='idle' ? 'gift-idle' : phase==='shaking' ? 'gift-shake' : ''}
+            onClick={handleClick}
+            style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', cursor:'pointer', userSelect:'none', zIndex:2 }}
           >
-            <svg width="72" height="38" viewBox="0 0 72 38" fill="none">
-              <defs>
-                <linearGradient id="bl" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FDE68A"/>
-                  <stop offset="100%" stopColor="#F59E0B"/>
-                </linearGradient>
-                <linearGradient id="br" x1="100%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FDE68A"/>
-                  <stop offset="100%" stopColor="#D97706"/>
-                </linearGradient>
-                <linearGradient id="bk" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FCD34D"/>
-                  <stop offset="100%" stopColor="#92400E"/>
-                </linearGradient>
-              </defs>
-              <path d="M36 24C18 4 2 10 6 21C9 30 24 26 36 24Z" fill="url(#bl)"/>
-              <path d="M36 24C54 4 70 10 66 21C63 30 48 26 36 24Z" fill="url(#br)"/>
-              <ellipse cx="36" cy="22" rx="9" ry="9" fill="url(#bk)"/>
-              <ellipse cx="36" cy="22" rx="5" ry="5" fill="#FCD34D" opacity="0.6"/>
-            </svg>
-          </div>
+            {/* Bow */}
+            <div
+              className={isOpening ? 'bow-fly' : ''}
+              style={{ position:'absolute', top:-28, left:'50%', transform:'translateX(-50%)', width:72, height:38, zIndex:4 }}
+            >
+              <svg width="72" height="38" viewBox="0 0 72 38" fill="none">
+                <defs>
+                  <linearGradient id="bl" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FDE68A"/>
+                    <stop offset="100%" stopColor="#F59E0B"/>
+                  </linearGradient>
+                  <linearGradient id="br" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FDE68A"/>
+                    <stop offset="100%" stopColor="#D97706"/>
+                  </linearGradient>
+                  <linearGradient id="bk" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FCD34D"/>
+                    <stop offset="100%" stopColor="#92400E"/>
+                  </linearGradient>
+                </defs>
+                <path d="M36 24C18 4 2 10 6 21C9 30 24 26 36 24Z" fill="url(#bl)"/>
+                <path d="M36 24C54 4 70 10 66 21C63 30 48 26 36 24Z" fill="url(#br)"/>
+                <ellipse cx="36" cy="22" rx="9" ry="9" fill="url(#bk)"/>
+                <ellipse cx="36" cy="22" rx="5" ry="5" fill="#FCD34D" opacity="0.6"/>
+              </svg>
+            </div>
 
-          {/* Lid */}
-          <div
-            className={isOpening||isOpen ? 'lid-fly' : ''}
-            style={{ width:168, height:44, position:'relative', zIndex:3 }}
-          >
+            {/* Lid */}
+            <div
+              className={isOpening ? 'lid-fly' : ''}
+              style={{ width:168, height:44, position:'relative', zIndex:3 }}
+            >
+              <div style={{
+                width:168, height:44,
+                background:'linear-gradient(180deg, #EF4444 0%, #B91C1C 100%)',
+                borderRadius:'10px 10px 3px 3px',
+                border:'1px solid rgba(255,255,255,0.12)',
+                position:'relative', overflow:'hidden',
+                boxShadow:'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.3)',
+              }}>
+                <div style={{ position:'absolute', top:0, bottom:0, left:'50%', transform:'translateX(-50%)', width:24, background:'linear-gradient(90deg, #FCD34D, #F59E0B 50%, #FCD34D)' }}/>
+                <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 60%)', pointerEvents:'none' }}/>
+              </div>
+            </div>
+
+            {/* Body */}
             <div style={{
-              width:168, height:44,
-              background:'linear-gradient(180deg, #EF4444 0%, #B91C1C 100%)',
-              borderRadius:'10px 10px 3px 3px',
-              border:'1px solid rgba(255,255,255,0.12)',
+              width:152, height:116,
+              background:'linear-gradient(160deg, #F87171 0%, #B91C1C 100%)',
+              borderRadius:'0 0 16px 16px',
+              border:'1px solid rgba(255,255,255,0.08)', borderTop:'none',
               position:'relative', overflow:'hidden',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.3)',
+              boxShadow:'0 20px 40px rgba(185,28,28,0.3), 0 8px 16px rgba(0,0,0,0.4)',
+              zIndex:2,
             }}>
               <div style={{ position:'absolute', top:0, bottom:0, left:'50%', transform:'translateX(-50%)', width:24, background:'linear-gradient(90deg, #FCD34D, #F59E0B 50%, #FCD34D)' }}/>
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 60%)', pointerEvents:'none' }}/>
+              <div style={{ position:'absolute', left:0, right:0, top:'28%', height:22, background:'linear-gradient(180deg, #FCD34D, #D97706)' }}/>
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, transparent 45%)', pointerEvents:'none', zIndex:1 }}/>
             </div>
           </div>
 
-          {/* Body */}
-          <div style={{
-            width:152, height:116,
-            background:'linear-gradient(160deg, #DC2626 0%, #7F1D1D 100%)',
-            borderRadius:'0 0 16px 16px',
-            border:'1px solid rgba(255,255,255,0.08)', borderTop:'none',
-            position:'relative', overflow:'hidden',
-            boxShadow:'0 20px 40px rgba(185,28,28,0.3), 0 8px 16px rgba(0,0,0,0.4)',
-            zIndex:2,
+          {/* Hint pill */}
+          <div className="hint-pop" style={{
+            marginTop:22, fontSize:13, fontWeight:500,
+            color:'#ffffff', background:'rgba(255,255,255,0.12)',
+            border:'1px solid rgba(255,255,255,0.2)',
+            borderRadius:100, padding:'7px 18px',
+            letterSpacing:'0.2px',
           }}>
-            <div style={{ position:'absolute', top:0, bottom:0, left:'50%', transform:'translateX(-50%)', width:24, background:'linear-gradient(90deg, #FCD34D, #F59E0B 50%, #FCD34D)' }}/>
-            <div style={{ position:'absolute', left:0, right:0, top:'28%', height:22, background:'linear-gradient(180deg, #FCD34D, #D97706)' }}/>
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, transparent 45%)', pointerEvents:'none', zIndex:1 }}/>
+            {hintText}
           </div>
         </div>
+      )}
 
-        {/* Hint pill */}
-        <div className="hint-pop" style={{
-          marginTop:22, fontSize:13, fontWeight:500,
-          color:'#94a3b8', background:'rgba(255,255,255,0.04)',
-          border:'1px solid rgba(255,255,255,0.07)',
-          borderRadius:100, padding:'7px 18px',
-          letterSpacing:'0.2px',
-        }}>
-          {hintText}
-        </div>
-      </div>
-
-      {/* ── JOB CARDS (rise up from below gift) ── */}
+      {/*  JOB CARDS  */}
       {isOpen && (
         <div
           style={{
-            width:'100%', marginTop:80,
+            width:'100%', marginTop:24,
             animation:'cardsRise 0.75s cubic-bezier(0.34,1.56,0.64,1) both',
             display:'flex', flexDirection:'column', gap:24, zIndex:2,
           }}
         >
           {/* Section header */}
           <div style={{ textAlign:'center', marginBottom:4 }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.18)', borderRadius:100, padding:'5px 16px', marginBottom:16 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.22)', borderRadius:100, padding:'5px 16px', marginBottom:16 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
               </svg>
-              <span style={{ fontSize:11, fontWeight:700, color:'#34d399', letterSpacing:'0.8px', textTransform:'uppercase' }}>Cơ hội dành riêng cho bạn</span>
+              <span style={{ fontSize:11, fontWeight:700, color:'#ffffff', letterSpacing:'0.8px', textTransform:'uppercase' }}>Cơ hội dành riêng cho bạn</span>
             </div>
             <h3 style={{ fontSize:28, fontWeight:800, color:'#f8fafc', margin:'0 0 8px', letterSpacing:'-0.5px' }}>
               Các vị trí đang tuyển dụng
             </h3>
-            <p style={{ fontSize:14, color:'rgba(148,163,184,0.8)', margin:0 }}>
+            <p style={{ fontSize:14, color:'rgba(255,255,255,0.8)', margin:0 }}>
               Từ các doanh nghiệp đối tác của Học viện Nông nghiệp Việt Nam
             </p>
           </div>
@@ -558,7 +583,7 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
           {loading ? (
             <div className="jobs-grid">{[1,2,3].map(i => <SkeletonCard key={i}/>)}</div>
           ) : jobs.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'64px 24px', background:'rgba(255,255,255,0.01)', border:'1px dashed rgba(255,255,255,0.08)', borderRadius:20, color:'#475569', fontSize:15 }}>
+            <div style={{ textAlign:'center', padding:'64px 24px', background:'rgba(255,255,255,0.06)', border:'1px dashed rgba(255,255,255,0.2)', borderRadius:20, color:'rgba(255,255,255,0.7)', fontSize:15 }}>
               Hiện chưa có vị trí mới nào đang mở. Vui lòng quay lại sau!
             </div>
           ) : (
@@ -572,7 +597,7 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
   )
 }
 
-// ── DoneScreen ────────────────────────────────────────────────────────────────
+//  DoneScreen 
 export function DoneScreen() {
   useParams<{ id: string }>()
   const [jobs,      setJobs]      = useState<JobWithEnterprise[]>([])
@@ -580,7 +605,7 @@ export function DoneScreen() {
   const [fireworks, setFireworks] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setFireworks(false), 3500)
+    const t = setTimeout(() => setFireworks(false), 6000)
     return () => clearTimeout(t)
   }, [])
 
@@ -611,9 +636,7 @@ export function DoneScreen() {
   return (
     <div style={{
       minHeight:'100vh',
-      backgroundImage:`linear-gradient(rgba(6,12,22,0.88), rgba(6,12,22,0.94)),
-        url("https://sohanews.sohacdn.com/160588918557773824/2022/7/29/3-hoc-vien-nong-nghiep-viet-nam-16591074415901730271303.jpg")`,
-      backgroundSize:'cover', backgroundPosition:'center', backgroundAttachment:'fixed',
+      background:'linear-gradient(180deg, #1D9E75 0%, #15805f 100%)',
       overflowX:'hidden', display:'flex', flexDirection:'column', width:'100%',
     }}>
       <style>{GLOBAL_STYLE}</style>

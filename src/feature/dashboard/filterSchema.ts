@@ -16,7 +16,7 @@ export type ChartFilterState = {
   chartMode: string;
 };
 
-export const DEFAULT_QUEST_ID = "q_employment_status";
+export const DEFAULT_QUEST_ID = "coViec";
 
 export const CHART_FILTER_SCHEMA: FilterFieldSchema[] = [
   {

@@ -10,13 +10,12 @@ import {
 } from "../../../feature/dashboard/filterSchema";
 import { DynamicFilterBar } from "../../../feature/dashboard/DynamicFilterBar";
 import {
-  getChartByQuestionId,
-  getStatisticalQuestions,
-} from "../../../feature/dashboard/statisticalQuestionApi";
-import type {
-  ChartResult,
-  StatisticalQuestion,
-} from "../../../feature/dashboard/statisticalQuestion";
+  CHART_MODES,
+  MODE_CONFIG,
+  fetchEmploymentChartData,
+  type EmploymentChartResponse,
+} from "../../../feature/dashboard/api";
+import type { ChartMode } from "../../../feature/dashboard/type";
 import { COLOR } from "./theme";
 import { PieColumnChart } from "../../../components/charts/PieColumnChart";
 
@@ -32,50 +31,29 @@ interface Props {
 export function ChartSection({ state, setField, khoaOptions = [], nganhOptions = [] }: Props) {
   const { khoa, nganh, chartMode } = state;
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState<StatisticalQuestion[]>([]);
-  const [chart, setChart] = useState<ChartResult | null>(null);
+  const [employmentData, setEmploymentData] = useState<EmploymentChartResponse | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
 
-  const questionId = chartMode;
+  const mode = (chartMode as ChartMode) || "coViec";
 
-  // Load danh sách câu hỏi một lần khi mount
+  // Tải lại dữ liệu khi khoa / nganh thay đổi (data đã chứa đủ cho mọi chartMode)
   useEffect(() => {
     let cancelled = false;
-    getStatisticalQuestions().then(list => {
-      if (cancelled) return;
-      setQuestions(list);
-      const isKnown = list.some(q => q.questionId === chartMode);
-      if (!isKnown && list[0]) setField("chartMode", list[0].questionId);
-    });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Tải lại chart khi questionId / khoa / nganh thay đổi
-  useEffect(() => {
-    let cancelled = false;
-    if (!questionId) {
-      setChart(null);
-      return;
-    }
-    // console.log('[ChartSection] fetch chart', { questionId, khoa, nganh });
     setChartLoading(true);
-    getChartByQuestionId(questionId, { khoa, nganh }).then(res => {
+    fetchEmploymentChartData(khoa, nganh).then(res => {
       if (cancelled) return;
-      setChart(res);
+      setEmploymentData(res);
       setChartLoading(false);
     }).catch(() => {
       if (cancelled) return;
-      setChart(null);
+      setEmploymentData(null);
       setChartLoading(false);
     });
     return () => { cancelled = true; };
-  }, [questionId, khoa, nganh]);
+  }, [khoa, nganh]);
 
   const dynamicSchema = useMemo<FilterFieldSchema[]>(() => {
-    const questionOpts = questions.length
-      ? questions.map(q => ({ value: q.questionId, label: q.label }))
-      : [{ value: questionId, label: "Đang tải…" }];
+    const modeOpts = CHART_MODES.map(m => ({ value: m.value, label: m.label }));
 
     const safeKhoaOptions = khoaOptions.length
       ? khoaOptions
@@ -85,33 +63,31 @@ export function ChartSection({ state, setField, khoaOptions = [], nganhOptions =
       : [{ value: "all", label: "Tất cả ngành" }];
 
     return CHART_FILTER_SCHEMA.map(f => {
-      if (f.key === "chartMode") return { ...f, getOptions: () => questionOpts };
+      if (f.key === "chartMode") return { ...f, getOptions: () => modeOpts };
       if (f.key === "khoa") return { ...f, getOptions: () => safeKhoaOptions };
       if (f.key === "nganh") return { ...f, getOptions: () => safeNganhOptions };
       return f;
     });
-  }, [questions, questionId, khoaOptions, nganhOptions]);
+  }, [khoaOptions, nganhOptions]);
 
-  const pieData = chart?.data ?? [];
+  const dotData = employmentData?.dotData ?? {};
+  const latestKey = employmentData?.latestKey ?? "—";
 
-  const currentQuestion = useMemo(
-    () => questions.find(x => x.questionId === questionId),
-    [questions, questionId],
+  const getPieData = MODE_CONFIG[mode].getPieData;
+
+  const pieData = useMemo(
+    () => (dotData[latestKey] ? getPieData(dotData[latestKey]) : []),
+    [dotData, latestKey, getPieData],
   );
 
-  // latestKey: ưu tiên lấy từ BE response (key của đợt mới nhất trong dotData),
-  // fallback về label câu hỏi nếu chưa có
-  const latestKey = useMemo(() => {
-    if (chart?.dotData) {
-      const keys = Object.keys(chart.dotData);
-      if (keys.length) return keys[keys.length - 1];
-    }
-    return currentQuestion?.label ?? "—";
-  }, [chart, currentQuestion]);
+  const chartDotData = useMemo(
+    () => Object.fromEntries(
+      Object.entries(dotData).map(([dot, entry]) => [dot, getPieData(entry)]),
+    ),
+    [dotData, getPieData],
+  );
 
-  const pieLabel = currentQuestion
-    ? `Đợt khảo sát mới nhất · ${latestKey}`
-    : "Đợt khảo sát mới nhất";
+  const pieLabel = `Đợt khảo sát mới nhất · ${latestKey}`;
   const columnLabel = "Số lượng theo từng đợt khảo sát";
 
   return (
@@ -188,7 +164,7 @@ export function ChartSection({ state, setField, khoaOptions = [], nganhOptions =
         ) : (
           <PieColumnChart
             pieData={pieData}
-            dotData={chart?.dotData}
+            dotData={chartDotData}
             latestKey={latestKey}
             pieLabel={pieLabel}
             columnLabel={columnLabel}
