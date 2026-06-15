@@ -33,12 +33,16 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
 function flattenPermissions(payload: Record<string, any>): string[] {
   if (payload.permissions === '*') return ['*'];
 
-  const map: Record<string, string[]> = payload.permissions ?? {};
-  return Object.entries(map).flatMap(([resource, actions]) =>
-    (actions as string[]).map((action) => `${resource}:${action}`),
+  const perms = payload.permissions ?? [];
+
+  // Backend trả string[] dạng ['reports:read', 'students:read']
+  if (Array.isArray(perms)) return perms;
+
+  // Fallback: dạng object cũ { reports: ['read'] }
+  return Object.entries(perms as Record<string, string[]>).flatMap(
+    ([resource, actions]) => (actions as string[]).map((action) => `${resource}:${action}`)
   );
 }
-
 export default function AuthCallback() {
   const navigate = useNavigate();
 
@@ -73,9 +77,9 @@ export default function AuthCallback() {
     window.history.replaceState({}, '', '/');
     navigate('/', { replace: true });
   }, [navigate]);
-const t = localStorage.getItem('accessToken');
-const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-console.log(t, p);
+// const t = localStorage.getItem('accessToken');
+// const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+// console.log(t, p);
 
   return <Loader />;
 }

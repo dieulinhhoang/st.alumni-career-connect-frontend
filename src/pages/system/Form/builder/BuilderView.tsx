@@ -132,6 +132,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isMountedRef = useRef(false)
+  const unmountingRef = useRef(false)
   useEffect(() => {
     if (!isMountedRef.current) {
       isMountedRef.current = true
@@ -139,9 +140,20 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     }
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => { handleSaveOnly() }, 3000)
-    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current) }
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current)
+        // Đang rời trang (unmount) với lưu tự động còn đang chờ -> lưu ngay để không mất thay đổi
+        if (unmountingRef.current) handleSaveOnly()
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+  // Khai báo SAU effect debounce: cleanup chạy theo thứ tự LIFO nên cờ này
+  // được set TRƯỚC khi cleanup của effect debounce chạy lúc unmount.
+  useEffect(() => {
+    return () => { unmountingRef.current = true }
+  }, [])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', background: '#fff' }}>

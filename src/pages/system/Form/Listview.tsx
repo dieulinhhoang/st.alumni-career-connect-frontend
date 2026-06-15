@@ -124,18 +124,28 @@ export default function ListView({
             <Button type="text" size="small" icon={<EyeOutlined />}
               onClick={(e) => { e.stopPropagation(); onPreview(record) }} />
           </Tooltip>
-          <Tooltip title="Chỉnh sửa" mouseEnterDelay={0.4}>
-            <Button type="text" size="small" icon={<EditOutlined />}
+          
+          <Tooltip
+            title={
+              record.isSystem ? 'Form hệ thống, không thể sửa'
+              : record.usedInBatch ? 'Form đang gắn với đợt khảo sát, không thể sửa'
+              : 'Chỉnh sửa'
+            }
+            mouseEnterDelay={0.4}
+          >
+            <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.usedInBatch}
               onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
           </Tooltip>
           <Tooltip title="Nhân bản" mouseEnterDelay={0.4}>
             <Button type="text" size="small" icon={<CopyOutlined />}
               onClick={(e) => { e.stopPropagation(); onDup(record) }} />
           </Tooltip>
-          <Tooltip title="Xóa" mouseEnterDelay={0.4}>
-            <Button type="text" size="small" danger icon={<DeleteOutlined />}
-              onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} />
-          </Tooltip>
+          {!record.isSystem && !record.usedInBatch && (
+            <Tooltip title="Xóa" mouseEnterDelay={0.4}>
+              <Button type="text" size="small" danger icon={<DeleteOutlined />}
+                onClick={(e) => { e.stopPropagation(); onDelete(record.id as number) }} />
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -159,13 +169,13 @@ export default function ListView({
         </div>
 
         <Space>
-          <Button
+          {/* <Button
             icon={<ThunderboltOutlined />}
             onClick={onAI}
             style={{ borderColor: '#fcd34d', color: '#b45309', background: '#fffbeb' }}
           >
             Tạo bằng AI
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             icon={<PlusOutlined />}

@@ -25,6 +25,7 @@ import AuthCallback from '../pages/system/Auth/AuthCallback';
 import FacultyReportPage from '../pages/system/Reports/components/FacultyReportPage';
 import { PermissionRoute } from './PermissionRoute';
 import { PermissionEnum } from '../feature/auth/type';
+import ImportExcelForGraduation from '../pages/system/Graduation/ImportExcel';
 
 const DashBoard = lazy(() => import('../pages/system/DashBoard/index'));
 const KhoaDashBoard = lazy(() => import('../pages/customFaculty/DashBoard/index'));
@@ -192,6 +193,10 @@ const routes = [
                 path: '/admin/legacy-import',
                 element: <Suspense fallback={<Loader />}><LegacyImportPage /></Suspense>
               },
+              {
+                path:'admin/graduation-import',
+                element:<Suspense fallback={<Loader />}><ImportExcelForGraduation /></Suspense>
+              }
             ],
           },
 

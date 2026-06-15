@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { message } from 'antd'
 import { useFormList } from '../../../../feature/form/hooks/useFormList'
 import { deleteForm, duplicateForm } from '../../../../feature/form/api'
 import type { Form } from '../../../../feature/form/types'
@@ -20,8 +21,8 @@ export default function FormListPage() {
       try {
         await deleteForm(deleteTarget.id as number)
         await reload()
-      } catch (e) {
-        console.error('Xóa form thất bại:', e)
+      } catch (e: any) {
+        message.error(e?.response?.data?.message ?? 'Xóa form thất bại')
       }
     }
     setDeleteTarget(undefined)

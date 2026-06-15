@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Typography, Alert, Table } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { Col, Row, Input, Typography, Alert, Table, Button } from "antd";
 import type { TablePaginationConfig, ColumnsType } from "antd/es/table";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, UploadOutlined } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
 import type { Graduation } from "../../../feature/graduation/type";
@@ -234,12 +234,14 @@ export default function GraduationList() {
                 variant="filled"
                 allowClear
               />
-
+              <Button type="primary" icon={<UploadOutlined />}   onClick={() => navigate('/admin/graduation-import')}>
+                       Tải lên đợt tốt nghiệp
+            </Button>
               <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
                 {search.trim() ? filtered.length : meta.total} đợt
               </span>
             </div>
-
+            
             <Table<Graduation>
               columns={columns}
               dataSource={filtered}

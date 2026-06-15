@@ -160,6 +160,8 @@ export interface Form {
   footer?: SurveyFooter;
   logoUrl?: string;
   status?: 'draft' | 'published';
+  isSystem?: boolean;
+  usedInBatch?: boolean;
 }
 
 // VIEW TYPES
