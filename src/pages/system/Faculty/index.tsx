@@ -166,7 +166,7 @@ export default function FacultyListPage() {
         <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
           {[
             { label: "Tổng số khoa", value: list.length, color: COLOR.primary },
-            { label: "Ngành đào tạo", value: list.reduce((sum, f) => sum + getMajorCount(f), 0), color: COLOR.yellow },
+            // { label: "Ngành đào tạo", value: list.reduce((sum, f) => sum + getMajorCount(f), 0), color: COLOR.yellow },
           ].map((s) => (
             <Col key={s.label} xs={24} sm={8}>
               <div
@@ -252,8 +252,8 @@ export default function FacultyListPage() {
                           </div>
                           <div style={{ display: "flex", gap: 12, fontSize: 12, color: COLOR.sub }}>
                             <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                              <BookOutlined style={{ fontSize: 11 }} />
-                              {getMajorCount(f)} ngành
+                              {/* <BookOutlined style={{ fontSize: 11 }} />
+                              {getMajorCount(f)} ngành */}
                             </span>
                           </div>
                         </div>
