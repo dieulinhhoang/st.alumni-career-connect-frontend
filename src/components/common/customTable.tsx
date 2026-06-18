@@ -112,7 +112,7 @@ interface CustomTableProps<T extends object>
   striped?: boolean
 }
 
-// Component
+// Component — memo để tránh re-render khi parent thay đổi state không liên quan
 function CustomTable<T extends object>({
   data,
   columns,
@@ -172,4 +172,4 @@ function CustomTable<T extends object>({
   )
 }
 
-export default CustomTable
+export default React.memo(CustomTable) as typeof CustomTable

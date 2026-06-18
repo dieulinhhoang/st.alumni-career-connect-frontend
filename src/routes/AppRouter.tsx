@@ -1,49 +1,69 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import Enterprise from '../pages/system/Enterprise/index';
-import EnterpriseDetail from '../pages/system/EnterpriseDetail/index';
-import Faculties from '../pages/system/Faculty';
-import MajorDetail from '../pages/system/Faculty/MajorDetail';
-import FacultyDetail from '../pages/system/Faculty/FacultyDetail';
-import GraduationStudents from '../pages/system/Graduation/GraduationStudents';
-import GraduationList from '../pages/system/Graduation/index';
-import StudentDetail from '../pages/system/Graduation/Studentdetail';
-import UserManagement from '../pages/system/User/UserManagement';
-import RoleManagement from '../pages/system/Role/RoleManagement';
-import ResourceManagement from '../pages/system/Resources/ResourceManagement';
-import { ResponseDetail } from '../pages/system/Alumni/ResponseDetail';
-import { BatchResults } from '../pages/system/Alumni/BatchResults';
-import { BatchCreate } from '../pages/system/Alumni/BatchCreate';
-import { BatchList } from '../pages/system/Alumni/BatchList';
-import FormStatisticsDetailPage from '../pages/system/Statistics/FormStatisticsDetail';
-import AdminProfile from '../pages/system/AdminProfile/AdminProfile';
-import ReportsPage from '../pages/system/Reports/ReportsPage';
-import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
-import JobsPage from '../pages/client/Jobs/JobsPage';
-import { DoneScreen } from '../pages/client/Survey/DoneScreen';
-import StatIndicatorConfig from '../pages/system/Statistics/StatIndicatorConfig';
-import AuthCallback from '../pages/system/Auth/AuthCallback';
-import LoginPage from '../pages/system/Auth/LoginPage';
-import EnterpriseLoginPage from '../pages/enterprise/EnterpriseLoginPage';
-import AcceptInvitePage from '../pages/enterprise/AcceptInvitePage';
-import EnterpriseDashboard from '../pages/enterprise/EnterpriseDashboard';
 import { isEnterpriseUser } from '../utils/jwt';
-import FacultyReportPage from '../pages/system/Reports/components/FacultyReportPage';
 import { PermissionRoute } from './PermissionRoute';
 import { PermissionEnum } from '../feature/auth/type';
-import ImportExcelForGraduation from '../pages/system/Graduation/ImportExcel';
 
-const DashBoard = lazy(() => import('../pages/system/DashBoard/index'));
-const KhoaDashBoard = lazy(() => import('../pages/customFaculty/DashBoard/index'));
 const Loader = lazy(() => import('../components/common/loader'));
-const BatchFormEditor = lazy(() => import('../pages/system/Alumni/BatchFormEditor'));
-const LegacyImportPage = lazy(() => import('../pages/system/LegacyImport/LegacyImportPage'));
 
-// Form pages — mỗi view 1 route riêng
+// Auth
+const LoginPage           = lazy(() => import('../pages/system/Auth/LoginPage'));
+const AuthCallback        = lazy(() => import('../pages/system/Auth/AuthCallback'));
+
+// Enterprise
+const EnterpriseLoginPage = lazy(() => import('../pages/enterprise/EnterpriseLoginPage'));
+const AcceptInvitePage    = lazy(() => import('../pages/enterprise/AcceptInvitePage'));
+const EnterpriseDashboard = lazy(() => import('../pages/enterprise/EnterpriseDashboard'));
+
+// Client
+const SurveyFillPage = lazy(() => import('../pages/client/Survey/SurveyFillPage'));
+const DoneScreen     = lazy(() => import('../pages/client/Survey/DoneScreen'));
+const JobsPage       = lazy(() => import('../pages/client/Jobs/JobsPage'));
+
+// Admin — core
+const DashBoard      = lazy(() => import('../pages/system/DashBoard/index'));
+const KhoaDashBoard  = lazy(() => import('../pages/customFaculty/DashBoard/index'));
+const AdminProfile   = lazy(() => import('../pages/system/AdminProfile/AdminProfile'));
+
+// Admin — statistics & reports
+const FormStatisticsDetailPage = lazy(() => import('../pages/system/Statistics/FormStatisticsDetail'));
+const StatIndicatorConfig      = lazy(() => import('../pages/system/Statistics/StatIndicatorConfig'));
+const ReportsPage              = lazy(() => import('../pages/system/Reports/ReportsPage'));
+const FacultyReportPage        = lazy(() => import('../pages/system/Reports/components/FacultyReportPage'));
+
+// Admin — forms
 const FormListPage    = lazy(() => import('../pages/system/Form/pages/FormListPage'));
 const FormBuilderPage = lazy(() => import('../pages/system/Form/pages/FormBuilderPage'));
 const FormPreviewPage = lazy(() => import('../pages/system/Form/pages/FormPreviewPage'));
 const FormAIPage      = lazy(() => import('../pages/system/Form/pages/FormAIPage'));
+
+// Admin — alumni batches & import
+const BatchList       = lazy(() => import('../pages/system/Alumni/BatchList').then(m => ({ default: m.BatchList })));
+const BatchCreate     = lazy(() => import('../pages/system/Alumni/BatchCreate').then(m => ({ default: m.BatchCreate })));
+const BatchResults    = lazy(() => import('../pages/system/Alumni/BatchResults').then(m => ({ default: m.BatchResults })));
+const ResponseDetail  = lazy(() => import('../pages/system/Alumni/ResponseDetail').then(m => ({ default: m.ResponseDetail })));
+const BatchFormEditor = lazy(() => import('../pages/system/Alumni/BatchFormEditor'));
+const LegacyImportPage         = lazy(() => import('../pages/system/LegacyImport/LegacyImportPage'));
+const ImportExcelForGraduation = lazy(() => import('../pages/system/Graduation/ImportExcel'));
+
+// Admin — users & roles
+const UserManagement     = lazy(() => import('../pages/system/User/UserManagement'));
+const RoleManagement     = lazy(() => import('../pages/system/Role/RoleManagement'));
+const ResourceManagement = lazy(() => import('../pages/system/Resources/ResourceManagement'));
+
+// Admin — enterprises
+const Enterprise       = lazy(() => import('../pages/system/Enterprise/index'));
+const EnterpriseDetail = lazy(() => import('../pages/system/EnterpriseDetail/index'));
+
+// Admin — faculties
+const Faculties     = lazy(() => import('../pages/system/Faculty'));
+const FacultyDetail = lazy(() => import('../pages/system/Faculty/FacultyDetail'));
+const MajorDetail   = lazy(() => import('../pages/system/Faculty/MajorDetail'));
+
+// Admin — graduation
+const GraduationList     = lazy(() => import('../pages/system/Graduation/index'));
+const GraduationStudents = lazy(() => import('../pages/system/Graduation/GraduationStudents'));
+const StudentDetail      = lazy(() => import('../pages/system/Graduation/Studentdetail'));
 
 //  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');

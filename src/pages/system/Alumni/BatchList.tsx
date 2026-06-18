@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   Button, Input, Select, Space, Typography,
   Dropdown, message,
@@ -72,21 +72,29 @@ export const BatchList: React.FC = () => {
   const [emailBatch, setEmailBatch] = useState<SurveyBatchWithStats | null>(null);
   const { batches, loading, deleteBatch } = useBatches();
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
   const [showForm,setshowForm]= useState();
 
-  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch );
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSearchChange = useCallback((val: string) => {
+    setSearchInput(val);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setSearch(val), 300);
+  }, []);
+
+  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch);
   const safeBatches = Array.isArray(batches) ? batches : [];
 
-  const filtered = safeBatches.filter(b => {
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return (
+    return safeBatches.filter(b =>
       b.title.toLowerCase().includes(q) &&
-      (status === 'all' || b.status === status)
+      (status === 'all' || b.status === status),
     );
-  });
+  }, [safeBatches, search, status]);
   const columns: ColumnsType<SurveyBatchWithStats> = [
     {
       title: 'Tiêu đề khảo sát', key: 'title',
@@ -176,8 +184,8 @@ export const BatchList: React.FC = () => {
             <Input
               placeholder="Tìm kiếm theo tiêu đề..."
               allowClear
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={e => handleSearchChange(e.target.value)}
               style={{ width: 260, borderRadius: 8 }}
             />
             <Select

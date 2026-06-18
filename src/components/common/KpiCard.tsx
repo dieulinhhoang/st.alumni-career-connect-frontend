@@ -1,4 +1,5 @@
-  import type { ReactNode } from 'react';
+import { memo } from 'react';
+import type { ReactNode } from 'react';
 
 interface KpiCardProps {
   label: string;
@@ -16,7 +17,7 @@ interface KpiCardProps {
 
 const DEFAULT_COLOR = '#16a34a';
 
-export function KpiCard({
+export const KpiCard = memo(function KpiCard({
   label,
   value,
   sub,
@@ -190,6 +191,6 @@ export function KpiCard({
       ) : null}
     </div>
   );
-}
+});
 
 export default KpiCard;

@@ -10,7 +10,16 @@ import './index.css';
 
 dayjs.locale('vi');
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,      // 5 phút — không refetch nếu data còn fresh
+      gcTime: 1000 * 60 * 10,        // 10 phút — giữ cache sau khi unmount
+      retry: 1,
+      refetchOnWindowFocus: false,   // không refetch mỗi lần focus tab
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
