@@ -3,9 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logovua.png" />
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alumni Career Connect – VNUA</title>
+    <!-- Preconnect để giảm latency khi fetch font -->
+    <!-- Preload LCP image — logo trong AdminLayout -->
+    <link rel="preload" href="/logovua.png" as="image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Non-blocking font load: media=print trick, switch sang all sau khi load xong -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

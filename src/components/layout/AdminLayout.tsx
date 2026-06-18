@@ -191,6 +191,7 @@ const SiderLogo: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
       <img
         src="/logovua.png"
         alt="VNUA"
+        fetchPriority="high"
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
       />
     </div>

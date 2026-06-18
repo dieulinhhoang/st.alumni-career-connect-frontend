@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Alert, Col, Row, Spin, Typography } from "antd";
 import {
@@ -9,9 +9,11 @@ import {
 } from "@ant-design/icons";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { KpiCard } from "../../../components/common/KpiCard";
-import { FacultyCard } from "./FacultyCard";
-import { EnterpriseList } from "./Enterpriselist";
-import { ChartSection } from "./Chartsection";
+
+// Lazy-load below-the-fold sections — charts/tables không cần render ngay
+const FacultyCard    = lazy(() => import("./FacultyCard").then(m => ({ default: m.FacultyCard })));
+const EnterpriseList = lazy(() => import("./Enterpriselist").then(m => ({ default: m.EnterpriseList })));
+const ChartSection   = lazy(() => import("./Chartsection").then(m => ({ default: m.ChartSection })));
 import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
 import { getCurrentUser } from "../../../feature/auth/permission";
 import {
@@ -262,20 +264,26 @@ export function DashBoard() {
             {/* Faculty + Enterprise */}
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }} align="stretch">
               <Col xs={24} lg={14}>
-                <FacultyCard />
+                <Suspense fallback={<Spin />}>
+                  <FacultyCard />
+                </Suspense>
               </Col>
               <Col xs={24} lg={10}>
-                <EnterpriseList />
+                <Suspense fallback={<Spin />}>
+                  <EnterpriseList />
+                </Suspense>
               </Col>
             </Row>
 
-            {/* Chart section */}
-            <ChartSection
-              state={state}
-              setField={setField}
-              khoaOptions={khoaOptions}
-              nganhOptions={nganhOptions}
-            />
+            {/* Chart section — lazy loaded vì nặng và below the fold */}
+            <Suspense fallback={<div style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin size="large" /></div>}>
+              <ChartSection
+                state={state}
+                setField={setField}
+                khoaOptions={khoaOptions}
+                nganhOptions={nganhOptions}
+              />
+            </Suspense>
           </>
         )}
       </div>
