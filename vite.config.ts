@@ -11,14 +11,17 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-antd': ['antd', '@ant-design/icons'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-charts': ['recharts', '@ant-design/plots', '@antv/g2plot'],
-          'vendor-editor': ['survey-core', 'survey-creator-core', 'survey-creator-react'],
-          'vendor-pdf': ['jspdf', 'jspdf-autotable', 'html2canvas'],
-          'vendor-misc': ['axios', 'dayjs', 'lodash', 'zustand', 'xlsx'],
+        manualChunks: (id: string) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/')) return 'vendor-react';
+            if (id.includes('/antd/') || id.includes('@ant-design/icons')) return 'vendor-antd';
+            if (id.includes('@ant-design/plots') || id.includes('@antv/')) return 'vendor-charts';
+            if (id.includes('/recharts/')) return 'vendor-charts';
+            if (id.includes('@tanstack/')) return 'vendor-query';
+            if (id.includes('/survey-core/') || id.includes('/survey-creator')) return 'vendor-editor';
+            if (id.includes('/jspdf') || id.includes('/html2canvas')) return 'vendor-pdf';
+            if (id.includes('/lodash') || id.includes('/zustand') || id.includes('/xlsx/')) return 'vendor-misc';
+          }
         },
       },
     },
