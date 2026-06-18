@@ -7,7 +7,9 @@ import {
   ArrowLeftOutlined, GlobalOutlined, MailOutlined, PhoneOutlined,
   PlusOutlined, EnvironmentOutlined, SafetyCertificateOutlined,
   PauseCircleOutlined, PlayCircleOutlined, EditOutlined, TeamOutlined,
+  SendOutlined,
 } from "@ant-design/icons";
+import api from "../../../libs/api";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { findBySlug } from "../../../components/common/utils";
@@ -133,6 +135,16 @@ export default function EnterpriseDetailPage() {
     }
   };
 
+  const handleSendInvite = async () => {
+    if (!entId) return
+    try {
+      await api.post(`/auth/enterprise/invite/${entId}`)
+      Modal.success({ title: 'Đã gửi lời mời!', content: `Email kích hoạt đã được gửi đến ${ent?.email}` })
+    } catch (err: any) {
+      Modal.error({ title: 'Không thể gửi', content: err.response?.data?.message ?? 'Có lỗi xảy ra' })
+    }
+  }
+
   const handleSaveJob = async (values: JobFormValues) => {
     if (jobModal.job) {
       await editJob(jobModal.job.id, values as Partial<Job>);
@@ -247,6 +259,15 @@ export default function EnterpriseDetailPage() {
                   {/* Thêm tin tuyển dụng */}
                 </Button>
               )}
+
+              <Button
+                icon={<SendOutlined />}
+                onClick={handleSendInvite}
+                style={{ borderRadius: 8, borderColor: '#1D9E75', color: '#1D9E75' }}
+                title="Gửi lời mời kích hoạt tài khoản DN"
+              >
+                Gửi lời mời
+              </Button>
 
               <Button
                 icon={<EditOutlined />}

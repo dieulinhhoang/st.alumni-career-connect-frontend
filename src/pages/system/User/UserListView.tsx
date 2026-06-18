@@ -109,22 +109,6 @@ const UserListView: React.FC<UserListViewProps> = ({
       ),
     },
     {
-      title: 'Loại người dùng',
-      dataIndex: 'type',
-      render: (type: string, record: IUser) => (
-        <span
-          style={{
-            color:
-              record.status === 'inactive'
-                ? 'rgba(182, 176, 173, 0.9)'
-                : '#111827',
-          }}
-        >
-          {type || '-'}
-        </span>
-      ),
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Tag, Space, Spin, Alert } from 'antd';
-import type { TableProps } from 'antd';
+import { Tag, Spin, Alert } from 'antd';
+import CustomTable from './customTable';
 
 interface TableData {
     id: string,
@@ -34,7 +34,7 @@ const getTagColor = (xepLoai: string): string => {
 
 // đn các cột
 
-const columns: TableProps<TableData>['columns'] = [
+const columns = [
     {
         title: 'Mã Sinh Viên',
         dataIndex: 'maSinhVien',
@@ -113,19 +113,12 @@ const StudentTable: React.FC<Props> = ({ apiURL }) => {
     }
 
     return (
-        <Table<TableData>
+        <CustomTable<TableData>
             columns={columns}
-            dataSource={data}
+            data={data}
             rowKey="id"
-            pagination={{
-                position: ['bottomRight'],
-                defaultPageSize: 3,
-                showSizeChanger: true,
-                pageSizeOptions: ['10'],
-
-            }}
             scroll={{ x: 'max-content' }}
-        ></Table>
+        />
     )
 }
 

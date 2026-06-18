@@ -167,8 +167,10 @@ function toArray<T>(raw: unknown): T[] {
   return [];
 }
 
-export async function fetchEnterpriseList(): Promise<EnterpriseItem[]> {
-  const res = await api.get("/enterprises");
+export async function fetchEnterpriseList(facultyId?: string): Promise<EnterpriseItem[]> {
+  const params: Record<string, string> = {};
+  if (facultyId) params.facultyId = facultyId;
+  const res = await api.get("/enterprises", { params });
   return toArray<EnterpriseItem>(res.data);
 }
 

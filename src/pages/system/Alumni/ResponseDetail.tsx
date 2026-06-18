@@ -7,9 +7,10 @@ import {
   BookOutlined, EditOutlined, CloseOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
+import { getBatchById, getBatchResponses, updateResponse, createResponseByAdmin } from '../../../feature/alumni/api';
 import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
+import type { GraduationStudent } from '../../../feature/graduation/type';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { SurveyPreview } from '../Form/Preview';
 import { havePermission } from '../../../feature/auth/permission';
@@ -31,10 +32,11 @@ export const ResponseDetail: React.FC = () => {
   const { pathname } = useLocation();
   const isEdit = pathname.endsWith('/edit');
 
-  const [batch,    setBatch]    = useState<SurveyBatch | null>(null);
-  const [response, setResponse] = useState<AlumniResponse | null>(null);
-  const [loading,  setLoading]  = useState(true);
-  const [saving,   setSaving]   = useState(false);
+  const [batch,       setBatch]       = useState<SurveyBatch | null>(null);
+  const [response,    setResponse]    = useState<AlumniResponse | null>(null);
+  const [gradStudent, setGradStudent] = useState<GraduationStudent | null>(null);
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
 
@@ -50,8 +52,9 @@ export const ResponseDetail: React.FC = () => {
       if (numId < 0 && b.graduationId) {
         // ID âm = SV chưa submit → tìm trong gradStudents
         const studentsRes = await fetchGraduationStudents(b.graduationId, 1, 9999);
-        const gs = studentsRes.data.find(s => s.id === -numId);
+        const gs = studentsRes.data.find(s => Number(s.id) === -numId);
         if (gs) {
+          setGradStudent(gs);
           setResponse({
             id: numId,
             batchId: b.id,
@@ -61,7 +64,6 @@ export const ResponseDetail: React.FC = () => {
             answers: {},
             submittedAt: '',
             status: 'pending' as any,
-            // Thêm thông tin ngành từ GraduationStudent
             training_industry_id: gs.training_industry_id,
             training_industry_name: gs.training_industry_name,
             training_industry_code: gs.training_industry_code,
@@ -98,12 +100,58 @@ export const ResponseDetail: React.FC = () => {
     finally { setLoading(false); }
   };
 
+  const isPending = Number(responseId) < 0;
+
+  // Build initial values từ data sinh viên, giống SurveyFillPage.buildInitialValues
+  const adminInitialValues = React.useMemo(() => {
+    if (!isPending || !gradStudent || !batch) return {};
+    const snapshot = (batch as any).formSnapshot;
+    if (!snapshot) return {};
+    const sortedQs = [...(snapshot.questions ?? [])].sort(
+      (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+    );
+    const values: Record<string, any> = {};
+    const set = (idx: number, val: any) => {
+      if (sortedQs[idx] && val !== null && val !== undefined && val !== '') {
+        values[sortedQs[idx].id] = val;
+      }
+    };
+    const genderMap: Record<string, string> = { male: 'Nam', female: 'Nữ', other: 'Khác' };
+    set(0, gradStudent.code);
+    set(1, gradStudent.full_name);
+    set(2, gradStudent.gender ? (genderMap[gradStudent.gender] ?? gradStudent.gender) : null);
+    if (gradStudent.dob) {
+      const d = new Date(gradStudent.dob);
+      if (!isNaN(d.getTime())) set(3, d.toISOString().slice(0, 10));
+    }
+    set(4, gradStudent.training_industry_code);
+    set(5, gradStudent.citizen_identification);
+    set(6, gradStudent.school_year_end);
+    set(7, gradStudent.training_industry_name);
+    set(8, gradStudent.phone);
+    set(9, gradStudent.email);
+    return values;
+  }, [isPending, gradStudent, batch]);
+
   const handleSubmit = async (answers: Record<string, any>) => {
+    if (!response) return;
     setSaving(true);
     try {
-      // TODO: await updateResponse(Number(id), Number(responseId), { answers });
-      message.success('Đã lưu chỉnh sửa!');
-      navigate(`/admin/alumni/batches/${id}/responses/${responseId}`);
+      if (isPending) {
+        // SV chưa nộp — admin tạo mới thay
+        const created = await createResponseByAdmin(Number(id), {
+          studentId: response.studentId,
+          studentName: response.studentName,
+          studentEmail: response.studentEmail,
+          answers,
+        });
+        message.success('Đã thêm phản hồi thành công!');
+        navigate(`/admin/alumni/batches/${id}/responses/${created.id}`);
+      } else {
+        await updateResponse(Number(id), Number(responseId), answers);
+        message.success('Đã lưu chỉnh sửa!');
+        navigate(`/admin/alumni/batches/${id}/responses/${responseId}`);
+      }
     } catch {
       message.error('Lưu thất bại, thử lại.');
     } finally { setSaving(false); }
@@ -203,9 +251,11 @@ export const ResponseDetail: React.FC = () => {
               havePermission(PermissionEnum.SURVEYS_UPDATE) && (
                 <Button
                   icon={<EditOutlined />}
-                  style={{ borderRadius: 6, borderColor: '#d97706', color: '#d97706' }}
+                  style={{ borderRadius: 6, borderColor: isPending ? '#1D9E75' : '#d97706', color: isPending ? '#1D9E75' : '#d97706' }}
                   onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}
-                />
+                >
+                  {isPending ? 'Thêm phản hồi' : ''}
+                </Button>
               )
             ) : (
               <Button icon={<CloseOutlined />} style={{ borderRadius: 6 }}
@@ -235,9 +285,9 @@ export const ResponseDetail: React.FC = () => {
                   <SurveyPreview
                     form={formSnapshot}
                     compact={true}
-                    initialValues={answers}
+                    initialValues={isPending && isEdit ? adminInitialValues : answers}
                     onSubmit={isEdit ? handleSubmit : undefined}
-                    submitLabel="Lưu"
+                    submitLabel={isPending ? 'Thêm phản hồi' : 'Lưu'}
                   />
                 </div>
               ) : (

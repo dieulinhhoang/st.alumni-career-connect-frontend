@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import React from "react";
 import { Alert, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { fetchEnterpriseList } from "../../../feature/dashboard/api";
@@ -6,7 +7,7 @@ import { toSlug } from "../../../components/common/utils";
 import type { EnterpriseItem } from "../../../feature/dashboard/type";
 import { COLOR, RADIUS, SHADOW } from "./theme";
 
-export function EnterpriseList() {
+export function EnterpriseList({ facultyId, extra }: { facultyId?: string | null; extra?: React.ReactNode }) {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState<number | null>(null);
   const [items, setItems] = useState<EnterpriseItem[]>([]);
@@ -19,7 +20,7 @@ export function EnterpriseList() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetchEnterpriseList();
+        const res = await fetchEnterpriseList(facultyId ?? undefined);
         if (!cancelled) setItems(res);
       } catch (e) {
         if (!cancelled) {
@@ -33,7 +34,7 @@ export function EnterpriseList() {
     };
     run();
     return () => { cancelled = true; };
-  }, []);
+  }, [facultyId]);
 
   return (
     <div
@@ -71,22 +72,25 @@ export function EnterpriseList() {
             Doanh nghiệp đối tác
           </span>
         </div>
-        <button
-          onClick={() => navigate("/admin/enterprises")}
-          style={{
-            background: `${COLOR.primary}10`,
-            border: `1px solid ${COLOR.primary}30`,
-            borderRadius: RADIUS.pill,
-            cursor: "pointer",
-            fontSize: 12,
-            color: COLOR.primary,
-            fontWeight: 600,
-            padding: "4px 12px",
-            transition: "background 150ms ease",
-          }}
-        >
-          Xem tất cả →
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {extra}
+          <button
+            onClick={() => navigate(facultyId ? `/admin/enterprises?facultyId=${facultyId}` : "/admin/enterprises")}
+            style={{
+              background: `${COLOR.primary}10`,
+              border: `1px solid ${COLOR.primary}30`,
+              borderRadius: RADIUS.pill,
+              cursor: "pointer",
+              fontSize: 12,
+              color: COLOR.primary,
+              fontWeight: 600,
+              padding: "4px 12px",
+              transition: "background 150ms ease",
+            }}
+          >
+            Xem tất cả →
+          </button>
+        </div>
       </div>
 
       {error && (

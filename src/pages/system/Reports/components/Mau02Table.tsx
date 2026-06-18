@@ -3,6 +3,7 @@ import { Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { GraduateRow } from '../../../../feature/reports/types';
 import { SheetWrapper } from './SheetWrapper';
+import CustomTable from '../../../../components/common/customTable';
 
 const columns: ColumnsType<GraduateRow> = [
   { title: 'STT',  render: (_, __, i) => i + 1,  width: 42,  align: 'center', fixed: 'left' },
@@ -57,14 +58,15 @@ export const Mau02Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, n
   return (
     <SheetWrapper orgLine1={orgLine1} orgLine2={orgLine2} title={title} signLabel={signLabel}
       note={note ?? `Tổng số sinh viên: ${totalCount} | Đã phản hồi: ${respondedCount} | Chưa phản hồi: ${totalCount - respondedCount}`}>
-      <Table
+      <CustomTable<GraduateRow>
         size="small"
         pagination={false}
         bordered
+        striped={false}
         className="rp-formal-table"
         scroll={{ x: 'max-content' }}
         columns={columns}
-        dataSource={rows}
+        data={rows}
         rowKey="key"
         rowClassName={(record) =>
           record.status === 'submitted' || record.status === 'approved'

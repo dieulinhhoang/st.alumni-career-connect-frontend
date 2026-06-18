@@ -150,18 +150,19 @@ export function EnterpriseFormModal({
           </Col>
         </Row>
 
-        {/* FIX: name="faculties", mode="multiple", value là id string khớp options */}
-        <Form.Item name="faculties" label="Khoa đối tác">
-          <Select
-            mode="multiple"
-            allowClear
-            showSearch
-            placeholder="Chọn khoa liên kết (có thể chọn nhiều)"
-            options={facultyOptions}
-            optionFilterProp="label"
-            notFoundContent="Không có khoa"
-          />
-        </Form.Item>
+        {facultyOptions.length > 0 && (
+          <Form.Item name="faculties" label="Khoa đối tác">
+            <Select
+              mode="multiple"
+              allowClear
+              showSearch
+              placeholder="Chọn khoa liên kết (có thể chọn nhiều)"
+              options={facultyOptions}
+              optionFilterProp="label"
+              notFoundContent="Không có khoa"
+            />
+          </Form.Item>
+        )}
 
         <Row gutter={16}>
           <Col span={12}>

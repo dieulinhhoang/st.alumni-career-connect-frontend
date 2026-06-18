@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Table, Tag, Typography, Modal, Form, Input, Switch, Popconfirm, message } from "antd";
+import { Button, Tag, Typography, Modal, Form, Input, Switch, Popconfirm, message } from "antd";
 import { ArrowLeftOutlined, BookOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../../../../components/layout/AdminLayout";
@@ -283,9 +283,9 @@ export default function FacultyDetailPage() {
           </div>
         )}
 
-        <Table
+        <CustomTable<MajorRow>
           columns={columns}
-          dataSource={majors}
+          data={majors}
           rowKey="id"
           pagination={false}
           onRow={(record: MajorRow) => ({

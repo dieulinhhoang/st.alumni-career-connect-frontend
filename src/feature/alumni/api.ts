@@ -52,6 +52,29 @@ export async function getBatchResponses(batchId: number): Promise<AlumniResponse
   return res.data;
 }
 
+export async function updateResponse(
+  batchId: number,
+  responseId: number,
+  answers: Record<string, any>,
+): Promise<AlumniResponse> {
+  const res = await api.patch(`/alumni/batches/${batchId}/responses/${responseId}`, { answers });
+  return res.data;
+}
+
+export async function createResponseByAdmin(
+  batchId: number,
+  payload: {
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    studentPhone?: string;
+    answers: Record<string, any>;
+  },
+): Promise<AlumniResponse> {
+  const res = await api.post(`/alumni/batches/${batchId}/responses/admin`, payload);
+  return res.data;
+}
+
 //  Graduation API 
 export interface GraduationOption {
   id: number;

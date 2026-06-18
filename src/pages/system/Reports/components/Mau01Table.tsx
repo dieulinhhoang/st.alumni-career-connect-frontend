@@ -3,6 +3,7 @@ import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { MajorSummaryRow } from '../../../../feature/reports/types';
 import { SheetWrapper } from './SheetWrapper';
+import CustomTable from '../../../../components/common/customTable';
 
 const columns: ColumnsType<MajorSummaryRow> = [
   { title: 'STT', render: (_, __, i) => i + 1, width: 42, align: 'center', fixed: 'left' },
@@ -58,14 +59,15 @@ interface Props {
 
 export const Mau01Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, note, signLabel }) => (
   <SheetWrapper orgLine1={orgLine1} orgLine2={orgLine2} title={title} signLabel={signLabel} note={note}>
-    <Table
+    <CustomTable<MajorSummaryRow>
       size="small"
       pagination={false}
       bordered
+      striped={false}
       className="rp-formal-table"
       scroll={{ x: 'max-content' }}
       columns={columns as any}
-      dataSource={rows}
+      data={rows}
       rowKey="key"
       summary={(pageRows) => {
         const tot = pageRows.reduce((a, r) => a + (r.total || 0), 0);

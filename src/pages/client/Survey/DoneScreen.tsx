@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { fetchEnterprises, fetchJobsByEnterprise } from '../../../feature/enterprise/api'
 import type { Job, Enterprise } from '../../../feature/enterprise/type'
 
@@ -7,6 +8,21 @@ interface JobWithEnterprise extends Job {
   enterpriseName?: string
   enterpriseAbbr?: string
   enterpriseColor?: string
+}
+
+interface ApplyFormData {
+  fullName: string
+  email: string
+  phone: string
+  message: string
+}
+
+async function submitApplication(jobId: string, data: ApplyFormData) {
+  const res = await axios.post(`${import.meta.env.VITE_API_URL}/job-applications`, {
+    jobId,
+    ...data,
+  })
+  return res.data
 }
 
 //  Fireworks ─
@@ -272,8 +288,128 @@ function SkeletonCard() {
   )
 }
 
+// ApplyModal
+function ApplyModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => void }) {
+  const [form, setForm] = useState<ApplyFormData>({ fullName: '', email: '', phone: '', message: '' })
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const set = (k: keyof ApplyFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm(prev => ({ ...prev, [k]: e.target.value }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.fullName.trim() || !form.email.trim() || !form.phone.trim()) return
+    setStatus('loading')
+    try {
+      await submitApplication(job.id, form)
+      setStatus('success')
+    } catch {
+      setErrorMsg('Gửi không thành công, vui lòng thử lại.')
+      setStatus('error')
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '10px 13px', borderRadius: 10,
+    border: '1.5px solid rgba(15,23,42,0.12)', fontSize: 13,
+    background: '#f8fafc', outline: 'none', fontFamily: 'inherit',
+    transition: 'border-color 0.2s',
+  }
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5, display: 'block',
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      background: 'rgba(8,15,26,0.65)', backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+    }} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{
+        background: '#fff', borderRadius: 20, width: '100%', maxWidth: 480,
+        boxShadow: '0 32px 64px rgba(0,0,0,0.25)', overflow: 'hidden',
+        animation: 'heroIn 0.35s cubic-bezier(0.16,1,0.3,1) both',
+      }}>
+        {/* Header */}
+        <div style={{ background: 'linear-gradient(135deg, #1D9E75, #15805f)', padding: '20px 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: 4 }}>
+                {job.enterpriseName}
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>
+                {job.title}
+              </div>
+            </div>
+            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              ×
+            </button>
+          </div>
+          {(job.location || job.salary) && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              {job.location && <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.15)', color: '#fff', padding: '3px 10px', borderRadius: 8 }}>{job.location}</span>}
+              {job.salary && <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.15)', color: '#fff', padding: '3px 10px', borderRadius: 8 }}>{job.salary}</span>}
+            </div>
+          )}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '24px 24px 20px' }}>
+          {status === 'success' ? (
+            <div style={{ textAlign: 'center', padding: '24px 0' }}>
+              <div style={{ width: 60, height: 60, background: 'linear-gradient(135deg,#34d399,#059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>Đã gửi hồ sơ!</div>
+              <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                Doanh nghiệp sẽ liên hệ với bạn qua email hoặc số điện thoại đã cung cấp.
+              </div>
+              <button onClick={onClose} style={{ marginTop: 20, padding: '10px 28px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                Đóng
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Họ và tên <span style={{ color: '#ef4444' }}>*</span></label>
+                <input style={inputStyle} placeholder="Nguyễn Văn A" value={form.fullName} onChange={set('fullName')} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Email <span style={{ color: '#ef4444' }}>*</span></label>
+                <input style={inputStyle} type="email" placeholder="example@gmail.com" value={form.email} onChange={set('email')} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Số điện thoại <span style={{ color: '#ef4444' }}>*</span></label>
+                <input style={inputStyle} placeholder="0912 345 678" value={form.phone} onChange={set('phone')} required />
+              </div>
+              <div>
+                <label style={labelStyle}>Lời nhắn <span style={{ color: '#94a3b8', fontWeight: 400 }}>(tùy chọn)</span></label>
+                <textarea style={{ ...inputStyle, resize: 'none', height: 90 }} placeholder="Giới thiệu ngắn về bản thân hoặc lý do ứng tuyển..." value={form.message} onChange={set('message')} />
+              </div>
+              {status === 'error' && (
+                <div style={{ fontSize: 12, color: '#ef4444', background: '#fef2f2', padding: '8px 12px', borderRadius: 8 }}>{errorMsg}</div>
+              )}
+              <button type="submit" disabled={status === 'loading'} style={{
+                padding: '12px', background: status === 'loading' ? '#94a3b8' : '#1D9E75',
+                color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700,
+                fontSize: 14, cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                transition: 'background 0.2s',
+              }}>
+                {status === 'loading' ? 'Đang gửi...' : 'Gửi hồ sơ ứng tuyển'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 //  JobCard ─
-function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
+function JobCard({ job, delay=0, onApply }: { job: JobWithEnterprise; delay?: number; onApply: (job: JobWithEnterprise) => void }) {
   const fmt = (s: string|null) => {
     if (!s) return null
     const d = new Date(s)
@@ -343,8 +479,8 @@ function JobCard({ job, delay=0 }: { job: JobWithEnterprise; delay?: number }) {
         <span style={{ fontSize:11, color:'#94a3b8' }}>
           {job.postedAt ? `Đăng ${fmt(job.postedAt)}` : ''}
         </span>
-        <span className="cta-btn" style={{ fontSize:11.5, padding:'6px 14px', background:'rgba(15,23,42,0.04)', color:'#334155', borderRadius:9, fontWeight:600, border:'1px solid rgba(15,23,42,0.07)', transition:'all 0.25s ease', cursor:'pointer' }}>
-          Xem chi tiết →
+        <span className="cta-btn" onClick={() => onApply(job)} style={{ fontSize:11.5, padding:'6px 14px', background:'rgba(15,23,42,0.04)', color:'#334155', borderRadius:9, fontWeight:600, border:'1px solid rgba(15,23,42,0.07)', transition:'all 0.25s ease', cursor:'pointer' }}>
+          Ứng tuyển →
         </span>
       </div>
     </div>
@@ -394,6 +530,7 @@ const DOT_COLORS = ['#EF4444','#F59E0B','#3B82F6','#A855F7','#EC4899','#FFFFFF',
 function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolean }) {
   const [clicks, setClicks] = useState(0)
   const [phase,  setPhase]  = useState<'idle'|'shaking'|'opening'|'open'>('idle')
+  const [applyJob, setApplyJob] = useState<JobWithEnterprise | null>(null)
   const sceneRef    = useRef<HTMLDivElement>(null)
   const giftRef     = useRef<HTMLDivElement>(null)
   const confettiRef = useRef<HTMLDivElement>(null)
@@ -455,6 +592,8 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
         position:'relative', minHeight:'62vh',
       }}
     >
+      {applyJob && <ApplyModal job={applyJob} onClose={() => setApplyJob(null)} />}
+
       {/* Dot burst layer */}
       <div ref={confettiRef} style={{ position:'absolute', inset:0, pointerEvents:'none', overflow:'hidden', zIndex:10 }} />
 
@@ -588,7 +727,7 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
             </div>
           ) : (
             <div className="jobs-grid">
-              {jobs.map((job,i) => <JobCard key={job.id} job={job} delay={i*70}/>)}
+              {jobs.map((job,i) => <JobCard key={job.id} job={job} delay={i*70} onApply={setApplyJob}/>)}
             </div>
           )}
         </div>
@@ -599,10 +738,17 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
 
 //  DoneScreen 
 export function DoneScreen() {
-  useParams<{ id: string }>()
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [jobs,      setJobs]      = useState<JobWithEnterprise[]>([])
   const [loading,   setLoading]   = useState(true)
   const [fireworks, setFireworks] = useState(true)
+
+  useEffect(() => {
+    if (!sessionStorage.getItem(`survey_done_${id}`)) {
+      navigate(`/survey/${id}`, { replace: true })
+    }
+  }, [id, navigate])
 
   useEffect(() => {
     const t = setTimeout(() => setFireworks(false), 6000)

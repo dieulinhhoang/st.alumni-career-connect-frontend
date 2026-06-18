@@ -28,7 +28,7 @@ const LOCKED_COUNT = 8
  *  3 (index 2): Giới tính
  *  4 (index 3): Ngày sinh
  *  5 (index 4): Mã ngành đào tạo
- *  6 (index 5): Số CCCD (kèm Ngày cấp / Nơi cấp — câu hỏi loại 'cccd')
+ *  6 (index 5): Số CCCD
  *  7 (index 6): Khóa học (school_year_end)
  *  8 (index 7): Tên ngành được đào tạo
  *  9 (index 8): Số điện thoại  ← prefill nhưng không khoá
@@ -83,20 +83,8 @@ function buildInitialValues(
     // Câu 5: Mã ngành đào tạo
     set(4, sd.training_industry_code)
 
-    // Câu 6: Số CCCD (câu hỏi loại 'cccd' — value = { number, issueDate, issuePlace })
-    if (sd.citizen_identification) {
-      let issueDate: string | undefined
-      if (sd.citizen_identification_issue_date) {
-        const d = new Date(sd.citizen_identification_issue_date)
-        if (!isNaN(d.getTime())) issueDate = d.toISOString().slice(0, 10)
-      }
-      set(5, {
-        number: sd.citizen_identification,
-        issueDate,
-        // mặc định "Cục Cảnh Sát" nếu không có dữ liệu
-        issuePlace: sd.citizen_identification_issue_place || 'Cục Cảnh Sát',
-      })
-    }
+    // Câu 6: Số CCCD — chỉ lưu số, không kèm ngày cấp / nơi cấp
+    set(5, sd.citizen_identification)
 
     // Câu 7: Khóa học
     set(6, sd.school_year_end)
@@ -183,6 +171,7 @@ export default function SurveyFillPage() {
   const handleSubmit = async (answers: Record<string, any>) => {
     if (!batch || !identity) return
     await submitResponse(batch.id, identity, answers)
+    sessionStorage.setItem(`survey_done_${batch.id}`, '1')
     navigate(`/survey/${batch.id}/done`)
   }
 

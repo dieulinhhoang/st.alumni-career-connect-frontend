@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Card,
   Row,
   Col,
   Input,
@@ -9,8 +8,8 @@ import {
   Popconfirm,
   Tooltip,
   Form,
-  Table,
 } from 'antd'
+import CustomTable from '../../../components/common/customTable'
 import {
   PlusOutlined,
   EditOutlined,
@@ -196,22 +195,19 @@ const RoleListView: React.FC<RoleListViewProps> = ({
           boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
         }}
       > */}
-        <Table
+        <CustomTable<IRole>
           rowKey="id"
           columns={columns}
-          dataSource={listData?.items ?? []}
+          data={listData ?? []}
           loading={loading}
           pagination={{
             current: query.page + 1,
             pageSize: query.size,
             total: listData?.total ?? 0,
             showSizeChanger: false,
-             showTotal: (total: number, range: [number, number]) =>
-              `${range[0]}–${range[1]} / ${total} bản ghi`,
           }}
-          onChange={onTableChange}
-            scroll={{ x: 900 }}
-          locale={{ emptyText: 'Không có dữ liệu' }}
+          handleTableChange={onTableChange}
+          scroll={{ x: 900 }}
         />
       {/* </Card> */}
     </>

@@ -9,7 +9,7 @@ import {
   ExclamationCircleOutlined,
   ClockCircleOutlined, CalendarOutlined,
   FileExcelOutlined, FilePdfOutlined, FilterOutlined,
-  EditOutlined, CloseCircleOutlined, CheckCircleOutlined
+  EditOutlined, PlusCircleOutlined, CloseCircleOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBatchById, getBatchResponses } from '../../../feature/alumni/api';
@@ -340,13 +340,23 @@ export const BatchResults: React.FC = () => {
             />
           </Tooltip>
           {havePermission(PermissionEnum.SURVEYS_UPDATE) && (
-            <Tooltip title="Sửa">
-              <Button
-                size="small" type="text"
-                icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
-                onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
-              />
-            </Tooltip>
+            r.status === 'pending' ? (
+              <Tooltip title="Thêm phản hồi">
+                <Button
+                  size="small" type="text"
+                  icon={<PlusCircleOutlined style={{ color: '#1D9E75', fontSize: 16 }} />}
+                  onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
+                />
+              </Tooltip>
+            ) : (
+              <Tooltip title="Sửa phản hồi">
+                <Button
+                  size="small" type="text"
+                  icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
+                  onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
+                />
+              </Tooltip>
+            )
           )}
         </Space>
       ),

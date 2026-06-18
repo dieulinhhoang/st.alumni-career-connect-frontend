@@ -1,8 +1,8 @@
 import React from 'react';
-import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { ResponseRow } from '../../../../feature/reports/types';
 import { SheetWrapper } from './SheetWrapper';
+import CustomTable from '../../../../components/common/customTable';
 
 // Helpers
 const boolCol = (title: string, dataIndex: string, width = 120): any => ({
@@ -76,14 +76,15 @@ interface Props {
 
 export const Mau03Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, note, signLabel }) => (
   <SheetWrapper orgLine1={orgLine1} orgLine2={orgLine2} title={title} signLabel={signLabel} note={note}>
-    <Table
+    <CustomTable<ResponseRow>
       size="small"
       pagination={false}
       bordered
+      striped={false}
       className="rp-formal-table"
       scroll={{ x: 'max-content' }}
       columns={columns as any}
-      dataSource={rows}
+      data={rows}
       rowKey="key"
     />
   </SheetWrapper>

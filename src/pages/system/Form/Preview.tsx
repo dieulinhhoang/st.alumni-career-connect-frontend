@@ -184,34 +184,16 @@ interface CccdValue { number?: string; issueDate?: string; issuePlace?: string }
 
 
 function CccdField({ value, onChange, hasError, readOnly }: FieldProps & {
-  value?: CccdValue
-  onChange?: (v: CccdValue) => void
+  value?: string | CccdValue
+  onChange?: (v: string) => void
 }) {
-  const v: CccdValue = value ?? {}
+  const strVal = typeof value === 'string' ? value : (value?.number ?? '')
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <input type="text" readOnly={readOnly} placeholder="Nhập số CCCD"
-        value={v.number ?? ''} onChange={e => onChange?.({ ...v, number: e.target.value })}
-        style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-        onFocus={applyFocus} onBlur={removeFocus}
-      />
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 6 }}>Cấp ngày:</div>
-        <input type="date" readOnly={readOnly}
-          value={v.issueDate ?? ''} onChange={e => onChange?.({ ...v, issueDate: e.target.value })}
-          style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer' }}
-          onFocus={applyFocus} onBlur={removeFocus}
-        />
-      </div>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 6 }}>Tại:</div>
-        <input type="text" readOnly={readOnly} placeholder="Nhập nơi cấp"
-          value={v.issuePlace ?? ''} onChange={e => onChange?.({ ...v, issuePlace: e.target.value })}
-          style={baseInput}
-          onFocus={applyFocus} onBlur={removeFocus}
-        />
-      </div>
-    </div>
+    <input type="text" readOnly={readOnly} placeholder="Nhập số CCCD"
+      value={strVal} onChange={e => onChange?.(e.target.value)}
+      style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
+      onFocus={applyFocus} onBlur={removeFocus}
+    />
   )
 }
 

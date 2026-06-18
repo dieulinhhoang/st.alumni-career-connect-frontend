@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import Enterprise from '../pages/system/Enterprise/index';
 import EnterpriseDetail from '../pages/system/EnterpriseDetail/index';
@@ -19,10 +19,15 @@ import FormStatisticsDetailPage from '../pages/system/Statistics/FormStatisticsD
 import AdminProfile from '../pages/system/AdminProfile/AdminProfile';
 import ReportsPage from '../pages/system/Reports/ReportsPage';
 import SurveyFillPage from '../pages/client/Survey/SurveyFillPage';
+import JobsPage from '../pages/client/Jobs/JobsPage';
 import { DoneScreen } from '../pages/client/Survey/DoneScreen';
 import StatIndicatorConfig from '../pages/system/Statistics/StatIndicatorConfig';
 import AuthCallback from '../pages/system/Auth/AuthCallback';
 import LoginPage from '../pages/system/Auth/LoginPage';
+import EnterpriseLoginPage from '../pages/enterprise/EnterpriseLoginPage';
+import AcceptInvitePage from '../pages/enterprise/AcceptInvitePage';
+import EnterpriseDashboard from '../pages/enterprise/EnterpriseDashboard';
+import { isEnterpriseUser } from '../utils/jwt';
 import FacultyReportPage from '../pages/system/Reports/components/FacultyReportPage';
 import { PermissionRoute } from './PermissionRoute';
 import { PermissionEnum } from '../feature/auth/type';
@@ -43,20 +48,13 @@ const FormAIPage      = lazy(() => import('../pages/system/Form/pages/FormAIPage
 //  Guards
 const isLoggedIn = () => !!localStorage.getItem('accessToken');
 
-// Khi chưa đăng nhập → redirect sang SSO của BE thay vì loop lại dashboard
 const SsoRedirect = () => {
-  const [redirecting, setRedirecting] = useState(false);
-
   useEffect(() => {
-    if (!redirecting) {
-      setRedirecting(true);
-      window.location.href = `${import.meta.env.VITE_API_URL}/auth/sso/redirect`;
-    }
-  }, [redirecting]);
+    window.location.replace('/login');
+  }, []);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      {/* <span>Đang chuyển hướng đến trang đăng nhập...</span> */}
       <Loader />
     </div>
   );
@@ -64,6 +62,9 @@ const SsoRedirect = () => {
 
 const ProtectedRoute = () =>
   isLoggedIn() ? <Outlet /> : <SsoRedirect />;
+
+const EnterpriseRoute = () =>
+  isEnterpriseUser() ? <Outlet /> : <Navigate to="/enterprise/login" replace />;
 
 //  Routes
 const routes = [
@@ -74,7 +75,7 @@ const routes = [
       // PUBLIC
       {
         path: '',
-        element: <Navigate to="/admin/dashboard" replace />
+        element: <Navigate to="/login" replace />
       },
       {
         path: '/auth/callback',
@@ -83,6 +84,27 @@ const routes = [
       {
         path: '/login',
         element: <Suspense fallback={<Loader />}><LoginPage /></Suspense>
+      },
+      {
+        path: '/enterprise/login',
+        element: <EnterpriseLoginPage />,
+      },
+      {
+        path: '/enterprise/accept-invite',
+        element: <AcceptInvitePage />,
+      },
+      {
+        element: <EnterpriseRoute />,
+        children: [
+          {
+            path: '/enterprise/dashboard',
+            element: <Suspense fallback={<Loader />}><EnterpriseDashboard /></Suspense>,
+          },
+        ],
+      },
+      {
+        path: '/jobs',
+        element: <Suspense fallback={<Loader />}><JobsPage /></Suspense>,
       },
       {
         path: '/survey/:id/:slug',
