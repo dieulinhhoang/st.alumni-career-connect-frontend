@@ -177,7 +177,7 @@ export function JobCard({
           </Tag>
           {job.deadline && (
             <span style={{ fontSize: 11, color: expired ? "#ef4444" : "#d97706", whiteSpace: "nowrap" }}>
-              {expired } Hạn: {formatDate(job.deadline)}
+              Hạn: {formatDate(job.deadline)}
             </span>
           )}
         </div>
@@ -192,8 +192,8 @@ export function JobCard({
         }}
       >
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {(job.tags || []).slice(0, 1).map(tag => (
-          <span key={tag} style={{ fontSize: 11, padding: '5px 10px', background: 'rgba(255,255,255,0.02)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 12, fontWeight: 500 }}>
+          {(job.tags || []).map(tag => (
+          <span key={tag} style={{ fontSize: 11, padding: '3px 10px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: 12, fontWeight: 500 }}>
             {tag}
           </span>
         ))}

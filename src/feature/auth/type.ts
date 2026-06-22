@@ -68,6 +68,10 @@ export const PermissionEnum = {
   FACULTY_UPDATE: 'faculty:update',
   FACULTY_DELETE: 'faculty:delete',
 
+  //  settings (email config, templates)
+  SETTINGS_READ:   'settings:read',
+  SETTINGS_UPDATE: 'settings:update',
+
 } as const;
 
 export type PermissionEnum = typeof PermissionEnum[keyof typeof PermissionEnum];

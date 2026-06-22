@@ -1,13 +1,10 @@
 export interface IAdminProfile {
-  _id: string
+  id: string
   userName: string
   fullName: string
   email: string
-  mobile?: string
-  address?: string
-  sex?: 'MALE' | 'FEMALE' | 'OTHER'
-  bod?: string
-  isSupperAdmin?: boolean
+  isAdmin?: boolean
+  facultyId?: number | null
   roles: string[]
   roleName: string
 }
@@ -15,8 +12,4 @@ export interface IAdminProfile {
 export interface IUpdateAdminProfileBody {
   fullName?: string
   email?: string
-  mobile?: string
-  address?: string
-  sex?: 'MALE' | 'FEMALE' | 'OTHER'
-  bod?: string
 }

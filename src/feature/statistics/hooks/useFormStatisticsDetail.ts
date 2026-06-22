@@ -10,6 +10,7 @@ import type {
   StatisticalQuestion,
   FormStatisticsDetail,
 } from '../types'
+import { getCurrentUser } from '../../auth/permission'
 
 /**
  * Hook quản lý toàn bộ state cho trang thống kê:
@@ -35,7 +36,12 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingBatches(true)
 
-    getEndedBatches()
+    // Cán bộ khoa chỉ thấy các đợt có dữ liệu của khoa mình — tránh mặc định
+    // chọn 1 đợt rỗng đối với khoa họ rồi tưởng chart bị mất.
+    const currentUser = getCurrentUser()
+    const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined
+
+    getEndedBatches(facultyScope)
       .then((res) => {
         if (!mounted) return
         setBatches(res)
@@ -93,7 +99,11 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingDetail(true)
 
-    getFormStatisticsDetail(formId, questionId)
+    // Cán bộ khoa chỉ xem thống kê của khoa mình — admin xem toàn trường
+    const currentUser = getCurrentUser()
+    const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined
+
+    getFormStatisticsDetail(formId, questionId, facultyScope)
       .then((res) => {
         if (!mounted) return
         setDetail(res)

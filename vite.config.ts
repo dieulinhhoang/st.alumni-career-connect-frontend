@@ -8,7 +8,9 @@ export default defineConfig({
     proxy: {},
   },
   build: {
+    target: 'es2020',
     chunkSizeWarningLimit: 600,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
@@ -18,8 +20,13 @@ export default defineConfig({
             if (id.includes('@ant-design/plots') || id.includes('@antv/')) return 'vendor-charts';
             if (id.includes('/recharts/')) return 'vendor-charts';
             if (id.includes('@tanstack/')) return 'vendor-query';
-            if (id.includes('/survey-core/') || id.includes('/survey-creator')) return 'vendor-editor';
+            if (id.includes('/survey-core/') || id.includes('/survey-creator')) return 'vendor-survey';
+            if (id.includes('/pdfjs-dist/')) return 'vendor-pdfjs';
+            if (id.includes('/mammoth/')) return 'vendor-mammoth';
+            if (id.includes('@tinymce/')) return 'vendor-tinymce';
             if (id.includes('/jspdf') || id.includes('/html2canvas')) return 'vendor-pdf';
+            if (id.includes('/dayjs/')) return 'vendor-dayjs';
+            if (id.includes('@geoapify/')) return 'vendor-geo';
             if (id.includes('/lodash') || id.includes('/zustand') || id.includes('/xlsx/')) return 'vendor-misc';
           }
         },

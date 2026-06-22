@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Modal, Form, Input, Select, Tag, Row, Col } from "antd";
+import { Modal, Form, Input, Select, Tag, Row, Col, DatePicker } from "antd";
+import dayjs from "dayjs";
 import {
   JOB_LOCATIONS,
   type Job,
@@ -29,7 +30,9 @@ function normalizeFacultyValue(job: Job | null): string | undefined {
 }
 
 function normalizeDeadline(deadline?: string | null) {
-  return deadline ?? "";
+  if (!deadline) return null;
+  const d = dayjs(deadline);
+  return d.isValid() ? d : null;
 }
 
 export function JobFormModal({
@@ -104,7 +107,7 @@ export function JobFormModal({
         location: values.location,
         salary: values.salary ?? "",
         faculty: values.faculty ?? null,
-        deadline: values.deadline?.trim() ? values.deadline : null,
+        deadline: values.deadline ? dayjs(values.deadline).format('YYYY-MM-DD') : null,
         status: values.status ?? "active",
         tags,
       });
@@ -221,7 +224,12 @@ export function JobFormModal({
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Form.Item name="deadline" label="Hạn nộp hồ sơ">
-              <Input placeholder="YYYY-MM-DD" />
+              <DatePicker
+                style={{ width: '100%' }}
+                format="DD/MM/YYYY"
+                placeholder="Chọn ngày hết hạn"
+                disabledDate={(d) => d && d.isBefore(dayjs().startOf('day'))}
+              />
             </Form.Item>
           </Col>
 

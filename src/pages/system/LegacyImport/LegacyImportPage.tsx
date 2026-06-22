@@ -40,7 +40,7 @@ const { RangePicker } = DatePicker;
 export default function LegacyImportPage() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [forms, setForms] = useState<{ id: number; name: string }[]>([]);
+  const [systemForm, setSystemForm] = useState<{ id: number; name: string } | null>(null);
   const [majors, setMajors] = useState<MajorOption[]>([]);
   const [faculties, setFaculties] = useState<FacultyOption[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -50,20 +50,32 @@ export default function LegacyImportPage() {
   const [decisions, setDecisions] = useState<Record<string, MajorGroupDecision>>({});
 
   useEffect(() => {
-    fetchAllForms().then((data) => setForms(data.map((f) => ({ id: Number(f.id), name: f.name }))));
+    fetchAllForms().then((data) => {
+      const sys = data
+        .filter((f) => f.isSystem)
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+      if (sys) {
+        const entry = { id: Number(sys.id), name: sys.name };
+        setSystemForm(entry);
+        form.setFieldValue('formId', entry.id);
+      }
+    });
     fetchMajors().then(setMajors);
     fetchFaculties().then(setFaculties);
   }, []);
 
   const handlePreview = async () => {
     try {
-      const values = await form.validateFields(['formId']);
+      if (!systemForm) {
+        message.error('Không tìm thấy form hệ thống');
+        return;
+      }
       if (!file) {
         message.warning('Vui lòng chọn file Excel (.xlsx)');
         return;
       }
       setPreviewLoading(true);
-      const result = await previewLegacyImport(file, values.formId);
+      const result = await previewLegacyImport(file, systemForm.id);
       setPreview(result);
 
       const initialDecisions: Record<string, MajorGroupDecision> = {};
@@ -137,13 +149,8 @@ export default function LegacyImportPage() {
         <Form form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="formId" label="Form khảo sát" rules={[{ required: true, message: 'Chọn form' }]}>
-                <Select
-                  showSearch
-                  placeholder="Chọn form"
-                  options={forms.map((f) => ({ value: f.id, label: `#${f.id} - ${f.name}` }))}
-                  optionFilterProp="label"
-                />
+              <Form.Item name="formId" label="Form khảo sát">
+                <Text>{systemForm ? `#${systemForm.id} - ${systemForm.name}` : 'Đang tải...'}</Text>
               </Form.Item>
             </Col>
             <Col span={8}>

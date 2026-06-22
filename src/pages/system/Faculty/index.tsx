@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Input, Typography, Button, Modal, Form, Switch, Popconfirm, message } from "antd";
 import {
@@ -14,7 +14,7 @@ import { useFaculties } from "../../../feature/faculty/hooks/useFaculties";
 import { createFaculty, updateFaculty, deleteFaculty } from "../../../feature/faculty/api";
 import type { Faculty } from "../../../feature/faculty/types";
 import { toSlug } from "../../../components/common/utils";
-import { havePermission } from "../../../feature/auth/permission";
+import { havePermission, getCurrentUser } from "../../../feature/auth/permission";
 import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Title, Text } = Typography;
@@ -41,6 +41,17 @@ export default function FacultyListPage() {
   const slugTouched = useRef(false);
 
   const list = Array.isArray(faculties) ? faculties : [];
+
+  // Cán bộ khoa không được xem danh sách toàn bộ khoa — gõ URL /admin/faculties
+  // trực tiếp sẽ bị đẩy thẳng vào trang khoa của chính họ.
+  const currentUser = getCurrentUser();
+  const isFacultyOfficer = !currentUser.isAdmin && !!currentUser.facultyId;
+  useEffect(() => {
+    if (!isFacultyOfficer || loading) return;
+    const own = list.find((f) => String(f.id) === String(currentUser.facultyId));
+    if (own?.slug) navigate(`/admin/faculties/${own.slug}`, { replace: true });
+    else navigate("/admin/dashboard", { replace: true });
+  }, [isFacultyOfficer, loading, list, currentUser.facultyId, navigate]);
 
   const openEditModal = (faculty: Faculty) => {
     setEditingFaculty(faculty);
@@ -120,6 +131,17 @@ export default function FacultyListPage() {
   const isEmpty = !loading && filtered.length === 0;
   const isNoFaculties = isEmpty && list.length === 0 && search === "";
   const isNoResults = isEmpty && !isNoFaculties;
+
+  // Cán bộ khoa không được xem danh sách toàn bộ khoa — đang điều hướng (xem useEffect trên)
+  if (isFacultyOfficer) {
+    return (
+      <AdminLayout>
+        <div style={{ textAlign: "center", padding: 60, color: "#9ca3af" }}>
+          Đang tải...
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

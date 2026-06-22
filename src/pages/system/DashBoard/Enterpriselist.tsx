@@ -105,45 +105,57 @@ export function EnterpriseList({ facultyId, extra }: { facultyId?: string | null
         </div>
       ) : (
         <div style={{ maxHeight: 400, overflowY: "auto" }}>
-          {items.map((e, i) => (
-            <div
-              key={e.name}
-              onClick={() => navigate(`/admin/enterprises/${toSlug(e.name)}`)}
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 20px",
-                background: hovered === i ? COLOR.bgMuted : i % 2 === 0 ? COLOR.bgCard : COLOR.bgPage,
-                borderBottom: `1px solid ${COLOR.borderSoft}`,
-                cursor: "pointer",
-                transition: "background 120ms ease",
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: COLOR.textBase,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {e.name}
+          {items.map((e, i) => {
+            const color = (e as any).color || e.mau || COLOR.primaryLight;
+            return (
+              <div
+                key={e.name}
+                onClick={() => navigate(`/admin/enterprises/${toSlug(e.name)}`)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 20px",
+                  background: hovered === i ? COLOR.bgMuted : i % 2 === 0 ? COLOR.bgCard : COLOR.bgPage,
+                  borderBottom: `1px solid ${COLOR.borderSoft}`,
+                  cursor: "pointer",
+                  transition: "background 120ms ease",
+                }}
+              >
+                {/* Color indicator */}
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: COLOR.textBase,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {e.name}
+                  </div>
+                  {e.industry && (
+                    <div style={{ fontSize: 11, color: COLOR.textFaint, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {e.industry}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: COLOR.textDark, lineHeight: 1.1 }}>
+                    {e.jobs}
+                  </div>
+                  <div style={{ fontSize: 11, color: COLOR.textFaint, marginTop: 2 }}>vị trí</div>
                 </div>
               </div>
-              <div style={{ textAlign: "right", flexShrink: 0, minWidth: 60 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: COLOR.textDark, lineHeight: 1.1 }}>
-                  {e.jobs}
-                </div>
-                <div style={{ fontSize: 11, color: COLOR.textFaint, marginTop: 2 }}>vị trí</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {!items.length && !error && (
             <div style={{ padding: "32px 20px", textAlign: "center", color: COLOR.textFaint, fontSize: 13 }}>

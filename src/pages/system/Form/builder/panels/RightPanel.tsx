@@ -26,7 +26,7 @@ interface RightPanelProps {
 const TABS = [
   { key: 'bank'  as Tab, icon: <AppstoreOutlined />,  label: 'Thư viện'  },
   { key: 'theme' as Tab, icon: <BgColorsOutlined />,  label: 'Giao diện' },
-  { key: 'logic' as Tab, icon: <NodeIndexOutlined />, label: 'Logic'     },
+  { key: 'logic' as Tab, icon: <NodeIndexOutlined />, label: 'Điều kiện' },
 ]
 
 const STRIP_W         = 44

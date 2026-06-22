@@ -88,30 +88,70 @@ function OwnFacultySummary({ item, onClick }: { item?: NormalizedFaculty; onClic
     );
   }
 
+  const pct = item.total > 0 ? Math.round((item.responded / item.total) * 100) : 0;
+  const circumference = 2 * Math.PI * 36; // r=36
+  const offset = circumference - (pct / 100) * circumference;
+
   return (
-    <div
-      onClick={onClick}
-      style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16, cursor: "pointer" }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ fontSize: 17, fontWeight: 700, color: COLOR.textDark }}>{item.name}</div>
-        <StatusBadge submitted={item.submitted} />
-      </div>
-
-      <div>
-        <div
-          style={{
-            fontSize: 11, fontWeight: 600, color: COLOR.textFaint,
-            textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8,
-          }}
-        >
-          Sinh viên phản hồi khảo sát
+    <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Top row: circular gauge + stats */}
+      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        {/* Circular progress */}
+        <div style={{ flexShrink: 0, position: "relative", width: 88, height: 88 }}>
+          <svg width={88} height={88} viewBox="0 0 88 88">
+            {/* Track */}
+            <circle cx={44} cy={44} r={36} fill="none" stroke={COLOR.borderSoft} strokeWidth={8} />
+            {/* Progress */}
+            <circle
+              cx={44} cy={44} r={36} fill="none"
+              stroke={item.color}
+              strokeWidth={8}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              transform="rotate(-90 44 44)"
+              style={{ transition: "stroke-dashoffset 0.5s ease" }}
+            />
+          </svg>
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 18, fontWeight: 800, color: COLOR.textDark, lineHeight: 1 }}>{pct}%</span>
+          </div>
         </div>
-        <ProgressBar value={item.responded} total={item.total} color={item.color} />
+
+        {/* Stat numbers */}
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: COLOR.textFaint, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>
+            Sinh viên phản hồi khảo sát
+          </div>
+          <div style={{ display: "flex", gap: 24 }}>
+            <div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: item.color, lineHeight: 1 }}>{item.responded}</div>
+              <div style={{ fontSize: 11, color: COLOR.textFaint, marginTop: 3 }}>Đã phản hồi</div>
+            </div>
+            <div style={{ width: 1, background: COLOR.borderSoft, alignSelf: "stretch" }} />
+            <div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: COLOR.textMuted, lineHeight: 1 }}>{item.total}</div>
+              <div style={{ fontSize: 11, color: COLOR.textFaint, marginTop: 3 }}>Tổng SV</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: COLOR.primary }}>
-        Xem báo cáo khoa <ArrowRightOutlined style={{ fontSize: 12 }} />
+      {/* Progress bar */}
+      <ProgressBar value={item.responded} total={item.total} color={item.color} />
+
+      {/* Footer row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <StatusBadge submitted={item.submitted} />
+        <div
+          onClick={onClick}
+          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: COLOR.primary, cursor: "pointer" }}
+        >
+          Xem báo cáo <ArrowRightOutlined style={{ fontSize: 12 }} />
+        </div>
       </div>
     </div>
   );

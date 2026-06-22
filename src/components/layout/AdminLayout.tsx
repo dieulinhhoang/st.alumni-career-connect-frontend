@@ -19,6 +19,7 @@ import {
   UsergroupAddOutlined,
   BellOutlined,
   HomeOutlined,
+  MailOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
@@ -26,6 +27,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGetAdminProfile } from '../../feature/adminProfile/hook/query';
 import { getCurrentUser, havePermission } from '../../feature/auth/permission';
 import { PermissionEnum } from '../../feature/auth/type';
+import { fetchFacultyById } from '../../feature/faculty/api';
 
 const { Header, Sider, Content } = Layout;
 
@@ -45,6 +47,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/resources': 'Tài nguyên',
   '/admin/roles': 'Vai trò',
   '/admin/users': 'Người dùng',
+  '/admin/mail-settings': 'Cài đặt email',
   '/admin/profile': 'Hồ sơ cá nhân',
 };
 
@@ -53,7 +56,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
  * Item không khai báo `permission` thì luôn hiển thị.
  */
 const SYSTEM_CONFIG_KEY = 'system-config';
-const SYSTEM_CONFIG_CHILD_KEYS = ['/admin/forms', '/admin/legacy-import', '/admin/resources', '/admin/roles', '/admin/users'];
+const SYSTEM_CONFIG_CHILD_KEYS = ['/admin/forms', '/admin/legacy-import', '/admin/resources', '/admin/roles', '/admin/users', '/admin/mail-settings'];
 
 const MENU_ITEMS = [
   { key: '/admin/dashboard', icon: <DashboardOutlined />, label: <Link to="/admin/dashboard">Bảng điều khiển</Link> },
@@ -84,6 +87,7 @@ const MENU_ITEMS = [
       { key: '/admin/resources', icon: <AppstoreOutlined />, label: <Link to="/admin/resources">Tài nguyên</Link>, permission: PermissionEnum.ROLES_READ },
       { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
       { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
+      { key: '/admin/mail-settings', icon: <MailOutlined />, label: <Link to="/admin/mail-settings">Cài đặt email</Link> },
     ],
   },
 ];
@@ -96,14 +100,24 @@ const getDashboardPath = () => {
   return !currentUser.isAdmin && currentUser.facultyId ? '/khoa/dashboard' : '/admin/dashboard';
 };
 
-const getVisibleMenuItems = () => {
+const getVisibleMenuItems = (facultySlug?: string | null) => {
   const dashboardPath = getDashboardPath();
+  const currentUser = getCurrentUser();
 
-  const items = MENU_ITEMS.map((item) =>
-    item.key === '/admin/dashboard'
-      ? { ...item, key: dashboardPath, label: <Link to={dashboardPath}>Bảng điều khiển</Link> }
-      : item
-  );
+  // Cán bộ khoa: bấm vào thẳng trang khoa của mình (danh sách ngành), không qua trang chọn khoa
+  const isFacultyOfficer = !currentUser.isAdmin && !!currentUser.facultyId;
+  const facultiesPath = isFacultyOfficer && facultySlug ? `/admin/faculties/${facultySlug}` : '/admin/faculties';
+  const facultiesLabel = isFacultyOfficer ? 'Ngành' : 'Khoa';
+
+  const items = MENU_ITEMS.map((item) => {
+    if (item.key === '/admin/dashboard') {
+      return { ...item, key: dashboardPath, label: <Link to={dashboardPath}>Bảng điều khiển</Link> };
+    }
+    if (item.key === '/admin/faculties') {
+      return { ...item, key: facultiesPath, label: <Link to={facultiesPath}>{facultiesLabel}</Link> };
+    }
+    return item;
+  }).filter((item) => item.key !== SYSTEM_CONFIG_KEY || currentUser.isAdmin);
 
   const withFilteredChildren = items.map((item) =>
     'children' in item && Array.isArray(item.children)
@@ -229,9 +243,19 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
 
   const { data: profile } = useGetAdminProfile();
   const displayName = profile?.fullName || profile?.userName || 'Người dùng';
-  const displayRole = profile?.roleName || 'Quản trị viên';
+  // const displayRole = profile?.roleName || 'Quản trị viên'; // ẩn nhãn vai trò — xem comment ở phần render avatar
   const displayEmail = profile?.email || '';
   const avatarLetter = displayName.trim().charAt(0).toUpperCase();
+
+  // Cán bộ khoa: lấy slug khoa của mình để menu "Khoa" trỏ thẳng vào trang khoa
+  const [facultySlug, setFacultySlug] = useState<string | null>(null);
+  useEffect(() => {
+    const cu = getCurrentUser();
+    if (cu.isAdmin || !cu.facultyId) return;
+    fetchFacultyById(Number(cu.facultyId))
+      .then((f) => setFacultySlug((f as any)?.slug ?? null))
+      .catch(() => setFacultySlug(null));
+  }, []);
 
   useEffect(() => {
     const check = () => {
@@ -250,7 +274,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     onCollapse?.(next);
   };
 
-  const visibleMenuItems = useMemo(() => getVisibleMenuItems(), []);
+  const visibleMenuItems = useMemo(() => getVisibleMenuItems(facultySlug), [facultySlug]);
 
   const SIDER_W = 240;
   const SIDER_COLLAPSED = 80;
@@ -266,6 +290,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
     if (/^\/admin\/alumni\/batches\//.test(pathname)) return 'Chi tiết đợt khảo sát';
     if (/^\/admin\/statistics\//.test(pathname)) return 'Chỉ số thống kê';
     if (/^\/admin\/forms\//.test(pathname)) return 'Cấu hình form';
+    if (/^\/admin\/mail-settings\//.test(pathname)) return 'Chỉnh sửa email template';
     return 'Trang hiện tại';
   };
   const pageLabel = getPageLabel(location.pathname);
@@ -453,7 +478,8 @@ const handleLogout = () => {
                 </Avatar>
                 <div className="al-avatar-name" style={{ lineHeight: 1.3 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{displayName}</div>
-                  <div style={{ fontSize: 11, color: '#94a3b8' }}>{displayRole}</div>
+                  {/* Nhãn vai trò "Quản trị viên" bị hard-code sai cho cán bộ khoa — ẩn đến khi có roleName đúng theo từng loại tài khoản */}
+                  {/* <div style={{ fontSize: 11, color: '#94a3b8' }}>{displayRole}</div> */}
                 </div>
                 <DownOutlined style={{ fontSize: 10, color: '#94a3b8' }} />
               </div>

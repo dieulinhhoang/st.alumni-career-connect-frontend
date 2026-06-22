@@ -7,10 +7,10 @@ import api from '../../libs/api';
 
 /**
  * Fetch list of ended survey batches (for dropdown selection)
- * GET /statistics/batches
+ * GET /statistics/batches?facultyId=X
  */
-export async function getEndedBatches(): Promise<BatchOption[]> {
-  const res = await api.get('/statistics/batches');
+export async function getEndedBatches(facultyId?: string): Promise<BatchOption[]> {
+  const res = await api.get('/statistics/batches', { params: { facultyId } });
   return res.data ?? [];
 }
 
@@ -25,14 +25,15 @@ export async function getStatisticalQuestions(batchId: number): Promise<Statisti
 
 /**
  * Fetch detailed statistics for a specific question in a batch
- * GET /statistics?batch_id=X&question_key=Y
+ * GET /statistics?batch_id=X&question_key=Y&facultyId=Z
  */
 export async function getFormStatisticsDetail(
   batchId: number,
   questionKey: string,
+  facultyId?: string,
 ): Promise<FormStatisticsDetail | null> {
   const res = await api.get('/statistics', {
-    params: { batch_id: batchId, question_key: questionKey },
+    params: { batch_id: batchId, question_key: questionKey, facultyId },
   });
   return res.data ?? null;
 }

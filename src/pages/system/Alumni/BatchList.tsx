@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   Button, Input, Select, Space, Typography,
-  Dropdown, message,
+  Dropdown,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   PlusOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
-  FilePdfOutlined, FileTextOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -46,10 +45,6 @@ const useMenuItems = (
     //   onClick: () => message.info('Tính năng đang phát triển'),
     // },
     { type: 'divider' },
-    // { key: 'report1', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 1', onClick: () => message.info('Tính năng đang phát triển') },
-    // { key: 'report2', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 2', onClick: () => message.info('Tính năng đang phát triển') },
-    // { key: 'report3', icon: <FileTextOutlined />, label: 'Tải mẫu báo cáo 3', onClick: () => message.info('Tính năng đang phát triển') },
-    { type: 'divider' },
     ...(r.status === 'draft' && havePermission(PermissionEnum.SURVEYS_UPDATE)
       ? [{
         key: 'edit', icon: <EditOutlined style={{ color: '#1D9E75' }} />, label: 'Chỉnh sửa',
@@ -76,8 +71,6 @@ export const BatchList: React.FC = () => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [linkBatch, setLinkBatch] = useState<SurveyBatchWithStats | null>(null);
-  const [showForm,setshowForm]= useState();
-
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSearchChange = useCallback((val: string) => {
     setSearchInput(val);

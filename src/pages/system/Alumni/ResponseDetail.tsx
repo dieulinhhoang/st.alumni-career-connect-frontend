@@ -245,7 +245,9 @@ export const ResponseDetail: React.FC = () => {
 
         {/* Title + toggle */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <Title level={4} style={{ margin: 0, color: '#111827' }} />
+          <Title level={4} style={{ margin: 0, color: '#111827' }}>
+            {isEdit ? 'Chỉnh sửa phản hồi' : 'Chi tiết phản hồi'}
+          </Title>
           <div style={{ display: 'flex', gap: 8 }}>
             {!isEdit ? (
               havePermission(PermissionEnum.SURVEYS_UPDATE) && (
@@ -254,7 +256,7 @@ export const ResponseDetail: React.FC = () => {
                   style={{ borderRadius: 6, borderColor: isPending ? '#1D9E75' : '#d97706', color: isPending ? '#1D9E75' : '#d97706' }}
                   onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${responseId}/edit`)}
                 >
-                  {isPending ? 'Thêm phản hồi' : ''}
+                  {isPending ? 'Thêm phản hồi' : 'Chỉnh sửa'}
                 </Button>
               )
             ) : (

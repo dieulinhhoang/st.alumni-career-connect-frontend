@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Tag, Typography, Modal, Form, Input, Switch, Popconfirm, message } from "antd";
 import { ArrowLeftOutlined, BookOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -8,7 +8,7 @@ import { useFacultyDetailBySlug } from "../../../../feature/faculty/hooks/useFac
 import { createMajor, updateMajor, deleteMajor } from "../../../../feature/major/api";
 import { toSlug } from "../../../../components/common/utils";
 import CustomTable from "../../../../components/common/customTable";
-import { havePermission } from "../../../../feature/auth/permission";
+import { havePermission, getCurrentUser } from "../../../../feature/auth/permission";
 import { PermissionEnum } from "../../../../feature/auth/type";
 
 const { Title, Text } = Typography;
@@ -35,6 +35,16 @@ export default function FacultyDetailPage() {
   const navigate = useNavigate();
 
   const { data: faculty, loading, error, reload } = useFacultyDetailBySlug(facultySlug);
+
+  // Cán bộ khoa chỉ được xem khoa của chính mình — gõ URL khoa khác sẽ bị đẩy về khoa mình
+  const currentUser = getCurrentUser();
+  const isFacultyOfficer = !currentUser.isAdmin && !!currentUser.facultyId;
+  useEffect(() => {
+    if (!isFacultyOfficer || !faculty) return;
+    if (String((faculty as any).id) !== String(currentUser.facultyId)) {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [isFacultyOfficer, faculty, currentUser.facultyId, navigate]);
 
   const [form] = Form.useForm<MajorFormValues>();
   const [modalOpen, setModalOpen] = useState(false);
@@ -201,24 +211,40 @@ export default function FacultyDetailPage() {
       <AdminLayout>
         <div style={{ textAlign: "center", padding: 60 }}>
           <div>{error ?? "Không tìm thấy khoa"}</div>
-          <Button style={{ marginTop: 16 }} onClick={() => navigate("/admin/faculties")}>
-            Quay lại
-          </Button>
+          {!isFacultyOfficer && (
+            <Button style={{ marginTop: 16 }} onClick={() => navigate("/admin/faculties")}>
+              Quay lại
+            </Button>
+          )}
         </div>
       </AdminLayout>
     );
   }
+
+  // Đang điều hướng cán bộ khoa về đúng khoa của họ — không render nội dung khoa khác
+  if (isFacultyOfficer && String((faculty as any).id) !== String(currentUser.facultyId)) {
+    return (
+      <AdminLayout>
+        <div style={{ textAlign: "center", padding: 60, color: "#9ca3af" }}>
+          Đang tải...
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          type="text"
-          style={{ marginBottom: 16, padding: "0 4px", color: "#6b7280" }}
-          onClick={() => navigate("/admin/faculties")}
-        >
-          Quay lại danh sách khoa
-        </Button>
+        {!isFacultyOfficer && (
+          <Button
+            icon={<ArrowLeftOutlined />}
+            type="text"
+            style={{ marginBottom: 16, padding: "0 4px", color: "#6b7280" }}
+            onClick={() => navigate("/admin/faculties")}
+          >
+            Quay lại danh sách khoa
+          </Button>
+        )}
 
         <div
           style={{

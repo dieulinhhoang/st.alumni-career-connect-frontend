@@ -23,7 +23,7 @@ import {
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { KpiCard } from "../../../components/common/KpiCard";
-import { havePermission } from "../../../feature/auth/permission";
+import { havePermission, getCurrentUser } from "../../../feature/auth/permission";
 import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Text } = Typography;
@@ -97,6 +97,10 @@ export default function EnterprisePage() {
     enterprise: null,
   });
 
+  // Cán bộ khoa chỉ được xem doanh nghiệp liên kết với khoa mình — admin xem toàn bộ
+  const currentUser = getCurrentUser();
+  const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined;
+
   const {
     enterprises,
     loading,
@@ -104,7 +108,7 @@ export default function EnterprisePage() {
     setPage,
     addEnterprise,
     editEnterprise,
-  } = useEnterprises({ page: query.page - 1, size: query.size });
+  } = useEnterprises({ page: query.page - 1, size: query.size, facultyId: facultyScope });
 
   const filtered = useMemo(() => {
     return enterprises.filter((e) => {

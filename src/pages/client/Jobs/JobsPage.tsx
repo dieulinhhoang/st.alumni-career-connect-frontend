@@ -32,7 +32,6 @@ const isExpired = (deadline?: string) => deadline ? new Date(deadline) < new Dat
 
 // ── Global styles ─────────────────────────────────────────────────────────────
 const STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *, *::before, *::after { font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; box-sizing:border-box; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 @keyframes shimmer { 100%{transform:translateX(100%)} }

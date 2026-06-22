@@ -23,7 +23,7 @@ import { SurveyLinkModal } from './components/SurveyLinkModal';
 import { useExportAllPDF, domToPdfBlob } from '../../../feature/alumni/hooks/useExportAllPDF';
 import type { ExportItem } from '../../../feature/alumni/hooks/useExportAllPDF';
 import SurveyPreview from '../Form/Preview';
-import { havePermission } from '../../../feature/auth/permission';
+import { havePermission, getCurrentUser } from '../../../feature/auth/permission';
 import { PermissionEnum } from '../../../feature/auth/type';
 import * as XLSX from 'xlsx';
 
@@ -54,20 +54,31 @@ export const BatchResults: React.FC = () => {
   // Hook lấy toàn bộ sinh viên của đợt tốt nghiệp (không phân trang, load hết)
   const { data: gradStudents } = useGraduationStudents(batch?.graduationId ?? 0, 1, 9999);
 
-  // Derive khoa + ngành trực tiếp từ gradStudents
+  // Cán bộ khoa chỉ được xem sinh viên của khoa mình — admin xem toàn bộ
+  const currentUser = getCurrentUser();
+  const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined;
+
+  const scopedGradStudents = React.useMemo(() => {
+    if (!facultyScope) return gradStudents;
+    return gradStudents.filter(
+      s => String((s as any).faculty_id ?? (s as any).facultyId ?? '') === facultyScope
+    );
+  }, [gradStudents, facultyScope]);
+
+  // Derive khoa + ngành trực tiếp từ scopedGradStudents
   const khoaOptions = React.useMemo(() => {
     const seen = new Map<string, string>();
-    gradStudents.forEach(s => {
+    scopedGradStudents.forEach(s => {
       const id   = String((s as any).faculty_id ?? (s as any).facultyId ?? '');
       const name = (s as any).faculty_name ?? (s as any).facultyName ?? id;
       if (id && !seen.has(id)) seen.set(id, name);
     });
     return Array.from(seen.entries()).map(([value, label]) => ({ value, label }));
-  }, [gradStudents]);
+  }, [scopedGradStudents]);
 
   const nganhOptions = React.useMemo(() => {
     const seen = new Map<string, string>();
-    gradStudents.forEach(s => {
+    scopedGradStudents.forEach(s => {
       const studentFacultyId = String((s as any).faculty_id ?? (s as any).facultyId ?? '');
       if (khoa && studentFacultyId !== khoa) return;
       const id   = String(s.training_industry_id ?? (s as any).trainingIndustryId ?? '');
@@ -75,7 +86,7 @@ export const BatchResults: React.FC = () => {
       if (id && !seen.has(id)) seen.set(id, name);
     });
     return Array.from(seen.entries()).map(([value, label]) => ({ value, label }));
-  }, [gradStudents, khoa]);
+  }, [scopedGradStudents, khoa]);
 
   useEffect(() => { if (id) load(); }, [id]);
 
@@ -87,10 +98,15 @@ export const BatchResults: React.FC = () => {
   const mergedRows: AlumniResponse[] = React.useMemo(() => {
     if (!batch) return [];
     const responses = batch.responses ?? [];
-    if (gradStudents.length === 0) return responses;
+    if (scopedGradStudents.length === 0) {
+      // Không có dữ liệu SV tốt nghiệp khớp khoa — cán bộ khoa không thấy phản hồi của khoa khác
+      return facultyScope
+        ? responses.filter(r => String((r as any).faculty_id ?? (r as any).facultyId ?? '') === facultyScope)
+        : responses;
+    }
     const responseByCode = new Map<string, AlumniResponse>();
     responses.forEach(r => { if (r.studentId) responseByCode.set(r.studentId, r); });
-    return gradStudents.map(gs => {
+    return scopedGradStudents.map(gs => {
       const existing = responseByCode.get(gs.code);
       if (existing) return {
         ...existing,
@@ -116,7 +132,7 @@ export const BatchResults: React.FC = () => {
         training_industry_code: gs.training_industry_code,
       } as AlumniResponse;
     });
-  }, [batch, gradStudents]);
+  }, [batch, scopedGradStudents, facultyScope]);
 
   const load = async () => {
     try {
@@ -434,24 +450,44 @@ export const BatchResults: React.FC = () => {
               icon={<FileExcelOutlined style={{ color: '#16a34a' }} />}
               loading={exporting === 'excel'}
               onClick={() => {
-                // 1. Lấy div bao quanh bảng
-               const tableContainer = document.getElementById('alumni-table');
-  
-                // 2. Tìm thẻ table thực tế bên trong div đó
-                const table = tableContainer.querySelector('table');
-                
-                if (!table) {
-                  alert('Không tìm thấy dữ liệu bảng để xuất!');
-                  return;
-                }
+                const questions = (batch as any).formSnapshot?.questions ?? [];
 
-                // 3. Tiến hành chuyển đổi và tải file
-                const ws = XLSX.utils.table_to_sheet(table);
+                const formatAnswer = (raw: any, q: any): string => {
+                  if (raw == null || raw === '') return '';
+                  if (q.type === 'address' && typeof raw === 'object') {
+                    return Object.values(raw).filter(Boolean).join(', ');
+                  }
+                  if (q.type === 'cccd' && typeof raw === 'object') {
+                    const v = raw as any;
+                    return [v.number, v.issueDate, v.issuePlace].filter(Boolean).join(' / ');
+                  }
+                  if (Array.isArray(raw)) return raw.join(', ');
+                  return String(raw);
+                };
+
+                const headers = [
+                  'STT', 'Mã SV', 'Họ và tên', 'Khoa', 'Ngành', 'Trạng thái', 'Ngày phản hồi',
+                  ...questions.map((q: any) => q.title ?? ''),
+                ];
+
+                const dataRows = filtered.map((r, i) => [
+                  i + 1,
+                  r.studentId ?? '',
+                  r.studentName ?? '',
+                  (r as any).faculty_name ?? '',
+                  (r as any).training_industry_name ?? '',
+                  r.status === 'submitted' ? 'Đã phản hồi' : 'Chưa phản hồi',
+                  r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN') : '',
+                  ...questions.map((q: any) => formatAnswer(r.answers?.[q.id], q)),
+                ]);
+
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+                // Cột STT và các cột số không tự đổi sang number format
+                ws['!cols'] = headers.map((_, ci) => ({ wch: ci === 0 ? 6 : ci <= 2 ? 20 : 18 }));
                 const wb = XLSX.utils.book_new();
-                
                 XLSX.utils.book_append_sheet(wb, ws, 'Danh sách SV');
-                
-                XLSX.writeFile(wb, 'Danh_sach_sinh_vien.xlsx');
+                const safeName = (batch.title ?? 'danh-sach-sv').replace(/[^\wÀ-ɏḀ-ỿ ]/g, '').trim().replace(/\s+/g, '_');
+                XLSX.writeFile(wb, `${safeName}.xlsx`);
               }}
             >
               Xuất Excel
@@ -482,18 +518,20 @@ export const BatchResults: React.FC = () => {
               <Select.Option value="pending">Chưa phản hồi</Select.Option>
             </Select>
 
-            {/* Lọc Khoa */}
-            <Select
-              allowClear
-              value={khoa}
-              placeholder="Lọc theo khoa"
-              onChange={v => { setKhoa(v); setNganh(undefined); setLop(undefined); }}
-              style={{ width: 200 }}
-            >
-              {khoaOptions.map(k => (
-                <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>
-              ))}
-            </Select>
+            {/* Lọc Khoa — cán bộ khoa đã bị khóa theo khoa mình, không cần chọn */}
+            {!facultyScope && (
+              <Select
+                allowClear
+                value={khoa}
+                placeholder="Lọc theo khoa"
+                onChange={v => { setKhoa(v); setNganh(undefined); setLop(undefined); }}
+                style={{ width: 200 }}
+              >
+                {khoaOptions.map(k => (
+                  <Select.Option key={k.value} value={k.value}>{k.label}</Select.Option>
+                ))}
+              </Select>
+            )}
 
             {/* Lọc Ngành — phụ thuộc khoa đã chọn */}
             <Select

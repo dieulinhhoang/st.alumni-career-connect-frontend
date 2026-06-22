@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Row, Col, Spin, Typography, message, Form } from 'antd'
-import dayjs, { Dayjs } from 'dayjs'
 import AdminLayout from '../../../components/layout/AdminLayout'
 import {
   useGetAdminProfile,
@@ -28,10 +27,6 @@ const AdminProfile: React.FC = () => {
       fullName: profile.fullName,
       userName: profile.userName,
       email: profile.email,
-      mobile: profile.mobile,
-      address: profile.address,
-      sex: profile.sex,
-      bod: profile.bod ? dayjs(profile.bod) : undefined,
       roleName: profile.roleName,
     }
   }, [profile])
@@ -44,10 +39,6 @@ const AdminProfile: React.FC = () => {
     const body: IUpdateAdminProfileBody = {
       fullName: values.fullName?.trim(),
       email: values.email,
-      mobile: values.mobile,
-      address: values.address,
-      sex: values.sex,
-      bod: values.bod ? (values.bod as Dayjs).toISOString() : undefined,
     }
 
     updateProfile.mutate(body, {

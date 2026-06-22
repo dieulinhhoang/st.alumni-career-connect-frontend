@@ -51,6 +51,10 @@ const UserManagement     = lazy(() => import('../pages/system/User/UserManagemen
 const RoleManagement     = lazy(() => import('../pages/system/Role/RoleManagement'));
 const ResourceManagement = lazy(() => import('../pages/system/Resources/ResourceManagement'));
 
+// Admin — mail settings
+const MailSettingsPage       = lazy(() => import('../pages/system/MailSettings/index'));
+const EmailTemplateEditor    = lazy(() => import('../pages/system/MailSettings/EmailTemplateEditor'));
+
 // Admin — enterprises
 const Enterprise       = lazy(() => import('../pages/system/Enterprise/index'));
 const EnterpriseDetail = lazy(() => import('../pages/system/EnterpriseDetail/index'));
@@ -107,11 +111,11 @@ const routes = [
       },
       {
         path: '/enterprise/login',
-        element: <EnterpriseLoginPage />,
+        element: <Suspense fallback={<div />}><EnterpriseLoginPage /></Suspense>,
       },
       {
         path: '/enterprise/accept-invite',
-        element: <AcceptInvitePage />,
+        element: <Suspense fallback={<div />}><AcceptInvitePage /></Suspense>,
       },
       {
         element: <EnterpriseRoute />,
@@ -119,6 +123,14 @@ const routes = [
           {
             path: '/enterprise/dashboard',
             element: <Suspense fallback={<Loader />}><EnterpriseDashboard /></Suspense>,
+          },
+          {
+            path: '/enterprise/jobs',
+            element: <Navigate to="/enterprise/dashboard" replace />,
+          },
+          {
+            path: '/enterprise/applicants',
+            element: <Navigate to="/enterprise/dashboard" replace />,
           },
         ],
       },
@@ -276,6 +288,16 @@ const routes = [
                 element: <Suspense fallback={<Loader />}><ResourceManagement /></Suspense>
               },
             ],
+          },
+
+          // Mail settings
+          {
+            path: '/admin/mail-settings',
+            element: <Suspense fallback={<Loader />}><MailSettingsPage /></Suspense>
+          },
+          {
+            path: '/admin/mail-settings/templates/:id',
+            element: <Suspense fallback={<Loader />}><EmailTemplateEditor /></Suspense>
           },
 
           // Enterprises
