@@ -177,6 +177,8 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
               <Popconfirm
                 title="Xoá tài nguyên?"
                 onConfirm={() => onDelete(recordId)}
+                okText="Xoá"
+                cancelText="Hủy"
               >
                 <DeleteOutlined
                   style={{

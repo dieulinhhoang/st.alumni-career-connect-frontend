@@ -16,7 +16,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const toolbar = ['undo redo | blocks | bold italic underline forecolor backcolor','alignleft aligncenter alignright alignjustify','bullist numlist outdent indent | removeformat | help | image media']
   return (
     <Editor
-      apiKey={import.meta.env.VITE_TINYMCE_KEY}
+      apiKey={import.meta.env.VITE_API_TINYMCE_KEY}
       onInit={(evt, editor) => { editorRef.current = editor }}
       value={value}
       onEditorChange={(v) => onChange(v)}

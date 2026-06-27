@@ -1,5 +1,5 @@
 export type PartnerStatus = "active" | "inactive";
-export type JobStatus = "active" | "closed";
+export type JobStatus = "pending" | "active" | "closed" | "rejected";
 
 export interface Faculty {
   id: string;
@@ -38,6 +38,7 @@ export interface Job {
   status: JobStatus;
   postedAt: string;
   faculty?: string | Faculty | null;
+  rejectionReason?: string | null;
 }
 
 // faculties là mảng id string gửi lên BE

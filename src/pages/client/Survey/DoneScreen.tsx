@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { fetchEnterprises, fetchJobsByEnterprise } from '../../../feature/enterprise/api'
 import type { Job, Enterprise } from '../../../feature/enterprise/type'
 
@@ -8,21 +7,7 @@ interface JobWithEnterprise extends Job {
   enterpriseName?: string
   enterpriseAbbr?: string
   enterpriseColor?: string
-}
-
-interface ApplyFormData {
-  fullName: string
-  email: string
-  phone: string
-  message: string
-}
-
-async function submitApplication(jobId: string, data: ApplyFormData) {
-  const res = await axios.post(`${import.meta.env.VITE_API_URL}/job-applications`, {
-    jobId,
-    ...data,
-  })
-  return res.data
+  enterprise?: Enterprise
 }
 
 // ─── Confetti ─────────────────────────────────────────────────────────────────
@@ -89,9 +74,6 @@ const STYLE = `
 
 @keyframes fadeUp   { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
 @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
-@keyframes scaleIn  { from { opacity:0; transform:scale(0.82); } to { opacity:1; transform:scale(1); } }
-@keyframes checkDraw { from { stroke-dashoffset:56; } to { stroke-dashoffset:0; } }
-@keyframes ringPing  { 0% { box-shadow:0 0 0 0 rgba(29,158,117,0.35); } 100% { box-shadow:0 0 0 28px rgba(29,158,117,0); } }
 @keyframes float     { 0%,100% { transform:translateY(0)rotate(-1deg); } 50% { transform:translateY(-10px)rotate(1deg); } }
 @keyframes shake     { 0%,100%{transform:translateX(0)rotate(0)} 20%{transform:translateX(-8px)rotate(-3deg)} 40%{transform:translateX(8px)rotate(3deg)} 60%{transform:translateX(-5px)rotate(-1.5deg)} 80%{transform:translateX(3px)rotate(1deg)} }
 @keyframes lidPop    { 0%{transform:translateY(0)rotate(0)scale(1);opacity:1} 30%{transform:translateY(-30px)rotate(-10deg)scale(1.05);opacity:1} 100%{transform:translateY(-220px)rotate(-45deg)scale(0.5);opacity:0} }
@@ -104,8 +86,6 @@ const STYLE = `
 @keyframes pulseDot  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.08)} }
 @keyframes badgePop  { from{opacity:0;transform:scale(0.9)translateY(-6px)} to{opacity:1;transform:scale(1)translateY(0)} }
 
-.check-ring  { animation: scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both, ringPing 1.6s ease-out 0.6s; }
-.check-path  { stroke-dasharray:56; stroke-dashoffset:56; animation: checkDraw 0.55s ease-out 0.4s forwards; }
 .gift-float  { animation: float 3.2s ease-in-out infinite; }
 .gift-shake  { animation: shake 0.45s ease both; }
 .lid-pop     { animation: lidPop 0.65s cubic-bezier(0.2,1,0.4,1) forwards; }
@@ -165,34 +145,14 @@ function SkeletonCard() {
   )
 }
 
-// ─── Apply Modal ───────────────────────────────────────────────────────────────
-function ApplyModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => void }) {
-  const [form,   setForm]   = useState<ApplyFormData>({ fullName: '', email: '', phone: '', message: '' })
-  const [status, setStatus] = useState<'idle'|'loading'|'success'|'error'>('idle')
-  const [err,    setErr]    = useState('')
-
-  const set = (k: keyof ApplyFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm(p => ({ ...p, [k]: e.target.value }))
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.fullName.trim() || !form.email.trim() || !form.phone.trim()) return
-    setStatus('loading')
-    try {
-      await submitApplication(job.id, form)
-      setStatus('success')
-    } catch {
-      setErr('Gửi không thành công, vui lòng thử lại.')
-      setStatus('error')
-    }
-  }
-
-  const inputCss: React.CSSProperties = {
-    width: '100%', padding: '9px 12px', borderRadius: 9,
-    border: '1.5px solid #e2e8f0', fontSize: 13.5, background: '#f8fafc',
-    outline: 'none', color: '#0f172a', transition: 'border-color 0.18s',
-  }
-  const labelCss: React.CSSProperties = { fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }
+// ─── Job Detail Modal (JD + liên hệ doanh nghiệp) ──────────────────────────────
+function JobDetailModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => void }) {
+  const ent = job.enterprise
+  const contactRows = [
+    { label: 'Điện thoại', value: ent?.phone, href: ent?.phone ? `tel:${ent.phone}` : undefined },
+    { label: 'Email', value: ent?.email, href: ent?.email ? `mailto:${ent.email}` : undefined },
+    { label: 'Website', value: ent?.website, href: ent?.website },
+  ].filter(r => r.value)
 
   return (
     <div
@@ -223,46 +183,88 @@ function ApplyModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => v
         </div>
 
         {/* Body */}
-        <div style={{ padding: '22px 24px 20px' }}>
-          {status === 'success' ? (
-            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
-              <div style={{ width: 58, height: 58, background: 'linear-gradient(135deg,#34d399,#059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-              </div>
-              <p style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 800, color: '#0f172a' }}>Đã gửi hồ sơ!</p>
-              <p style={{ margin: '0 0 20px', fontSize: 13, color: '#64748b', lineHeight: 1.65 }}>
-                Doanh nghiệp sẽ liên hệ với bạn qua email hoặc số điện thoại đã cung cấp.
-              </p>
-              <button onClick={onClose} style={{ padding: '10px 28px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                Đóng
-              </button>
+        <div style={{ padding: '22px 24px 24px' }}>
+          {job.tags && job.tags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+              {job.tags.map(t => (
+                <span key={t} style={{ fontSize: 11.5, padding: '3px 10px', background: '#f1f5f9', color: '#475569', borderRadius: 8 }}>{t}</span>
+              ))}
             </div>
+          )}
+
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
+            Liên hệ ứng tuyển
+          </div>
+          {contactRows.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 13, color: '#94a3b8' }}>Doanh nghiệp chưa cập nhật thông tin liên hệ.</p>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
-              {[
-                { key: 'fullName', label: 'Họ và tên', type: 'text', placeholder: 'Nguyễn Văn A', required: true },
-                { key: 'email',    label: 'Email',     type: 'email', placeholder: 'example@gmail.com', required: true },
-                { key: 'phone',    label: 'Số điện thoại', type: 'text', placeholder: '0912 345 678', required: true },
-              ].map(f => (
-                <div key={f.key}>
-                  <label style={labelCss}>{f.label} {f.required && <span style={{ color: '#ef4444' }}>*</span>}</label>
-                  <input style={inputCss} type={f.type} placeholder={f.placeholder} value={form[f.key as keyof ApplyFormData]} onChange={set(f.key as keyof ApplyFormData)} required={f.required}/>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {contactRows.map(r => (
+                <div key={r.label} style={{ display: 'flex', gap: 10, fontSize: 13.5, alignItems: 'baseline' }}>
+                  <span style={{ width: 78, flexShrink: 0, color: '#94a3b8', fontWeight: 600 }}>{r.label}</span>
+                  {r.href ? (
+                    <a href={r.href} target={r.label === 'Website' ? '_blank' : undefined} rel="noreferrer" style={{ color: '#0f7a57', fontWeight: 600, wordBreak: 'break-word' }}>
+                      {r.value}
+                    </a>
+                  ) : (
+                    <span style={{ color: '#0f172a', wordBreak: 'break-word' }}>{r.value}</span>
+                  )}
                 </div>
               ))}
-              <div>
-                <label style={labelCss}>Lời nhắn <span style={{ color: '#94a3b8', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(tùy chọn)</span></label>
-                <textarea style={{ ...inputCss, resize: 'none', height: 84 }} placeholder="Giới thiệu ngắn hoặc lý do ứng tuyển..." value={form.message} onChange={set('message')}/>
-              </div>
-              {status === 'error' && (
-                <p style={{ margin: 0, fontSize: 12.5, color: '#dc2626', background: '#fef2f2', padding: '8px 12px', borderRadius: 8 }}>{err}</p>
-              )}
-              <button
-                type="submit" disabled={status === 'loading'}
-                style={{ padding: '12px', background: status === 'loading' ? '#94a3b8' : '#1D9E75', color: '#fff', border: 'none', borderRadius: 11, fontWeight: 700, fontSize: 14, cursor: status === 'loading' ? 'not-allowed' : 'pointer', transition: 'background 0.18s', marginTop: 2 }}
-              >
-                {status === 'loading' ? 'Đang gửi...' : 'Gửi hồ sơ ứng tuyển'}
-              </button>
-            </form>
+            </div>
+          )}
+          <p style={{ margin: '16px 0 0', fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>
+            Hãy chủ động liên hệ trực tiếp với doanh nghiệp để ứng tuyển vị trí này.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Enterprise Modal ──────────────────────────────────────────────────────────
+function EnterpriseModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => void }) {
+  const ent = job.enterprise
+  const rows = [
+    { label: 'Ngành', value: ent?.industry },
+    { label: 'Quy mô', value: ent?.size },
+    { label: 'Địa chỉ', value: ent?.address },
+    { label: 'Điện thoại', value: ent?.phone },
+    { label: 'Email', value: ent?.email },
+    { label: 'Website', value: ent?.website },
+  ].filter(r => r.value)
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 440, boxShadow: '0 32px 72px rgba(0,0,0,0.2)', overflow: 'hidden', animation: 'fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both' }}>
+        <div style={{ background: 'linear-gradient(135deg,#1D9E75,#0f7a57)', padding: '22px 24px 18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{job.enterpriseName}</h3>
+            <button
+              onClick={onClose}
+              style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', width: 30, height: 30, borderRadius: '50%', cursor: 'pointer', fontSize: 16, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >×</button>
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 24px 24px' }}>
+          {ent?.description && (
+            <p style={{ margin: '0 0 16px', fontSize: 13.5, color: '#475569', lineHeight: 1.7 }}>{ent.description}</p>
+          )}
+          {rows.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 13, color: '#94a3b8' }}>Chưa có thêm thông tin về doanh nghiệp này.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {rows.map(r => (
+                <div key={r.label} style={{ display: 'flex', gap: 10, fontSize: 13.5 }}>
+                  <span style={{ width: 84, flexShrink: 0, color: '#94a3b8', fontWeight: 600 }}>{r.label}</span>
+                  <span style={{ color: '#0f172a', wordBreak: 'break-word' }}>{r.value}</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -271,7 +273,7 @@ function ApplyModal({ job, onClose }: { job: JobWithEnterprise; onClose: () => v
 }
 
 // ─── Job Card ──────────────────────────────────────────────────────────────────
-function JobCard({ job, delay = 0, onApply }: { job: JobWithEnterprise; delay?: number; onApply: (j: JobWithEnterprise) => void }) {
+function JobCard({ job, delay = 0, onShowDetail, onShowEnterprise }: { job: JobWithEnterprise; delay?: number; onShowDetail: (j: JobWithEnterprise) => void; onShowEnterprise: (j: JobWithEnterprise) => void }) {
   const fmt = (s: string | null) => {
     if (!s) return null
     const d = new Date(s)
@@ -288,7 +290,19 @@ function JobCard({ job, delay = 0, onApply }: { job: JobWithEnterprise; delay?: 
 
       <div style={{ padding: '18px 20px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.7px', lineHeight: 1.2 }}>
+          <span
+            onClick={(e) => { e.stopPropagation(); onShowEnterprise(job) }}
+            style={{
+              fontSize: 11, fontWeight: 800, color: '#0f7a57', textTransform: 'uppercase',
+              letterSpacing: '0.5px', lineHeight: 1.2, flex: 1, minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'transparent',
+              textUnderlineOffset: '3px', transition: 'text-decoration-color 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.textDecorationColor = '#0f7a57' }}
+            onMouseLeave={(e) => { e.currentTarget.style.textDecorationColor = 'transparent' }}
+            title={`Xem chi tiết ${job.enterpriseName}`}
+          >
             {job.enterpriseName}
           </span>
           {job.deadline && (
@@ -327,10 +341,10 @@ function JobCard({ job, delay = 0, onApply }: { job: JobWithEnterprise; delay?: 
         </span>
         <button
           className="apply-btn"
-          onClick={() => onApply(job)}
+          onClick={() => onShowDetail(job)}
           style={{ fontSize: 12, padding: '6px 14px', background: '#f8fafc', color: '#334155', border: '1.5px solid #e2e8f0', borderRadius: 8, fontWeight: 600, cursor: 'pointer', transition: 'all 0.22s ease' }}
         >
-          Ứng tuyển →
+          Xem & liên hệ →
         </button>
       </div>
     </div>
@@ -343,7 +357,9 @@ const BURST_COLORS = ['#1D9E75','#34d399','#FCD34D','#F87171','#60A5FA','#C084FC
 function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolean }) {
   const [clicks,   setClicks]   = useState(0)
   const [phase,    setPhase]    = useState<'idle'|'shaking'|'opening'|'open'>('idle')
-  const [applyJob, setApplyJob] = useState<JobWithEnterprise | null>(null)
+  const [detailJob, setDetailJob] = useState<JobWithEnterprise | null>(null)
+  const [entJob,   setEntJob]   = useState<JobWithEnterprise | null>(null)
+  const [search,   setSearch]   = useState('')
   const sceneRef  = useRef<HTMLDivElement>(null)
   const giftRef   = useRef<HTMLDivElement>(null)
   const burstRef  = useRef<HTMLDivElement>(null)
@@ -388,9 +404,20 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
 
   const hints = ['Chạm vào hộp quà ✨', 'Đang lung lay rồi...', 'Thêm một cái nữa!']
 
+  const q = search.trim().toLowerCase()
+  const filteredJobs = q
+    ? jobs.filter(j =>
+        j.title?.toLowerCase().includes(q) ||
+        j.enterpriseName?.toLowerCase().includes(q) ||
+        j.location?.toLowerCase().includes(q)
+      )
+    : jobs.slice(0, 6)
+
   return (
-    <div ref={sceneRef} style={{ position: 'relative', width: '100%', maxWidth: 1080, margin: '0 auto', padding: '0 24px 80px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: phase === 'open' ? 'flex-start' : 'center', minHeight: '50vh' }}>
-      {applyJob && <ApplyModal job={applyJob} onClose={() => setApplyJob(null)} />}
+    <>
+    <div ref={sceneRef} style={{ position: 'relative', width: '100%', maxWidth: 1080, margin: '0 auto', padding: phase === 'open' ? '0 24px' : '0 24px 80px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: phase === 'open' ? 0 : '50vh' }}>
+      {detailJob && <JobDetailModal job={detailJob} onClose={() => setDetailJob(null)} />}
+      {entJob && <EnterpriseModal job={entJob} onClose={() => setEntJob(null)} />}
       <div ref={burstRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 10 }}/>
 
       {/* ── Gift area ── */}
@@ -418,7 +445,7 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
             ref={giftRef}
             className={phase === 'idle' ? 'gift-float' : phase === 'shaking' ? 'gift-shake' : ''}
             onClick={handleClick}
-            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', userSelect: 'none', filter: 'drop-shadow(0 20px 32px rgba(29,158,117,0.22))' }}
+            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', userSelect: 'none', filter: 'drop-shadow(0 20px 32px rgba(0,0,0,0.28))' }}
           >
             {/* Bow */}
             <div className={phase === 'opening' ? 'bow-pop' : ''} style={{ position: 'absolute', top: -32, left: '50%', transform: 'translateX(-50%)', width: 80, height: 42, zIndex: 4 }}>
@@ -440,17 +467,17 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
 
             {/* Lid */}
             <div className={phase === 'opening' ? 'lid-pop' : ''} style={{ width: 176, height: 46, position: 'relative', zIndex: 3 }}>
-              <div style={{ width: 176, height: 46, background: 'linear-gradient(180deg,#1D9E75 0%,#15805f 100%)', borderRadius: '10px 10px 3px 3px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 14px rgba(0,0,0,0.18)' }}>
-                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 22, background: 'linear-gradient(90deg,rgba(255,255,255,0.4),rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4))' }}/>
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 60%)', pointerEvents: 'none' }}/>
+              <div style={{ width: 176, height: 46, background: 'linear-gradient(180deg,#f87171 0%,#dc2626 100%)', borderRadius: '10px 10px 3px 3px', position: 'relative', overflow: 'hidden', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.25)' }}>
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 22, background: 'linear-gradient(90deg,rgba(255,255,255,0.5),rgba(255,255,255,0.8) 50%,rgba(255,255,255,0.5))' }}/>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(255,255,255,0.2) 0%,transparent 60%)', pointerEvents: 'none' }}/>
               </div>
             </div>
 
             {/* Body */}
-            <div style={{ width: 160, height: 124, background: 'linear-gradient(160deg,#22c55e 0%,#1D9E75 45%,#15805f 100%)', borderRadius: '0 0 16px 16px', borderTop: 'none', position: 'relative', overflow: 'hidden', boxShadow: '0 18px 40px rgba(21,128,95,0.35), 0 6px 14px rgba(0,0,0,0.18)', zIndex: 2 }}>
-              <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 22, background: 'linear-gradient(90deg,rgba(255,255,255,0.3),rgba(255,255,255,0.6) 50%,rgba(255,255,255,0.3))' }}/>
-              <div style={{ position: 'absolute', left: 0, right: 0, top: '30%', height: 20, background: 'rgba(255,255,255,0.2)' }}/>
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg,rgba(255,255,255,0.14) 0%,transparent 50%)', pointerEvents: 'none', zIndex: 1 }}/>
+            <div style={{ width: 160, height: 124, background: 'linear-gradient(160deg,#fca5a5 0%,#ef4444 50%,#b91c1c 100%)', borderRadius: '0 0 16px 16px', borderTop: 'none', position: 'relative', overflow: 'hidden', boxShadow: '0 18px 40px rgba(0,0,0,0.3), 0 6px 14px rgba(0,0,0,0.2)', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 22, background: 'linear-gradient(90deg,rgba(255,255,255,0.35),rgba(255,255,255,0.65) 50%,rgba(255,255,255,0.35))' }}/>
+              <div style={{ position: 'absolute', left: 0, right: 0, top: '30%', height: 20, background: 'rgba(255,255,255,0.25)' }}/>
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg,rgba(255,255,255,0.18) 0%,transparent 50%)', pointerEvents: 'none', zIndex: 1 }}/>
             </div>
           </div>
 
@@ -458,12 +485,20 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
           <p style={{ marginTop: 24, fontSize: 13, fontWeight: 500, color: '#64748b', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 100, padding: '6px 18px', letterSpacing: '0.1px' }}>
             {hints[Math.min(clicks, 2)]}
           </p>
+          <button
+            onClick={() => setPhase('open')}
+            style={{ marginTop: 14, background: 'none', border: 'none', color: 'rgba(255,255,255,0.75)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
+          >
+            Bỏ qua, xem ngay →
+          </button>
         </div>
       )}
+    </div>
 
-      {/* ── Job cards ── */}
-      {phase === 'open' && (
-        <div style={{ width: '100%', marginTop: 16, animation: 'cardsIn 0.6s cubic-bezier(0.16,1,0.3,1) both', display: 'flex', flexDirection: 'column', gap: 20, zIndex: 2 }}>
+    {/* ── Job recommendations sheet ── */}
+    {phase === 'open' && (
+      <div style={{ width: '100%', boxSizing: 'border-box', marginTop: 28, background: '#f1f5f9', borderRadius: '32px 32px 0 0', boxShadow: '0 -12px 36px rgba(0,0,0,0.12)', animation: 'cardsIn 0.6s cubic-bezier(0.16,1,0.3,1) both' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 24px 64px', display: 'flex', flexDirection: 'column', gap: 22 }}>
           {/* Section header */}
           <div style={{ textAlign: 'center', marginBottom: 6 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 100, padding: '5px 16px', marginBottom: 14, animation: 'badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both' }}>
@@ -480,20 +515,46 @@ function GiftBox({ jobs, loading }: { jobs: JobWithEnterprise[]; loading: boolea
             </p>
           </div>
 
+          {!loading && jobs.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+              <div style={{ position: 'relative', width: '100%', maxWidth: 420 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }}>
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Tìm theo vị trí, doanh nghiệp, địa điểm..."
+                  style={{
+                    width: '100%', boxSizing: 'border-box', padding: '11px 14px 11px 38px',
+                    fontSize: 13.5, border: '1.5px solid #e2e8f0', borderRadius: 12,
+                    background: '#fff', color: '#0f172a', outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           {loading ? (
             <div className="jobs-grid">{[1,2,3].map(i => <SkeletonCard key={i}/>)}</div>
           ) : jobs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '52px 24px', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: 16, color: '#94a3b8', fontSize: 14 }}>
+            <div style={{ textAlign: 'center', padding: '52px 24px', background: '#fff', border: '1.5px dashed #cbd5e1', borderRadius: 16, color: '#94a3b8', fontSize: 14 }}>
               Hiện chưa có vị trí mới nào đang mở. Vui lòng quay lại sau!
+            </div>
+          ) : filteredJobs.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '52px 24px', background: '#fff', border: '1.5px dashed #cbd5e1', borderRadius: 16, color: '#94a3b8', fontSize: 14 }}>
+              Không tìm thấy vị trí phù hợp với "{search}".
             </div>
           ) : (
             <div className="jobs-grid">
-              {jobs.map((job, i) => <JobCard key={job.id} job={job} delay={i * 65} onApply={setApplyJob}/>)}
+              {filteredJobs.map((job, i) => <JobCard key={job.id} job={job} delay={i * 65} onShowDetail={setDetailJob} onShowEnterprise={setEntJob}/>)}
             </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    )}
+    </>
   )
 }
 
@@ -509,24 +570,7 @@ function Hero() {
         </span>
       </div>
 
-      {/* Check icon */}
-      <div
-        className="check-ring"
-        style={{
-          width: 88, height: 88, margin: '0 auto 28px',
-          background: 'rgba(255,255,255,0.15)',
-          border: '1.5px solid rgba(255,255,255,0.35)',
-          borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backdropFilter: 'blur(6px)',
-        }}
-      >
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-          <path className="check-path" d="M20 6L9 17l-5-5"/>
-        </svg>
-      </div>
-
-      <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', margin: '0 0 14px', letterSpacing: '-0.6px', lineHeight: 1.2, textShadow: '0 2px 20px rgba(0,0,0,0.12)' }}>
+      <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', margin: '28px 0 14px', letterSpacing: '-0.6px', lineHeight: 1.2, textShadow: '0 2px 20px rgba(0,0,0,0.12)' }}>
         Cảm ơn bạn đã hoàn thành khảo sát!
       </h1>
       <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,0.82)', margin: '0 auto', maxWidth: 500, lineHeight: 1.75 }}>
@@ -565,11 +609,11 @@ export function DoneScreen() {
         await Promise.all(enterprises.map(async ent => {
           const list = await fetchJobsByEnterprise(ent.id)
           list.filter(j => j.status === 'active').forEach(j => all.push({
-            ...j, enterpriseName: ent.name, enterpriseAbbr: ent.abbr, enterpriseColor: ent.color,
+            ...j, enterpriseName: ent.name, enterpriseAbbr: ent.abbr, enterpriseColor: ent.color, enterprise: ent,
           }))
         }))
         all.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
-        if (mounted) setJobs(all.slice(0, 6))
+        if (mounted) setJobs(all.slice(0, 30))
       } catch (err) {
         console.error('DoneScreen load error:', err)
       } finally {
@@ -589,12 +633,6 @@ export function DoneScreen() {
       <style>{STYLE}</style>
       <Confetti active={confetti}/>
       <Hero/>
-      {/* Divider wave */}
-      <div style={{ width: '100%', overflow: 'hidden', lineHeight: 0, marginTop: 32, zIndex: 1, position: 'relative' }}>
-        <svg viewBox="0 0 1440 56" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%' }}>
-          <path d="M0 56C240 0 480 0 720 28C960 56 1200 56 1440 28V56H0Z" fill="rgba(255,255,255,0.07)"/>
-        </svg>
-      </div>
       <GiftBox jobs={jobs} loading={loading}/>
     </div>
   )

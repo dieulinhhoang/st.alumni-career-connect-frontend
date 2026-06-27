@@ -121,6 +121,8 @@ const RoleListView: React.FC<RoleListViewProps> = ({
             <Popconfirm
               title="Xóa vai trò?"
               onConfirm={() => onDelete(String(record.id))}
+              okText="Xóa"
+              cancelText="Hủy"
             >
               <DeleteOutlined
                 style={{ fontSize: 18, cursor: 'pointer', color: '#ef4444' }}

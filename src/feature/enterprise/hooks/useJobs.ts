@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchJobsByEnterprise, createJob, updateJob, deleteJob } from "../api";
+import { fetchJobsByEnterprise, createJob, updateJob, deleteJob, approveJob, rejectJob } from "../api";
 import type { Job, JobFormValues, JobStatus } from "../type";
 
 // Hook quản lý state & side-effects cho danh sách tin tuyển dụng của một doanh nghiệp.
@@ -9,9 +9,9 @@ export function useJobs(enterpriseId: string | undefined) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Kiểm tra job có quá hạn nộp không
+  // Kiểm tra job có quá hạn nộp không (chỉ áp dụng cho tin đang active)
   function isExpired(job: Job): boolean {
-    if (!job.deadline || job.status === "closed") return false;
+    if (!job.deadline || job.status !== "active") return false;
     try {
       const deadlineDate = new Date(job.deadline);
       if (Number.isNaN(deadlineDate.getTime())) return false;
@@ -88,23 +88,40 @@ export function useJobs(enterpriseId: string | undefined) {
     setJobs((prev) => prev.filter((j) => j.id !== jobId));
   }, [enterpriseId]);
 
+  // Approve/Reject (chỉ admin gọi)
+  const approveJobAction = useCallback(async (jobId: string) => {
+    const updated = await approveJob(jobId);
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? updated : j)));
+  }, []);
+
+  const rejectJobAction = useCallback(async (jobId: string, reason?: string) => {
+    const updated = await rejectJob(jobId, reason);
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? updated : j)));
+  }, []);
+
   // Derived
+  const pendingJobs = jobs.filter((j) => j.status === "pending");
   const activeJobs = jobs.filter(
     (j) => j.status === "active" && !isExpired(j)
   );
   const closedJobs = jobs.filter(
     (j) => j.status === "closed" || isExpired(j)
   );
+  const rejectedJobs = jobs.filter((j) => j.status === "rejected");
 
   return {
     jobs,
+    pendingJobs,
     activeJobs,
     closedJobs,
+    rejectedJobs,
     loading,
     error,
     reload: load,
     addJob,
     editJob,
     removeJob,
+    approveJob: approveJobAction,
+    rejectJob: rejectJobAction,
   };
 }

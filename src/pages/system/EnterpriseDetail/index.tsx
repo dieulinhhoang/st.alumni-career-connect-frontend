@@ -75,11 +75,14 @@ export default function EnterpriseDetailPage() {
 
   const {
     jobs,
+    pendingJobs,
     activeJobs,
     closedJobs,
     addJob,
     editJob,
     removeJob,
+    approveJob,
+    rejectJob,
   } = useJobs(entId);
 
   const [jobTab, setJobTab] = useState("all");
@@ -116,7 +119,10 @@ export default function EnterpriseDetailPage() {
   }
 
   const displayJobs =
-    jobTab === "active" ? activeJobs : jobTab === "closed" ? closedJobs : jobs;
+    jobTab === "pending" ? pendingJobs
+    : jobTab === "active" ? activeJobs
+    : jobTab === "closed" ? closedJobs
+    : jobs;
 
   const enterpriseFaculties = Array.isArray(ent.faculties) ? ent.faculties : [];
 
@@ -424,6 +430,7 @@ export default function EnterpriseDetailPage() {
                   <Space size={4} wrap>
                     {[
                       { key: "all", label: "Tất cả", count: jobs.length },
+                      { key: "pending", label: "Chờ duyệt", count: pendingJobs.length },
                       { key: "active", label: "Đang tuyển", count: activeJobs.length },
                       { key: "closed", label: "Đã đóng", count: closedJobs.length },
                     ].map((tab) => (
@@ -465,6 +472,12 @@ export default function EnterpriseDetailPage() {
                         faculties={faculties}
                         onEdit={(job) => setJobModal({ open: true, job })}
                         onDelete={removeJob}
+                        onCloseJob={(id) => editJob(id, { status: "closed" })}
+                        isAdmin
+                        onApprove={approveJob}
+                        onReject={rejectJob}
+                        canManage={havePermission(PermissionEnum.JOBS_UPDATE)}
+                        canDelete={havePermission(PermissionEnum.JOBS_DELETE)}
                       />
                     ))}
                   </div>

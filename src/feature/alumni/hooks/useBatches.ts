@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getBatches, deleteBatch, getBatchResponses } from '../api';
+import { getBatches, deleteBatch, updateBatch, getBatchResponses } from '../api';
 import { fetchGraduationStudents } from '../../graduation/api';
 import type { SurveyBatch } from '../types';
 
@@ -73,6 +73,11 @@ export function useBatches() {
     }
   }, []);
 
+  const handleActivate = useCallback(async (id: number) => {
+    const updated = await updateBatch(id, { status: 'active' });
+    setBatches(prev => prev.map(b => (b.id === id ? { ...b, ...updated } : b)));
+  }, []);
+
   useEffect(() => {
     const cancelled = { v: false };
     fetchBatches(cancelled);
@@ -84,5 +89,5 @@ export function useBatches() {
     fetchBatches(cancelled);
   }, [fetchBatches]);
 
-  return { batches, loading, error, reload, deleteBatch: handleDelete };
+  return { batches, loading, error, reload, deleteBatch: handleDelete, activateBatch: handleActivate };
 }

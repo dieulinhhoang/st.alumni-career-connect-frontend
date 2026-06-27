@@ -1,19 +1,20 @@
-import { useState, useEffect, useMemo } from "react";
-import { Button, Col, Row, message } from "antd";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { Button, Col, Row, Spin } from "antd";
 import {
-  PlusOutlined, TeamOutlined, BankOutlined,
+  TeamOutlined, BankOutlined,
   FileTextOutlined, RiseOutlined, ArrowRightOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { FacultyCard } from "../../system/DashBoard/FacultyCard";
 import { EnterpriseList } from "../../system/DashBoard/Enterpriselist";
-import { EnterpriseFormModal } from "../../system/EnterpriseDetail/EditEnterpriseModal";
 import { StatCard } from "../../system/DashBoard/Statcard";
 import { getCurrentUser } from "../../../feature/auth/permission";
 import api from "../../../libs/api";
-import type { EnterpriseFormValues } from "../../../feature/enterprise/type";
 import { COLOR, RADIUS, SHADOW } from "../../system/DashBoard/theme";
+import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
+
+const ChartSection = lazy(() => import("../../system/DashBoard/Chartsection").then(m => ({ default: m.ChartSection })));
 
 type FacultyInfo = {
   name: string;
@@ -33,8 +34,8 @@ export function KhoaDashBoard() {
   const currentUser = getCurrentUser();
   const facultyId = currentUser.facultyId;
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  const { state: chartState, setField: setChartField, setKhoa: setChartKhoa, nganhOptions } = useChartFilter();
+  const [reloadKey] = useState(0);
   const [faculty, setFaculty] = useState<FacultyInfo | null>(null);
   const [report, setReport] = useState<ReportStatus | null>(null);
   const [totalEnterprises, setTotalEnterprises] = useState(0);
@@ -86,17 +87,19 @@ export function KhoaDashBoard() {
     return () => { cancelled = true; };
   }, [facultyId, reloadKey]);
 
+  useEffect(() => {
+    if (faculty?.abbr && chartState.khoa !== faculty.abbr) setChartKhoa(faculty.abbr);
+  }, [faculty?.abbr, chartState.khoa, setChartKhoa]);
+
+  const chartKhoaOptions = useMemo(
+    () => (faculty ? [{ value: faculty.abbr, label: faculty.name }] : []),
+    [faculty],
+  );
+
   const responseRate = useMemo(() => {
     if (!report || report.total === 0) return 0;
     return Math.round((report.responded / report.total) * 100);
   }, [report]);
-
-  const handleAddEnterprise = async (values: EnterpriseFormValues) => {
-    await api.post("/enterprises/by-faculty", values);
-    message.success("Đã thêm doanh nghiệp liên kết");
-    setModalOpen(false);
-    setReloadKey(k => k + 1);
-  };
 
   const statCards = useMemo(() => [
     {
@@ -211,29 +214,20 @@ export function KhoaDashBoard() {
             <EnterpriseList
               key={reloadKey}
               facultyId={currentUser.facultyId}
-              extra={
-                <Button
-                  size="small"
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setModalOpen(true)}
-                  style={{ background: "#1D9E75", border: "none" }}
-                >
-                  Thêm doanh nghiệp
-                </Button>
-              }
             />
           </Col>
         </Row>
-      </div>
 
-      <EnterpriseFormModal
-        open={modalOpen}
-        enterprise={null}
-        faculties={[]}
-        onClose={() => setModalOpen(false)}
-        onSave={handleAddEnterprise}
-      />
+        {/* ── CHART ── */}
+        <Suspense fallback={<div style={{ minHeight: 300, display: "flex", alignItems: "center", justifyContent: "center" }}><Spin size="large" /></div>}>
+          <ChartSection
+            state={chartState}
+            setField={setChartField}
+            khoaOptions={chartKhoaOptions}
+            nganhOptions={nganhOptions}
+          />
+        </Suspense>
+      </div>
     </AdminLayout>
   );
 }

@@ -47,6 +47,7 @@ export interface CreateBatchPayload {
   /** FK to graduation.id */
   graduationId?: number;
   totalStudents?: number;
+  status?: BatchStatus;
 }
 
 export interface UpdateBatchPayload {

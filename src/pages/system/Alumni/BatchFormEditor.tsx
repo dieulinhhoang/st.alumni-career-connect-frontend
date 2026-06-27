@@ -83,6 +83,23 @@ export default function BatchFormEditor() {
     )
   }
 
+  if (batch && batch.status !== 'draft') {
+    return (
+      <AdminLayout>
+        <Result
+          status="warning"
+          title="Không thể chỉnh sửa"
+          subTitle="Đợt khảo sát đã được kích hoạt hoặc đã kết thúc, không thể chỉnh sửa nội dung form."
+          extra={
+            <Button type="primary" onClick={() => navigate('/admin/alumni/batches')}>
+              Quay lại danh sách đợt
+            </Button>
+          }
+        />
+      </AdminLayout>
+    )
+  }
+
   return (
     <AdminLayout>
       <BuilderView

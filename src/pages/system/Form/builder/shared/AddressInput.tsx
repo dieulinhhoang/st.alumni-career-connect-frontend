@@ -70,7 +70,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
   return (
     <div ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
-      <GeoapifyContext apiKey={import.meta.env.VITE_API_GEOAPIFY_KEY || ""}>
+      <GeoapifyContext apiKey={import.meta.env.VITE_API_GEOAPIFY_KEY || "93a776ca72964dd9a1adc22cfbec60d9"}>
         <GeoapifyGeocoderAutocomplete
           value={inputValue}
           placeholder={placeholder}

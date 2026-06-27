@@ -32,14 +32,14 @@ const columns: ColumnsType<MajorSummaryRow> = [
     width: 100,
     align: 'right',
     render: (_, row) =>
-      row.submitted ? `${Math.round((row.approved / row.submitted) * 100)}%` : '-',
+      row.submitted ? `${Math.round((row.coViecLam / row.submitted) * 100)}%` : '-',
   },
   {
     title: 'Tỷ lệ VL / Tốt nghiệp',
     width: 110,
     align: 'right',
     render: (_, row) =>
-      row.total ? `${Math.round((row.approved / row.total) * 100)}%` : '-',
+      row.total ? `${Math.round((row.coViecLam / row.total) * 100)}%` : '-',
   },
   { title: 'Nhà nước',          dataIndex: 'kvNhaNuoc',    width: 80,  align: 'right' },
   { title: 'Tư nhân',           dataIndex: 'kvTuNhan',     width: 70,  align: 'right' },
@@ -74,7 +74,7 @@ export const Mau01Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, n
         const totNu = pageRows.reduce((a, r) => a + (r.totalNu || 0), 0);
         const sub = pageRows.reduce((a, r) => a + (r.submitted || 0), 0);
         const subNu = pageRows.reduce((a, r) => a + (r.submittedNu || 0), 0);
-        const app = pageRows.reduce((a, r) => a + (r.approved || 0), 0);
+        const coViec = pageRows.reduce((a, r) => a + (r.coViecLam || 0), 0);
         const tiep = pageRows.reduce((a, r) => a + (r.tiepTucHoc || 0), 0);
         const chua = pageRows.reduce((a, r) => a + (r.chuaCoViecLam || 0), 0);
         return (
@@ -84,11 +84,11 @@ export const Mau01Table: React.FC<Props> = ({ rows, orgLine1, orgLine2, title, n
             <Table.Summary.Cell index={5} align="right"><strong>{totNu}</strong></Table.Summary.Cell>
             <Table.Summary.Cell index={6} align="right"><strong>{sub}</strong></Table.Summary.Cell>
             <Table.Summary.Cell index={7} align="right"><strong>{subNu}</strong></Table.Summary.Cell>
-            <Table.Summary.Cell index={8} align="right"><strong>{app}</strong></Table.Summary.Cell>
+            <Table.Summary.Cell index={8} align="right"><strong>{coViec}</strong></Table.Summary.Cell>
             <Table.Summary.Cell index={9} align="right"><strong>{tiep}</strong></Table.Summary.Cell>
             <Table.Summary.Cell index={10} align="right"><strong>{chua}</strong></Table.Summary.Cell>
             <Table.Summary.Cell index={11} align="right">
-              <strong>{tot > 0 ? `${Math.round(app / tot * 100)}%` : '-'}</strong>
+              <strong>{tot > 0 ? `${Math.round(coViec / tot * 100)}%` : '-'}</strong>
             </Table.Summary.Cell>
             {Array.from({ length: 6 }).map((_, i) => (
               <Table.Summary.Cell key={i} index={12 + i} align="right">-</Table.Summary.Cell>

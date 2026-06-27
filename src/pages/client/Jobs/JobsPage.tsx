@@ -6,19 +6,15 @@ interface JobPosting {
   id: string
   enterpriseId: string
   enterpriseName: string
+  enterprisePhone?: string
+  enterpriseEmail?: string
+  enterpriseWebsite?: string
   title: string
   location: string
   salaryRange: string
   tags: string[]
   postedAt: string
   deadline?: string
-}
-
-interface ApplyForm {
-  fullName: string
-  email: string
-  phone: string
-  message: string
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -58,31 +54,13 @@ function SkeletonCard() {
   )
 }
 
-// ── ApplyModal ────────────────────────────────────────────────────────────────
-function ApplyModal({ job, onClose }: { job: JobPosting; onClose: () => void }) {
-  const [form, setForm] = useState<ApplyForm>({ fullName:'', email:'', phone:'', message:'' })
-  const [status, setStatus] = useState<'idle'|'loading'|'success'|'error'>('idle')
-  const [errMsg, setErrMsg] = useState('')
-
-  const set = (k: keyof ApplyForm) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) =>
-    setForm(p => ({ ...p, [k]: e.target.value }))
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus('loading')
-    try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/job-applications`, { jobId: job.id, ...form })
-      setStatus('success')
-    } catch {
-      setErrMsg('Gửi không thành công, vui lòng thử lại.')
-      setStatus('error')
-    }
-  }
-
-  const inp: React.CSSProperties = {
-    width:'100%', padding:'10px 13px', borderRadius:10,
-    border:'1.5px solid #e2e8f0', fontSize:13, background:'#f8fafc', transition:'border-color .2s',
-  }
+// ── JobDetailModal (JD + liên hệ doanh nghiệp) ─────────────────────────────────
+function JobDetailModal({ job, onClose }: { job: JobPosting; onClose: () => void }) {
+  const contactRows = [
+    { label: 'Điện thoại', value: job.enterprisePhone, href: job.enterprisePhone ? `tel:${job.enterprisePhone}` : undefined },
+    { label: 'Email', value: job.enterpriseEmail, href: job.enterpriseEmail ? `mailto:${job.enterpriseEmail}` : undefined },
+    { label: 'Website', value: job.enterpriseWebsite, href: job.enterpriseWebsite },
+  ].filter(r => r.value)
 
   return (
     <div
@@ -106,42 +84,39 @@ function ApplyModal({ job, onClose }: { job: JobPosting; onClose: () => void }) 
           </div>
         </div>
 
-        <div style={{ padding:'24px 24px 20px' }}>
-          {status === 'success' ? (
-            <div style={{ textAlign:'center',padding:'16px 0' }}>
-              <div style={{ width:56,height:56,background:'#dcfce7',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px' }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-              </div>
-              <div style={{ fontSize:16,fontWeight:800,color:'#0f172a',marginBottom:8 }}>Đã gửi hồ sơ!</div>
-              <div style={{ fontSize:13,color:'#64748b',lineHeight:1.6,marginBottom:20 }}>Doanh nghiệp sẽ liên hệ với bạn qua email hoặc số điện thoại đã cung cấp.</div>
-              <button onClick={onClose} style={{ padding:'10px 28px',background:'#1D9E75',color:'#fff',border:'none',borderRadius:10,fontWeight:700,fontSize:13,cursor:'pointer' }}>Đóng</button>
+        <div style={{ padding:'24px 24px 24px' }}>
+          {job.tags && job.tags.length > 0 && (
+            <div style={{ display:'flex',flexWrap:'wrap',gap:6,marginBottom:16 }}>
+              {job.tags.map(t => (
+                <span key={t} style={{ fontSize:11.5,padding:'3px 10px',background:'#f1f5f9',color:'#475569',borderRadius:8 }}>{t}</span>
+              ))}
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display:'flex',flexDirection:'column',gap:14 }}>
-              <div>
-                <label style={{ fontSize:12,fontWeight:700,color:'#475569',display:'block',marginBottom:5 }}>Họ và tên <span style={{ color:'#ef4444' }}>*</span></label>
-                <input style={inp} placeholder="Nguyễn Văn A" value={form.fullName} onChange={set('fullName')} required />
-              </div>
-              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
-                <div>
-                  <label style={{ fontSize:12,fontWeight:700,color:'#475569',display:'block',marginBottom:5 }}>Email <span style={{ color:'#ef4444' }}>*</span></label>
-                  <input style={inp} type="email" placeholder="email@gmail.com" value={form.email} onChange={set('email')} required />
-                </div>
-                <div>
-                  <label style={{ fontSize:12,fontWeight:700,color:'#475569',display:'block',marginBottom:5 }}>Số điện thoại <span style={{ color:'#ef4444' }}>*</span></label>
-                  <input style={inp} placeholder="0912 345 678" value={form.phone} onChange={set('phone')} required />
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize:12,fontWeight:700,color:'#475569',display:'block',marginBottom:5 }}>Lời nhắn <span style={{ fontSize:11,color:'#94a3b8',fontWeight:400 }}>(tùy chọn)</span></label>
-                <textarea style={{ ...inp,resize:'none',height:84 }} placeholder="Giới thiệu ngắn về bản thân..." value={form.message} onChange={set('message')} />
-              </div>
-              {status === 'error' && <div style={{ fontSize:12,color:'#ef4444',background:'#fef2f2',padding:'8px 12px',borderRadius:8 }}>{errMsg}</div>}
-              <button type="submit" disabled={status==='loading'} style={{ padding:12,background:status==='loading'?'#94a3b8':'#1D9E75',color:'#fff',border:'none',borderRadius:12,fontWeight:700,fontSize:14,cursor:status==='loading'?'not-allowed':'pointer',transition:'background .2s',marginTop:4 }}>
-                {status==='loading' ? 'Đang gửi...' : 'Gửi hồ sơ ứng tuyển'}
-              </button>
-            </form>
           )}
+
+          <div style={{ fontSize:12,fontWeight:700,color:'#64748b',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:10 }}>
+            Liên hệ ứng tuyển
+          </div>
+          {contactRows.length === 0 ? (
+            <p style={{ margin:0,fontSize:13,color:'#94a3b8' }}>Doanh nghiệp chưa cập nhật thông tin liên hệ.</p>
+          ) : (
+            <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
+              {contactRows.map(r => (
+                <div key={r.label} style={{ display:'flex',gap:10,fontSize:13.5,alignItems:'baseline' }}>
+                  <span style={{ width:78,flexShrink:0,color:'#94a3b8',fontWeight:600 }}>{r.label}</span>
+                  {r.href ? (
+                    <a href={r.href} target={r.label === 'Website' ? '_blank' : undefined} rel="noreferrer" style={{ color:'#0f7a57',fontWeight:600,wordBreak:'break-word' }}>
+                      {r.value}
+                    </a>
+                  ) : (
+                    <span style={{ color:'#0f172a',wordBreak:'break-word' }}>{r.value}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <p style={{ margin:'16px 0 0',fontSize:12,color:'#94a3b8',lineHeight:1.6 }}>
+            Hãy chủ động liên hệ trực tiếp với doanh nghiệp để ứng tuyển vị trí này.
+          </p>
         </div>
       </div>
     </div>
@@ -149,7 +124,7 @@ function ApplyModal({ job, onClose }: { job: JobPosting; onClose: () => void }) 
 }
 
 // ── JobCard ───────────────────────────────────────────────────────────────────
-function JobCard({ job, onApply, delay=0 }: { job: JobPosting; onApply: () => void; delay?: number }) {
+function JobCard({ job, onShowDetail, delay=0 }: { job: JobPosting; onShowDetail: () => void; delay?: number }) {
   const expired = isExpired(job.deadline)
   return (
     <div
@@ -159,7 +134,15 @@ function JobCard({ job, onApply, delay=0 }: { job: JobPosting; onApply: () => vo
       <div style={{ height:3,background:'linear-gradient(90deg,#1D9E75,transparent)',opacity:.7 }}/>
       <div style={{ padding:'18px 20px 14px',display:'flex',flexDirection:'column',gap:10 }}>
         <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8 }}>
-          <span style={{ fontSize:11,fontWeight:700,color:'#1D9E75',textTransform:'uppercase',letterSpacing:'.6px' }}>{job.enterpriseName}</span>
+          <span
+            style={{
+              fontSize:11,fontWeight:800,color:'#0f7a57',textTransform:'uppercase',letterSpacing:'.5px',
+              flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
+            }}
+            title={job.enterpriseName}
+          >
+            {job.enterpriseName}
+          </span>
           {job.deadline && (
             <span style={{ fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:6,background:expired?'#fee2e2':'#fff7ed',color:expired?'#ef4444':'#f97316',flexShrink:0 }}>
               {expired ? 'Hết hạn' : `HSD: ${fmtDate(job.deadline)}`}
@@ -192,11 +175,10 @@ function JobCard({ job, onApply, delay=0 }: { job: JobPosting; onApply: () => vo
         <span style={{ fontSize:11,color:'#94a3b8' }}>{fmtDate(job.postedAt) ? `Đăng ${fmtDate(job.postedAt)}` : ''}</span>
         <button
           className="apply-btn"
-          onClick={onApply}
-          disabled={expired}
-          style={{ fontSize:12,padding:'7px 16px',borderRadius:9,border:'1.5px solid #1D9E75',background:'transparent',color:'#1D9E75',fontWeight:700,cursor:expired?'not-allowed':'pointer',opacity:expired?.5:1,transition:'all .25s ease' }}
+          onClick={onShowDetail}
+          style={{ fontSize:12,padding:'7px 16px',borderRadius:9,border:'1.5px solid #1D9E75',background:'transparent',color:'#1D9E75',fontWeight:700,cursor:'pointer',transition:'all .25s ease' }}
         >
-          Ứng tuyển →
+          Xem & liên hệ →
         </button>
       </div>
     </div>
@@ -210,18 +192,32 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('')
-  const [applyJob, setApplyJob] = useState<JobPosting | null>(null)
+  const [detailJob, setDetailJob] = useState<JobPosting | null>(null)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 12
 
   const load = useCallback(async (p = 0) => {
     setLoading(true)
     try {
-      const params: Record<string, any> = { page: p, size: PAGE_SIZE }
-      if (search.trim()) params.search = search.trim()
+      const params: Record<string, any> = { page: p, size: PAGE_SIZE, status: 'active' }
+      if (search.trim()) params.title = search.trim()
       if (location.trim()) params.location = location.trim()
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/job-postings`, { params })
-      setJobs(res.data?.items ?? [])
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`, { params })
+      const items: JobPosting[] = (res.data?.items ?? []).map((j: any) => ({
+        id: String(j.id),
+        enterpriseId: String(j.enterpriseId),
+        enterpriseName: j.enterprise?.name ?? j.enterpriseName ?? '',
+        enterprisePhone: j.enterprise?.phone,
+        enterpriseEmail: j.enterprise?.email,
+        enterpriseWebsite: j.enterprise?.website,
+        title: j.title,
+        location: j.location,
+        salaryRange: j.salary,
+        tags: j.tags ?? [],
+        postedAt: j.postedAt,
+        deadline: j.deadline,
+      }))
+      setJobs(items)
       setTotal(res.data?.total ?? 0)
       setPage(p)
     } catch {
@@ -240,7 +236,7 @@ export default function JobsPage() {
   return (
     <div style={{ minHeight:'100vh', background:'#f8fafc' }}>
       <style>{STYLES}</style>
-      {applyJob && <ApplyModal job={applyJob} onClose={() => setApplyJob(null)} />}
+      {detailJob && <JobDetailModal job={detailJob} onClose={() => setDetailJob(null)} />}
 
       {/* Hero */}
       <div style={{ background:'linear-gradient(135deg,#1D9E75 0%,#15805f 100%)', padding:'52px 24px 40px', textAlign:'center' }}>
@@ -309,7 +305,7 @@ export default function JobsPage() {
         ) : (
           <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:18 }}>
             {jobs.map((job,i) => (
-              <JobCard key={job.id} job={job} delay={i*40} onApply={() => setApplyJob(job)} />
+              <JobCard key={job.id} job={job} delay={i*40} onShowDetail={() => setDetailJob(job)} />
             ))}
           </div>
         )}

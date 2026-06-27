@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Modal, Form, Input, Select, Tag, Row, Col, DatePicker } from "antd";
+import { Modal, Form, Input, Select, Tag, Row, Col, DatePicker, Alert } from "antd";
 import dayjs from "dayjs";
 import {
   JOB_LOCATIONS,
@@ -234,16 +234,45 @@ export function JobFormModal({
           </Col>
 
           <Col xs={24} sm={12}>
-            <Form.Item name="status" label="Trạng thái">
-              <Select
-                options={[
-                  { label: "Đang tuyển", value: "active" },
-                  { label: "Đã đóng", value: "closed" },
-                ]}
-              />
-            </Form.Item>
+            {job && job.status === "active" ? (
+              <Form.Item name="status" label="Trạng thái">
+                <Select
+                  options={[
+                    { label: "Đang tuyển", value: "active" },
+                    { label: "Đã đóng", value: "closed" },
+                  ]}
+                />
+              </Form.Item>
+            ) : job ? (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ marginBottom: 8, fontSize: 14 }}>Trạng thái</div>
+                {job.status === "pending" && (
+                  <Alert type="info" showIcon message="Đang chờ admin duyệt" />
+                )}
+                {job.status === "rejected" && (
+                  <Alert
+                    type="error"
+                    showIcon
+                    message="Đã bị từ chối"
+                    description={job.rejectionReason || undefined}
+                  />
+                )}
+                {job.status === "closed" && (
+                  <Alert type="warning" showIcon message="Tin đã đóng" />
+                )}
+              </div>
+            ) : null}
           </Col>
         </Row>
+
+        {!job && (
+          <Alert
+            type="info"
+            showIcon
+            message="Tin tuyển dụng sẽ ở trạng thái chờ duyệt cho đến khi admin xác nhận"
+            style={{ marginTop: -4 }}
+          />
+        )}
       </Form>
     </Modal>
   );

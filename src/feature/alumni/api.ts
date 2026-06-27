@@ -100,6 +100,23 @@ export async function getGraduations(page = 1, perPage = 100): Promise<Graduatio
   }));
 }
 
+export interface FacultyBreakdownItem {
+  facultyId: number | null;
+  facultyName: string;
+  studentCount: number;
+}
+
+export interface FacultyBreakdown {
+  graduationId: number;
+  totalStudents: number;
+  faculties: FacultyBreakdownItem[];
+}
+
+export async function getFacultyBreakdown(graduationId: number): Promise<FacultyBreakdown> {
+  const res = await api.get(`/graduation/${graduationId}/faculty-breakdown`);
+  return res.data;
+}
+
 /** Thông tin đầy đủ của sinh viên từ backend */
 export interface StudentData {
   id: number

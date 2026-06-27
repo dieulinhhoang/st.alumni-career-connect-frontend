@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   Button, Input, Select, Space, Typography,
-  Dropdown,
+  Dropdown, message,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   PlusOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
-  EyeOutlined,
+  EyeOutlined, CheckCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -27,7 +27,8 @@ const { Text } = Typography;
 const useMenuItems = (
   navigate: ReturnType<typeof useNavigate>,
   deleteBatch: (id: number) => void,
-  setEmailBatch: (batch: SurveyBatchWithStats) => void, 
+  setEmailBatch: (batch: SurveyBatchWithStats) => void,
+  activateBatch: (id: number) => Promise<void>,
   // showForm:(r)=>void,
 ) =>
   (r: SurveyBatchWithStats): MenuProps['items'] => [
@@ -51,13 +52,27 @@ const useMenuItems = (
         onClick: () => navigate(`/admin/alumni/batches/${r.id}/edit-form`),
       }]
       : []),
+    ...(r.status === 'draft' && havePermission(PermissionEnum.SURVEYS_UPDATE)
+      ? [{
+        key: 'activate', icon: <CheckCircleOutlined style={{ color: '#1D9E75' }} />, label: 'Kích hoạt',
+        onClick: () => {
+          if (!window.confirm(`Kích hoạt đợt khảo sát "${r.title}"? Sinh viên sẽ có thể bắt đầu làm khảo sát.`)) return;
+          activateBatch(r.id)
+            .then(() => message.success('Đã kích hoạt đợt khảo sát'))
+            .catch(() => message.error('Kích hoạt thất bại'));
+        },
+      }]
+      : []),
     ...(havePermission(PermissionEnum.SURVEYS_DELETE)
       ? [{
         key: 'delete',
         icon: <DeleteOutlined style={{ color: '#ef4444' }} />,
         label: <span style={{ color: '#ef4444' }}>Xóa khảo sát</span>,
         onClick: () => {
-          if (window.confirm(`Xóa đợt khảo sát "${r.title}"?`)) deleteBatch(r.id);
+          if (!window.confirm(`Xóa đợt khảo sát "${r.title}"?`)) return;
+          deleteBatch(r.id)
+            .then(() => message.success('Đã xóa đợt khảo sát'))
+            .catch((err: any) => message.error(err?.response?.data?.message ?? 'Xóa đợt khảo sát thất bại'));
         },
       }]
       : []),
@@ -65,7 +80,7 @@ const useMenuItems = (
 
 export const BatchList: React.FC = () => {
   const [emailBatch, setEmailBatch] = useState<SurveyBatchWithStats | null>(null);
-  const { batches, loading, deleteBatch } = useBatches();
+  const { batches, loading, deleteBatch, activateBatch } = useBatches();
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -78,7 +93,7 @@ export const BatchList: React.FC = () => {
     debounceTimer.current = setTimeout(() => setSearch(val), 300);
   }, []);
 
-  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch);
+  const getMenuItems = useMenuItems(navigate, deleteBatch, setEmailBatch, activateBatch);
   const safeBatches = Array.isArray(batches) ? batches : [];
 
   const filtered = useMemo(() => {

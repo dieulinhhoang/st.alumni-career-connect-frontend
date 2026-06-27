@@ -22,16 +22,16 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    key: '/enterprise/applicants',
-    label: 'Ứng viên',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-  },
+  // {
+  //   key: '/enterprise/applicants',
+  //   label: 'Ứng viên',
+  //   icon: (
+  //     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  //       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+  //       <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  //     </svg>
+  //   ),
+  // },
 ]
 
 export default function EnterpriseLayout({ children }: { children: React.ReactNode }) {
@@ -79,7 +79,7 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: '12px 8px' }}>
-          {NAV_ITEMS.map(item => {
+          {/* {NAV_ITEMS.map(item => {
             const active = location.pathname === item.key
             return (
               <button
@@ -99,7 +99,7 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
                 {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
               </button>
             )
-          })}
+          })} */}
         </nav>
 
         {/* Logout */}
@@ -133,7 +133,7 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
               <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
-          <span style={{ fontSize: 13, color: '#94a3b8' }}>Alumni Career Connect</span>
+          {/* <span style={{ fontSize: 13, color: '#94a3b8' }}>Alumni Career Connect</span> */}
         </header>
 
         <main style={{ flex: 1, padding: '28px 28px', overflowY: 'auto' }}>

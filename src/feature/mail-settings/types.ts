@@ -87,6 +87,13 @@ export const TEMPLATE_SECTIONS: Record<string, SectionDef[]> = {
     { key: 'signature', label: 'Chữ ký', multiline: true },
     { key: 'footer', label: 'Chú thích', multiline: true },
   ],
+  job_opportunity: [
+    { key: 'greeting', label: 'Lời chào', multiline: false },
+    { key: 'intro', label: 'Đoạn giới thiệu', multiline: true },
+    { key: 'button_label', label: 'Chữ trên nút', multiline: false },
+    { key: 'signature', label: 'Chữ ký', multiline: true },
+    { key: 'footer', label: 'Chú thích', multiline: true },
+  ],
 };
 
 export const TEMPLATE_VARIABLES: Record<string, VariableDef[]> = {
@@ -113,5 +120,13 @@ export const TEMPLATE_VARIABLES: Record<string, VariableDef[]> = {
     { key: 'ten_nguoi_dung', label: '{{ten_nguoi_dung}}', desc: 'Tên người dùng' },
     { key: 'ten_khao_sat', label: '{{ten_khao_sat}}', desc: 'Tên khảo sát' },
     { key: 'button_url', label: '{{button_url}}', desc: 'Link tham gia khảo sát' },
+  ],
+  job_opportunity: [
+    { key: 'ten_nguoi_dung', label: '{{ten_nguoi_dung}}', desc: 'Tên người dùng' },
+    { key: 'ten_viec', label: '{{ten_viec}}', desc: 'Tên vị trí tuyển dụng' },
+    { key: 'ten_doanh_nghiep', label: '{{ten_doanh_nghiep}}', desc: 'Tên doanh nghiệp tuyển dụng' },
+    { key: 'dia_diem', label: '{{dia_diem}}', desc: 'Địa điểm làm việc' },
+    { key: 'luong', label: '{{luong}}', desc: 'Mức lương' },
+    { key: 'button_url', label: '{{button_url}}', desc: 'Link xem chi tiết & ứng tuyển' },
   ],
 };

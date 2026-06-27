@@ -120,6 +120,65 @@ export async function deleteJob(enterpriseId: string, jobId: string): Promise<vo
   await api.delete(`/jobs/${jobId}`, { data: { enterpriseId } });
 }
 
+export async function approveJob(jobId: string): Promise<Job> {
+  const res = await api.post(`/jobs/${jobId}/approve`);
+  return res.data?.data ?? res.data;
+}
+
+export async function rejectJob(jobId: string, reason?: string): Promise<Job> {
+  const res = await api.post(`/jobs/${jobId}/reject`, { reason });
+  return res.data?.data ?? res.data;
+}
+
+export type UnemployedAlumnus = {
+  studentCode: string;
+  fullName: string;
+  email: string;
+  majorName?: string;
+  facultyName?: string;
+};
+
+export type UnemployedAlumniPreview = {
+  batchTitle: string;
+  alumni: UnemployedAlumnus[];
+};
+
+export type NotifyUnemployedAlumniResult = {
+  batchTitle: string;
+  total: number;
+  sentCount: number;
+  failedCount: number;
+};
+
+/** Xem trước danh sách cựu SV "chưa có việc làm" theo đợt khảo sát (trước khi gửi email). */
+export async function fetchUnemployedAlumniPreview(
+  jobId: string,
+  surveyId?: string,
+): Promise<UnemployedAlumniPreview> {
+  const res = await api.get(`/jobs/${jobId}/unemployed-alumni`, {
+    params: surveyId ? { surveyId } : undefined,
+  });
+  return res.data;
+}
+
+/** Gửi email thông báo tin tuyển dụng cho các cựu SV đã chọn (chưa có việc làm theo khảo sát). */
+export async function notifyUnemployedAlumni(
+  jobId: string,
+  surveyId?: string,
+  emails?: string[],
+): Promise<NotifyUnemployedAlumniResult> {
+  const res = await api.post(`/jobs/${jobId}/notify-unemployed-alumni`, { surveyId, emails });
+  return res.data;
+}
+
+export type EmailPreview = { subject: string; html: string };
+
+/** Xem trước nội dung email (subject + HTML) sẽ được gửi cho tin tuyển dụng này. */
+export async function fetchNotifyEmailPreview(jobId: string): Promise<EmailPreview> {
+  const res = await api.get(`/jobs/${jobId}/notify-email-preview`);
+  return res.data;
+}
+
 // Faculty API
 export async function fetchFaculties(): Promise<Faculty[]> {
   const res = await api.get("/faculty", { params: { page: 0, size: 999 } });

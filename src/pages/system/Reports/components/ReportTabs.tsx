@@ -7,7 +7,7 @@ import {
   PieChartOutlined,
   SendOutlined,
   DownloadOutlined,
-  EllipsisOutlined,
+  FileExcelOutlined,
 } from '@ant-design/icons';
 import type {
   MajorSummaryRow,
@@ -30,7 +30,7 @@ interface Props {
   orgLine1: string;
   orgLine2: string;
   signLabel: string;
-  onDownload: (mau: 'mau01' | 'mau02' | 'mau03') => void;
+  onDownload: (mau: 'mau01' | 'mau02' | 'mau03' | 'all') => void;
   batchId: string;
   showProgress?: boolean;
 }
@@ -50,17 +50,19 @@ export const ReportTabs: React.FC<Props> = ({
 }) => {
   const downloadMenu: MenuProps = {
     items: [
-      { key: 'mau01', icon: <DownloadOutlined />, label: 'Mẫu 1 ' },
-      { key: 'mau02', icon: <DownloadOutlined />, label: 'Mẫu 2 ' },
-      { key: 'mau03', icon: <DownloadOutlined />, label: 'Mẫu 3 ' },
+      { key: 'all', icon: <FileExcelOutlined />, label: 'Tải tất cả báo cáo (1 file)' },
+      { type: 'divider' },
+      { key: 'mau01', icon: <DownloadOutlined />, label: 'Chỉ Mẫu 1' },
+      { key: 'mau02', icon: <DownloadOutlined />, label: 'Chỉ Mẫu 2' },
+      { key: 'mau03', icon: <DownloadOutlined />, label: 'Chỉ Mẫu 3' },
     ],
-    onClick: ({ key }) => onDownload(key as 'mau01' | 'mau02' | 'mau03'),
+    onClick: ({ key }) => onDownload(key as 'mau01' | 'mau02' | 'mau03' | 'all'),
   };
 
   const tabBarExtra = (
     <Dropdown menu={downloadMenu} trigger={['click']} placement="bottomRight">
-      <Button size="small" icon={<DownloadOutlined />} title="Tải báo cáo">
-        <EllipsisOutlined />
+      <Button size="small" type="primary" icon={<DownloadOutlined />}>
+        Tải báo cáo
       </Button>
     </Dropdown>
   );

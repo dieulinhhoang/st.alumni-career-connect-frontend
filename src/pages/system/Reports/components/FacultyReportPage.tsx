@@ -72,7 +72,7 @@ export default function FacultyReportPage() {
 
   const selectedDeadline = surveyOptions.find((o) => o.value === filters.surveyId)?.deadline ?? deadline;
 
-  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03') => {
+  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03' | 'all') => {
     try {
       await exportReportExcel(mau, filters);
     } catch {

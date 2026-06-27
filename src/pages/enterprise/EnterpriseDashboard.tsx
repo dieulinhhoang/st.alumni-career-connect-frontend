@@ -32,7 +32,7 @@ export default function EnterpriseDashboard() {
   const enterpriseId = session?.enterpriseId
 
   const { enterprise: ent, loading: entLoading } = useEnterpriseDetail(enterpriseId)
-  const { jobs, activeJobs, closedJobs, addJob, editJob, removeJob } = useJobs(enterpriseId)
+  const { jobs, pendingJobs, activeJobs, closedJobs, addJob, editJob, removeJob } = useJobs(enterpriseId)
   const { applicants, loading: appLoading, updateStatus } = useApplicants(enterpriseId)
   const { faculties } = useFaculties()
 
@@ -50,8 +50,13 @@ export default function EnterpriseDashboard() {
   const ACCENT = ent?.color ?? '#1D9E75'
 
   const handleSaveJob = async (values: JobFormValues) => {
-    if (jobModal.job) await editJob(jobModal.job.id, values as Partial<Job>)
-    else await addJob(values)
+    if (jobModal.job) {
+      // Sửa nội dung tin đang active phải chờ admin duyệt lại trước khi hiển thị công khai
+      const resetToPending = jobModal.job.status === 'active'
+      await editJob(jobModal.job.id, { ...values, status: resetToPending ? 'pending' : values.status } as Partial<Job>)
+    } else {
+      await addJob(values)
+    }
   }
 
   const filteredApplicants = applicants.filter(a => {
@@ -77,7 +82,7 @@ export default function EnterpriseDashboard() {
         <StatCard label="Tổng tin tuyển dụng" value={jobs.length} color={ACCENT} />
         <StatCard label="Đang tuyển" value={activeJobs.length} color="#059669" />
         <StatCard label="Đã đóng" value={closedJobs.length} color="#d97706" />
-        <StatCard label="Tổng ứng viên" value={applicants.length} color="#7c3aed" />
+        {/* <StatCard label="Tổng ứng viên" value={applicants.length} color="#7c3aed" /> */}
       </div>
 
       {/* Tabs */}
@@ -110,6 +115,7 @@ export default function EnterpriseDashboard() {
                           key={j.id} job={j} entColor={ACCENT} faculties={faculties}
                           onEdit={job => setJobModal({ open: true, job })}
                           onDelete={removeJob}
+                          onCloseJob={id => editJob(id, { status: 'closed' })}
                         />
                       ))}
                     </div>
@@ -117,148 +123,148 @@ export default function EnterpriseDashboard() {
                 </div>
               ),
             },
-            {
-              key: 'applicants',
-              label: (
-                <span>
-                  Ứng viên{' '}
-                  <Badge count={pendingCount} style={{ background: '#7c3aed' }} title="Chờ xem xét" />
-                </span>
-              ),
-              children: (
-                <div>
-                  {/* Filters */}
-                  <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-                    <Select
-                      allowClear
-                      placeholder="Lọc theo tin tuyển dụng"
-                      style={{ width: 240 }}
-                      options={jobOptions}
-                      value={filterJobId}
-                      onChange={v => setFilterJobId(v)}
-                    />
-                    <Select
-                      allowClear
-                      placeholder="Lọc theo trạng thái"
-                      style={{ width: 180 }}
-                      value={filterStatus}
-                      onChange={v => setFilterStatus(v)}
-                      options={Object.entries(STATUS_CONFIG).map(([k, v]) => ({ label: v.label, value: k }))}
-                    />
-                    <span style={{ fontSize: 12, color: '#94a3b8', alignSelf: 'center' }}>
-                      {filteredApplicants.length} / {applicants.length} ứng viên
-                    </span>
-                  </div>
+            // {
+            //   key: 'applicants',
+            //   label: (
+            //     <span>
+            //       Ứng viên{' '}
+            //       <Badge count={pendingCount} style={{ background: '#7c3aed' }} title="Chờ xem xét" />
+            //     </span>
+            //   ),
+            //   children: (
+            //     <div>
+            //       {/* Filters */}
+            //       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            //         <Select
+            //           allowClear
+            //           placeholder="Lọc theo tin tuyển dụng"
+            //           style={{ width: 240 }}
+            //           options={jobOptions}
+            //           value={filterJobId}
+            //           onChange={v => setFilterJobId(v)}
+            //         />
+            //         <Select
+            //           allowClear
+            //           placeholder="Lọc theo trạng thái"
+            //           style={{ width: 180 }}
+            //           value={filterStatus}
+            //           onChange={v => setFilterStatus(v)}
+            //           options={Object.entries(STATUS_CONFIG).map(([k, v]) => ({ label: v.label, value: k }))}
+            //         />
+            //         <span style={{ fontSize: 12, color: '#94a3b8', alignSelf: 'center' }}>
+            //           {filteredApplicants.length} / {applicants.length} ứng viên
+            //         </span>
+            //       </div>
 
-                  {appLoading ? (
-                    <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
-                  ) : filteredApplicants.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
-                      {applicants.length === 0 ? 'Chưa có ứng viên nào' : 'Không có ứng viên khớp bộ lọc'}
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {filteredApplicants.map(a => {
-                        const sc = STATUS_CONFIG[a.status ?? 'pending']
-                        return (
-                          <div
-                            key={a.id}
-                            style={{
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderLeft: `3px solid ${sc.color}`,
-                              borderRadius: 12,
-                              padding: '14px 18px',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              gap: 12,
-                            }}
-                          >
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>{a.fullName}</div>
-                              <div style={{ fontSize: 12, color: '#64748b', marginTop: 3, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                                <span>✉ {a.email}</span>
-                                <span>📞 {a.phone}</span>
-                              </div>
-                              {a.message && (
-                                <div
-                                  style={{
-                                    fontSize: 12,
-                                    color: '#475569',
-                                    marginTop: 6,
-                                    background: '#fff',
-                                    padding: '6px 10px',
-                                    borderRadius: 7,
-                                    border: '1px solid #e2e8f0',
-                                    maxHeight: 48,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                  } as React.CSSProperties}
-                                >
-                                  {a.message}
-                                </div>
-                              )}
-                            </div>
+            //       {appLoading ? (
+            //         <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
+            //       ) : filteredApplicants.length === 0 ? (
+            //         <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
+            //           {applicants.length === 0 ? 'Chưa có ứng viên nào' : 'Không có ứng viên khớp bộ lọc'}
+            //         </div>
+            //       ) : (
+            //         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            //           {filteredApplicants.map(a => {
+            //             const sc = STATUS_CONFIG[a.status ?? 'pending']
+            //             return (
+            //               <div
+            //                 key={a.id}
+            //                 style={{
+            //                   background: '#f8fafc',
+            //                   border: '1px solid #e2e8f0',
+            //                   borderLeft: `3px solid ${sc.color}`,
+            //                   borderRadius: 12,
+            //                   padding: '14px 18px',
+            //                   display: 'flex',
+            //                   justifyContent: 'space-between',
+            //                   alignItems: 'flex-start',
+            //                   gap: 12,
+            //                 }}
+            //               >
+            //                 <div style={{ flex: 1, minWidth: 0 }}>
+            //                   <div style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>{a.fullName}</div>
+            //                   <div style={{ fontSize: 12, color: '#64748b', marginTop: 3, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            //                     <span>✉ {a.email}</span>
+            //                     <span>📞 {a.phone}</span>
+            //                   </div>
+            //                   {a.message && (
+            //                     <div
+            //                       style={{
+            //                         fontSize: 12,
+            //                         color: '#475569',
+            //                         marginTop: 6,
+            //                         background: '#fff',
+            //                         padding: '6px 10px',
+            //                         borderRadius: 7,
+            //                         border: '1px solid #e2e8f0',
+            //                         maxHeight: 48,
+            //                         overflow: 'hidden',
+            //                         textOverflow: 'ellipsis',
+            //                         display: '-webkit-box',
+            //                         WebkitLineClamp: 2,
+            //                         WebkitBoxOrient: 'vertical',
+            //                       } as React.CSSProperties}
+            //                     >
+            //                       {a.message}
+            //                     </div>
+            //                   )}
+            //                 </div>
 
-                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                <Tag color="purple" style={{ margin: 0 }}>{a.job?.title ?? 'N/A'}</Tag>
-                                <Tag color={sc.antColor} style={{ margin: 0 }}>{sc.label}</Tag>
-                              </div>
-                              <div style={{ fontSize: 11, color: '#94a3b8' }}>
-                                {new Date(a.appliedAt).toLocaleDateString('vi-VN')}
-                              </div>
-                              {/* Action buttons */}
-                              <div style={{ display: 'flex', gap: 4 }}>
-                                <Tooltip title="Xem chi tiết">
-                                  <Button
-                                    size="small" type="text"
-                                    icon={<EyeOutlined />}
-                                    style={{ color: '#64748b' }}
-                                    onClick={() => setDetailApp(a)}
-                                  />
-                                </Tooltip>
-                                <Tooltip title="Đánh dấu tiềm năng">
-                                  <Button
-                                    size="small" type="text"
-                                    icon={<StarOutlined />}
-                                    style={{ color: a.status === 'shortlisted' ? '#059669' : '#94a3b8' }}
-                                    onClick={() => updateStatus(a.id, 'shortlisted')}
-                                    disabled={a.status === 'shortlisted'}
-                                  />
-                                </Tooltip>
-                                <Tooltip title="Đánh dấu đã xem xét">
-                                  <Button
-                                    size="small" type="text"
-                                    icon={<CheckOutlined />}
-                                    style={{ color: a.status === 'reviewed' ? '#2563eb' : '#94a3b8' }}
-                                    onClick={() => updateStatus(a.id, 'reviewed')}
-                                    disabled={a.status === 'reviewed'}
-                                  />
-                                </Tooltip>
-                                <Tooltip title="Không phù hợp">
-                                  <Button
-                                    size="small" type="text"
-                                    icon={<CloseOutlined />}
-                                    style={{ color: a.status === 'rejected' ? '#dc2626' : '#94a3b8' }}
-                                    onClick={() => updateStatus(a.id, 'rejected')}
-                                    disabled={a.status === 'rejected'}
-                                  />
-                                </Tooltip>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              ),
-            },
+            //                 <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+            //                   <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            //                     <Tag color="purple" style={{ margin: 0 }}>{a.job?.title ?? 'N/A'}</Tag>
+            //                     <Tag color={sc.antColor} style={{ margin: 0 }}>{sc.label}</Tag>
+            //                   </div>
+            //                   <div style={{ fontSize: 11, color: '#94a3b8' }}>
+            //                     {new Date(a.appliedAt).toLocaleDateString('vi-VN')}
+            //                   </div>
+            //                   {/* Action buttons */}
+            //                   <div style={{ display: 'flex', gap: 4 }}>
+            //                     <Tooltip title="Xem chi tiết">
+            //                       <Button
+            //                         size="small" type="text"
+            //                         icon={<EyeOutlined />}
+            //                         style={{ color: '#64748b' }}
+            //                         onClick={() => setDetailApp(a)}
+            //                       />
+            //                     </Tooltip>
+            //                     <Tooltip title="Đánh dấu tiềm năng">
+            //                       <Button
+            //                         size="small" type="text"
+            //                         icon={<StarOutlined />}
+            //                         style={{ color: a.status === 'shortlisted' ? '#059669' : '#94a3b8' }}
+            //                         onClick={() => updateStatus(a.id, 'shortlisted')}
+            //                         disabled={a.status === 'shortlisted'}
+            //                       />
+            //                     </Tooltip>
+            //                     <Tooltip title="Đánh dấu đã xem xét">
+            //                       <Button
+            //                         size="small" type="text"
+            //                         icon={<CheckOutlined />}
+            //                         style={{ color: a.status === 'reviewed' ? '#2563eb' : '#94a3b8' }}
+            //                         onClick={() => updateStatus(a.id, 'reviewed')}
+            //                         disabled={a.status === 'reviewed'}
+            //                       />
+            //                     </Tooltip>
+            //                     <Tooltip title="Không phù hợp">
+            //                       <Button
+            //                         size="small" type="text"
+            //                         icon={<CloseOutlined />}
+            //                         style={{ color: a.status === 'rejected' ? '#dc2626' : '#94a3b8' }}
+            //                         onClick={() => updateStatus(a.id, 'rejected')}
+            //                         disabled={a.status === 'rejected'}
+            //                       />
+            //                     </Tooltip>
+            //                   </div>
+            //                 </div>
+            //               </div>
+            //             )
+            //           })}
+            //         </div>
+            //       )}
+            //     </div>
+            //   ),
+            // },
           ]}
         />
       </div>

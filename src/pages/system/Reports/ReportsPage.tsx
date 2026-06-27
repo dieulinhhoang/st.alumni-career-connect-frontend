@@ -37,7 +37,7 @@ export default function ReportsPage() {
     setFilters((f) => ({ ...f, surveyId: v }));
   };
 
-  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03') => {
+  const handleDownload = async (mau: 'mau01' | 'mau02' | 'mau03' | 'all') => {
     try {
       await exportReportExcel(mau, filters);
     } catch {

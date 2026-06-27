@@ -1,7 +1,9 @@
 export function parseJwt(token: string): Record<string, any> | null {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
-    return JSON.parse(atob(base64))
+    const binary = atob(base64)
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0))
+    return JSON.parse(new TextDecoder('utf-8').decode(bytes))
   } catch {
     return null
   }

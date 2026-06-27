@@ -19,7 +19,7 @@ type PageState = 'loading' | 'error' | 'not-active' | 'identify' | 'fill'
  * Câu 9–10 (SĐT, Email) chỉ được prefill nếu có studentData nhưng KHÔNG bị khoá
  * để SV có thể cập nhật nếu thông tin thay đổi.
  */
-const LOCKED_COUNT = 8
+const LOCKED_COUNT = 0
 
 /**
  * Mapping thứ tự câu hỏi → field của student (dựa theo form chuẩn VNUA):

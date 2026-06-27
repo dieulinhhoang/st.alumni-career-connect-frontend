@@ -6,7 +6,7 @@ import * as pdfjs from "pdfjs-dist";
 // Cấu hình PDF Worker  
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-const GROQ_KEY =   "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" ; 
+const GROQ_KEY = import.meta.env.VITE_API_GROQ_KEY;
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL    = "llama-3.3-70b-versatile"; 
 

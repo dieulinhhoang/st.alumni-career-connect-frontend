@@ -10,7 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getForms, type FormType } from '../../../feature/form/api';
 import { useCreateBatch } from '../../../feature/alumni/hooks/useCreateBatch';
-import { getGraduations, type GraduationOption } from '../../../feature/alumni/api';
+import { getGraduations, getFacultyBreakdown, type GraduationOption, type FacultyBreakdown } from '../../../feature/alumni/api';
 import Preview from '../Form/Preview';
 import AdminLayout from '../../../components/layout/AdminLayout';
 
@@ -26,8 +26,20 @@ export const BatchCreate: React.FC = () => {
   const [graduations,    setGraduations]      = useState<GraduationOption[]>([]);
   const [loadingGrads,   setLoadingGrads]     = useState(true);
   const { create, loading: creating } = useCreateBatch();
+  const [breakdown,      setBreakdown]        = useState<FacultyBreakdown | null>(null);
+  const [loadingBreak,   setLoadingBreak]     = useState(false);
+  const selectedGraduationId = Form.useWatch('graduationId', form);
 
   useEffect(() => { loadPublishedForms(); loadGraduations(); }, []);
+
+  useEffect(() => {
+    if (!selectedGraduationId) { setBreakdown(null); return; }
+    setLoadingBreak(true);
+    getFacultyBreakdown(selectedGraduationId)
+      .then(setBreakdown)
+      .catch(() => { message.error('Không thể tải thông tin khoa của đợt tốt nghiệp'); setBreakdown(null); })
+      .finally(() => setLoadingBreak(false));
+  }, [selectedGraduationId]);
 
   const loadPublishedForms = async () => {
     try {
@@ -51,7 +63,8 @@ export const BatchCreate: React.FC = () => {
     }
   };
 
-  const onFinish = async (values: any) => {
+  const submitBatch = async (status: 'draft' | 'active') => {
+    const values = await form.validateFields();
     if (!selectedForm) { message.warning('Vui lòng chọn form khảo sát'); return; }
     const [s, e] = values.dateRange;
 
@@ -69,10 +82,10 @@ export const BatchCreate: React.FC = () => {
       graduationPeriod: grad.name,
       year:             grad.schoolYear,   // kept for legacy display
       totalStudents:    grad.studentCount ?? 0,
-      status:           'active',
+      status,
     });
     if (newBatch) {
-      message.success('Tạo đợt khảo sát thành công!');
+      message.success(status === 'draft' ? 'Đã lưu nháp đợt khảo sát!' : 'Tạo đợt khảo sát thành công!');
       navigate('/admin/alumni/batches');
     }
   };
@@ -103,7 +116,7 @@ export const BatchCreate: React.FC = () => {
               <FormOutlined /> Thông tin đợt khảo sát
             </div>
 
-            <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Form form={form} layout="vertical">
               <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}>
                 <Input placeholder="VD: Khảo sát tình hình việc làm của sinh viên tốt nghiệp năm 2025" style={{ borderRadius: 6 }} />
               </Form.Item>
@@ -158,6 +171,44 @@ export const BatchCreate: React.FC = () => {
                 style={{ marginBottom: 16, borderRadius: 6 }}
               />
 
+              {selectedGraduationId && (
+                <div style={{
+                  border: '1px solid #e5e7eb', borderRadius: 8,
+                  padding: '12px 14px', marginBottom: 16, background: '#fafafa',
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                    Khoa có sinh viên trong đợt này
+                  </div>
+                  {loadingBreak ? (
+                    <div style={{ textAlign: 'center', padding: 8 }}><Spin size="small" /></div>
+                  ) : !breakdown || breakdown.faculties.length === 0 ? (
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Đợt tốt nghiệp này chưa có sinh viên nào.
+                    </Text>
+                  ) : (
+                    <>
+                      {breakdown.faculties.map((f) => (
+                        <div key={f.facultyId ?? f.facultyName} style={{
+                          display: 'flex', justifyContent: 'space-between',
+                          fontSize: 12.5, padding: '3px 0',
+                        }}>
+                          <span>{f.facultyName}</span>
+                          <span style={{ color: '#64748b' }}>{f.studentCount} SV</span>
+                        </div>
+                      ))}
+                      <div style={{
+                        display: 'flex', justifyContent: 'space-between',
+                        fontSize: 12.5, fontWeight: 600, marginTop: 6, paddingTop: 6,
+                        borderTop: '1px solid #e5e7eb',
+                      }}>
+                        <span>Tổng cộng</span>
+                        <span>{breakdown.totalStudents} SV</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Form selector */}
               <Form.Item label="Chọn form khảo sát">
                 <FormSelector
@@ -168,18 +219,28 @@ export const BatchCreate: React.FC = () => {
                 />
               </Form.Item>
 
-              <Button
-                type="primary" htmlType="submit"
-                loading={creating} disabled={!hasSelectedForm} block
-                icon={<CopyOutlined />}
-                style={{
-                  background:   hasSelectedForm ? '#1D9E75' : undefined,
-                  borderColor:  hasSelectedForm ? '#1D9E75' : undefined,
-                  borderRadius: 6, fontWeight: 500, height: 40,
-                }}
-              >
-                Tạo đợt &amp; nhân bản form
-              </Button>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Button
+                  loading={creating} disabled={!hasSelectedForm}
+                  onClick={() => submitBatch('draft').catch(() => {})}
+                  style={{ borderRadius: 6, fontWeight: 500, height: 40, flex: 1 }}
+                >
+                  Lưu nháp
+                </Button>
+                <Button
+                  type="primary"
+                  loading={creating} disabled={!hasSelectedForm}
+                  icon={<CopyOutlined />}
+                  onClick={() => submitBatch('active').catch(() => {})}
+                  style={{
+                    background:   hasSelectedForm ? '#1D9E75' : undefined,
+                    borderColor:  hasSelectedForm ? '#1D9E75' : undefined,
+                    borderRadius: 6, fontWeight: 500, height: 40, flex: 2,
+                  }}
+                >
+                  Tạo &amp; Kích hoạt
+                </Button>
+              </div>
             </Form>
           </div>
 

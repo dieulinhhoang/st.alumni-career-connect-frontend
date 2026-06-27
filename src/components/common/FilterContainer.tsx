@@ -67,13 +67,14 @@
 
         {/* Form filter */}
         <Form form={form} layout='inline' onValuesChange={handleChangeFilter} ref={formRef}>
-          <div 
-            className='filter-form-container' 
-            style={{ 
-              display: 'flex', 
-              flexWrap: 'wrap', 
-              gap: '8px', 
-              alignItems: 'flex-end'
+          <div
+            className='filter-form-container'
+            style={{
+              display: 'flex',
+              flexWrap: 'nowrap',
+              gap: '8px',
+              alignItems: 'flex-end',
+              overflowX: 'auto',
             }}
           >
             {typeof children === 'function' ? children(form) : children}
