@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Empty, Skeleton, Space } from 'antd'
 import AdminLayout from '../../../../components/layout/AdminLayout'
 import { useFormStatisticsDetail } from '../../../../feature/statistics/hooks/useFormStatisticsDetail'
@@ -19,11 +20,14 @@ export default function FormStatisticsDetailPage() {
     loading,
   } = useFormStatisticsDetail()
 
-  const pieData =
-    detail?.data?.map((item) => ({
-      name: item.label,
-      value: item.value,
-    })) ?? []
+  const pieData = useMemo(
+    () =>
+      detail?.data?.map((item) => ({
+        name: item.label,
+        value: item.value,
+      })) ?? [],
+    [detail],
+  )
 
   const currentQuestion = questions.find((q) => q.id === questionId)
   const pieLabel = detail ? `Biểu đồ tròn · ${detail.batchTitle}` : 'Biểu đồ tròn'

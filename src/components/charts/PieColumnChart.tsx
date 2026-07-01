@@ -43,6 +43,13 @@ export function PieColumnChart({
   const pieInst = useRef<G2Pie | null>(null)
   const colInst = useRef<G2Column | null>(null)
   const [selectedSlice, setSelectedSlice] = useState<string | null>(null)
+  // Ref phản chiếu selectedSlice để đọc giá trị hiện tại trong event handler
+  // mà không cần đưa selectedSlice vào deps của effect (tránh rebuild chart).
+  const selectedRef = useRef<string | null>(null)
+
+  // Pie chỉ có ý nghĩa khi tổng giá trị > 0. Nếu đợt mới nhất chưa có số liệu
+  // (tất cả = 0), G2Pie vẫn vẽ các lát bằng nhau kèm nhãn "0%" gây hiểu nhầm.
+  const pieHasData = useMemo(() => pieData.some((d) => d.value > 0), [pieData])
 
   // Tính colorMap từ pieData — dùng cả cho pie lẫn column để đồng màu
   const nameColorMap = useMemo(
@@ -62,6 +69,7 @@ export function PieColumnChart({
     try { colInst.current?.destroy() } catch (_) {}
     pieInst.current = null
     colInst.current = null
+    selectedRef.current = null
     setSelectedSlice(null)
 
     // colorMap tính lại trong effect để đảm bảo đồng bộ với pieData hiện tại
@@ -75,7 +83,9 @@ export function PieColumnChart({
     )
 
     // ---- Pie chart ----
-    const pie = new G2Pie(pieRef.current, {
+    // Bỏ qua pie khi tất cả giá trị = 0 để tránh vẽ lát giả kèm nhãn "0%".
+    const hasPie = pieData.some((d) => d.value > 0)
+    const pie = !hasPie ? null : new G2Pie(pieRef.current, {
       data: pieData,
       angleField: 'value',
       colorField: 'name',
@@ -127,8 +137,10 @@ export function PieColumnChart({
       },
     })
 
-    pie.render()
-    pieInst.current = pie
+    if (pie) {
+      pie.render()
+      pieInst.current = pie
+    }
 
     // ---- Column chart ----
     const maxVal = Math.max(...colData.map((d) => d.value), 1)
@@ -187,16 +199,17 @@ export function PieColumnChart({
     colInst.current = col
 
     // Khi click vào slice pie → lọc cột theo loại đó
-    pie.on('element:click', (evt: { data?: { data?: { name?: string } } }) => {
+    pie?.on('element:click', (evt: { data?: { data?: { name?: string } } }) => {
       const name = evt?.data?.data?.name
       if (!name) return
-      setSelectedSlice((prev) => {
-        const next = prev === name ? null : name
-        colInst.current?.changeData(
-          next ? colData.filter((d) => d.type === next) : colData,
-        )
-        return next
-      })
+      // Tính next ngoài state updater để updater luôn thuần (pure) —
+      // side effect changeData không bị double-fire dưới StrictMode/concurrent.
+      const next = selectedRef.current === name ? null : name
+      selectedRef.current = next
+      setSelectedSlice(next)
+      colInst.current?.changeData(
+        next ? colData.filter((d) => d.type === next) : colData,
+      )
     })
 
     // FIX: dùng requestAnimationFrame để tránh ResizeObserver loop
@@ -214,7 +227,7 @@ export function PieColumnChart({
       ro.observe(el)
       observers.push(ro)
     }
-    observe(pieRef.current, pie as unknown as G2Pie)
+    if (pie) observe(pieRef.current, pie as unknown as G2Pie)
     observe(colRef.current, col as unknown as G2Pie)
 
     return () => {
@@ -227,6 +240,7 @@ export function PieColumnChart({
   }, [pieData, dotData, latestKey])
 
   const handleClearSlice = () => {
+    selectedRef.current = null
     setSelectedSlice(null)
     const rawDotData = dotData ?? { [latestKey]: pieData }
     const colData = Object.entries(rawDotData).flatMap(([dot, items]) =>
@@ -308,7 +322,26 @@ export function PieColumnChart({
                 </Text>
               </div>
             )}
-            <div ref={pieRef} style={{ height: 280 }} />
+            <div style={{ position: 'relative', height: 280 }}>
+              <div ref={pieRef} style={{ height: 280, visibility: pieHasData ? 'visible' : 'hidden' }} />
+              {!pieHasData && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    color: COLOR.textFaint,
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>Chưa có số liệu</div>
+                  <div style={{ fontSize: 11 }}>Đợt {latestKey} chưa có phản hồi việc làm</div>
+                </div>
+              )}
+            </div>
           </div>
         </Col>
 

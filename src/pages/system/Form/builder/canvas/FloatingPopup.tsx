@@ -23,7 +23,7 @@ const LBL: React.CSSProperties = {
 }
 
 // Loại câu hỏi có thể gán chỉ tiêu thống kê
-const CHARTABLE_TYPES: Question['type'][] = ['radio', 'checkbox', 'multiple-choice', 'dropdown', 'select']
+const CHARTABLE_TYPES: Question['type'][] = ['radio', 'checkbox', 'multiple-choice', 'dropdown', 'select', 'gender']
 
 interface FloatingPopupProps {
   question: Question

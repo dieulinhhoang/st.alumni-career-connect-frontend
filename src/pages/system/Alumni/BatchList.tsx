@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   Button, Input, Select, Space, Typography,
-  Dropdown, message,
+  Dropdown, message, Modal,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import {
@@ -69,10 +69,17 @@ const useMenuItems = (
         icon: <DeleteOutlined style={{ color: '#ef4444' }} />,
         label: <span style={{ color: '#ef4444' }}>Xóa khảo sát</span>,
         onClick: () => {
-          if (!window.confirm(`Xóa đợt khảo sát "${r.title}"?`)) return;
-          deleteBatch(r.id)
-            .then(() => message.success('Đã xóa đợt khảo sát'))
-            .catch((err: any) => message.error(err?.response?.data?.message ?? 'Xóa đợt khảo sát thất bại'));
+          Modal.confirm({
+            title: 'Xóa đợt khảo sát?',
+            content: `Đợt khảo sát "${r.title}" sẽ bị xóa vĩnh viễn.`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: () =>
+              deleteBatch(r.id)
+                .then(() => message.success('Đã xóa đợt khảo sát'))
+                .catch((err: any) => message.error(err?.response?.data?.message ?? 'Xóa đợt khảo sát thất bại')),
+          });
         },
       }]
       : []),

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Input, Timeline, Tag, Empty, Progress, Tooltip, Badge, message } from 'antd';
+import { Button, Modal, Input, Timeline, Tag, Empty, Progress, Tooltip, Space, Badge, message, Dropdown } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
   EyeOutlined,
@@ -9,10 +9,13 @@ import {
   ClockCircleOutlined,
   SendOutlined,
   CloseCircleOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
 import type { FacultySubmissionRow, FacultySubmissionRowExtended, SubmissionStatus } from '../../../../feature/reports/types';
 import { approveReport, returnReport, submitReport } from '../../../../feature/reports/api';
 import { SubmissionPill } from './SubmissionPill';
+import CustomTable from '../../../../components/common/customTable';
 
 interface Props {
   rows: FacultySubmissionRowExtended[];
@@ -27,21 +30,6 @@ type HistoryEntry = {
   color: string;
 };
 
-const STATUS_CONFIG: Record<SubmissionStatus, { icon: React.ReactNode; borderColor: string; headerBg: string }> = {
-  draft:     { icon: <ClockCircleOutlined />,        borderColor: '#d9d9d9', headerBg: '#fafafa' },
-  submitted: { icon: <SendOutlined />,               borderColor: '#91caff', headerBg: '#e6f4ff' },
-  returned:  { icon: <ExclamationCircleOutlined />,  borderColor: '#ffd666', headerBg: '#fffbe6' },
-  approved:  { icon: <CheckCircleOutlined />,        borderColor: '#b7eb8f', headerBg: '#f6ffed' },
-};
-
-// Tính % hoàn thành dựa vào status
-const STATUS_PROGRESS: Record<SubmissionStatus, number> = {
-  draft: 0,
-  submitted: 60,
-  returned: 30,
-  approved: 100,
-};
-
 export const ProgressTable: React.FC<Props> = ({ rows, batchId, onViewFaculty }) => {
   const navigate = useNavigate();
   const [statusMap, setStatusMap]   = useState<Record<string, SubmissionStatus>>({});
@@ -53,7 +41,6 @@ export const ProgressTable: React.FC<Props> = ({ rows, batchId, onViewFaculty })
     open: false, key: '', name: '',
   });
 
-  // Filter state
   const [activeFilter, setActiveFilter] = useState<SubmissionStatus | 'all'>('all');
 
   const getStatus = (row: FacultySubmissionRow): SubmissionStatus =>
@@ -109,7 +96,6 @@ export const ProgressTable: React.FC<Props> = ({ rows, batchId, onViewFaculty })
     }
   };
 
-  // Thống kê tổng hợp
   const allRows = rows.map((r) => ({ ...r, status: getStatus(r) }));
   const countByStatus = {
     draft:     allRows.filter((r) => r.status === 'draft').length,
@@ -132,179 +118,184 @@ export const ProgressTable: React.FC<Props> = ({ rows, batchId, onViewFaculty })
     { key: 'draft',     label: 'Chưa nộp',    count: countByStatus.draft,        color: '#8c8c8c' },
   ];
 
+  const columns: ColumnsType<FacultySubmissionRowExtended> = [
+    {
+      title: 'STT', key: 'stt', width: 55, align: 'center',
+      render: (_, __, i) => <span style={{ color: '#9ca3af', fontSize: 13 }}>{i + 1}</span>,
+    },
+    {
+      title: 'Khoa', key: 'faculty',
+      render: (_, r) => (
+        <div>
+          <div style={{ fontWeight: 500, fontSize: 14 }}>{r.facultyName}</div>
+          <div style={{ fontSize: 12, color: '#9ca3af' }}>{r.facultyCode}</div>
+        </div>
+      ),
+    },
+    {
+      title: 'Trạng thái', key: 'status', width: 130, align: 'center',
+      render: (_, r) => <SubmissionPill status={r.status} />,
+    },
+    {
+      title: 'Người nộp', key: 'submittedBy', width: 150,
+      render: (_, r) => (
+        <span style={{ color: r.submittedBy ? '#374151' : '#d1d5db', fontSize: 13 }}>
+          {r.submittedBy ?? '—'}
+        </span>
+      ),
+    },
+    {
+      title: 'Thời gian nộp', key: 'submittedAt', width: 140,
+      render: (_, r) => (
+        <span style={{ color: r.submittedAt ? '#374151' : '#d1d5db', fontSize: 13 }}>
+          {r.submittedAt ?? '—'}
+        </span>
+      ),
+    },
+    {
+      title: 'Hạn nộp', key: 'deadline', width: 120,
+      render: (_, r) => (
+        <span style={{
+          fontSize: 13,
+          color: r.deadline && r.status === 'draft' ? '#ef4444' : '#374151',
+          fontWeight: r.deadline && r.status === 'draft' ? 500 : 400,
+        }}>
+          {r.deadline ?? '—'}
+        </span>
+      ),
+    },
+    {
+      title: 'Phản hồi', key: 'responseCount', width: 90, align: 'center',
+      render: (_, r) => (
+        <span style={{ fontWeight: 600, fontSize: 14 }}>
+          {r.responseCount ?? 0}
+        </span>
+      ),
+    },
+    {
+      title: 'Có việc làm', key: 'employed', width: 100, align: 'center',
+      render: (_, r) => {
+        const pct = r.responseCount && r.responseCount > 0
+          ? Math.round(((r.employedCount ?? 0) / r.responseCount) * 100)
+          : 0;
+        return (
+          <span style={{ fontWeight: 600, fontSize: 14, color: pct > 0 ? '#22c55e' : '#d1d5db' }}>
+            {pct}%
+          </span>
+        );
+      },
+    },
+    {
+      title: 'Thao tác', key: 'actions', width: 200, align: 'center',
+      render: (_, r) => {
+        const hist = getHistory(r.key);
+        return (
+          <Space size={4}>
+            <Tooltip title="Xem chi tiết">
+              <Button
+                type="text" size="small"
+                icon={<EyeOutlined />}
+                onClick={() => navigate(`/admin/reports/faculty/${r.key}`)}
+              />
+            </Tooltip>
+            <Tooltip title={hist.length ? `${hist.length} lịch sử` : 'Lịch sử'}>
+              <Badge count={hist.length} size="small" offset={[-2, 2]}>
+                <Button
+                  type="text" size="small"
+                  icon={<HistoryOutlined style={{ color: hist.length ? '#6366f1' : '#d1d5db' }} />}
+                  onClick={() => setHistoryModal({ open: true, key: r.key, name: r.facultyName })}
+                />
+              </Badge>
+            </Tooltip>
+            {r.status === 'submitted' && (
+              <>
+                <Button
+                  size="small" type="primary"
+                  icon={<CheckCircleOutlined />}
+                  loading={actingKey === r.key}
+                  onClick={() => handleApprove(r.key)}
+                >
+                  Duyệt
+                </Button>
+                <Button
+                  size="small" danger
+                  icon={<CloseCircleOutlined />}
+                  disabled={actingKey === r.key}
+                  onClick={() => handleOpenReturn(r.key)}
+                >
+                  Trả
+                </Button>
+              </>
+            )}
+            {r.status === 'returned' && (
+              <Button
+                size="small"
+                icon={<SendOutlined />}
+                loading={actingKey === r.key}
+                onClick={() => handleResubmit(r.key)}
+              >
+                Nộp lại
+              </Button>
+            )}
+          </Space>
+        );
+      },
+    },
+  ];
+
   return (
     <>
-      {/* ── Thanh tổng quan ── */}
       <div className="pt-overview-bar">
         <div className="pt-overview-stats">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={`pt-filter-chip${activeFilter === tab.key ? ' pt-filter-chip--active' : ''}`}
-              style={{ '--chip-color': tab.color } as React.CSSProperties}
-              onClick={() => setActiveFilter(tab.key)}
+          <Dropdown
+            menu={{
+              items: filterTabs.map((tab) => ({
+                key: tab.key,
+                label: (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                      width: 8, height: 8, borderRadius: '50%',
+                      background: tab.color, display: 'inline-block', flexShrink: 0,
+                    }} />
+                    {tab.label} ({tab.count})
+                  </span>
+                ),
+              })),
+              selectedKeys: [activeFilter],
+              onClick: ({ key }) => setActiveFilter(key as SubmissionStatus | 'all'),
+            }}
+            trigger={['click']}
+          >
+            <Button
+              icon={<FilterOutlined />}
+              style={{
+                borderRadius: 8,
+                ...(activeFilter !== 'all' ? { borderColor: '#1677ff', color: '#1677ff' } : {}),
+              }}
             >
-              <span className="pt-chip-count">{tab.count}</span>
-              <span className="pt-chip-label">{tab.label}</span>
-            </button>
-          ))}
+              {filterTabs.find((t) => t.key === activeFilter)?.label ?? 'Bộ lọc'}
+              {activeFilter !== 'all' && ` (${filterTabs.find((t) => t.key === activeFilter)?.count})`}
+            </Button>
+          </Dropdown>
         </div>
         <div className="pt-overview-progress">
           <span className="pt-progress-label">Tỷ lệ duyệt toàn trường</span>
           <Progress
             percent={approvedPct}
-            strokeColor={{ '0%': '#52c41a', '100%': '#09d488' }}
-            trailColor="#e8eaed"
+            strokeColor="#22c55e"
+            trailColor="#f3f4f6"
             size="small"
-            style={{ width: 200 }}
+            style={{ width: 160 }}
           />
         </div>
       </div>
 
-      {/* ── Grid thẻ khoa ── */}
-      {filteredRows.length === 0 ? (
-        <Empty description="Không có khoa nào phù hợp" style={{ marginTop: 48 }} />
-      ) : (
-        <div className="pt-faculty-grid">
-          {filteredRows.map((row, idx) => {
-            const cfg  = STATUS_CONFIG[row.status] ?? STATUS_CONFIG.draft;
-            const hist = getHistory(row.key);
-            const pct  = STATUS_PROGRESS[row.status];
-
-            return (
-              <div
-                key={row.key}
-                className="pt-faculty-card"
-                style={{ borderTop: `3px solid ${cfg.borderColor}` }}
-              >
-                {/* Header */}
-                <div className="pt-card-header" style={{ background: cfg.headerBg }}>
-                  <div className="pt-card-header__left">
-                    <span className="pt-card-index">{idx + 1}</span>
-                    <div>
-                      <div className="pt-card-faculty-name">{row.facultyName}</div>
-                      <div className="pt-card-faculty-code">{row.facultyCode}</div>
-                    </div>
-                  </div>
-                  <SubmissionPill status={row.status} />
-                </div>
-
-                {/* Progress bar */}
-                <div style={{ padding: '8px 16px 0' }}>
-                  <Progress
-                    percent={pct}
-                    showInfo={false}
-                    strokeColor={cfg.borderColor}
-                    trailColor="#f0f0f0"
-                    size={[undefined, 4]}
-                  />
-                </div>
-
-                {/* Thông tin nộp */}
-                <div className="pt-card-body">
-                  <div className="pt-card-info-row">
-                    <span className="pt-card-info-label">Người nộp</span>
-                    <span className="pt-card-info-value">{row.submittedBy ?? '—'}</span>
-                  </div>
-                  <div className="pt-card-info-row">
-                    <span className="pt-card-info-label">Thời gian nộp</span>
-                    <span className="pt-card-info-value">{row.submittedAt ?? '—'}</span>
-                  </div>
-                  <div className="pt-card-info-row">
-                    <span className="pt-card-info-label">Hạn nộp</span>
-                    <span
-                      className="pt-card-info-value"
-                      style={row.deadline && row.status === 'draft' ? { color: '#ff4d4f', fontWeight: 500 } : {}}
-                    >
-                      {row.deadline ?? '—'}
-                    </span>
-                  </div>
-                  {/* Stats mini */}
-                  {(row.responseCount !== undefined) && (
-                    <div className="pt-card-stats-row">
-                      <div className="pt-card-stat">
-                        <span className="pt-card-stat-value">{row.responseCount}</span>
-                        <span className="pt-card-stat-label">Phản hồi</span>
-                      </div>
-                      <div className="pt-card-stat">
-                        <span className="pt-card-stat-value" style={{ color: '#52c41a' }}>
-                          {row.responseCount > 0
-                            ? Math.round(((row.employedCount ?? 0) / row.responseCount) * 100)
-                            : 0}%
-                        </span>
-                        <span className="pt-card-stat-label">Có việc làm</span>
-                      </div>
-                    </div>
-                  )}
-                  {row.feedback && (
-                    <div className="pt-card-feedback">
-                      <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: 4 }} />
-                      {row.feedback}
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="pt-card-actions">
-                  <Tooltip title="Xem chi tiết">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<EyeOutlined />}
-                      onClick={() => navigate(`/admin/reports/faculty/${row.key}`)}
-                    />
-                  </Tooltip>
-                  <Tooltip title={hist.length ? `${hist.length} lịch sử` : 'Lịch sử'}>
-                    <Badge count={hist.length} size="small" offset={[-2, 2]}>
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<HistoryOutlined style={{ color: hist.length ? '#6366f1' : '#d1d5db' }} />}
-                        onClick={() => setHistoryModal({ open: true, key: row.key, name: row.facultyName })}
-                      />
-                    </Badge>
-                  </Tooltip>
-
-                  <div style={{ flex: 1 }} />
-
-                  {row.status === 'submitted' && (
-                    <>
-                      <Button
-                        size="small"
-                        type="primary"
-                        icon={<CheckCircleOutlined />}
-                        loading={actingKey === row.key}
-                        onClick={() => handleApprove(row.key)}
-                      >
-                        Duyệt
-                      </Button>
-                      <Button
-                        size="small"
-                        danger
-                        icon={<CloseCircleOutlined />}
-                        disabled={actingKey === row.key}
-                        onClick={() => handleOpenReturn(row.key)}
-                      >
-                        Trả
-                      </Button>
-                    </>
-                  )}
-                  {row.status === 'returned' && (
-                    <Button
-                      size="small"
-                      icon={<SendOutlined />}
-                      loading={actingKey === row.key}
-                      onClick={() => handleResubmit(row.key)}
-                    >
-                      Nộp lại
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <CustomTable
+        columns={columns}
+        data={filteredRows}
+        loading={false}
+        rowKey="key"
+      />
 
       {/* Modal trả bổ sung */}
       <Modal

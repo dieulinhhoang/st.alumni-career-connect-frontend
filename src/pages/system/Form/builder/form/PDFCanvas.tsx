@@ -49,7 +49,7 @@ export function PDFCanvas({
   const [radios, setRadios] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     questions.forEach((q) => {
-      if ((q.type === 'radio' || q.type === 'multiple-choice') && initialValues[q.id] != null)
+      if ((q.type === 'radio' || q.type === 'gender' || q.type === 'multiple-choice') && initialValues[q.id] != null)
         init[q.id] = initialValues[q.id]
     })
     return init
@@ -67,7 +67,7 @@ export function PDFCanvas({
   const [textVals, setTextVals] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     questions.forEach((q) => {
-      if (!['radio', 'multiple-choice', 'checkbox'].includes(q.type) && initialValues[q.id] != null)
+      if (!['radio', 'gender', 'multiple-choice', 'checkbox'].includes(q.type) && initialValues[q.id] != null)
         init[q.id] = String(initialValues[q.id])
     })
     return init
@@ -96,7 +96,7 @@ export function PDFCanvas({
   })
   const [descDraft, setDescDraft] = useState(() => parseDesc(descriptionParagraphs))
 
-  const today = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const today = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' / ')
   const editable = headerOnly || !!onHeaderChange
   const descIsEmpty = descriptionParagraphs.length === 0 || descriptionParagraphs.every((p) => !p.trim())
 
@@ -105,7 +105,7 @@ export function PDFCanvas({
   const requiredOverrides = new Set<string>()
   if (interactive && logicRules.length > 0) {
     const getAnswer = (qId: string, qType: string) => {
-      if (qType === 'radio' || qType === 'multiple-choice') return radios[qId] ?? ''
+      if (qType === 'radio' || qType === 'gender' || qType === 'multiple-choice') return radios[qId] ?? ''
       if (qType === 'checkbox') return Object.entries(cbs[qId] ?? {}).filter(([, c]) => c).map(([v]) => v).join(',')
       return textVals[qId] ?? ''
     }

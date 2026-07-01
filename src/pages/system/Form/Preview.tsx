@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { DatePicker } from 'antd'
+import dayjs from 'dayjs'
+import type { CccdValue } from '../../../feature/form/types'
 import type { Form, Question, Section } from '../../../feature/form/types'
 import { groupByRow } from '../../../feature/form/hooks/Useformutils'
 
@@ -33,9 +36,9 @@ const C = {
 const baseInput: React.CSSProperties = {
   width: '100%',
   padding: '9px 12px',
-  borderRadius: 6,
+  borderRadius: 8,
   border: `1px solid ${C.border}`,
-  fontSize: 14,
+  fontSize: 16,
   color: C.text,
   background: C.surface,
   fontFamily: 'inherit',
@@ -70,7 +73,7 @@ function QLabel({ num, title, required, multi }: {
   num: number; title: string; required?: boolean; multi?: boolean
 }) {
   return (
-    <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 10, lineHeight: 1.6 }}>
+    <div style={{ fontSize: 16, fontWeight: 600, color: C.text, marginBottom: 10, lineHeight: 1.6 }}>
       <span style={{ marginRight: 5 }}>{num}.</span>
       <span>{title}</span>
 
@@ -168,10 +171,14 @@ function DateField({ value, onChange, hasError, readOnly }: FieldProps & {
   onChange?: (v: string) => void
 }) {
   return (
-    <input type="date" readOnly={readOnly}
-      value={value ?? ''} onChange={e => onChange?.(e.target.value)}
+    <DatePicker
+      format="DD/MM/YYYY"
+      placeholder="dd/mm/yyyy"
+      disabled={readOnly}
+      value={value ? dayjs(value) : null}
+      onChange={(d) => onChange?.(d ? d.format('YYYY-MM-DD') : '')}
+      disabledDate={(d) => !!d && d.isAfter(dayjs(), 'day')}
       style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer', ...(hasError ? errorBorder : {}) }}
-      onFocus={applyFocus} onBlur={removeFocus}
     />
   )
 }
@@ -180,20 +187,39 @@ function DateField({ value, onChange, hasError, readOnly }: FieldProps & {
 interface AddressValue { address?: string; city?: string }
 
 
-interface CccdValue { number?: string; issueDate?: string; issuePlace?: string }
-
-
 function CccdField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: string | CccdValue
-  onChange?: (v: string) => void
+  onChange?: (v: CccdValue) => void
 }) {
-  const strVal = typeof value === 'string' ? value : (value?.number ?? '')
+  const val: CccdValue = (() => {
+    if (!value) return {}
+    if (typeof value === 'object') return value
+    try { const p = JSON.parse(value); if (typeof p === 'object') return p } catch {}
+    return { number: value }
+  })()
+  const update = (patch: Partial<CccdValue>) => onChange?.({ ...val, ...patch })
   return (
-    <input type="text" readOnly={readOnly} placeholder="Nhập số CCCD"
-      value={strVal} onChange={e => onChange?.(e.target.value)}
-      style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
-      onFocus={applyFocus} onBlur={removeFocus}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <input type="text" readOnly={readOnly} placeholder="Số CCCD"
+        value={val.number ?? ''} onChange={e => update({ number: e.target.value })}
+        style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
+        onFocus={applyFocus} onBlur={removeFocus}
+      />
+      <DatePicker
+        format="DD/MM/YYYY"
+        placeholder="Cấp ngày (dd/mm/yyyy)"
+        disabled={readOnly}
+        value={val.issueDate ? dayjs(val.issueDate) : null}
+        onChange={(d) => update({ issueDate: d ? d.format('YYYY-MM-DD') : '' })}
+        disabledDate={(d) => !!d && d.isAfter(dayjs(), 'day')}
+        style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer' }}
+      />
+      <input type="text" readOnly={readOnly} placeholder="Nơi cấp"
+        value={val.issuePlace ?? ''} onChange={e => update({ issuePlace: e.target.value })}
+        style={{ ...baseInput }}
+        onFocus={applyFocus} onBlur={removeFocus}
+      />
+    </div>
   )
 }
 
@@ -248,7 +274,7 @@ function RadioField({ options, qId, value, onChange, hasError, readOnly, allowOt
             checked={value === opt} onChange={() => onChange?.(opt)}
             style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
+          <span style={{ fontSize: 16, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
       {allowOther && (
@@ -259,7 +285,7 @@ function RadioField({ options, qId, value, onChange, hasError, readOnly, allowOt
             style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
           <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 14, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
+            <span style={{ fontSize: 16, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
             {isOther && (
               <input
                 type="text" readOnly={readOnly}
@@ -327,7 +353,7 @@ function CheckboxField({ options, value, onChange, hasError, readOnly, allowOthe
             checked={checked.has(opt)} onChange={() => toggle(opt)}
             style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
-          <span style={{ fontSize: 14, color: C.text, lineHeight: 1.55 }}>{opt}</span>
+          <span style={{ fontSize: 16, color: C.text, lineHeight: 1.55 }}>{opt}</span>
         </label>
       ))}
       {allowOther && (
@@ -338,7 +364,7 @@ function CheckboxField({ options, value, onChange, hasError, readOnly, allowOthe
             style={{ marginTop: 3, cursor: readOnly ? 'default' : 'pointer', flexShrink: 0 }}
           />
           <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 14, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
+            <span style={{ fontSize: 16, color: C.sub, lineHeight: 1.55, fontStyle: 'italic' }}>Khác</span>
             {isOtherChecked && (
               <input
                 type="text" readOnly={readOnly}
@@ -398,8 +424,9 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'date':     return <DateField     {...fp} value={value} onChange={onChange} />
       case 'address':  return <AddressField  {...fp} value={value} onChange={onChange} />
       case 'cccd':     return <CccdField     {...fp} value={value} onChange={onChange} />
-      case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
-      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={(q as any).allowOther} />
+      case 'gender':
+      case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} allowOther={q.allowOther} />
+      case 'checkbox': return <CheckboxField {...fp} options={opts} value={value} onChange={onChange} allowOther={q.allowOther} />
       case 'select':
       case 'dropdown': return <SelectField   {...fp} options={opts} value={value} onChange={onChange} />
       default:         return <TextField    {...fp} value={value} onChange={onChange} />
@@ -425,7 +452,7 @@ function SectionHeader({ title }: { title: string }) {
       display: 'flex', alignItems: 'center', gap: 10,
       margin: '32px 0 20px',
     }}>
-      <span style={{ fontSize: 13.5, fontWeight: 700, color: C.text, letterSpacing: '-0.01em' }}>
+      <span style={{ fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '-0.01em' }}>
         {title}
       </span>
     </div>
@@ -464,6 +491,7 @@ function mapForm(form: Form) {
       rowGroup: q.rowGroup,
       reportFieldKey: q.reportFieldKey,
       visibleWhen: q.visibleWhen,
+      allowOther: q.allowOther,
     }
   })
 
@@ -488,16 +516,28 @@ function mapForm(form: Form) {
 }
 
 
+function scalarAnswer(val: any): string {
+  if (val === undefined || val === null) return ''
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    // CccdValue — compare against the number sub-field
+    if ('number' in val) return val.number ?? ''
+    // AddressValue — compare against address
+    if ('address' in val) return val.address ?? ''
+  }
+  return String(val)
+}
+
 function isVisible(q: Question, answers: Record<string, any>): boolean {
   if (!q.visibleWhen) return true
   const { questionId, operator, value } = q.visibleWhen
   const current = answers[questionId]
+  const scalar = scalarAnswer(current)
   switch (operator) {
-    case 'equals':     return String(current) === String(value)
-    case 'not_equals': return String(current) !== String(value)
+    case 'equals':     return scalar === String(value)
+    case 'not_equals': return scalar !== String(value)
     case 'includes':
       if (Array.isArray(current)) return current.includes(value as string)
-      return String(current).includes(String(value))
+      return scalar.includes(String(value))
     default: return true
   }
 }
@@ -506,7 +546,16 @@ function isVisible(q: Question, answers: Record<string, any>): boolean {
 function isEmpty(val: any): boolean {
   if (val === undefined || val === null) return true
   if (typeof val === 'string') {
-    if (val.startsWith('__other__')) return false  // "Khác" đã chọn = không rỗng
+    // "Khác" đã chọn = không rỗng, nhưng phải có text sau prefix
+    if (val.startsWith('__other__')) return val.slice('__other__'.length).trim() === ''
+    // CccdValue lưu dưới dạng JSON string (từ SurveyQuestion.tsx cũ)
+    if (val.startsWith('{')) {
+      try {
+        const p = JSON.parse(val)
+        if (typeof p === 'object' && ('number' in p || 'issueDate' in p || 'issuePlace' in p))
+          return !p.number?.trim()
+      } catch {}
+    }
     return val.trim() === ''
   }
   if (Array.isArray(val)) return val.length === 0
@@ -623,7 +672,7 @@ export function SurveyPreview({
       minHeight: '100vh',
       background: compact ? 'transparent' : C.bg,
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      fontSize: 14,
+      fontSize: 16,
       color: C.text,
     }}>
 
@@ -663,39 +712,42 @@ export function SurveyPreview({
           boxShadow: compact ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: compact ? '24px 28px 32px' : '36px 48px 44px' }}>
+          <div style={{ padding: compact ? '16px 28px 32px' : '20px 48px 44px' }}>
 
             {/* Institutional header */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 20,
-              marginBottom: 24, paddingBottom: 24,
-            }}>
-              <img
-                src={header.logoUrl}
-                alt="Logo"
-                style={{ width: 90, height: 90, objectFit: 'contain', flexShrink: 0 }}
-              />
-              <div style={{ flex: 1, textAlign: 'right' }}>
-                <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6, fontStyle: 'italic' }}>
-                  {formatDate((form as any).createdat ?? (form as any).createdAt)}
+            <div style={{ marginTop: 64, marginBottom: 24, paddingBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {/* Cột logo (col-5) */}
+                <div style={{ width: '41.666%', minHeight: 130, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <img
+                    src={header.logoUrl}
+                    alt="Logo Học viện"
+                    style={{ width: '50%', height: 'auto', objectFit: 'contain' }}
+                  />
                 </div>
-                <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', color: C.text, letterSpacing: '0.04em', marginBottom: 3 }}>
-                  {header.ministry}
-                </div>
-                <div style={{ fontSize: 12.5, fontWeight: 800, textTransform: 'uppercase', color: C.text, letterSpacing: '0.03em', marginBottom: 6 }}>
-                  {header.academy}
-                </div>
-                <div style={{ fontSize: 11.5, color: C.sub, lineHeight: 1.7, fontStyle: 'italic' }}>
-                  <div>{header.address}</div>
-                  <div>Điện thoại: {header.phone} – Fax: {header.phone}</div>
+                {/* Cột nội dung (col-7) */}
+                <div style={{ width: '58.333%', textAlign: 'right' }}>
+                  <div style={{ fontStyle: 'italic', fontSize: 13, color: '#374151', marginBottom: 16 }}>
+                    {(() => { const d = new Date(); return `Ngày ${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}` })()}
+                  </div>
+                  <p style={{ fontSize: 15, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
+                    {header.ministry}
+                  </p>
+                  <h6 style={{ fontSize: 16, fontWeight: 700, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
+                    {header.academy}
+                  </h6>
+                  <div style={{ fontStyle: 'italic', fontSize: 13.6, color: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span style={{ textAlign: 'center' }}>{header.address}</span>
+                    <span>Điện thoại: {header.phone} - Fax: {header.phone}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Survey title */}
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ textAlign: 'center', marginBottom: 44 }}>
               <h2 style={{
-                fontSize: 18, fontWeight: 700, color: C.text,
+                fontSize: 20, fontWeight: 700, color: C.text,
                 letterSpacing: '-0.01em', lineHeight: 1.5, margin: 0,
                 textTransform: 'uppercase',
               }}>
@@ -706,15 +758,15 @@ export function SurveyPreview({
             {/* Description */}
             {descParagraphs.length > 0 && (
               <div style={{ marginBottom: 28, paddingLeft: 16 }}>
-                <p style={{ fontSize: 14, fontStyle: 'italic', fontWeight: 600, color: C.text, lineHeight: 1.7, marginBottom: 10 }}>
+                <p style={{ fontSize: 16, fontStyle: 'italic', fontWeight: 600, color: C.text, lineHeight: 1.7, marginBottom: 40 }}>
                   Thân gửi Anh/Chị cựu sinh viên của {header.academy}!
                 </p>
                 {descParagraphs.map((p, i) => (
-                  <p key={i} style={{ fontSize: 14, fontStyle: 'italic', color: C.sub, lineHeight: 1.85, textIndent: 28, marginBottom: 8 }}>
+                  <p key={i} style={{ fontSize: 16, fontStyle: 'italic', color: C.sub, lineHeight: 1.85, textIndent: 30, marginBottom: 8 }}>
                     {p}
                   </p>
                 ))}
-                <p style={{ fontSize: 13.5, fontStyle: 'italic', color: C.sub, marginTop: 8 }}>
+                <p style={{ fontSize: 16, fontStyle: 'italic', color: C.sub, marginTop: 8 }}>
                   Trân trọng cảm ơn sự cộng tác của các Anh/Chị!
                 </p>
               </div>
@@ -789,10 +841,10 @@ export function SurveyPreview({
               textAlign: 'center', padding: '24px 0 16px',
               marginTop: 16,
             }}>
-              <p style={{ fontWeight: 600, color: C.text, marginBottom: 4, fontSize: 14 }}>
+              <p style={{ fontWeight: 600, color: C.text, marginBottom: 4, fontSize: 16 }}>
                 {footer.primaryText}
               </p>
-              <p style={{ fontStyle: 'italic', color: C.sub, fontSize: 13 }}>
+              <p style={{ fontStyle: 'italic', color: C.sub, fontSize: 16 }}>
                 {footer.secondaryText}
               </p>
             </div>

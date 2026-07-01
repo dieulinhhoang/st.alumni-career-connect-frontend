@@ -7,12 +7,19 @@ export const QTYPES: QuestionTypeOption[] = [
   { value: "long",     label: "Văn bản dài",          icon: "" },
   { value: "radio",    label: "Một lựa chọn",         icon: "" },
   { value: "checkbox", label: "Nhiều lựa chọn",       icon: "" },
+  { value: "gender",   label: "Giới tính",            icon: "" },
   { value: "date",     label: "Ngày tháng",           icon: "" },
   { value: "email",    label: "Email",                icon: "" },
   { value: "tel",      label: "Số điện thoại",        icon: "" },
   { value: "address",  label: "Địa chỉ",              icon: "" },
   { value: "dropdown", label: "Danh sách thả xuống",  icon: "" },
   { value: "cccd",     label: "Số CCCD (Số/Ngày cấp/Nơi cấp)", icon: "" },
+];
+
+//  GENDER — tùy chọn mặc định cho loại câu hỏi "Giới tính"
+export const GENDER_OPTIONS = [
+  { id: "gender-male",   label: "Nam" },
+  { id: "gender-female", label: "Nữ" },
 ];
 
 //  THEMES

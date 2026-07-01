@@ -118,7 +118,7 @@ export function ChartSection({ state, setField, khoaOptions = [], nganhOptions =
         </div>
         <Button
           icon={<TableOutlined />}
-          onClick={() => navigate("/admin/employment-stats")}
+          onClick={() => navigate("/admin/statistics")}
           style={{
             borderRadius: 8, fontWeight: 600, fontSize: 12, height: 34,
             background: `${COLOR.primary}08`, borderColor: `${COLOR.primary}30`,

@@ -152,7 +152,7 @@ export function JobCard({
           expired
             ? "#ef4444"
             : job.status === "active"
-            ? entColor
+            ? "#059669"
             : job.status === "pending"
             ? "#d97706"
             : job.status === "rejected"

@@ -1,4 +1,6 @@
 import React from 'react'
+import { DatePicker } from 'antd'
+import dayjs from 'dayjs'
 import type { Question } from '../../../../../feature/form/types'
 import { AddressInput } from '../shared/AddressInput'
 import { RichTextDisplay } from '../shared/RichTextDisplay'
@@ -189,14 +191,14 @@ export function SurveyQuestion({
 
       {/* Ngày */}
       {q.type === 'date' && (
-        <input
-          type="date"
-          value={textValue}
-          onChange={(e) => onChangeText(e.target.value)}
+        <DatePicker
+          format="DD/MM/YYYY"
+          placeholder="dd/mm/yyyy"
+          value={textValue ? dayjs(textValue) : null}
+          onChange={(d) => onChangeText(d ? d.format('YYYY-MM-DD') : '')}
+          disabledDate={(d) => !!d && d.isAfter(dayjs(), 'day')}
+          disabled={!interactive}
           style={{ ...underlineInput, width: 'auto', minWidth: 200 }}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          {...commonInputProps}
         />
       )}
 
@@ -226,13 +228,14 @@ export function SurveyQuestion({
             />
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>Cấp ngày:</div>
-              <input
-                type="date"
-                value={cccd.issueDate ?? ''}
-                onChange={(e) => update({ issueDate: e.target.value })}
+              <DatePicker
+                format="DD/MM/YYYY"
+                placeholder="dd/mm/yyyy"
+                value={cccd.issueDate ? dayjs(cccd.issueDate) : null}
+                onChange={(d) => update({ issueDate: d ? d.format('YYYY-MM-DD') : '' })}
+                disabledDate={(d) => !!d && d.isAfter(dayjs(), 'day')}
+                disabled={!interactive}
                 style={{ ...underlineInput, width: 'auto', minWidth: 200 }}
-                onFocus={handleFocus} onBlur={handleBlur}
-                {...commonInputProps}
               />
             </div>
             <div>
@@ -251,7 +254,7 @@ export function SurveyQuestion({
       })()}
 
       {/* Radio / Multiple choice */}
-      {(q.type === 'radio' || q.type === 'multiple-choice') && (
+      {(q.type === 'radio' || q.type === 'gender' || q.type === 'multiple-choice') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(q.options ?? []).map((opt) => {
             const val = typeof opt === 'string' ? opt : (opt as any).label

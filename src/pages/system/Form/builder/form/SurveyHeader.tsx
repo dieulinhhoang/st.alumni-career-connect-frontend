@@ -49,8 +49,8 @@ export function SurveyHeader({
         <div
           style={{
             textAlign: 'right',
-            fontSize: 12,
-            color: '#94a3b8',
+            fontSize: 13,
+            color: '#374151',
             marginBottom: 14,
             fontStyle: 'italic',
           }}
@@ -67,12 +67,14 @@ export function SurveyHeader({
           gap: isMobile ? 14 : 20,
         }}
       >
-        <LogoUpload
-          src={logoSrc}
-          size={effectiveSize}
-          editable={editable}
-          onUpload={(dataUrl) => update('logoUrl', dataUrl)}
-        />
+        <div style={{ paddingLeft: isMobile ? 0 : 40 }}>
+          <LogoUpload
+            src={logoSrc}
+            size={effectiveSize}
+            editable={editable}
+            onUpload={(dataUrl) => update('logoUrl', dataUrl)}
+          />
+        </div>
 
         <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : undefined }}>
           {editable ? (

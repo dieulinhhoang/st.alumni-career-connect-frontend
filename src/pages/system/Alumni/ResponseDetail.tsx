@@ -125,7 +125,13 @@ export const ResponseDetail: React.FC = () => {
       if (!isNaN(d.getTime())) set(3, d.toISOString().slice(0, 10));
     }
     set(4, gradStudent.training_industry_code);
-    set(5, gradStudent.citizen_identification);
+    if (gradStudent.citizen_identification) {
+      const q6 = sortedQs[5]
+      set(5, q6?.type === 'cccd'
+        ? { number: gradStudent.citizen_identification }
+        : gradStudent.citizen_identification
+      )
+    }
     set(6, gradStudent.school_year_end);
     set(7, gradStudent.training_industry_name);
     set(8, gradStudent.phone);

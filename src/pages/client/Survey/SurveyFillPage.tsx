@@ -83,8 +83,14 @@ function buildInitialValues(
     // Câu 5: Mã ngành đào tạo
     set(4, sd.training_industry_code)
 
-    // Câu 6: Số CCCD — chỉ lưu số, không kèm ngày cấp / nơi cấp
-    set(5, sd.citizen_identification)
+    // Câu 6: Số CCCD — wrap thành CccdValue nếu câu hỏi type "cccd", ngược lại plain string
+    if (sd.citizen_identification) {
+      const q6 = sortedQs[5]
+      set(5, q6?.type === 'cccd'
+        ? { number: sd.citizen_identification }
+        : sd.citizen_identification
+      )
+    }
 
     // Câu 7: Khóa học
     set(6, sd.school_year_end)

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Card, Col, Row, Tag, Button, Badge, Divider, Space, Modal, Spin,
+  Card, Col, Row, Tag, Button, Badge, Divider, Space, Modal, Spin, Dropdown,
 } from "antd";
 import {
   ArrowLeftOutlined, GlobalOutlined, MailOutlined, PhoneOutlined,
   PlusOutlined, EnvironmentOutlined, SafetyCertificateOutlined,
   PauseCircleOutlined, PlayCircleOutlined, EditOutlined, TeamOutlined,
-  SendOutlined,
+  SendOutlined, FilterOutlined,
 } from "@ant-design/icons";
 import api from "../../../libs/api";
 
@@ -31,7 +31,9 @@ import { EnterpriseFormModal } from "./EditEnterpriseModal";
 import { havePermission } from "../../../feature/auth/permission";
 import { PermissionEnum } from "../../../feature/auth/type";
 
-const DEFAULT_FACULTY_COLOR = "#1d4ed8";
+const DEFAULT_FACULTY_COLOR = "#64748b";
+const CARD_BORDER = "1px solid #f0f0f0";
+const ACCENT = "#334155";
 
 const IconBuilding = () => (
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -175,21 +177,22 @@ export default function EnterpriseDetailPage() {
           style={{
             borderRadius: 16,
             marginBottom: 20,
-            border: "1px solid #dbeafe",
+            border: CARD_BORDER,
             overflow: "hidden",
             padding: 0,
           }}
         >
           <div
             style={{
-              height: 80,
-              background: `linear-gradient(135deg, ${ent.color}18, ${ent.color}35)`,
+              height: 52,
+              background: "#fafafa",
+              borderBottom: "1px solid #f0f0f0",
               margin: "-24px -24px 0",
               position: "relative",
             }}
           >
             <div style={{ position: "absolute", right: 16, top: 12, display: "flex", gap: 6 }}>
-              <Tag color={ent.partnerStatus === "active" ? "blue" : "error"}>
+              <Tag color={ent.partnerStatus === "active" ? "green" : "default"}>
                 {ent.partnerStatus === "active" ? "Đang hoạt động" : "Không hoạt động"}
               </Tag>
             </div>
@@ -213,15 +216,14 @@ export default function EnterpriseDetailPage() {
                   borderRadius: 12,
                   flexShrink: 0,
                   background: "#fff",
-                  border: `2px solid ${ent.color}25`,
+                  border: "1px solid #e5e7eb",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  marginTop: -28,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                 }}
               >
-                <span style={{ fontSize: 17, fontWeight: 900, color: ent.color }}>
+                <span style={{ fontSize: 17, fontWeight: 800, color: ACCENT }}>
                   {ent.abbr}
                 </span>
               </div>
@@ -255,21 +257,10 @@ export default function EnterpriseDetailPage() {
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingBottom: 2 }}>
-              {havePermission(PermissionEnum.JOBS_CREATE) && (
-                <Button
-                  icon={<PlusOutlined />}
-                  type="primary"
-                  style={{ background: ent.color, border: "none", borderRadius: 8 }}
-                  onClick={() => setJobModal({ open: true, job: null })}
-                >
-                  {/* Thêm tin tuyển dụng */}
-                </Button>
-              )}
-
               <Button
                 icon={<SendOutlined />}
                 onClick={handleSendInvite}
-                style={{ borderRadius: 8, borderColor: '#1D9E75', color: '#1D9E75' }}
+                style={{ borderRadius: 8 }}
                 title="Gửi lời mời kích hoạt tài khoản DN"
               >
                 Gửi lời mời
@@ -323,82 +314,95 @@ export default function EnterpriseDetailPage() {
           <Col xs={24} lg={8}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
+                style={{ borderRadius: 14, border: CARD_BORDER }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thông tin liên hệ</span>}
               >
                 {[
-                  { icon: <GlobalOutlined style={{ color: ent.color }} />, label: "Website", value: ent.website },
-                  { icon: <MailOutlined style={{ color: ent.color }} />, label: "Email", value: ent.email },
-                  { icon: <PhoneOutlined style={{ color: ent.color }} />, label: "Điện thoại", value: ent.phone },
-                  { icon: <EnvironmentOutlined style={{ color: ent.color }} />, label: "Địa chỉ", value: ent.address },
+                  { icon: <GlobalOutlined style={{ color: "#9ca3af" }} />, label: "Website", value: ent.website, href: ent.website && (ent.website.startsWith("http") ? ent.website : `https://${ent.website}`) },
+                  { icon: <MailOutlined style={{ color: "#9ca3af" }} />, label: "Email", value: ent.email, href: ent.email && `mailto:${ent.email}` },
+                  { icon: <PhoneOutlined style={{ color: "#9ca3af" }} />, label: "Điện thoại", value: ent.phone },
+                  { icon: <EnvironmentOutlined style={{ color: "#9ca3af" }} />, label: "Địa chỉ", value: ent.address },
                 ].map((item) => (
                   <div key={item.label} style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                     <div style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{item.icon}</div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 11, color: "#9ca3af" }}>{item.label}</div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          color: "#374151",
-                          fontWeight: 500,
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {item.value}
-                      </div>
+                      {item.href && item.value ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 500,
+                            wordBreak: "break-all",
+                            color: "#1677ff",
+                          }}
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "#374151",
+                            fontWeight: 500,
+                            wordBreak: "break-all",
+                          }}
+                        >
+                          {item.value}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
                 <Divider style={{ margin: "8px 0 12px" }} />
                 <div style={{ fontSize: 11, color: "#9ca3af", marginBottom: 4 }}>Đối tác từ</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: ent.color }}>{ent.joinedDate}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{ent.joinedDate}</div>
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
+                style={{ borderRadius: 14, border: CARD_BORDER }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Khoa đối tác</span>}
               >
                 {enterpriseFaculties.length === 0 ? (
                   <span style={{ color: "#9ca3af", fontSize: 13 }}>Chưa có khoa liên kết</span>
                 ) : (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {enterpriseFaculties.map((f) => {
-                      const color = f.color ?? DEFAULT_FACULTY_COLOR;
-                      return (
+                    {enterpriseFaculties.map((f) => (
                         <span
                           key={f.id}
                           style={{
                             padding: "5px 14px",
                             borderRadius: 100,
                             fontSize: 12,
-                            fontWeight: 600,
-                            background: `${color}15`,
-                            color: color,
-                            border: `1px solid ${color}30`,
+                            fontWeight: 500,
+                            background: "#f3f4f6",
+                            color: "#374151",
+                            border: "1px solid #e5e7eb",
                           }}
                         >
                           {f.name}
                         </span>
-                      );
-                    })}
+                    ))}
                   </div>
                 )}
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
+                style={{ borderRadius: 14, border: CARD_BORDER }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Thống kê tuyển dụng</span>}
               >
                 <Row gutter={[12, 12]}>
                   {[
-                    { label: "Tổng tin", value: jobs.length, color: ent.color, bg: ent.color + "12" },
-                    { label: "Đang tuyển", value: activeJobs.length, color: "#059669", bg: "#d1fae5" },
-                    { label: "Đã đóng", value: closedJobs.length, color: "#d97706", bg: "#fef3c7" },
+                    { label: "Tổng tin", value: jobs.length },
+                    { label: "Đang tuyển", value: activeJobs.length },
+                    { label: "Đã đóng", value: closedJobs.length },
                   ].map((s) => (
                     <Col key={s.label} span={8}>
-                      <div style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: s.bg }}>
-                        <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
-                        <div style={{ fontSize: 11, color: s.color, marginTop: 2 }}>{s.label}</div>
+                      <div style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: "#f9fafb", border: "1px solid #f0f0f0" }}>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: "#1f2937" }}>{s.value}</div>
+                        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>{s.label}</div>
                       </div>
                     </Col>
                   ))}
@@ -410,7 +414,7 @@ export default function EnterpriseDetailPage() {
           <Col xs={24} lg={16}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
+                style={{ borderRadius: 14, border: CARD_BORDER }}
                 title={<span style={{ fontSize: 14, fontWeight: 700 }}>Giới thiệu</span>}
               >
                 <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.8, margin: 0 }}>
@@ -419,31 +423,49 @@ export default function EnterpriseDetailPage() {
               </Card>
 
               <Card
-                style={{ borderRadius: 14, border: "1px solid #dbeafe" }}
+                style={{ borderRadius: 14, border: CARD_BORDER }}
                 title={
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 14, fontWeight: 700 }}>Tin tuyển dụng</span>
-                    <Badge count={activeJobs.length} style={{ backgroundColor: ent.color }} />
+                    <Badge count={activeJobs.length} style={{ backgroundColor: "#94a3b8" }} />
                   </div>
                 }
                 extra={
-                  <Space size={4} wrap>
-                    {[
-                      { key: "all", label: "Tất cả", count: jobs.length },
-                      { key: "pending", label: "Chờ duyệt", count: pendingJobs.length },
-                      { key: "active", label: "Đang tuyển", count: activeJobs.length },
-                      { key: "closed", label: "Đã đóng", count: closedJobs.length },
-                    ].map((tab) => (
+                  <Space size={8}>
+                    <Dropdown
+                      menu={{
+                        items: [
+                          { key: "all", label: `Tất cả (${jobs.length})` },
+                          { key: "pending", label: `Chờ duyệt (${pendingJobs.length})` },
+                          { key: "active", label: `Đang tuyển (${activeJobs.length})` },
+                          { key: "closed", label: `Đã đóng (${closedJobs.length})` },
+                        ],
+                        selectedKeys: [jobTab],
+                        onClick: ({ key }) => setJobTab(key),
+                      }}
+                      trigger={["click"]}
+                    >
                       <Button
-                        key={tab.key}
                         size="small"
-                        type={jobTab === tab.key ? "primary" : "default"}
-                        style={jobTab === tab.key ? { background: ent.color, border: "none" } : {}}
-                        onClick={() => setJobTab(tab.key)}
+                        icon={<FilterOutlined />}
+                        style={{
+                          borderRadius: 8,
+                          ...(jobTab !== "all" ? { borderColor: "#1677ff", color: "#1677ff" } : {}),
+                        }}
                       >
-                        {tab.label} ({tab.count})
+                        {jobTab === "all" ? "Bộ lọc" : jobTab === "pending" ? "Chờ duyệt" : jobTab === "active" ? "Đang tuyển" : "Đã đóng"}
                       </Button>
-                    ))}
+                    </Dropdown>
+                    {havePermission(PermissionEnum.JOBS_CREATE) && (
+                      <Button
+                        size="small"
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => setJobModal({ open: true, job: null })}
+                      >
+                        Thêm tin
+                      </Button>
+                    )}
                   </Space>
                 }
               >
@@ -456,7 +478,7 @@ export default function EnterpriseDetailPage() {
                     <Button
                       type="primary"
                       icon={<PlusOutlined />}
-                      style={{ marginTop: 12, background: ent.color, border: "none" }}
+                      style={{ marginTop: 12 }}
                       onClick={() => setJobModal({ open: true, job: null })}
                     >
                       Thêm tin mới

@@ -11,6 +11,7 @@ export type QuestionType =
   | 'dropdown'
   | 'email'
   | 'tel'
+  | 'gender'
   | 'cccd';
 
 // Giá trị câu trả lời cho câu hỏi loại 'cccd' (Số CCCD + Ngày cấp + Nơi cấp)
@@ -46,6 +47,8 @@ export interface Question {
 
   // new fields:
   visibleWhen?: ConditionalRule;      // condition for the question to be shown
+
+  allowOther?: boolean;               // câu radio/checkbox có option "Khác" không
 
   // Thống kê & báo cáo — tự sinh, admin không nhập thủ công
   reportFieldKey?: string;            // key nội bộ tự sinh

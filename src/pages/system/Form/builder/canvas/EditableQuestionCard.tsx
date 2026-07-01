@@ -15,6 +15,7 @@ import {
   PieChartOutlined, BarChartOutlined, FileExcelOutlined,
 } from '@ant-design/icons'
 import type { Question, Section, QuestionType } from '../../../../../feature/form/types'
+import { GENDER_OPTIONS } from '../../../../../feature/form/constants'
 
 //  Cột của từng mẫu 
 //  Mau01Table.tsx và Mau03Table.tsx
@@ -77,7 +78,7 @@ export const MAU03_COLUMNS: { value: string; label: string }[] = [
 
 //  Helpers 
 
-const CHARTABLE_TYPES: QuestionType[] = ['radio', 'checkbox', 'select', 'multiple-choice', 'dropdown']
+const CHARTABLE_TYPES: QuestionType[] = ['radio', 'checkbox', 'select', 'multiple-choice', 'dropdown', 'gender']
 
 const genKey = (qid: string) => `rk_${qid}`
 
@@ -248,6 +249,7 @@ const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'long',     label: 'Đoạn văn' },
   { value: 'radio',    label: 'Trắc nghiệm' },
   { value: 'checkbox', label: 'Hộp kiểm' },
+  { value: 'gender',   label: 'Giới tính' },
   { value: 'select',   label: 'Danh sách thả xuống' },
   { value: 'date',     label: 'Ngày' },
   { value: 'email',    label: 'Email' },
@@ -328,9 +330,11 @@ export function EditableQuestionCard({
                 value={qType}
                 onChange={(val) => onUpdate({
                   type: val,
-                  options: ['radio', 'checkbox', 'select'].includes(val)
-                    ? options.length ? options : [{ id: crypto.randomUUID(), label: 'Tùy chọn 1' }]
-                    : [],
+                  options: val === 'gender'
+                    ? GENDER_OPTIONS.map((o) => ({ ...o }))
+                    : ['radio', 'checkbox', 'select'].includes(val)
+                      ? options.length ? options : [{ id: crypto.randomUUID(), label: 'Tùy chọn 1' }]
+                      : [],
                   // reset stat config nếu đổi sang loại không chartable
                   ...(CHARTABLE_TYPES.includes(val) ? {} : { showInChart: false, reportTemplate: undefined, excelColumn: undefined, reportFieldKey: undefined }),
                 })}
@@ -373,6 +377,16 @@ export function EditableQuestionCard({
                 <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, fontStyle: 'italic', background: '#f8fafc' }}>
                   Tại...
                 </div>
+              </div>
+            )}
+            {qType === 'gender' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {GENDER_OPTIONS.map((opt) => (
+                  <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #cbd5e1', flexShrink: 0 }} />
+                    <span style={{ fontSize: 14, color: '#334155' }}>{opt.label}</span>
+                  </div>
+                ))}
               </div>
             )}
             {isChoiceType && (
