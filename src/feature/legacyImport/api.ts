@@ -1,10 +1,44 @@
 import api from '../../libs/api';
-import type { ConfirmImportPayload, ConfirmImportResult, PreviewImportResult } from './types';
+import type {
+  ColumnsPreviewResult,
+  ConfirmImportPayload,
+  ConfirmImportResult,
+  PreviewImportResult,
+  ReadGridOptions,
+} from './types';
 
-export async function previewLegacyImport(file: File, formId: number): Promise<PreviewImportResult> {
+/** Bước 1: đẩy file lên, nhận lưới hàng/cột thô + câu hỏi của form để gán key */
+export async function readLegacyColumns(
+  file: File,
+  formId: number,
+  opts: ReadGridOptions = {},
+): Promise<ColumnsPreviewResult> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('formId', String(formId));
+  if (opts.sheetIndex != null) formData.append('sheetIndex', String(opts.sheetIndex));
+  if (opts.headerRow != null) formData.append('headerRow', String(opts.headerRow));
+  const res = await api.post('/alumni/legacy-import/columns', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data;
+}
+
+/** Bước 2: parse dữ liệu theo mapping cột -> key câu hỏi đã gán */
+export async function previewLegacyImport(
+  file: File,
+  formId: number,
+  mapping?: Record<number, string>,
+  opts: ReadGridOptions = {},
+): Promise<PreviewImportResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('formId', String(formId));
+  if (mapping && Object.keys(mapping).length) {
+    formData.append('mapping', JSON.stringify(mapping));
+  }
+  if (opts.sheetIndex != null) formData.append('sheetIndex', String(opts.sheetIndex));
+  if (opts.headerRow != null) formData.append('headerRow', String(opts.headerRow));
   const res = await api.post('/alumni/legacy-import/preview', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

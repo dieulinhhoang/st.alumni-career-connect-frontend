@@ -376,6 +376,20 @@ export function EditableQuestionCard({
   const isChoiceType = ['radio', 'checkbox', 'select'].includes(qType)
   const isChartable  = CHARTABLE_TYPES.includes(qType)
 
+  // Enter / click "Thêm tùy chọn" → thêm option mới rồi focus vào ô vừa thêm
+  const optionListRef = React.useRef<HTMLDivElement>(null)
+  const focusNewOptionRef = React.useRef(false)
+  React.useEffect(() => {
+    if (!focusNewOptionRef.current) return
+    focusNewOptionRef.current = false
+    const inputs = optionListRef.current?.querySelectorAll<HTMLInputElement>('input[data-option-input]')
+    inputs?.[inputs.length - 1]?.focus()
+  }, [options.length])
+  const handleAddOption = () => {
+    focusNewOptionRef.current = true
+    onAddOption()
+  }
+
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onActivate() }}
@@ -496,7 +510,7 @@ export function EditableQuestionCard({
               </div>
             )}
             {isChoiceType && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div ref={optionListRef} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {options.map((opt) => (
                   <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => e.stopPropagation()}>
                     <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0, fontSize: 14 }}>
@@ -504,7 +518,12 @@ export function EditableQuestionCard({
                         ? <Checkbox disabled />
                         : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #cbd5e1' }} />}
                     </div>
-                    <input value={opt.label} onChange={(e) => onUpdateOption(opt.id, e.target.value)} placeholder="Tùy chọn"
+                    <input value={opt.label} data-option-input onChange={(e) => onUpdateOption(opt.id, e.target.value)} placeholder="Tùy chọn"
+                      onKeyDown={(e) => {
+                        if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+                        e.preventDefault()
+                        handleAddOption()
+                      }}
                       style={{ flex: 1, border: 'none', borderBottom: '1px solid #dbe2ea', outline: 'none', padding: '8px 0', fontSize: 14, color: '#334155', background: 'transparent' }} />
                     {isActive && options.length > 1 && (
                       <button type="button" onClick={() => onRemoveOption(opt.id)}
@@ -512,34 +531,47 @@ export function EditableQuestionCard({
                     )}
                   </div>
                 ))}
+
+                {/* Hàng "Khác" khi đã bật allowOther */}
+                {isActive && (qType === 'radio' || qType === 'checkbox') && question.allowOther && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
+                      {qType === 'checkbox'
+                        ? <Checkbox disabled />
+                        : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
+                    </div>
+                    <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1, padding: '8px 0', borderBottom: '1px dotted #dbe2ea' }}>Khác...</span>
+                    <button type="button" onClick={() => onUpdate({ allowOther: false })}
+                      style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+                  </div>
+                )}
+
+                {/* Hàng thêm tùy chọn — kiểu Google Forms */}
                 {isActive && (
-                  <>
-                    <button type="button" onClick={(e) => { e.stopPropagation(); onAddOption() }}
-                      style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
-                      + Thêm tùy chọn
-                    </button>
-                    {(qType === 'radio' || qType === 'checkbox') && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
-                          {qType === 'checkbox'
-                            ? <Checkbox disabled />
-                            : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
-                        </div>
-                        {question.allowOther ? (
-                          <>
-                            <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1 }}>Khác (ô nhập sẽ hiện)</span>
-                            <button type="button" onClick={() => onUpdate({ allowOther: false })}
-                              style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
-                          </>
-                        ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0, fontSize: 14 }}>
+                      {qType === 'checkbox'
+                        ? <Checkbox disabled />
+                        : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', fontSize: 14 }}>
+                      <button type="button" onClick={handleAddOption}
+                        style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'text', fontSize: 14, padding: '8px 0', borderBottom: '1px solid transparent' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#dbe2ea' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent' }}>
+                        Thêm tùy chọn
+                      </button>
+                      {(qType === 'radio' || qType === 'checkbox') && !question.allowOther && (
+                        <>
+                          <span style={{ color: '#334155' }}>hoặc</span>
                           <button type="button" onClick={() => onUpdate({ allowOther: true })}
                             style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0 }}>
-                            + Thêm tùy chọn "Khác"
+                            thêm "Câu trả lời khác"
                           </button>
-                        )}
-                      </div>
-                    )}
-                  </>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
