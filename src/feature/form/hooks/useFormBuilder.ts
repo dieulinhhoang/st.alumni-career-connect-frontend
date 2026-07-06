@@ -20,14 +20,14 @@ export interface UseFormBuilderReturn extends QuestionActions, SectionActions, O
 
 // Hook tổng: ghép state cốt lõi (câu hỏi, section, ...) với các nhóm hành vi
 // useQuestionActions / useSectionActions / useFormLoader / useFormPersistence
-export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuilderReturn {
+export function useFormBuilder(mode: BuilderMode, formId?: number, initialName?: string): UseFormBuilderReturn {
   // Khởi tạo 1 lần (lazy) để id không bị sinh lại mỗi render
   const [initial] = useState(() => {
     const section = newSection()
     return { section, qs: mode === 'create' ? defaultQuestions(section.id) : [] }
   })
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState(initialName ?? '')
   const [desc, setDesc] = useState('')
   const [questions, setQuestions] = useState<Question[]>(initial.qs)
   const [activeId, setActiveId] = useState<string | null>(null)

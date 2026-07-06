@@ -520,9 +520,33 @@ export function EditableQuestionCard({
                     </div>
                     <input value={opt.label} data-option-input onChange={(e) => onUpdateOption(opt.id, e.target.value)} placeholder="Tùy chọn"
                       onKeyDown={(e) => {
-                        if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
-                        e.preventDefault()
-                        handleAddOption()
+                        if (e.nativeEvent.isComposing) return
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddOption()
+                          return
+                        }
+                        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                          const inputs = optionListRef.current?.querySelectorAll<HTMLInputElement>('input[data-option-input]')
+                          if (!inputs) return
+                          const curIdx = Array.from(inputs).indexOf(e.currentTarget)
+                          const nextIdx = e.key === 'ArrowDown' ? curIdx + 1 : curIdx - 1
+                          if (nextIdx >= 0 && nextIdx < inputs.length) {
+                            e.preventDefault()
+                            inputs[nextIdx].focus()
+                          }
+                          return
+                        }
+                        if ((e.key === 'Backspace' || e.key === 'Delete') && opt.label === '' && options.length > 1) {
+                          e.preventDefault()
+                          const idx = options.findIndex(o => o.id === opt.id)
+                          const targetIdx = idx > 0 ? idx - 1 : 1
+                          onRemoveOption(opt.id)
+                          requestAnimationFrame(() => {
+                            const inputs = optionListRef.current?.querySelectorAll<HTMLInputElement>('input[data-option-input]')
+                            inputs?.[Math.min(targetIdx, (inputs?.length ?? 1) - 1)]?.focus()
+                          })
+                        }
                       }}
                       style={{ flex: 1, border: 'none', borderBottom: '1px solid #dbe2ea', outline: 'none', padding: '8px 0', fontSize: 14, color: '#334155', background: 'transparent' }} />
                     {isActive && options.length > 1 && (

@@ -49,7 +49,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     groupQuestions, ungroupQuestion,
     saving, saved, handleSave,
     publishing, formStatus, handlePublish, handleUnpublish,
-  } = useFormBuilder(mode, form?.id ?? undefined)
+  } = useFormBuilder(mode, form?.id ?? undefined, form?.name)
 
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
   const [footer,  setFooter]  = useState<SurveyFooter>((form as any)?.footer  ?? DEFAULT_FOOTER)
@@ -113,9 +113,13 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [handleSave])
 
   const handlePublishClick = useCallback(async () => {
+    if (!name.trim()) {
+      message.error('Vui lòng nhập tên form trước khi xuất bản.')
+      return
+    }
     const savedForm = await handleSave(extrasRef.current)
     if (!savedForm) {
-      message.error('Vui lòng nhập tên form trước khi xuất bản.')
+      message.error('Lưu form thất bại, vui lòng thử lại.')
       return
     }
     const result = await handlePublish()
@@ -123,7 +127,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       message.success('Đã xuất bản form!')
       onSave(result)
     }
-  }, [handleSave, handlePublish, onSave])
+  }, [name, handleSave, handlePublish, onSave])
 
   const handleUnpublishClick = useCallback(async () => {
     const result = await handleUnpublish()

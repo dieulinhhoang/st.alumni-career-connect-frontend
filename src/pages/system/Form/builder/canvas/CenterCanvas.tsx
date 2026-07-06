@@ -665,10 +665,10 @@ export function CenterCanvas({
         >
           <RailButton icon={<PlusOutlined />} label="Thêm câu hỏi" onClick={() => onAddQuestion(activeQuestionId)} accent={accent} />
           <RailButton icon={<SplitCellsOutlined />} label="Ngắt phần" onClick={() => onAddSectionAfter(activeQuestionId)} accent={accent} />
-          {/* <RailButton icon={<CopyOutlined />} label="Nhân bản" onClick={() => onDuplicate(activeQuestionId)} accent={accent} />
+          <RailButton icon={<CopyOutlined />} label="Nhân bản" onClick={() => onDuplicate(activeQuestionId)} accent={accent} />
           <RailButton icon={<ArrowUpOutlined />} label="Đưa lên" onClick={() => onMoveUp(activeQuestionId)} accent={accent} />
           <RailButton icon={<ArrowDownOutlined />} label="Đưa xuống" onClick={() => onMoveDown(activeQuestionId)} accent={accent} />
-          <RailButton icon={<DeleteOutlined />} label="Xóa câu hỏi" onClick={() => onRemove(activeQuestionId)} accent={accent} danger /> */}
+          <RailButton icon={<DeleteOutlined />} label="Xóa câu hỏi" onClick={() => onRemove(activeQuestionId)} accent={accent} danger />
         </div>
       )}
     </div>
