@@ -49,6 +49,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     groupQuestions, ungroupQuestion,
     saving, saved, handleSave,
     publishing, formStatus, handlePublish, handleUnpublish,
+    loading,
   } = useFormBuilder(mode, form?.id ?? undefined, form?.name)
 
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
@@ -135,11 +136,12 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [handleUnpublish])
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isMountedRef = useRef(false)
+  const skipCountRef = useRef(mode === 'edit' ? 2 : 1)
   const unmountingRef = useRef(false)
   useEffect(() => {
-    if (!isMountedRef.current) {
-      isMountedRef.current = true
+    if (loading) return
+    if (skipCountRef.current > 0) {
+      skipCountRef.current--
       return
     }
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
@@ -147,12 +149,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current)
-        // Đang rời trang (unmount) với lưu tự động còn đang chờ -> lưu ngay để không mất thay đổi
         if (unmountingRef.current) handleSaveOnly()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+  }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs, loading])
   // Khai báo SAU effect debounce: cleanup chạy theo thứ tự LIFO nên cờ này
   // được set TRƯỚC khi cleanup của effect debounce chạy lúc unmount.
   useEffect(() => {
