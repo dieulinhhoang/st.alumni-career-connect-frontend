@@ -51,6 +51,9 @@ const UserManagement     = lazy(() => import('../pages/system/User/UserManagemen
 const RoleManagement     = lazy(() => import('../pages/system/Role/RoleManagement'));
 const ResourceManagement = lazy(() => import('../pages/system/Resources/ResourceManagement'));
 
+// External API
+const ApiKeyManagement = lazy(() => import('../pages/system/ExternalApi/ApiKeyManagement'));
+
 // Admin — mail settings
 const MailSettingsPage       = lazy(() => import('../pages/system/MailSettings/index'));
 const EmailTemplateEditor    = lazy(() => import('../pages/system/MailSettings/EmailTemplateEditor'));
@@ -288,6 +291,12 @@ const routes = [
                 element: <Suspense fallback={<Loader />}><ResourceManagement /></Suspense>
               },
             ],
+          },
+
+          // External API keys
+          {
+            path: '/admin/api-keys',
+            element: <Suspense fallback={<Loader />}><ApiKeyManagement /></Suspense>
           },
 
           // Mail settings

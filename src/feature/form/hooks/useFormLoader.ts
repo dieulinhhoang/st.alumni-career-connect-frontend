@@ -34,7 +34,7 @@ export function useFormLoader(mode: BuilderMode, formId: number | undefined, set
         setters.setSections(data.sections)
         setters.setActiveSectionId(data.activeSectionId)
         setters.setQuestions(data.questions)
-        setters.setActiveId(data.activeQuestionId)
+        setters.setActiveId(null)
       })
       .catch((e: unknown) => { if (!cancelled) setLoadError(e instanceof Error ? e.message : 'Không thể tải form.') })
       .finally(() => { if (!cancelled) setLoading(false) })

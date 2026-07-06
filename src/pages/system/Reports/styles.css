@@ -1,3 +1,111 @@
+/* ── Faculty Report Page Header ── */
+.frp-header {
+  background: #166534;
+  border-radius: 14px;
+  padding: 20px 24px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.frp-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.frp-header__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.frp-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.frp-back-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.frp-header__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+}
+
+.frp-header__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.frp-header__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.frp-deadline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.frp-deadline strong { color: #fde68a; }
+.frp-deadline__icon { font-size: 11px; }
+
+.frp-filter-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 3px;
+  display: block;
+}
+
+.frp-filter-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.frp-header__bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.frp-approved-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #86efac;
+}
+
 /*  Page layout  */
 .rp-page {
   padding: 24px;
@@ -15,9 +123,9 @@
   border-bottom: none;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  background: #f0fdf4;
   border-radius: 12px;
-  border: 1px solid #e0e5f0;
+  border: 1px solid #bbf7d0;
 }
 
 .rp-page-header__left {
@@ -29,14 +137,14 @@
 .rp-page-header__title {
   font-size: 22px;
   font-weight: 700;
-  color: #1e293b;
+  color: #14532d;
   margin: 0;
   line-height: 1.3;
 }
 
 .rp-page-header__subtitle {
   font-size: 14px;
-  color: #4338ca;
+  color: #16a34a;
   font-weight: 500;
   margin: 0;
 }

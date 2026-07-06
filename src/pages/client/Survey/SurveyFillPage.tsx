@@ -8,31 +8,42 @@ import type { Identity } from './IdentifyStep'
 import { NotActiveScreen } from './NotActiveScreen'
 import { LoadingScreen, ErrorScreen } from './StatusScreens'
 import { submitResponse } from './submitResponse'
+import type { StudentPrefillField } from '../../../feature/form/types'
 
 type PageState = 'loading' | 'error' | 'not-active' | 'identify' | 'fill'
 
-/**
- * Số câu hỏi đầu tiên (theo thứ tự order) được tự động điền từ thông tin
- * xác thực SV và khoá lại, không cho phép chỉnh sửa.
- *
- * Câu 1–8 luôn bị khoá vì dữ liệu đến từ bước xác thực (IdentifyStep).
- * Câu 9–10 (SĐT, Email) chỉ được prefill nếu có studentData nhưng KHÔNG bị khoá
- * để SV có thể cập nhật nếu thông tin thay đổi.
- */
-const LOCKED_COUNT = 0
+const LOCKED_COUNT = 0 // legacy, không còn dùng
+
+const GENDER_MAP: Record<string, string> = { male: 'Nam', female: 'Nữ', other: 'Khác' }
+
+/** Lấy giá trị prefill của một field sinh viên từ identity */
+function getPrefillValue(field: StudentPrefillField, identity: Identity, qType?: string): any {
+  const sd = identity.studentData
+  switch (field) {
+    case 'studentCode':   return identity.studentId
+    case 'fullName':      return sd?.full_name || identity.studentName
+    case 'gender':        return sd?.gender ? (GENDER_MAP[sd.gender] ?? sd.gender) : null
+    case 'dob': {
+      if (!sd?.dob) return null
+      const d = new Date(sd.dob)
+      return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10)
+    }
+    case 'majorCode':     return sd?.training_industry_code
+    case 'cccd':
+      if (!sd?.citizen_identification) return null
+      return qType === 'cccd' ? { number: sd.citizen_identification } : sd.citizen_identification
+    case 'schoolYearEnd': return sd?.school_year_end
+    case 'majorName':     return sd?.training_industry_name
+    case 'phone':         return sd?.phone
+    case 'email':         return sd?.email || identity.studentEmail
+    default:              return null
+  }
+}
 
 /**
- * Mapping thứ tự câu hỏi → field của student (dựa theo form chuẩn VNUA):
- *  1 (index 0): Mã sinh viên
- *  2 (index 1): Họ và tên
- *  3 (index 2): Giới tính
- *  4 (index 3): Ngày sinh
- *  5 (index 4): Mã ngành đào tạo
- *  6 (index 5): Số CCCD
- *  7 (index 6): Khóa học (school_year_end)
- *  8 (index 7): Tên ngành được đào tạo
- *  9 (index 8): Số điện thoại  ← prefill nhưng không khoá
- * 10 (index 9): Email          ← prefill nhưng không khoá
+ * Xây dựng giá trị ban đầu cho form từ dữ liệu xác thực sinh viên.
+ * Ưu tiên dùng prefillField trên từng câu hỏi; nếu form chưa cấu hình prefillField
+ * thì fallback về mapping theo thứ tự câu hỏi (legacy).
  */
 function buildInitialValues(
   formSnapshot: SurveyBatch['formSnapshot'],
@@ -44,69 +55,65 @@ function buildInitialValues(
     (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
   )
 
-  const sd = identity.studentData
   const values: Record<string, any> = {}
 
-  const set = (idx: number, val: any) => {
-    if (sortedQs[idx] && val !== null && val !== undefined && val !== '') {
-      values[sortedQs[idx].id] = val
-    }
-  }
+  // ── Ưu tiên: dùng prefillField trên từng câu hỏi ──────────────────────────
+  const hasPrefillConfig = sortedQs.some((q: any) => q.prefillField)
 
-  // ── Câu 1–2: luôn có từ IdentifyStep ──────────────────────────────────────
-
-  // Câu 1: Mã sinh viên
-  set(0, identity.studentId)
-
-  // Câu 2: Họ và tên
-  set(1, sd?.full_name || identity.studentName)
-
-  // ── Câu 3–9: lấy từ studentData (có đợt tốt nghiệp) ──────────────────────
-
-  if (sd) {
-    // Câu 3: Giới tính — chuyển enum → tiếng Việt để hiển thị đúng trong form
-    const genderMap: Record<string, string> = {
-      male: 'Nam',
-      female: 'Nữ',
-      other: 'Khác',
-    }
-    set(2, sd.gender ? (genderMap[sd.gender] ?? sd.gender) : null)
-
-    // Câu 4: Ngày sinh — format YYYY-MM-DD (date input chuẩn HTML)
-    if (sd.dob) {
-      const d = new Date(sd.dob)
-      if (!isNaN(d.getTime())) {
-        set(3, d.toISOString().slice(0, 10))
+  if (hasPrefillConfig) {
+    for (const q of sortedQs as any[]) {
+      if (!q.prefillField) continue
+      const val = getPrefillValue(q.prefillField as StudentPrefillField, identity, q.type)
+      if (val !== null && val !== undefined && val !== '') {
+        values[q.id] = val
       }
     }
-
-    // Câu 5: Mã ngành đào tạo
-    set(4, sd.training_industry_code)
-
-    // Câu 6: Số CCCD — wrap thành CccdValue nếu câu hỏi type "cccd", ngược lại plain string
-    if (sd.citizen_identification) {
-      const q6 = sortedQs[5]
-      set(5, q6?.type === 'cccd'
-        ? { number: sd.citizen_identification }
-        : sd.citizen_identification
-      )
-    }
-
-    // Câu 7: Khóa học
-    set(6, sd.school_year_end)
-
-    // Câu 8: Tên ngành được đào tạo
-    set(7, sd.training_industry_name)
-
-    // Câu 9: Số điện thoại (prefill nhưng không khoá — SV có thể cập nhật)
-    set(8, sd.phone)
+    return values
   }
 
-  // ── Câu 10: Email — ưu tiên studentData, fallback về IdentifyStep ──────────
-  // (prefill nhưng không khoá)
+  // ── Fallback legacy: mapping theo thứ tự câu hỏi ─────────────────────────
+  const sd = identity.studentData
+  const set = (idx: number, val: any) => {
+    if (sortedQs[idx] && val !== null && val !== undefined && val !== '') {
+      values[(sortedQs[idx] as any).id] = val
+    }
+  }
+
+  set(0, identity.studentId)
+  set(1, sd?.full_name || identity.studentName)
+
+  if (sd) {
+    set(2, sd.gender ? (GENDER_MAP[sd.gender] ?? sd.gender) : null)
+    if (sd.dob) {
+      const d = new Date(sd.dob)
+      if (!isNaN(d.getTime())) set(3, d.toISOString().slice(0, 10))
+    }
+    set(4, sd.training_industry_code)
+    if (sd.citizen_identification) {
+      const q6 = sortedQs[5] as any
+      set(5, q6?.type === 'cccd' ? { number: sd.citizen_identification } : sd.citizen_identification)
+    }
+    set(6, sd.school_year_end)
+    set(7, sd.training_industry_name)
+    set(8, sd.phone)
+  }
   set(9, sd?.email || identity.studentEmail)
 
   return values
+}
+
+/** Tập id các câu hỏi cần khoá (lockedWhenPrefilled = true và có giá trị prefill) */
+function buildLockedIds(
+  formSnapshot: SurveyBatch['formSnapshot'],
+  initialValues: Record<string, any>,
+): Set<string> {
+  const locked = new Set<string>()
+  for (const q of (formSnapshot?.questions ?? []) as any[]) {
+    if (q.lockedWhenPrefilled && initialValues[q.id] !== undefined) {
+      locked.add(q.id)
+    }
+  }
+  return locked
 }
 
 export default function SurveyFillPage() {
@@ -186,16 +193,20 @@ export default function SurveyFillPage() {
     case 'error': return <ErrorScreen />
     case 'not-active': return <NotActiveScreen batch={batch} />
     case 'identify': return batch ? <IdentifyStep batch={batch} onContinue={handleIdentify} /> : null
-    case 'fill':
+    case 'fill': {
+      const initVals = identity ? buildInitialValues(batch!.formSnapshot, identity) : undefined
+      const lockedIds = initVals ? buildLockedIds(batch!.formSnapshot, initVals) : undefined
       return batch?.formSnapshot
         ? <SurveyPreview
           form={batch.formSnapshot}
           onSubmit={handleSubmit}
           submitLabel="Gửi phiếu khảo sát"
           lockedCount={LOCKED_COUNT}
-          initialValues={identity ? buildInitialValues(batch.formSnapshot, identity) : undefined}
+          lockedIds={lockedIds}
+          initialValues={initVals}
         />
         : null
+    }
     default: return null
   }
 }

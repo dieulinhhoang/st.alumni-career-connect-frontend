@@ -571,8 +571,10 @@ export interface SurveyPreviewProps {
   form: Form | null
   onBack?: () => void
   initialValues?: Record<string, any>
-  /** Số câu hỏi đầu tiên bị khoá (auto-fill từ xác thực, không cho sửa) */
+  /** Số câu hỏi đầu tiên bị khoá (legacy, ưu tiên dùng lockedIds) */
   lockedCount?: number
+  /** Set id câu hỏi bị khoá (không cho sửa) — ưu tiên hơn lockedCount */
+  lockedIds?: Set<string>
   onSubmit?: (answers: Record<string, any>) => void | Promise<void>
   submitLabel?: string
   compact?: boolean
@@ -584,6 +586,7 @@ export function SurveyPreview({
   onBack,
   initialValues,
   lockedCount = 0,
+  lockedIds,
   onSubmit,
   submitLabel = 'Gửi',
   compact = false,
@@ -656,16 +659,18 @@ export function SurveyPreview({
 
   let num = 0
 
-  // Collect locked question ids (first lockedCount questions by order)
-  const lockedQIds = new Set<string>(
-    lockedCount > 0
-      ? questions
-          .slice()
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .slice(0, lockedCount)
-          .map(q => q.id)
-      : []
-  )
+  // Collect locked question ids — prefer explicit lockedIds, fallback to lockedCount
+  const lockedQIds: Set<string> = lockedIds
+    ? lockedIds
+    : new Set<string>(
+        lockedCount > 0
+          ? questions
+              .slice()
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+              .slice(0, lockedCount)
+              .map(q => q.id)
+          : []
+      )
 
   return (
     <div style={{

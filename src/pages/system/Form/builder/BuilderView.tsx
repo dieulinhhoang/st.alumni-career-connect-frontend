@@ -185,19 +185,24 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         )}
 
         {formStatus === 'published' ? (
-          <Tooltip title="Hủy xuất bản để chỉnh sửa lại">
-            <Button icon={<StopOutlined />} onClick={handleUnpublishClick} loading={publishing}
-              style={{ borderColor: '#f59e0b', color: '#b45309', background: '#fffbeb' }}>
-              {!isMobile && 'Hủy xuất bản'}
-            </Button>
-          </Tooltip>
+          <Button
+            icon={<CheckOutlined />}
+            loading={publishing}
+            onClick={handleUnpublishClick}
+            style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a', fontWeight: 600 }}
+          >
+            {!isMobile && 'Đã xuất bản'}
+          </Button>
         ) : (
-          <Tooltip title="Lưu và xuất bản form">
-            <Button type="primary" icon={<CloudUploadOutlined />} onClick={handlePublishClick} loading={publishing}
-              style={{ background: '#16a34a', borderColor: '#16a34a' }}>
-              {!isMobile && 'Xuất bản'}
-            </Button>
-          </Tooltip>
+          <Button
+            type="primary"
+            icon={<CloudUploadOutlined />}
+            loading={publishing}
+            onClick={handlePublishClick}
+            style={{ background: '#16a34a', borderColor: '#16a34a', fontWeight: 600 }}
+          >
+            {!isMobile && 'Xuất bản'}
+          </Button>
         )}
       </Flex>
 

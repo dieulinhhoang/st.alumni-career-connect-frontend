@@ -29,6 +29,7 @@ export type SurveyOption = {
   value: string;
   label: string;
   deadline?: string | null;
+  year?: number | null;
 };
 
 export type SubmissionStatusResponse = {
@@ -152,6 +153,7 @@ export async function fetchSurveyOptions(): Promise<SurveyOption[]> {
         ? `${b.title} (${b.graduationPeriod})`
         : b.year ? `${b.title} (${b.year})` : b.title,
       deadline: b.endDate ?? null,
+      year: b.year ?? null,
     }));
   }
 }

@@ -87,14 +87,24 @@ export function PDFCanvas({
   const isMedium = containerWidth >= 480 && containerWidth < 640
   const isMobile = isSmall || isMedium
   const px = isSmall ? 16 : isMedium ? 20 : 36
+  // Logo size = 50% của cột 41.666% — khớp đúng tỉ lệ preview
+  const computedLogoSize = containerWidth > 0
+    ? Math.round((containerWidth - px * 2) * 0.41666 * 0.5)
+    : (logoSize ?? 120)
 
-  // Description inline edit — 3 fields: titleLine / bodyText / footerLine
+  // Description inline edit — titleLine/footerLine là div hardcode, chỉ bodyText là editable
   const parseDesc = (paras: string[]) => ({
-    titleLine: paras[0] ?? '',
-    bodyText: paras.length > 2 ? paras.slice(1, paras.length - 1).join('\n') : (paras[1] ?? ''),
-    footerLine: paras.length > 2 ? (paras[paras.length - 1] ?? '') : '',
+    titleLine: '',
+    bodyText: paras.join('\n'),
+    footerLine: '',
   })
   const [descDraft, setDescDraft] = useState(() => parseDesc(descriptionParagraphs))
+
+  // Sync khi prop thay đổi (form load async)
+  useEffect(() => {
+    setDescDraft(parseDesc(descriptionParagraphs))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [descriptionParagraphs.join('\n')])
 
   const today = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' / ')
   const editable = headerOnly || !!onHeaderChange
@@ -158,7 +168,7 @@ export function PDFCanvas({
   return (
     <div ref={containerRef} style={{ background: '#f8fafc', fontFamily: 'Inter, Geist, system-ui, sans-serif', color: '#1e293b', width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
 
-      <SurveyHeaderComp header={header} editable={editable} logoUrl={logoUrl} logoSize={logoSize}
+      <SurveyHeaderComp header={header} editable={editable} logoUrl={logoUrl} logoSize={computedLogoSize}
         isMobile={isMobile} isSmall={isSmall} isMedium={isMedium} today={today} onHeaderChange={onHeaderChange} />
 
       {/* {editable && onSectionsChange && (
@@ -201,71 +211,50 @@ export function PDFCanvas({
                   onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
                   onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
                 /> */}
-                <a  style={{
-                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
-                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
-                    fontWeight: 700, fontStyle: 'italic', textAlign: 'center',
-                    color: '#0f172a', background: 'transparent', outline: 'none',
-                    boxSizing: 'border-box',
-                  }}>
-                    Thân gửi Anh/Chị cựu sinh viên của Học viện Nông nghiệp Việt Nam!
-                  </a>
-                {/* Đổi logoạn giữa — italic thụt lề */}
+                <div style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed transparent', borderRadius: 6,
+                    fontSize: 14, fontFamily: 'inherit', fontWeight: 700, fontStyle: 'italic',
+                    textAlign: 'center', color: '#0f172a', boxSizing: 'border-box', transition: 'border-color .15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#cbd5e1')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+                >
+                  Thân gửi Anh/Chị cựu sinh viên của Học viện Nông nghiệp Việt Nam!
+                </div>
+
                 <textarea
                   value={descDraft.bodyText}
                   onChange={e => {
                     const d = { ...descDraft, bodyText: e.target.value }
                     setDescDraft(d)
-                    const paras: string[] = []
-                    if (d.titleLine.trim()) paras.push(d.titleLine.trim())
-                    e.target.value.split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => paras.push(l))
-                    if (d.footerLine.trim()) paras.push(d.footerLine.trim())
+                    const paras = e.target.value.split('\n').map((l: string) => l.trim()).filter(Boolean)
                     onDescriptionParagraphsChange(paras.length ? paras : [''])
                   }}
                   placeholder="Đoạn giữa: nội dung giới thiệu / lời dẫn khảo sát..."
                   rows={5}
                   style={{
-                    width: '100%', padding: '6px 10px 6px 28px', border: '1px dashed #cbd5e1',
+                    width: '100%', padding: '6px 10px 6px 28px', border: '1px dashed transparent',
                     borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
                     fontStyle: 'italic', color: '#334155', background: 'transparent',
                     resize: 'vertical', outline: 'none', lineHeight: 1.75,
-                    boxSizing: 'border-box',
+                    boxSizing: 'border-box', transition: 'border-color .15s',
                   }}
+                  onMouseEnter={e => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.borderColor = '#cbd5e1' }}
+                  onMouseLeave={e => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.borderColor = 'transparent' }}
                   onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.borderStyle = 'dashed' }}
                 />
-                {/* Dòng cuối — italic căn giữa */}
-                {/* <input
-                  value={descDraft.footerLine}
-                  onChange={e => {
-                    const d = { ...descDraft, footerLine: e.target.value }
-                    setDescDraft(d)
-                    const paras: string[] = []
-                    if (d.titleLine.trim()) paras.push(d.titleLine.trim())
-                    d.bodyText.split('\n').map((l: string) => l.trim()).filter(Boolean).forEach((l: string) => paras.push(l))
-                    if (d.footerLine.trim()) paras.push(d.footerLine.trim())
-                    onDescriptionParagraphsChange(paras.length ? paras : [''])
+
+                <div style={{
+                    width: '100%', padding: '6px 10px', border: '1px dashed transparent', borderRadius: 6,
+                    fontSize: 14, fontFamily: 'inherit', fontStyle: 'italic', textAlign: 'center',
+                    color: '#334155', boxSizing: 'border-box', transition: 'border-color .15s',
                   }}
-                  placeholder="Dòng cuối: Trân trọng cảm ơn sự cộng tác..."
-                  style={{
-                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
-                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
-                    fontStyle: 'italic', textAlign: 'center',
-                    color: '#334155', background: 'transparent', outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                  onFocus={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.borderStyle = 'solid' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.borderStyle = 'dashed' }}
-                /> */}
-                <a style={{
-                    width: '100%', padding: '6px 10px', border: '1px dashed #cbd5e1',
-                    borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
-                    fontStyle: 'italic', textAlign: 'center',
-                    color: '#334155', background: 'transparent', outline: 'none',
-                    boxSizing: 'border-box',
-                  }}>
-                    Trân trọng cảm ơn sự cộng tác của Anh/Chị!
-                  </a>
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#cbd5e1')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+                >
+                  Trân trọng cảm ơn sự cộng tác của Anh/Chị!
+                </div>
               </div>
             ) : (
               <div style={{ padding: '16px 20px', background: `${accent}08`, borderLeft: `3px solid ${accent}`, borderRadius: '0 8px 8px 0' }}>

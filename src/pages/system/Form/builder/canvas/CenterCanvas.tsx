@@ -154,10 +154,10 @@ function SortableCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Cột trái: drag handle + layout buttons */}
+      {/* Cột trái: drag handle + layout buttons — chỉ hiện khi hover */}
       <div style={{
         position: 'absolute',
-        left: -36,
+        left: -26,
         top: '50%',
         transform: 'translateY(-50%)',
         display: 'flex',
@@ -165,6 +165,9 @@ function SortableCard({
         alignItems: 'center',
         gap: 2,
         zIndex: 10,
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity .15s',
+        pointerEvents: hovered ? 'auto' : 'none',
       }}>
         {/* Drag handle */}
         <div
@@ -176,16 +179,15 @@ function SortableCard({
             width: 24, height: 28,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: isDragging ? 'grabbing' : 'grab',
-            color: hovered ? '#94a3b8' : '#d1d5db',
+            color: '#94a3b8',
             fontSize: 16, userSelect: 'none', borderRadius: 6,
-            transition: 'color .15s',
           }}
           title="Kéo để sắp xếp"
         >
           ⠿
         </div>
 
-        {/* Layout buttons — chỉ hiện khi hover */}
+        {/* Layout buttons */}
         {hovered && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {isRowLeader ? (
@@ -331,28 +333,30 @@ export function CenterCanvas({
     >
       <div
         ref={scrollRef}
+        onClick={() => onDeactivate()}
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '24px 24px 48px',
+          padding: '28px 16px 72px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
         }}
       >
-        <div style={{ width: '100%', maxWidth: 680 }}>
-        {/* Header card */}
-        <div
-          style={{
-            background: '#fff',
-            borderRadius: 14,
-            border: '1px solid #eaecf0',
-            overflow: 'hidden',
-            marginBottom: 12,
-            boxShadow: '0 2px 8px rgba(0,0,0,.04)',
-          }}
-        >
-          <PDFCanvas
+        <div style={{ width: '100%', maxWidth: 780 }}>
+
+        {/* Paper card — wraps header + questions like preview */}
+        <div style={{
+          background: '#fff',
+          borderRadius: 10,
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 4px rgba(0,0,0,.06)',
+          overflow: 'hidden',
+          marginBottom: 16,
+        }}>
+
+        {/* Header — PDFCanvas tự handle padding nội bộ */}
+        <PDFCanvas
             surveyTitle={surveyTitle}
             descriptionParagraphs={descriptionParagraphs ?? []}
             sections={sections}
@@ -370,10 +374,11 @@ export function CenterCanvas({
             onDescriptionParagraphsChange={onDescriptionParagraphsChange}
             onSectionsChange={onSectionsChange}
           />
-        </div>
 
+        {/* Questions — có padding riêng để không tràn ra ngoài card */}
+        <div style={{ padding: '0 36px 32px' }}>
         {questions.length === 0 ? (
-          //  Empty state 
+          //  Empty state
           <div
             onDragOver={handleDragOver}
             onDrop={(e) => onDrop(e, undefined)}
@@ -456,9 +461,9 @@ export function CenterCanvas({
                                 question={q}
                                 index={questions.indexOf(q)}
                                 total={questions.length}
-                                isActive={activeQuestionId === q.id}
                                 accent={accent}
                                 sections={sections}
+                                isActive={activeQuestionId === q.id}
                                 onActivate={() => onActivate(q.id)}
                                 onDeactivate={onDeactivate}
                                 onUpdate={(patch) => onUpdate(q.id, patch)}
@@ -518,7 +523,7 @@ export function CenterCanvas({
                           isRowLeader={qIdx === 0} rowSize={item.length} accent={accent}
                           onGroup={(count) => onGroupQuestions(q.id, count)}
                           onUngroup={() => onUngroupQuestion(q.id)}
-                        >
+                          >
                           <EditableQuestionCard
                             question={q}
                             index={questions.indexOf(q)}
@@ -548,7 +553,7 @@ export function CenterCanvas({
                       isRowLeader={true} rowSize={1} accent={accent}
                       onGroup={(count) => onGroupQuestions(item.id, count)}
                       onUngroup={() => onUngroupQuestion(item.id)}
-                    >
+                      >
                       <EditableQuestionCard
                         question={item}
                         index={questions.indexOf(item)}
@@ -583,7 +588,6 @@ export function CenterCanvas({
                       question={dragActiveQuestion}
                       index={0}
                       total={0}
-                      isActive={false}
                       accent={accent}
                       sections={sections}
                       onActivate={() => {}}
@@ -603,37 +607,39 @@ export function CenterCanvas({
               </DragOverlay>
             </DndContext>
 
-            {/*  Bottom action bar  */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-              <Tooltip title="Thêm câu hỏi mới" placement="top">
-                <button
-                  onClick={() => onAddQuestion()}
-                  aria-label="Thêm câu hỏi mới"
-                  style={{ flex: 1, height: 36, border: '1.5px dashed #d1d5db', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'inherit', transition: 'all .15s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; e.currentTarget.style.background = `${accent}08` }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
-                >
-                  <PlusOutlined style={{ fontSize: 11 }} /> Thêm câu hỏi
-                </button>
-              </Tooltip>
-
-              <Tooltip title="Ngắt phần — thêm section mới" placement="top">
-                <button
-                  onClick={() => {
-                    const targetId = activeQuestionId ?? questions[questions.length - 1]?.id
-                    if (targetId) onAddSectionAfter(targetId)
-                  }}
-                  aria-label="Ngắt phần"
-                  style={{ height: 36, padding: '0 16px', border: '1.5px dashed #d1d5db', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'inherit', transition: 'all .15s', flexShrink: 0 }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#6366f1'; e.currentTarget.style.background = '#6366f108' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
-                >
-                  <SplitCellsOutlined style={{ fontSize: 13 }} /> Ngắt phần
-                </button>
-              </Tooltip>
-            </div>
           </div>
         )}
+        </div>{/* /questions padding */}
+        </div>{/* /paper card */}
+
+        {/* Bottom action bar — outside paper card */}
+        {questions.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <Tooltip title="Thêm câu hỏi mới" placement="top">
+              <button
+                onClick={() => onAddQuestion()}
+                aria-label="Thêm câu hỏi mới"
+                style={{ flex: 1, height: 36, border: '1.5px dashed #d1d5db', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'inherit', transition: 'all .15s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = accent; e.currentTarget.style.background = `${accent}08` }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
+              >
+                <PlusOutlined style={{ fontSize: 11 }} /> Thêm câu hỏi
+              </button>
+            </Tooltip>
+            <Tooltip title="Ngắt phần — thêm section mới" placement="top">
+              <button
+                onClick={() => { const tid = activeQuestionId ?? questions[questions.length - 1]?.id; if (tid) onAddSectionAfter(tid) }}
+                aria-label="Ngắt phần"
+                style={{ height: 36, padding: '0 16px', border: '1.5px dashed #d1d5db', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'inherit', transition: 'all .15s', flexShrink: 0 }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#6366f1'; e.currentTarget.style.background = '#6366f108' }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}
+              >
+                <SplitCellsOutlined style={{ fontSize: 13 }} /> Ngắt phần
+              </button>
+            </Tooltip>
+          </div>
+        )}
+
         </div>{/* /maxWidth */}
       </div>
 

@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Spin, Result, Button } from 'antd'
+import { EditOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useBatch } from '../../../feature/alumni/hooks/useBatch'
-import { getFormById, updateForm } from '../../../feature/form/api'
-import { updateBatch } from '../../../feature/alumni/api'
+import { getFormById } from '../../../feature/form/api'
 import type { Form } from '../../../feature/form/types'
-import { BuilderView } from '../Form/builder/BuilderView'
+import { SurveyPreview } from '../Form/Preview'
 import AdminLayout from '../../../components/layout/AdminLayout'
+import '../Form/survey.css'
 
 export default function BatchFormEditor() {
   const { id } = useParams<{ id: string }>()
@@ -14,12 +15,10 @@ export default function BatchFormEditor() {
   const navigate = useNavigate()
 
   const { batch, loading: batchLoading, error: batchError } = useBatch(batchId)
-
   const [form, setForm] = useState<Form | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  // Khi batch load xong, load form gốc theo formId
   useEffect(() => {
     if (!batch?.formId) return
     setFormLoading(true)
@@ -28,30 +27,6 @@ export default function BatchFormEditor() {
       .catch(() => setFormError('Không thể tải form. Form có thể đã bị xóa.'))
       .finally(() => setFormLoading(false))
   }, [batch?.formId])
-
-  const handleSave = async (updatedForm: Form) => {
-    try {
-      // 1. Lưu form gốc
-      if (updatedForm.id != null) {
-        await updateForm(updatedForm.id as number, {
-          name: updatedForm.name,
-          description: updatedForm.description,
-          sections: updatedForm.sections,
-          questions: updatedForm.questions,
-          themeId: updatedForm.themeId,
-          header: updatedForm.header,
-          footer: updatedForm.footer,
-        })
-      }
-
-      // 2. Cập nhật formSnapshot của batch để đồng bộ
-      await updateBatch(batchId, { formSnapshot: updatedForm })
-
-      navigate(`/admin/alumni/batches`)
-    } catch (e) {
-      console.error('Lưu form cho batch thất bại:', e)
-    }
-  }
 
   const loading = batchLoading || formLoading
   const error = batchError || formError
@@ -73,28 +48,7 @@ export default function BatchFormEditor() {
           status="warning"
           title="Không thể tải form"
           subTitle={error ?? 'Form không tồn tại hoặc đã bị xóa'}
-          extra={
-            <Button type="primary" onClick={() => navigate('/admin/alumni/batches')}>
-              Quay lại danh sách đợt
-            </Button>
-          }
-        />
-      </AdminLayout>
-    )
-  }
-
-  if (batch && batch.status !== 'draft') {
-    return (
-      <AdminLayout>
-        <Result
-          status="warning"
-          title="Không thể chỉnh sửa"
-          subTitle="Đợt khảo sát đã được kích hoạt hoặc đã kết thúc, không thể chỉnh sửa nội dung form."
-          extra={
-            <Button type="primary" onClick={() => navigate('/admin/alumni/batches')}>
-              Quay lại danh sách đợt
-            </Button>
-          }
+          extra={<Button type="primary" onClick={() => navigate('/admin/alumni/batches')}>Quay lại</Button>}
         />
       </AdminLayout>
     )
@@ -102,10 +56,24 @@ export default function BatchFormEditor() {
 
   return (
     <AdminLayout>
-      <BuilderView
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/alumni/batches')}>
+          Quay lại
+        </Button>
+        {batch?.status === 'draft' && (
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/admin/forms/${batch.formId}/edit`)}
+          >
+            Chỉnh sửa form
+          </Button>
+        )}
+      </div>
+
+      <SurveyPreview
         form={form}
-        onSave={handleSave}
-        onBack={() => navigate(`/admin/alumni/batches`)}
+        onBack={() => navigate('/admin/alumni/batches')}
       />
     </AdminLayout>
   )

@@ -12,9 +12,9 @@ import React from 'react'
 import { Select, Checkbox, Tooltip, Switch } from 'antd'
 import {
   CopyOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined,
-  PieChartOutlined, BarChartOutlined, FileExcelOutlined,
+  PieChartOutlined, BarChartOutlined, FileExcelOutlined, UserOutlined, LockOutlined,
 } from '@ant-design/icons'
-import type { Question, Section, QuestionType } from '../../../../../feature/form/types'
+import type { Question, Section, QuestionType, StudentPrefillField } from '../../../../../feature/form/types'
 import { GENDER_OPTIONS } from '../../../../../feature/form/constants'
 
 //  Cột của từng mẫu 
@@ -222,7 +222,89 @@ function StatConfig({ question: q, accent, onUpdate }: StatConfigProps) {
   )
 }
 
-//  Types 
+//  Prefill config
+
+const PREFILL_FIELD_OPTIONS: { value: StudentPrefillField; label: string }[] = [
+  { value: 'studentCode',   label: 'Mã sinh viên' },
+  { value: 'fullName',      label: 'Họ và tên' },
+  { value: 'gender',        label: 'Giới tính' },
+  { value: 'dob',           label: 'Ngày sinh' },
+  { value: 'majorCode',     label: 'Mã ngành đào tạo' },
+  { value: 'cccd',          label: 'Số CCCD' },
+  { value: 'schoolYearEnd', label: 'Khóa học' },
+  { value: 'majorName',     label: 'Tên ngành đào tạo' },
+  { value: 'phone',         label: 'Số điện thoại' },
+  { value: 'email',         label: 'Email' },
+]
+
+interface PrefillConfigProps {
+  question: Question
+  accent: string
+  onUpdate: (patch: Partial<Question>) => void
+}
+
+function PrefillConfig({ question: q, accent, onUpdate }: PrefillConfigProps) {
+  const hasPrefill = !!q.prefillField
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        marginTop: 12,
+        padding: '12px 14px',
+        borderRadius: 10,
+        background: '#f0f9ff',
+        border: '1px solid #bae6fd',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}
+    >
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '.06em', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <UserOutlined /> Tự điền từ dữ liệu sinh viên
+      </div>
+
+      {/* Chọn field sinh viên */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <Select
+          size="small"
+          allowClear
+          placeholder="Chọn thông tin SV..."
+          value={q.prefillField ?? undefined}
+          onChange={(v) => onUpdate({
+            prefillField: v as StudentPrefillField | undefined,
+            lockedWhenPrefilled: v ? q.lockedWhenPrefilled : false,
+          })}
+          style={{ width: 200 }}
+          options={PREFILL_FIELD_OPTIONS}
+        />
+        {!hasPrefill && (
+          <span style={{ fontSize: 12, color: '#64748b', fontStyle: 'italic' }}>
+            Không tự điền
+          </span>
+        )}
+      </div>
+
+      {/* Toggle khoá sau khi prefill */}
+      {hasPrefill && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Switch
+            size="small"
+            checked={!!q.lockedWhenPrefilled}
+            onChange={(on) => onUpdate({ lockedWhenPrefilled: on })}
+            style={{ background: q.lockedWhenPrefilled ? accent : undefined }}
+          />
+          <span style={{ fontSize: 13, color: '#374151', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <LockOutlined style={{ color: q.lockedWhenPrefilled ? accent : '#94a3b8' }} />
+            Khoá câu hỏi sau khi tự điền
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+//  Types
 
 interface EditableQuestionCardProps {
   question: Question
@@ -287,6 +369,8 @@ export function EditableQuestionCard({
   onActivate, onDeactivate, onUpdate, onDuplicate, onRemove,
   onMoveUp, onMoveDown, onAddQuestion, onAddOption, onUpdateOption, onRemoveOption,
 }: EditableQuestionCardProps) {
+  const [editingPlaceholder, setEditingPlaceholder] = React.useState(false)
+  const [cardHovered, setCardHovered] = React.useState(false)
   const qType = (question.type ?? 'text') as QuestionType
   const options = Array.isArray(question.options) ? question.options : []
   const isChoiceType = ['radio', 'checkbox', 'select'].includes(qType)
@@ -294,16 +378,17 @@ export function EditableQuestionCard({
 
   return (
     <div
-      onClick={onActivate}
+      onClick={(e) => { e.stopPropagation(); onActivate() }}
+      onMouseEnter={() => setCardHovered(true)}
+      onMouseLeave={() => setCardHovered(false)}
       style={{
-        background: '#fff', borderRadius: 0,
-        border: 'none',
-        borderBottom: '1px solid #e8eaed',
-        borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
-        boxShadow: isActive ? '0 1px 6px rgba(0,0,0,.10)' : 'none',
-        padding: isActive ? '18px 18px 18px 14px' : 18,
-        marginBottom: 12, transition: 'all .18s ease',
-        position: 'relative', overflow: 'hidden',
+        background: '#fff', borderRadius: 6,
+        border: isActive ? `1px solid ${accent}30` : cardHovered ? '1px solid #e2e8f0' : '1px solid transparent',
+        borderLeft: isActive ? `4px solid ${accent}` : cardHovered ? '4px solid #e2e8f0' : '4px solid transparent',
+        boxShadow: isActive ? '0 2px 8px rgba(0,0,0,.08)' : 'none',
+        padding: '16px 18px 16px 14px',
+        marginBottom: 0, transition: 'border-color .15s, box-shadow .2s',
+        position: 'relative', cursor: 'pointer',
       }}
     >
 
@@ -311,55 +396,76 @@ export function EditableQuestionCard({
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
 
-          {/* Title + type */}
+          {/* Title + type dropdown (dropdown chỉ hiện khi active) */}
           <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 280 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ minWidth: 20, color: '#64748b', fontSize: 12, fontWeight: 600, flexShrink: 0 }}>{index + 1}.</div>
+                <div style={{ minWidth: 20, color: '#64748b', fontSize: 14, fontWeight: 600, flexShrink: 0 }}>{index + 1}.</div>
                 <input
                   value={question.title ?? ''}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onUpdate({ title: e.target.value })}
                   placeholder="Câu hỏi"
-                  style={{ flex: 1, border: 'none', borderBottom: '2px solid #d1d5db', outline: 'none', padding: '10px 0 8px', fontSize: 16, fontWeight: 600, background: 'transparent', color: '#0f172a' }}
+                  style={{ flex: 1, border: 'none', borderBottom: isActive ? '2px solid #d1d5db' : 'none', outline: 'none', padding: '4px 0 6px', fontSize: 16, fontWeight: 600, background: 'transparent', color: '#0f172a', cursor: isActive ? 'text' : 'default' }}
+                  readOnly={!isActive}
                 />
               </div>
             </div>
-            <div style={{ width: 220, maxWidth: '100%' }} onClick={(e) => e.stopPropagation()}>
-              <Select
-                value={qType}
-                onChange={(val) => onUpdate({
-                  type: val,
-                  options: val === 'gender'
-                    ? GENDER_OPTIONS.map((o) => ({ ...o }))
-                    : ['radio', 'checkbox', 'select'].includes(val)
-                      ? options.length ? options : [{ id: crypto.randomUUID(), label: 'Tùy chọn 1' }]
-                      : [],
-                  // reset stat config nếu đổi sang loại không chartable
-                  ...(CHARTABLE_TYPES.includes(val) ? {} : { showInChart: false, reportTemplate: undefined, excelColumn: undefined, reportFieldKey: undefined }),
-                })}
-                style={{ width: '100%' }}
-                options={QUESTION_TYPE_OPTIONS}
-              />
-            </div>
+            {isActive && (
+              <div style={{ width: 220, maxWidth: '100%', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                <Select
+                  value={qType}
+                  onChange={(val) => onUpdate({
+                    type: val,
+                    options: val === 'gender'
+                      ? GENDER_OPTIONS.map((o) => ({ ...o }))
+                      : ['radio', 'checkbox', 'select'].includes(val)
+                        ? options.length ? options : [{ id: crypto.randomUUID(), label: 'Tùy chọn 1' }]
+                        : [],
+                    ...(CHARTABLE_TYPES.includes(val) ? {} : { showInChart: false, reportTemplate: undefined, excelColumn: undefined, reportFieldKey: undefined }),
+                  })}
+                  style={{ width: '100%' }}
+                  options={QUESTION_TYPE_OPTIONS}
+                />
+              </div>
+            )}
           </div>
 
-          {/* Input preview */}
+          {/* Input preview — mặc định giống preview, focus mới edit placeholder */}
           <div style={{ marginTop: 14 }}>
             {(qType === 'text' || qType === 'email' || qType === 'tel') && (
-              <input value={question.placeholder ?? ''} onClick={(e) => e.stopPropagation()}
-                onChange={(e) => onUpdate({ placeholder: e.target.value })} placeholder="Văn bản gợi ý"
-                style={{ width: '100%', height: 42, border: '1px solid #e5e7eb', borderRadius: 10, padding: '0 14px', fontSize: 14, outline: 'none', color: '#334155', background: '#fff' }} />
+              <input
+                value={editingPlaceholder ? (question.placeholder ?? '') : ''}
+                placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'Câu trả lời của bạn')}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setEditingPlaceholder(true)}
+                onBlur={() => setEditingPlaceholder(false)}
+                onChange={(e) => onUpdate({ placeholder: e.target.value })}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 16, outline: 'none', color: editingPlaceholder ? '#334155' : '#9ca3af', background: '#fff', fontFamily: 'inherit' }}
+              />
             )}
             {qType === 'long' && (
-              <textarea value={question.placeholder ?? ''} onClick={(e) => e.stopPropagation()}
-                onChange={(e) => onUpdate({ placeholder: e.target.value })} placeholder="Văn bản gợi ý" rows={3}
-                style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 10, padding: '12px 14px', fontSize: 14, outline: 'none', color: '#334155', background: '#fff', resize: 'vertical' }} />
+              <textarea
+                value={editingPlaceholder ? (question.placeholder ?? '') : ''}
+                placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'Câu trả lời của bạn')}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setEditingPlaceholder(true)}
+                onBlur={() => setEditingPlaceholder(false)}
+                onChange={(e) => onUpdate({ placeholder: e.target.value })}
+                rows={4}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 16, outline: 'none', color: editingPlaceholder ? '#334155' : '#9ca3af', background: '#fff', fontFamily: 'inherit', resize: 'vertical' }}
+              />
             )}
             {qType === 'date' && (
-              <input value={question.placeholder ?? ''} onClick={(e) => e.stopPropagation()}
-                onChange={(e) => onUpdate({ placeholder: e.target.value })} placeholder="dd/mm/yyyy"
-                style={{ width: 220, maxWidth: '100%', height: 42, border: '1px solid #e5e7eb', borderRadius: 10, padding: '0 14px', fontSize: 14, outline: 'none', color: '#334155', background: '#fff' }} />
+              <input
+                value={editingPlaceholder ? (question.placeholder ?? '') : ''}
+                placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'dd/mm/yyyy')}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => setEditingPlaceholder(true)}
+                onBlur={() => setEditingPlaceholder(false)}
+                onChange={(e) => onUpdate({ placeholder: e.target.value })}
+                style={{ width: 220, maxWidth: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 16, outline: 'none', color: '#9ca3af', background: '#fff', fontFamily: 'inherit' }}
+              />
             )}
             {qType === 'address' && (
               <div style={{ padding: '12px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#64748b', fontSize: 14, background: '#f8fafc' }}>
@@ -400,57 +506,86 @@ export function EditableQuestionCard({
                     </div>
                     <input value={opt.label} onChange={(e) => onUpdateOption(opt.id, e.target.value)} placeholder="Tùy chọn"
                       style={{ flex: 1, border: 'none', borderBottom: '1px solid #dbe2ea', outline: 'none', padding: '8px 0', fontSize: 14, color: '#334155', background: 'transparent' }} />
-                    {options.length > 1 && (
+                    {isActive && options.length > 1 && (
                       <button type="button" onClick={() => onRemoveOption(opt.id)}
                         style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
                     )}
                   </div>
                 ))}
-                <button type="button" onClick={(e) => { e.stopPropagation(); onAddOption() }}
-                  style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
-                  + Thêm tùy chọn
-                </button>
-                {/* "Khác" toggle — chỉ cho radio & checkbox */}
-                {(qType === 'radio' || qType === 'checkbox') && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
-                    <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
-                      {qType === 'checkbox'
-                        ? <Checkbox disabled />
-                        : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
-                    </div>
-                    {question.allowOther ? (
-                      <>
-                        <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1 }}>Khác (ô nhập sẽ hiện)</span>
-                        <button type="button" onClick={() => onUpdate({ allowOther: false })}
-                          style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
-                      </>
-                    ) : (
-                      <button type="button" onClick={() => onUpdate({ allowOther: true })}
-                        style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0 }}>
-                        + Thêm tùy chọn "Khác"
-                      </button>
+                {isActive && (
+                  <>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); onAddOption() }}
+                      style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0, display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content' }}>
+                      + Thêm tùy chọn
+                    </button>
+                    {(qType === 'radio' || qType === 'checkbox') && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
+                          {qType === 'checkbox'
+                            ? <Checkbox disabled />
+                            : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
+                        </div>
+                        {question.allowOther ? (
+                          <>
+                            <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1 }}>Khác (ô nhập sẽ hiện)</span>
+                            <button type="button" onClick={() => onUpdate({ allowOther: false })}
+                              style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+                          </>
+                        ) : (
+                          <button type="button" onClick={() => onUpdate({ allowOther: true })}
+                            style={{ border: 'none', background: 'transparent', color: 'rgb(22, 119, 255)', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0 }}>
+                            + Thêm tùy chọn "Khác"
+                          </button>
+                        )}
+                      </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             )}
           </div>
 
-          {/* Footer: required + actions */}
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}
-            onClick={(e) => e.stopPropagation()}>
-            <Checkbox checked={!!question.required} onChange={(e) => onUpdate({ required: e.target.checked })}>
-              Bắt buộc
-            </Checkbox>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <ActionIcon title="Nhân bản"  icon={<CopyOutlined />}      onClick={onDuplicate} />
-              <ActionIcon title="Xóa"       icon={<DeleteOutlined />}    onClick={onRemove}    danger />
+          {/* Footer + configs — grid trick để animate height 0→auto */}
+          <div style={{
+            display: 'grid',
+            gridTemplateRows: isActive ? '1fr' : '0fr',
+            transition: 'grid-template-rows .22s cubic-bezier(.4,0,.2,1)',
+          }}>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{
+                marginTop: 16, paddingTop: 14, borderTop: '1px solid #eef2f7',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+                opacity: isActive ? 1 : 0, transition: 'opacity .18s',
+              }} onClick={(e) => e.stopPropagation()}>
+                <Checkbox checked={!!question.required} onChange={(e) => onUpdate({ required: e.target.checked })}>
+                  Bắt buộc
+                </Checkbox>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ActionIcon title="Nhân bản" icon={<CopyOutlined />}   onClick={onDuplicate} />
+                  <ActionIcon title="Xóa"      icon={<DeleteOutlined />} onClick={onRemove} danger />
+                </div>
+              </div>
+              {isChartable && <StatConfig question={question} accent={accent} onUpdate={onUpdate} />}
+              <PrefillConfig question={question} accent={accent} onUpdate={onUpdate} />
             </div>
           </div>
 
-          {/*  Thống kê & Báo cáo — chỉ hiện với loại có options  Điện thoại: 024.62617586  Fax: 024.62617586*/}
-          {isChartable && (
-            <StatConfig question={question} accent={accent} onUpdate={onUpdate} />
+          {/* Badge nhỏ khi không active nhưng đã cấu hình prefill */}
+          {!isActive && question.prefillField && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                marginTop: 8,
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '3px 10px', borderRadius: 99,
+                background: '#e0f2fe', color: '#0284c7',
+                fontSize: 12, fontWeight: 500,
+              }}
+            >
+              <UserOutlined style={{ fontSize: 11 }} />
+              {PREFILL_FIELD_OPTIONS.find(o => o.value === question.prefillField)?.label ?? question.prefillField}
+              {question.lockedWhenPrefilled && <LockOutlined style={{ fontSize: 11, marginLeft: 2 }} />}
+            </div>
           )}
 
         </div>

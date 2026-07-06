@@ -21,6 +21,7 @@ import {
   HomeOutlined,
   MailOutlined,
   SettingOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -48,6 +49,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/admin/roles': 'Vai trò',
   '/admin/users': 'Người dùng',
   '/admin/mail-settings': 'Cài đặt email',
+  '/admin/api-keys': 'Quản lý API Key',
   '/admin/profile': 'Hồ sơ cá nhân',
 };
 
@@ -56,7 +58,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
  * Item không khai báo `permission` thì luôn hiển thị.
  */
 const SYSTEM_CONFIG_KEY = 'system-config';
-const SYSTEM_CONFIG_CHILD_KEYS = ['/admin/forms', '/admin/legacy-import', '/admin/resources', '/admin/roles', '/admin/users', '/admin/mail-settings'];
+const SYSTEM_CONFIG_CHILD_KEYS = ['/admin/forms', '/admin/legacy-import', '/admin/resources', '/admin/roles', '/admin/users', '/admin/mail-settings', '/admin/api-keys'];
 
 const MENU_ITEMS = [
   { key: '/admin/dashboard', icon: <DashboardOutlined />, label: <Link to="/admin/dashboard">Bảng điều khiển</Link> },
@@ -88,6 +90,7 @@ const MENU_ITEMS = [
       { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: <Link to="/admin/roles">Vai trò</Link>, permission: PermissionEnum.ROLES_READ },
       { key: '/admin/users', icon: <UsergroupAddOutlined />, label: <Link to="/admin/users">Người dùng</Link>, permission: PermissionEnum.USERS_READ },
       { key: '/admin/mail-settings', icon: <MailOutlined />, label: <Link to="/admin/mail-settings">Cài đặt email</Link> },
+      { key: '/admin/api-keys', icon: <ApiOutlined />, label: <Link to="/admin/api-keys">API Key</Link> },
     ],
   },
 ];
@@ -544,7 +547,7 @@ const handleLogout = () => {
             fontWeight: 500,
           }}
         >
-          © {new Date().getFullYear()} ST TEAM
+          © {new Date().getFullYear()} ST Team – Khoa Công nghệ Thông tin – Học viện Nông nghiệp Việt Nam
         </div>
       </Layout>
     </Layout>

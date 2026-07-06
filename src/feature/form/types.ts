@@ -1,3 +1,16 @@
+// Field sinh viên để auto-fill câu hỏi từ dữ liệu xác thực
+export type StudentPrefillField =
+  | 'studentCode'   // Mã sinh viên
+  | 'fullName'      // Họ và tên
+  | 'gender'        // Giới tính
+  | 'dob'           // Ngày sinh
+  | 'majorCode'     // Mã ngành đào tạo
+  | 'cccd'          // Số CCCD
+  | 'schoolYearEnd' // Khóa học
+  | 'majorName'     // Tên ngành được đào tạo
+  | 'phone'         // Số điện thoại
+  | 'email'         // Email
+
 export type QuestionType =
   | 'text'
   | 'multiple-choice'
@@ -49,6 +62,10 @@ export interface Question {
   visibleWhen?: ConditionalRule;      // condition for the question to be shown
 
   allowOther?: boolean;               // câu radio/checkbox có option "Khác" không
+
+  // Auto-fill từ dữ liệu sinh viên sau xác thực
+  prefillField?: StudentPrefillField; // field sinh viên sẽ điền vào câu hỏi này
+  lockedWhenPrefilled?: boolean;      // khoá câu hỏi (read-only) khi có giá trị prefill
 
   // Thống kê & báo cáo — tự sinh, admin không nhập thủ công
   reportFieldKey?: string;            // key nội bộ tự sinh

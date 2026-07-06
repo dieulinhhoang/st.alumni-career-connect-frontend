@@ -29,7 +29,7 @@ export function SurveyHeader({
   const update = (key: keyof SurveyHeaderType, value: string | boolean) =>
     onHeaderChange?.({ ...header, [key]: value })
 
-  const effectiveSize = isSmall ? 72 : isMedium ? 88 : logoSize
+  const effectiveSize = isSmall ? 72 : isMedium ? 100 : logoSize
   const logoSrc =
     logoUrl ||
     header.logoUrl ||
@@ -42,7 +42,7 @@ export function SurveyHeader({
     <div
       style={{
         background: '#fff',
-        padding: `${isSmall ? 16 : 24}px ${isSmall ? 14 : 20}px`,
+        padding: `${isSmall ? 24 : 48}px ${isSmall ? 14 : 20}px ${isSmall ? 16 : 24}px`,
       }}
     >
       {header.showDate !== false && (
@@ -67,7 +67,7 @@ export function SurveyHeader({
           gap: isMobile ? 14 : 20,
         }}
       >
-        <div style={{ paddingLeft: isMobile ? 0 : 40 }}>
+        <div style={{ width: isMobile ? '100%' : '41.666%', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
           <LogoUpload
             src={logoSrc}
             size={effectiveSize}
@@ -76,7 +76,7 @@ export function SurveyHeader({
           />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : undefined }}>
+        <div style={{ width: isMobile ? '100%' : '58.333%', minWidth: 0 }}>
           {editable ? (
             <>
               <InlineInput

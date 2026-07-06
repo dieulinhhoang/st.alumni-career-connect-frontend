@@ -30,7 +30,7 @@ export function LogoUpload({ src, size, editable, onUpload }: LogoUploadProps) {
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}
       onMouseEnter={() => editable && setHover(true)} onMouseLeave={() => setHover(false)}>
       <img src={src || '/logo/vua.png'} alt="Logo"
-        style={{ width: size, height: size, objectFit: 'contain', borderRadius: '50%', border: hover ? '2px dashed #6b7280' : '1px solid #e2e8f0', transition: 'all .2s', display: 'block' }}
+        style={{ width: size, height: 'auto', objectFit: 'contain', border: hover && editable ? '2px dashed #6b7280' : 'none', transition: 'all .2s', display: 'block' }}
         onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK }} />
       {editable && hover && (
         <div onClick={() => fileRef.current?.click()}

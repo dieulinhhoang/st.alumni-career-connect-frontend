@@ -30,7 +30,7 @@ export function useFormBuilder(mode: BuilderMode, formId?: number): UseFormBuild
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
   const [questions, setQuestions] = useState<Question[]>(initial.qs)
-  const [activeId, setActiveId] = useState<string | null>(initial.qs[0]?.id ?? null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [sections, setSections] = useState<Section[]>([initial.section])
   const [activeSectionId, setActiveSectionId] = useState<string | null>(initial.section.id)
 

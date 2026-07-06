@@ -95,7 +95,7 @@ export async function getGraduations(page = 1, perPage = 100): Promise<Graduatio
     name: g.name,
     certification: g.certification,
     certificationDate: g.certification_date ?? g.certificationDate,
-    schoolYear: g.school_year ?? g.schoolYear,
+    schoolYear: g.school_year ? Number(g.school_year) : (g.schoolYear ? Number(g.schoolYear) : 0),
     studentCount: g.student_count ?? g.studentCount ?? 0,
   }));
 }

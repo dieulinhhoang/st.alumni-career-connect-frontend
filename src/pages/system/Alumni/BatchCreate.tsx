@@ -28,6 +28,7 @@ export const BatchCreate: React.FC = () => {
   const { create, loading: creating } = useCreateBatch();
   const [breakdown,      setBreakdown]        = useState<FacultyBreakdown | null>(null);
   const [loadingBreak,   setLoadingBreak]     = useState(false);
+  const [selectedYear,   setSelectedYear]     = useState<number | null>(null);
   const selectedGraduationId = Form.useWatch('graduationId', form);
 
   useEffect(() => { loadPublishedForms(); loadGraduations(); }, []);
@@ -130,6 +131,31 @@ export const BatchCreate: React.FC = () => {
                 />
               </Form.Item>
 
+              {/* Năm tốt nghiệp — lọc danh sách đợt */}
+              {(() => {
+                const currentYear = new Date().getFullYear();
+                const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+                return (
+                  <Form.Item label="Năm tốt nghiệp">
+                    <Select
+                      value={selectedYear ?? undefined}
+                      onChange={(v) => {
+                        setSelectedYear(v ?? null);
+                        form.setFieldValue('graduationId', undefined);
+                        setBreakdown(null);
+                      }}
+                      placeholder="Tất cả các năm"
+                      style={{ borderRadius: 6 }}
+                      allowClear
+                    >
+                      {years.map(y => (
+                        <Select.Option key={y} value={y}>{y}</Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                );
+              })()}
+
               {/* Single graduation dropdown — replaces separate year + graduationPeriod */}
               <Form.Item
                 label="Đợt tốt nghiệp"
@@ -150,17 +176,19 @@ export const BatchCreate: React.FC = () => {
                       </div>
                     }
                   >
-                    {graduations.map(g => (
-                      <Select.Option key={g.id} value={g.id} label={g.name}>
-                        <div style={{ lineHeight: 1.5 }}>
-                          <div style={{ fontWeight: 500, fontSize: 13 }}>{g.name}</div>
-                          <div style={{ fontSize: 11, color: '#64748b' }}>
-                            {g.schoolYear ? `Năm học ${g.schoolYear}` : ''}
-                            {g.certificationDate ? ` · ${new Date(g.certificationDate).toLocaleDateString('vi-VN')}` : ''}
+                    {graduations
+                      .filter(g => !selectedYear || g.schoolYear === selectedYear)
+                      .map(g => (
+                        <Select.Option key={g.id} value={g.id} label={g.name}>
+                          <div style={{ lineHeight: 1.5 }}>
+                            <div style={{ fontWeight: 500, fontSize: 13 }}>{g.name}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>
+                              {g.schoolYear ? `Năm học ${g.schoolYear}` : ''}
+                              {g.certificationDate ? ` · ${new Date(g.certificationDate).toLocaleDateString('vi-VN')}` : ''}
+                            </div>
                           </div>
-                        </div>
-                      </Select.Option>
-                    ))}
+                        </Select.Option>
+                      ))}
                   </Select>
                 )}
               </Form.Item>
