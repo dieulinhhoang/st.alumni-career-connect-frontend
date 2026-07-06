@@ -110,8 +110,12 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [addQuestion, updateQuestion])
 
   const handleSaveOnly = useCallback(async () => {
-    await handleSave(extrasRef.current)
-  }, [handleSave])
+    const result = await handleSave(extrasRef.current)
+    if (result && formStatus === 'published') {
+      await handleUnpublish()
+      message.info('Form đã được tự động hủy xuất bản do có thay đổi.')
+    }
+  }, [handleSave, formStatus, handleUnpublish])
 
   const handlePublishClick = useCallback(async () => {
     if (!name.trim()) {
@@ -138,6 +142,8 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const skipCountRef = useRef(mode === 'edit' ? 2 : 1)
   const unmountingRef = useRef(false)
+  const handleSaveOnlyRef = useRef(handleSaveOnly)
+  handleSaveOnlyRef.current = handleSaveOnly
   useEffect(() => {
     if (loading) return
     if (skipCountRef.current > 0) {
@@ -145,11 +151,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       return
     }
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
-    debounceTimer.current = setTimeout(() => { handleSaveOnly() }, 3000)
+    debounceTimer.current = setTimeout(() => { handleSaveOnlyRef.current() }, 3000)
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current)
-        if (unmountingRef.current) handleSaveOnly()
+        if (unmountingRef.current) handleSaveOnlyRef.current()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
