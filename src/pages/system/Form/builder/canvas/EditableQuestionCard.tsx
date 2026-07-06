@@ -417,7 +417,7 @@ export function EditableQuestionCard({
                 <div style={{ minWidth: 20, color: '#64748b', fontSize: 14, fontWeight: 600, flexShrink: 0 }}>{index + 1}.</div>
                 <input
                   value={question.title ?? ''}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); onActivate() }}
                   onChange={(e) => onUpdate({ title: e.target.value })}
                   placeholder="Câu hỏi"
                   style={{ flex: 1, border: 'none', borderBottom: isActive ? '2px solid #d1d5db' : 'none', outline: 'none', padding: '4px 0 6px', fontSize: 16, fontWeight: 600, background: 'transparent', color: '#0f172a', cursor: isActive ? 'text' : 'default' }}
@@ -451,7 +451,7 @@ export function EditableQuestionCard({
               <input
                 value={editingPlaceholder ? (question.placeholder ?? '') : ''}
                 placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'Câu trả lời của bạn')}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onActivate() }}
                 onFocus={() => setEditingPlaceholder(true)}
                 onBlur={() => setEditingPlaceholder(false)}
                 onChange={(e) => onUpdate({ placeholder: e.target.value })}
@@ -462,7 +462,7 @@ export function EditableQuestionCard({
               <textarea
                 value={editingPlaceholder ? (question.placeholder ?? '') : ''}
                 placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'Câu trả lời của bạn')}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onActivate() }}
                 onFocus={() => setEditingPlaceholder(true)}
                 onBlur={() => setEditingPlaceholder(false)}
                 onChange={(e) => onUpdate({ placeholder: e.target.value })}
@@ -474,7 +474,7 @@ export function EditableQuestionCard({
               <input
                 value={editingPlaceholder ? (question.placeholder ?? '') : ''}
                 placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'dd/mm/yyyy')}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onActivate() }}
                 onFocus={() => setEditingPlaceholder(true)}
                 onBlur={() => setEditingPlaceholder(false)}
                 onChange={(e) => onUpdate({ placeholder: e.target.value })}
@@ -512,7 +512,7 @@ export function EditableQuestionCard({
             {isChoiceType && (
               <div ref={optionListRef} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {options.map((opt) => (
-                  <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => e.stopPropagation()}>
+                  <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => { e.stopPropagation(); onActivate() }}>
                     <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0, fontSize: 14 }}>
                       {qType === 'checkbox'
                         ? <Checkbox disabled />
