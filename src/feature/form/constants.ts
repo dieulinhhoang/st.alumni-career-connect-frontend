@@ -14,6 +14,8 @@ export const QTYPES: QuestionTypeOption[] = [
   { value: "address",  label: "Địa chỉ",              icon: "" },
   { value: "dropdown", label: "Danh sách thả xuống",  icon: "" },
   { value: "cccd",     label: "Số CCCD (Số/Ngày cấp/Nơi cấp)", icon: "" },
+  { value: "dob",      label: "Ngày sinh",            icon: "" },
+  { value: "number",   label: "Số nguyên",            icon: "" },
 ];
 
 //  GENDER — tùy chọn mặc định cho loại câu hỏi "Giới tính"

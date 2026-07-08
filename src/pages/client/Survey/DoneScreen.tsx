@@ -307,7 +307,7 @@ function JobCard({ job, delay = 0, onShowDetail, onShowEnterprise }: { job: JobW
           </span>
           {job.deadline && (
             <span style={{ fontSize: 10.5, fontWeight: 600, color: '#ea580c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              HSD: {fmt(job.deadline)}
+              Hạn: {fmt(job.deadline)}
             </span>
           )}
         </div>

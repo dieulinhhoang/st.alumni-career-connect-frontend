@@ -68,6 +68,7 @@ export function JobFormModal({
 
     form.setFieldsValue({
       title: job?.title ?? "",
+      description: job?.description ?? "",
       location: job?.location ?? undefined,
       salary: job?.salary ?? "",
       faculty: normalizeFacultyValue(job),
@@ -104,6 +105,7 @@ export function JobFormModal({
 
       await onSave({
         title: values.title,
+        description: values.description ?? "",
         location: values.location,
         salary: values.salary ?? "",
         faculty: values.faculty ?? null,
@@ -147,6 +149,18 @@ export function JobFormModal({
           rules={[{ required: true, message: "Nhập tên vị trí" }]}
         >
           <Input placeholder="VD: Lập trình viên Backend" />
+        </Form.Item>
+
+        <Form.Item
+          name="description"
+          label="Mô tả công việc"
+        >
+          <Input.TextArea
+            rows={5}
+            showCount
+            maxLength={5000}
+            placeholder="Mô tả chi tiết công việc, yêu cầu ứng viên, quyền lợi..."
+          />
         </Form.Item>
 
         <Row gutter={16}>

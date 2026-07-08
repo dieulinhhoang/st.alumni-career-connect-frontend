@@ -9,6 +9,7 @@ export interface SaveExtras {
   logoUrl?: string
   logoSize?: number
   logicRules?: LogicRule[]
+  themeId?: string
   descriptionParagraphs?: string[]
 }
 

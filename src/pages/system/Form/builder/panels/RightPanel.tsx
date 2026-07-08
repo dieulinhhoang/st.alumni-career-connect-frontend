@@ -14,10 +14,12 @@ interface RightPanelProps {
   sections: Section[]
   logoSize: number
   logicRules: LogicRule[]
+  themeId: string
   onAddBlank: (type: string) => void
   onDropFromBank: (question: Question) => void
   onLogoSizeChange: (size: number) => void
   onLogicRulesChange: (rules: LogicRule[]) => void
+  onThemeChange: (id: string) => void
   /** FIX: cần để LogicPanel ghi visibleWhen vào question */
   onUpdateQuestion: (id: string, patch: Partial<Question>) => void
   defaultTab?: Tab
@@ -33,8 +35,8 @@ const STRIP_W         = 44
 const PANEL_CONTENT_W = 256
 
 export function RightPanel({
-  questions, logoSize, logicRules,
-  onAddBlank, onDropFromBank, onLogoSizeChange, onLogicRulesChange,
+  questions, logoSize, logicRules, themeId,
+  onAddBlank, onDropFromBank, onLogoSizeChange, onLogicRulesChange, onThemeChange,
   onUpdateQuestion,
   defaultTab,
 }: RightPanelProps) {
@@ -58,7 +60,7 @@ export function RightPanel({
       }}>
         <div style={{ width: PANEL_CONTENT_W, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {activeTab === 'bank'  && <BankPanel onAddBlank={onAddBlank} onDropFromBank={onDropFromBank} />}
-          {activeTab === 'theme' && <div style={{ flex: 1, overflowY: 'auto' }}><ThemePanel logoSize={logoSize} onLogoSizeChange={onLogoSizeChange} /></div>}
+          {activeTab === 'theme' && <div style={{ flex: 1, overflowY: 'auto' }}><ThemePanel themeId={themeId} onThemeChange={onThemeChange} logoSize={logoSize} onLogoSizeChange={onLogoSizeChange} /></div>}
           {activeTab === 'logic' && (
             <div style={{ flex: 1, overflowY: 'auto' }}>
               <LogicPanel

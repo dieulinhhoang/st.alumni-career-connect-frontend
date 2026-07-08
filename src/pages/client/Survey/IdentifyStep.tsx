@@ -71,7 +71,9 @@ export function IdentifyStep({ batch, onContinue }: Props) {
           return
         }
       } catch {
-        // Lỗi mạng → cho tiếp tục
+        // Lỗi xác thực (mạng/server) → KHÔNG cho vượt qua, tránh bỏ lọt xác thực danh tính
+        setErr('Không thể xác thực lúc này. Vui lòng kiểm tra kết nối và thử lại.')
+        return
       } finally {
         setChecking(false)
       }

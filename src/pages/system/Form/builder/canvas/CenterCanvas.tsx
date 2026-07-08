@@ -41,6 +41,8 @@ interface CenterCanvasProps {
   footer?: SurveyFooter
   logoUrl?: string
   logoSize?: number
+  /** Bố cục header ('classic' | 'centered' | 'right') */
+  themeId?: string
   onActivate: (id: string) => void
   onDeactivate: () => void
   onUpdate: (id: string, patch: Partial<Question>) => void
@@ -258,6 +260,7 @@ export function CenterCanvas({
   footer,
   logoUrl,
   logoSize,
+  themeId,
   onActivate,
   onDeactivate,
   onUpdate,
@@ -366,6 +369,7 @@ export function CenterCanvas({
             footer={footer}
             logoUrl={logoUrl}
             logoSize={logoSize}
+            themeId={themeId}
             interactive={false}
             headerOnly
             onHeaderChange={onHeaderChange}

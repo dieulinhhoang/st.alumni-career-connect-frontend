@@ -1,6 +1,20 @@
 import React, { useRef, useEffect, useState } from "react";
 import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from "@geoapify/react-geocoder-autocomplete";
 import "@geoapify/geocoder-autocomplete/styles/minimal.css";
+import api from "../../../../../libs/api";
+
+let cachedApiKey: string | null = null;
+
+async function fetchGeoapifyKey(): Promise<string> {
+  if (cachedApiKey) return cachedApiKey;
+  try {
+    const { data } = await api.get('/service-config/geoapify_api_key');
+    cachedApiKey = data.value || '';
+    return cachedApiKey;
+  } catch {
+    return '';
+  }
+}
 
 interface AddressInputProps {
   value: string;
@@ -17,6 +31,13 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState(value);
+  const [apiKey, setApiKey] = useState(cachedApiKey || '');
+
+  useEffect(() => {
+    if (!cachedApiKey) {
+      fetchGeoapifyKey().then(setApiKey);
+    }
+  }, []);
 
   useEffect(() => {
     setInputValue(value);
@@ -68,9 +89,24 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     );
   }
 
+  if (!apiKey) {
+    return (
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => { setInputValue(e.target.value); onChange(e.target.value); }}
+        placeholder={placeholder}
+        style={{
+          width: '100%', border: '1px solid #e2e8f0', borderRadius: 8,
+          padding: '10px 14px', fontSize: 14, fontFamily: 'inherit', outline: 'none',
+        }}
+      />
+    );
+  }
+
   return (
     <div ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
-      <GeoapifyContext apiKey={import.meta.env.VITE_API_GEOAPIFY_KEY || "93a776ca72964dd9a1adc22cfbec60d9"}>
+      <GeoapifyContext apiKey={apiKey}>
         <GeoapifyGeocoderAutocomplete
           value={inputValue}
           placeholder={placeholder}

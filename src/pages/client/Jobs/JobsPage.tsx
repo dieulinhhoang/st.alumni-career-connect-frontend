@@ -10,6 +10,7 @@ interface JobPosting {
   enterpriseEmail?: string
   enterpriseWebsite?: string
   title: string
+  description?: string
   location: string
   salaryRange: string
   tags: string[]
@@ -93,6 +94,17 @@ function JobDetailModal({ job, onClose }: { job: JobPosting; onClose: () => void
             </div>
           )}
 
+          {job.description && job.description.trim() && (
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:12,fontWeight:700,color:'#64748b',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:10 }}>
+                Mô tả công việc
+              </div>
+              <div style={{ fontSize:13.5,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap' }}>
+                {job.description}
+              </div>
+            </div>
+          )}
+
           <div style={{ fontSize:12,fontWeight:700,color:'#64748b',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:10 }}>
             Liên hệ ứng tuyển
           </div>
@@ -124,61 +136,102 @@ function JobDetailModal({ job, onClose }: { job: JobPosting; onClose: () => void
 }
 
 // ── JobCard ───────────────────────────────────────────────────────────────────
+function InfoRow({ icon, label, value, valueColor='#0f172a' }: { icon: React.ReactNode; label: string; value: React.ReactNode; valueColor?: string }) {
+  return (
+    <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+      <span style={{ width:28,height:28,borderRadius:8,flexShrink:0,background:'#f1f5f9',color:'#64748b',display:'flex',alignItems:'center',justifyContent:'center' }}>{icon}</span>
+      <span style={{ fontSize:12,color:'#94a3b8',fontWeight:600,width:74,flexShrink:0 }}>{label}</span>
+      <span style={{ fontSize:13,color:valueColor,fontWeight:700,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{value}</span>
+    </div>
+  )
+}
+
 function JobCard({ job, onShowDetail, delay=0 }: { job: JobPosting; onShowDetail: () => void; delay?: number }) {
   const expired = isExpired(job.deadline)
+  const initial = (job.enterpriseName || '?').trim().charAt(0).toUpperCase()
   return (
     <div
       className="job-card"
-      style={{ background:'#fff',borderRadius:16,border:'1px solid #e2e8f0',overflow:'hidden',animation:`fadeUp .5s ease ${delay}ms both`,boxShadow:'0 2px 8px rgba(15,23,42,.06)' }}
+      onClick={onShowDetail}
+      style={{ background:'#fff',borderRadius:18,border:'1px solid #eef2f6',overflow:'hidden',animation:`fadeUp .5s ease ${delay}ms both`,boxShadow:'0 1px 3px rgba(15,23,42,.05)',display:'flex',flexDirection:'column' }}
     >
-      <div style={{ height:3,background:'linear-gradient(90deg,#1D9E75,transparent)',opacity:.7 }}/>
-      <div style={{ padding:'18px 20px 14px',display:'flex',flexDirection:'column',gap:10 }}>
-        <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8 }}>
-          <span
-            style={{
-              fontSize:11,fontWeight:800,color:'#0f7a57',textTransform:'uppercase',letterSpacing:'.5px',
-              flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
-            }}
-            title={job.enterpriseName}
-          >
-            {job.enterpriseName}
-          </span>
+      <div style={{ padding:'18px 20px 14px',display:'flex',flexDirection:'column',gap:14,flex:1 }}>
+        {/* Logo + doanh nghiệp + hạn */}
+        <div style={{ display:'flex',alignItems:'center',gap:12 }}>
+          <div style={{ width:46,height:46,borderRadius:13,flexShrink:0,background:'linear-gradient(135deg,#1D9E75,#0f7a57)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,boxShadow:'0 4px 12px rgba(29,158,117,.28)' }}>
+            {initial}
+          </div>
+          <div style={{ flex:1,minWidth:0 }}>
+            <div style={{ fontSize:13,fontWeight:700,color:'#0f7a57',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }} title={job.enterpriseName}>
+              {job.enterpriseName}
+            </div>
+            <div style={{ fontSize:11,color:'#94a3b8',marginTop:2 }}>Doanh nghiệp đối tác</div>
+          </div>
           {job.deadline && (
-            <span style={{ fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:6,background:expired?'#fee2e2':'#fff7ed',color:expired?'#ef4444':'#f97316',flexShrink:0 }}>
-              {expired ? 'Hết hạn' : `HSD: ${fmtDate(job.deadline)}`}
+            <span style={{ fontSize:10.5,fontWeight:700,padding:'4px 10px',borderRadius:20,whiteSpace:'nowrap',background:expired?'#fef2f2':'#fff7ed',color:expired?'#ef4444':'#ea580c',flexShrink:0,border:`1px solid ${expired?'#fecaca':'#fed7aa'}` }}>
+              {expired ? 'Hết hạn' : `Hạn ${fmtDate(job.deadline)}`}
             </span>
           )}
         </div>
 
-        <div style={{ fontSize:15,fontWeight:700,color:'#0f172a',lineHeight:1.4 }}>{job.title}</div>
-
-        <div style={{ display:'flex',flexWrap:'wrap',gap:6 }}>
-          {job.location && (
-            <span style={{ fontSize:11,padding:'3px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,color:'#475569',display:'flex',alignItems:'center',gap:4 }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {job.location}
-            </span>
-          )}
-          {job.salaryRange && (
-            <span style={{ fontSize:11,padding:'3px 10px',background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:8,color:'#15803d',fontWeight:600,display:'flex',alignItems:'center',gap:4 }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              {job.salaryRange}
-            </span>
-          )}
-          {job.tags?.slice(0,2).map(t => (
-            <span key={t} style={{ fontSize:11,padding:'3px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,color:'#94a3b8' }}>{t}</span>
-          ))}
+        {/* Tiêu đề */}
+        <div style={{ fontSize:17,fontWeight:800,color:'#0f172a',lineHeight:1.38,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden',minHeight:47 }} title={job.title}>
+          {job.title}
         </div>
+
+        {/* Mô tả ngắn */}
+        {job.description && job.description.trim() && (
+          <div style={{ fontSize:13,color:'#64748b',lineHeight:1.55,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden' }}>
+            {job.description}
+          </div>
+        )}
+
+        {/* Thông tin dạng JD */}
+        <div style={{ display:'flex',flexDirection:'column',gap:9,padding:'12px 0',borderTop:'1px solid #f1f5f9',borderBottom:'1px solid #f1f5f9' }}>
+          <InfoRow
+            label="Địa điểm"
+            value={job.location || 'Đang cập nhật'}
+            valueColor={job.location ? '#0f172a' : '#94a3b8'}
+            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>}
+          />
+          <InfoRow
+            label="Mức lương"
+            value={job.salaryRange || 'Thỏa thuận'}
+            valueColor={job.salaryRange ? '#15803d' : '#94a3b8'}
+            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
+          />
+          <InfoRow
+            label="Hạn nộp"
+            value={job.deadline ? fmtDate(job.deadline) : 'Không giới hạn'}
+            valueColor={expired ? '#ef4444' : (job.deadline ? '#0f172a' : '#94a3b8')}
+            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+          />
+        </div>
+
+        {/* Kỹ năng / tag */}
+        {job.tags && job.tags.length > 0 && (
+          <div style={{ display:'flex',flexDirection:'column',gap:7 }}>
+            <span style={{ fontSize:11,fontWeight:700,color:'#94a3b8',textTransform:'uppercase',letterSpacing:'.4px' }}>Kỹ năng / lĩnh vực</span>
+            <div style={{ display:'flex',flexWrap:'wrap',gap:7 }}>
+              {job.tags.slice(0,5).map(t => (
+                <span key={t} style={{ fontSize:11.5,padding:'4px 11px',background:'#f0fdf9',border:'1px solid #cdeee0',borderRadius:20,color:'#0f7a57',fontWeight:600 }}>{t}</span>
+              ))}
+              {job.tags.length > 5 && (
+                <span style={{ fontSize:11.5,padding:'4px 11px',color:'#94a3b8',fontWeight:600 }}>+{job.tags.length - 5}</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div style={{ padding:'10px 20px 14px',borderTop:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between',alignItems:'center' }}>
-        <span style={{ fontSize:11,color:'#94a3b8' }}>{fmtDate(job.postedAt) ? `Đăng ${fmtDate(job.postedAt)}` : ''}</span>
+      {/* Footer CTA */}
+      <div style={{ padding:'14px 20px',borderTop:'1px solid #f1f5f9',background:'#fcfdfe',marginTop:'auto' }}>
         <button
           className="apply-btn"
-          onClick={onShowDetail}
-          style={{ fontSize:12,padding:'7px 16px',borderRadius:9,border:'1.5px solid #1D9E75',background:'transparent',color:'#1D9E75',fontWeight:700,cursor:'pointer',transition:'all .25s ease' }}
+          onClick={e => { e.stopPropagation(); onShowDetail() }}
+          style={{ width:'100%',fontSize:13,padding:'10px 16px',borderRadius:11,border:'1.5px solid #1D9E75',background:'transparent',color:'#1D9E75',fontWeight:700,cursor:'pointer',transition:'all .25s ease' }}
         >
-          Xem & liên hệ →
+          Xem chi tiết &amp; liên hệ →
         </button>
       </div>
     </div>
@@ -211,6 +264,7 @@ export default function JobsPage() {
         enterpriseEmail: j.enterprise?.email,
         enterpriseWebsite: j.enterprise?.website,
         title: j.title,
+        description: j.description,
         location: j.location,
         salaryRange: j.salary,
         tags: j.tags ?? [],
@@ -261,15 +315,14 @@ export default function JobsPage() {
             />
           </div>
           <select
-            value={location} onChange={e => setLocation(e.target.value)}
+            value={location} onChange={e => { setLocation(e.target.value); }}
             style={{ padding:'12px 14px',borderRadius:12,border:'none',fontSize:14,background:'#fff',minWidth:140,cursor:'pointer',boxShadow:'0 2px 8px rgba(0,0,0,.1)' }}
           >
             <option value="">Tất cả địa điểm</option>
             {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
-          <button type="submit" style={{ padding:'12px 22px',background:'#fff',color:'#1D9E75',border:'none',borderRadius:12,fontWeight:800,fontSize:14,cursor:'pointer',boxShadow:'0 2px 8px rgba(0,0,0,.1)' }}>
-            Tìm kiếm
-          </button>
+          {/* Nút submit ẩn: Enter trong ô tìm kiếm vẫn gửi form */}
+          <button type="submit" style={{ display:'none' }} aria-hidden="true" tabIndex={-1} />
         </form>
       </div>
 

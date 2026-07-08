@@ -189,6 +189,24 @@ export function SurveyQuestion({
         />
       )}
 
+      {/* Số nguyên */}
+      {q.type === 'number' && (
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder={q.placeholder || 'Nhập số nguyên'}
+          value={textValue}
+          onChange={(e) => {
+            const v = e.target.value
+            if (v === '' || /^-?\d*$/.test(v)) onChangeText(v)
+          }}
+          style={underlineInput}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...commonInputProps}
+        />
+      )}
+
       {/* Ngày */}
       {q.type === 'date' && (
         <DatePicker
@@ -202,9 +220,24 @@ export function SurveyQuestion({
         />
       )}
 
+      {/* Ngày sinh — chặn tối đa 20 năm trước trở về */}
+      {q.type === 'dob' && (
+        <DatePicker
+          format="DD/MM/YYYY"
+          placeholder="dd/mm/yyyy"
+          value={textValue ? dayjs(textValue) : null}
+          onChange={(d) => onChangeText(d ? d.format('YYYY-MM-DD') : '')}
+          disabledDate={(d) => !!d && d.isAfter(dayjs().subtract(20, 'year'), 'day')}
+          defaultPickerValue={dayjs().subtract(20, 'year')}
+          disabled={!interactive}
+          style={{ ...underlineInput, width: 'auto', minWidth: 200 }}
+        />
+      )}
+
       {/* Địa chỉ */}
       {q.type === 'address' && (
         <AddressInput
+          key={q.id}
           value={textValue}
           onChange={onChangeText}
           placeholder={q.placeholder || 'Nhập địa chỉ của bạn'}

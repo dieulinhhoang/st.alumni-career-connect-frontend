@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Question, Section, SurveyFooter, SurveyHeader } from '../../../../../feature/form/types'
 import { SurveyHeader as SurveyHeaderComp } from './SurveyHeader'
+import type { HeaderLayout } from './SurveyHeader'
 import { SurveyQuestion } from './SurveyQuestion'
 import { FooterBlock } from './FooterBlock'
 import { SectionManager } from './SectionManager'
@@ -33,18 +34,26 @@ interface PDFCanvasProps {
   onSectionsChange?: (sections: Section[]) => void
   logoUrl?: string
   logoSize?: number
+  /** Bố cục header — themeId của form ('classic' | 'centered' | 'right') */
+  themeId?: string
   initialValues?: Record<string, any>
   onSubmit?: (answers: Record<string, any>) => void
   submitLabel?: string
   logicRules?: LogicRule[]
 }
 
+const HEADER_LAYOUTS: HeaderLayout[] = ['classic', 'centered', 'right']
+function toLayout(themeId?: string): HeaderLayout {
+  return HEADER_LAYOUTS.includes(themeId as HeaderLayout) ? (themeId as HeaderLayout) : 'classic'
+}
+
 export function PDFCanvas({
   surveyTitle, descriptionParagraphs = [], sections = [], questions,
   accent, header, footer, interactive = true, headerOnly = false,
   onHeaderChange, onFooterChange, onTitleChange, onDescriptionParagraphsChange, onSectionsChange,
-  logoUrl, logoSize = 120, initialValues = {}, onSubmit, submitLabel = 'Gửi', logicRules = [],
+  logoUrl, logoSize = 120, themeId, initialValues = {}, onSubmit, submitLabel = 'Gửi', logicRules = [],
 }: PDFCanvasProps) {
+  const headerLayout = toLayout(themeId)
   // Answer state
   const [radios, setRadios] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
@@ -87,10 +96,11 @@ export function PDFCanvas({
   const isMedium = containerWidth >= 480 && containerWidth < 640
   const isMobile = isSmall || isMedium
   const px = isSmall ? 16 : isMedium ? 20 : 36
-  // Logo size = 50% của cột 41.666% — khớp đúng tỉ lệ preview
+  // Logo size = 50% của cột 41.666% — khớp đúng tỉ lệ preview,
+  // nhân thêm hệ số logoSize/120 để slider "Kích thước logo" có tác dụng
   const computedLogoSize = containerWidth > 0
-    ? Math.round((containerWidth - px * 2) * 0.41666 * 0.5)
-    : (logoSize ?? 120)
+    ? Math.round((containerWidth - px * 2) * 0.41666 * 0.5 * (logoSize / 120))
+    : logoSize
 
   // Description inline edit — titleLine/footerLine là div hardcode, chỉ bodyText là editable
   const parseDesc = (paras: string[]) => ({
@@ -123,8 +133,8 @@ export function PDFCanvas({
       const srcQ = questions.find((q) => q.id === rule.sourceQuestionId); if (!srcQ) return false
       const ans = getAnswer(rule.sourceQuestionId, srcQ.type)
       if (rule.operator === 'equals') return ans === rule.value
-      if (rule.operator === 'notequals') return ans !== rule.value
-      if (rule.operator === 'contains') return ans.includes(rule.value)
+      if (rule.operator === 'not_equals') return ans !== rule.value
+      if (rule.operator === 'includes') return ans.includes(rule.value)
       return false
     }
     for (const rule of logicRules) if (rule.action === 'show') hiddenQuestionIds.add(rule.targetQuestionId)
@@ -169,7 +179,7 @@ export function PDFCanvas({
     <div ref={containerRef} style={{ background: '#f8fafc', fontFamily: 'Inter, Geist, system-ui, sans-serif', color: '#1e293b', width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
 
       <SurveyHeaderComp header={header} editable={editable} logoUrl={logoUrl} logoSize={computedLogoSize}
-        isMobile={isMobile} isSmall={isSmall} isMedium={isMedium} today={today} onHeaderChange={onHeaderChange} />
+        isMobile={isMobile} isSmall={isSmall} isMedium={isMedium} today={today} layout={headerLayout} onHeaderChange={onHeaderChange} />
 
       {/* {editable && onSectionsChange && (
         <div style={{ padding: `16px ${px}px`, background: '#fff', borderBottom: '1px solid #e2e8f0' }}>

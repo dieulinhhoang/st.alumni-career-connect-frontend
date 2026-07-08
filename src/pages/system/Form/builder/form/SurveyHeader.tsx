@@ -3,6 +3,9 @@ import type { SurveyHeader as SurveyHeaderType } from '../../../../../feature/fo
 import { LogoUpload } from './LogoUpload'
 import { InlineInput } from '../shared/InlineInput'
 
+/** Bố cục header — themeId của form */
+export type HeaderLayout = 'classic' | 'centered' | 'right'
+
 interface SurveyHeaderProps {
   header: SurveyHeaderType
   editable: boolean
@@ -12,6 +15,7 @@ interface SurveyHeaderProps {
   isSmall: boolean
   isMedium: boolean
   today: string
+  layout?: HeaderLayout
   onHeaderChange?: (h: SurveyHeaderType) => void
 }
 
@@ -24,6 +28,7 @@ export function SurveyHeader({
   isSmall,
   isMedium,
   today,
+  layout = 'classic',
   onHeaderChange,
 }: SurveyHeaderProps) {
   const update = (key: keyof SurveyHeaderType, value: string | boolean) =>
@@ -37,6 +42,14 @@ export function SurveyHeader({
 
   const ministryText = header.ministry?.trim() || (editable ? '' : 'Bộ/ngành')
   const academyText = header.academy?.trim() || (editable ? '' : 'Học viện / Trường')
+
+  // Bố cục theo layout — mobile luôn ép về dạng dọc, căn giữa
+  const isCentered = layout === 'centered' || isMobile
+  const flexDir: React.CSSProperties['flexDirection'] =
+    isCentered ? 'column' : layout === 'right' ? 'row-reverse' : 'row'
+  const align: React.CSSProperties['textAlign'] =
+    isCentered ? 'center' : layout === 'right' ? 'left' : 'right'
+  const fullWidth = isCentered
 
   return (
     <div
@@ -62,12 +75,12 @@ export function SurveyHeader({
       <div
         style={{
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
+          flexDirection: flexDir,
           alignItems: 'center',
           gap: isMobile ? 14 : 20,
         }}
       >
-        <div style={{ width: isMobile ? '100%' : '41.666%', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
+        <div style={{ width: fullWidth ? '100%' : '41.666%', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
           <LogoUpload
             src={logoSrc}
             size={effectiveSize}
@@ -76,7 +89,7 @@ export function SurveyHeader({
           />
         </div>
 
-        <div style={{ width: isMobile ? '100%' : '58.333%', minWidth: 0 }}>
+        <div style={{ width: fullWidth ? '100%' : '58.333%', minWidth: 0 }}>
           {editable ? (
             <>
               <InlineInput
@@ -88,7 +101,7 @@ export function SurveyHeader({
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                   color: '#64748b',
                 }}
               />
@@ -102,7 +115,7 @@ export function SurveyHeader({
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   margin: '4px 0',
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                   color: '#0f172a',
                 }}
               />
@@ -112,7 +125,7 @@ export function SurveyHeader({
                 placeholder="Địa chỉ"
                 style={{
                   fontSize: isSmall ? 11 : 12,
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                   color: '#64748b',
                 }}
               />
@@ -122,7 +135,7 @@ export function SurveyHeader({
                 placeholder="Điện thoại"
                 style={{
                   fontSize: isSmall ? 11 : 12,
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                   color: '#64748b',
                 }}
               />
@@ -132,7 +145,7 @@ export function SurveyHeader({
                 placeholder="Fax"
                 style={{
                   fontSize: isSmall ? 11 : 12,
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                   color: '#64748b',
                   marginTop: 4,
                 }}
@@ -147,7 +160,7 @@ export function SurveyHeader({
                   color: '#64748b',
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                 }}
                 
               >
@@ -161,7 +174,7 @@ export function SurveyHeader({
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   margin: '4px 0',
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                 }}
               >
                 {academyText}
@@ -171,7 +184,7 @@ export function SurveyHeader({
                   fontSize: isSmall ? 11 : 12,
                   color: '#64748b',
                   fontStyle: 'italic',
-                  textAlign: isMobile ? 'center' : 'right',
+                  textAlign: align,
                 }}
               >
                 {header.address}

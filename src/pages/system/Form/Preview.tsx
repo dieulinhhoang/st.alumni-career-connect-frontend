@@ -719,35 +719,49 @@ export function SurveyPreview({
         }}>
           <div style={{ padding: compact ? '16px 28px 32px' : '20px 48px 44px' }}>
 
-            {/* Institutional header */}
-            <div style={{ marginTop: 64, marginBottom: 24, paddingBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {/* Cột logo (col-5) */}
-                <div style={{ width: '41.666%', minHeight: 130, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <img
-                    src={header.logoUrl}
-                    alt="Logo Học viện"
-                    style={{ width: '50%', height: 'auto', objectFit: 'contain' }}
-                  />
-                </div>
-                {/* Cột nội dung (col-7) */}
-                <div style={{ width: '58.333%', textAlign: 'right' }}>
-                  <div style={{ fontStyle: 'italic', fontSize: 13, color: '#374151', marginBottom: 16 }}>
-                    {(() => { const d = new Date(); return `Ngày ${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}` })()}
+            {/* Institutional header — bố cục theo form.themeId */}
+            {(() => {
+              const layout = ['classic', 'centered', 'right'].includes(form.themeId as string)
+                ? form.themeId as 'classic' | 'centered' | 'right'
+                : 'classic'
+              const isCentered = layout === 'centered'
+              const align: React.CSSProperties['textAlign'] = isCentered ? 'center' : layout === 'right' ? 'left' : 'right'
+              const alignItems = isCentered ? 'center' : layout === 'right' ? 'flex-start' : 'flex-end'
+              return (
+                <div style={{ marginTop: 64, marginBottom: 24, paddingBottom: 20 }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    flexDirection: isCentered ? 'column' : layout === 'right' ? 'row-reverse' : 'row',
+                    gap: isCentered ? 14 : 0,
+                  }}>
+                    {/* Cột logo */}
+                    <div style={{ width: isCentered ? '100%' : '41.666%', minHeight: isCentered ? undefined : 130, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <img
+                        src={header.logoUrl}
+                        alt="Logo Học viện"
+                        style={{ width: isCentered ? 130 : '50%', height: 'auto', objectFit: 'contain' }}
+                      />
+                    </div>
+                    {/* Cột nội dung */}
+                    <div style={{ width: isCentered ? '100%' : '58.333%', textAlign: align }}>
+                      <div style={{ fontStyle: 'italic', fontSize: 13, color: '#374151', marginBottom: 16 }}>
+                        {(() => { const d = new Date(); return `Ngày ${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}` })()}
+                      </div>
+                      <p style={{ fontSize: 15, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
+                        {header.ministry}
+                      </p>
+                      <h6 style={{ fontSize: 16, fontWeight: 700, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
+                        {header.academy}
+                      </h6>
+                      <div style={{ fontStyle: 'italic', fontSize: 13.6, color: '#0f172a', display: 'flex', flexDirection: 'column', alignItems }}>
+                        <span style={{ textAlign: 'center' }}>{header.address}</span>
+                        <span>Điện thoại: {header.phone} - Fax: {header.phone}</span>
+                      </div>
+                    </div>
                   </div>
-                  <p style={{ fontSize: 15, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
-                    {header.ministry}
-                  </p>
-                  <h6 style={{ fontSize: 16, fontWeight: 700, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
-                    {header.academy}
-                  </h6>
-                  <div style={{ fontStyle: 'italic', fontSize: 13.6, color: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <span style={{ textAlign: 'center' }}>{header.address}</span>
-                    <span>Điện thoại: {header.phone} - Fax: {header.phone}</span>
-                  </div>
                 </div>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* Survey title */}
             <div style={{ textAlign: 'center', marginBottom: 44 }}>

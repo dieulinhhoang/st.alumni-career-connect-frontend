@@ -338,6 +338,8 @@ const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'tel',      label: 'Số điện thoại' },
   { value: 'address',  label: 'Địa chỉ' },
   { value: 'cccd',     label: 'Số CCCD (Số/Ngày cấp/Nơi cấp)' },
+  { value: 'dob',      label: 'Ngày sinh' },
+  { value: 'number',   label: 'Số nguyên' },
 ]
 
 const iconBtnBase: React.CSSProperties = {
@@ -447,7 +449,7 @@ export function EditableQuestionCard({
 
           {/* Input preview — mặc định giống preview, focus mới edit placeholder */}
           <div style={{ marginTop: 14 }}>
-            {(qType === 'text' || qType === 'email' || qType === 'tel') && (
+            {(qType === 'text' || qType === 'email' || qType === 'tel' || qType === 'number') && (
               <input
                 value={editingPlaceholder ? (question.placeholder ?? '') : ''}
                 placeholder={editingPlaceholder ? 'Nhập gợi ý...' : (question.placeholder || 'Câu trả lời của bạn')}
@@ -480,6 +482,11 @@ export function EditableQuestionCard({
                 onChange={(e) => onUpdate({ placeholder: e.target.value })}
                 style={{ width: 220, maxWidth: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 16, outline: 'none', color: '#9ca3af', background: '#fff', fontFamily: 'inherit' }}
               />
+            )}
+            {qType === 'dob' && (
+              <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, fontStyle: 'italic', background: '#f8fafc', width: 220, maxWidth: '100%' }}>
+                Ngày sinh (dd/mm/yyyy)
+              </div>
             )}
             {qType === 'address' && (
               <div style={{ padding: '12px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#64748b', fontSize: 14, background: '#f8fafc' }}>
@@ -557,16 +564,18 @@ export function EditableQuestionCard({
                 ))}
 
                 {/* Hàng "Khác" khi đã bật allowOther */}
-                {isActive && (qType === 'radio' || qType === 'checkbox') && question.allowOther && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => e.stopPropagation()}>
+                {(qType === 'radio' || qType === 'checkbox') && question.allowOther && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={(e) => { e.stopPropagation(); onActivate() }}>
                     <div style={{ width: 18, display: 'flex', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
                       {qType === 'checkbox'
                         ? <Checkbox disabled />
                         : <div style={{ width: 14, height: 14, borderRadius: 999, border: '2px solid #d1d5db' }} />}
                     </div>
                     <span style={{ fontSize: 14, color: '#94a3b8', fontStyle: 'italic', flex: 1, padding: '8px 0', borderBottom: '1px dotted #dbe2ea' }}>Khác...</span>
-                    <button type="button" onClick={() => onUpdate({ allowOther: false })}
-                      style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+                    {isActive && (
+                      <button type="button" onClick={() => onUpdate({ allowOther: false })}
+                        style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+                    )}
                   </div>
                 )}
 

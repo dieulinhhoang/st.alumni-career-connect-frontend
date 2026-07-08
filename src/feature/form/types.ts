@@ -25,7 +25,9 @@ export type QuestionType =
   | 'email'
   | 'tel'
   | 'gender'
-  | 'cccd';
+  | 'cccd'
+  | 'dob'
+  | 'number';
 
 // Giá trị câu trả lời cho câu hỏi loại 'cccd' (Số CCCD + Ngày cấp + Nơi cấp)
 export interface CccdValue {

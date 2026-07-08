@@ -5,6 +5,7 @@ import { useFormBuilder } from '../../../../feature/form/hooks/useFormBuilder'
 import type { Form, Section, SurveyFooter, SurveyHeader } from '../../../../feature/form/types'
 import { CenterCanvas } from './canvas/CenterCanvas'
 import { RightPanel } from './panels/RightPanel'
+import type { LogicRule } from './panels/LogicPanel'
 
 const DEFAULT_HEADER: SurveyHeader = {
   ministry:  'Bộ Nông nghiệp và Môi trường',
@@ -20,14 +21,8 @@ const DEFAULT_FOOTER: SurveyFooter = {
 
 const ACCENT = '#279f2d'
 
-export interface LogicRule {
-  id: string
-  sourceQuestionId: string
-  operator: 'equals' | 'notequals' | 'contains'
-  value: string
-  action: 'show' | 'hide' | 'skip' | 'require'
-  targetQuestionId: string
-}
+// Re-export để useFormPersistence import không vỡ — nguồn chuẩn là LogicPanel
+export type { LogicRule } from './panels/LogicPanel'
 
 interface BuilderViewProps {
   form: Form | null
@@ -57,6 +52,10 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const [logoUrl, setLogoUrl] = useState<string>((form as any)?.logoUrl ?? '')
   const [logoSize, setLogoSize] = useState<number>((form as any)?.logoSize ?? 120)
   const [logicRules, setLogicRules] = useState<LogicRule[]>((form as any)?.logicRules ?? [])
+  // themeId = bố cục header: 'classic' (logo trái) | 'centered' (logo giữa) | 'right' (logo phải)
+  const [themeId, setThemeId] = useState<string>(
+    ['classic', 'centered', 'right'].includes(form?.themeId as string) ? form!.themeId : 'classic'
+  )
   const [descParagraphs, setDescParagraphs] = useState<string[]>(() => {
     const desc: string = (form as any)?.description ?? ''
     return desc ? desc.split('\n').filter(Boolean) : []
@@ -71,8 +70,8 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [])
   const isMobile = winWidth < 768
 
-  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs })
-  useEffect(() => { extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, descriptionParagraphs: descParagraphs } }, [header, footer, logoUrl, logoSize, logicRules, descParagraphs])
+  const extrasRef = useRef({ header, footer, logoUrl, logoSize, logicRules, themeId, descriptionParagraphs: descParagraphs })
+  useEffect(() => { extrasRef.current = { header, footer, logoUrl, logoSize, logicRules, themeId, descriptionParagraphs: descParagraphs } }, [header, footer, logoUrl, logoSize, logicRules, themeId, descParagraphs])
 
   const renameSection = useCallback((id: string, title: string) => {
     setSections(prev => prev.map((s: Section) => s.id === id ? { ...s, title } : s))
@@ -159,7 +158,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, descParagraphs, loading])
+  }, [questions, sections, name, header, footer, logoUrl, logoSize, logicRules, themeId, descParagraphs, loading])
   // Khai báo SAU effect debounce: cleanup chạy theo thứ tự LIFO nên cờ này
   // được set TRƯỚC khi cleanup của effect debounce chạy lúc unmount.
   useEffect(() => {
@@ -197,7 +196,6 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
         {formStatus === 'published' ? (
           <Button
-            icon={<CheckOutlined />}
             loading={publishing}
             onClick={handleUnpublishClick}
             style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a', fontWeight: 600 }}
@@ -223,7 +221,7 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
           <CenterCanvas
             questions={questions} sections={sections} activeQuestionId={activeId}
             accent={ACCENT} surveyTitle={name} descriptionParagraphs={descParagraphs}
-            header={header} footer={footer} logoUrl={logoUrl} logoSize={logoSize}
+            header={header} footer={footer} logoUrl={logoUrl} logoSize={logoSize} themeId={themeId}
             onActivate={setActiveId} onDeactivate={() => setActiveId(null)}
             onUpdate={updateQuestion} onDuplicate={duplicateQuestion} onRemove={removeQuestion}
             onMoveUp={id => moveQuestion(id, 'up')} onMoveDown={id => moveQuestion(id, 'down')}
@@ -240,8 +238,11 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         {!isMobile && (
           <RightPanel
             questions={questions} sections={sections} logoSize={logoSize} logicRules={logicRules}
+            themeId={themeId}
             onAddBlank={() => addQuestion()} onDropFromBank={handleDropFromBank}
             onLogoSizeChange={setLogoSize} onLogicRulesChange={setLogicRules}
+            onThemeChange={setThemeId}
+            onUpdateQuestion={updateQuestion}
           />
         )}
       </div>
@@ -252,9 +253,12 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             styles={{ body: { padding: 0 } }} title="Thư viện / Giao diện">
             <RightPanel
               questions={questions} sections={sections} logoSize={logoSize} logicRules={logicRules}
+              themeId={themeId}
               onAddBlank={_type => { addQuestion(); setRightOpen(false) }}
               onDropFromBank={q => { handleDropFromBank(q); setRightOpen(false) }}
               onLogoSizeChange={setLogoSize} onLogicRulesChange={setLogicRules}
+              onThemeChange={setThemeId}
+              onUpdateQuestion={updateQuestion}
             />
           </Drawer>
           <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 52, background: '#fff', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', zIndex: 100, boxShadow: '0 -2px 12px rgba(0,0,0,.06)' }}>

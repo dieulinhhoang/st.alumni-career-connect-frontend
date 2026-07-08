@@ -19,7 +19,7 @@ function makeBlankForm(): Form {
   return {
     id: null as any, name: '', description: '',
     sections: [defaultSection], questions: [defaultQuestion],
-    themeId: 'blue',
+    themeId: 'classic',
     header: { ministry: 'Bộ Nông nghiệp và Môi trường', academy: 'Học viện Nông nghiệp Việt Nam', address: 'Xã Gia Lâm, Thành phố Hà Nội', phone: '024.62617586', showDate: true },
     footer: { primaryText: 'Xin trân trọng cảm ơn sự hợp tác của Anh/Chị!', secondaryText: 'Kính chúc Anh/Chị sức khỏe và thành công!' },
   } as any

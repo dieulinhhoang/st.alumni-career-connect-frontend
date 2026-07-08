@@ -31,6 +31,7 @@ export interface Enterprise {
 export interface Job {
   id: string;
   title: string;
+  description?: string | null;
   location: string;
   salary: string;
   tags: string[];
