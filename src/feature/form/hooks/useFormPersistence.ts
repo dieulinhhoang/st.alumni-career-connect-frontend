@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { isAxiosError } from 'axios'
 import { createForm, updateForm, publishForm, unpublishForm } from '../api'
 import type { Form, Question, Section, SurveyHeader, SurveyFooter } from '../types'
 import type { LogicRule } from '../../../pages/system/Form/builder/BuilderView'
@@ -29,6 +30,17 @@ export interface FormPersistence {
   setFormStatus: (s: 'draft' | 'published' | undefined) => void
 }
 
+// Ưu tiên message backend trả về (BadRequestException/class-validator) thay vì
+// "Request failed with status code 400" chung chung của axios
+function extractErrorMessage(e: unknown, fallbackMsg: string): string {
+  if (isAxiosError(e)) {
+    const serverMsg = e.response?.data?.message
+    if (Array.isArray(serverMsg)) return serverMsg.join('\n')
+    if (typeof serverMsg === 'string' && serverMsg) return serverMsg
+  }
+  return e instanceof Error && e.message ? e.message : fallbackMsg
+}
+
 async function runAsync<T>(
   fn: () => Promise<T>,
   setBusy: (b: boolean) => void,
@@ -40,7 +52,7 @@ async function runAsync<T>(
   try {
     return await fn()
   } catch (e) {
-    setError(e instanceof Error ? e.message : fallbackMsg)
+    setError(extractErrorMessage(e, fallbackMsg))
     return null
   } finally {
     setBusy(false)

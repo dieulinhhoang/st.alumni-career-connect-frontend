@@ -192,6 +192,8 @@ export interface Form {
   status?: 'draft' | 'published';
   isSystem?: boolean;
   usedInBatch?: boolean;
+  // Đợt khảo sát dùng form đã kích hoạt/kết thúc → không cho sửa nữa
+  lockedByBatch?: boolean;
 }
 
 // VIEW TYPES

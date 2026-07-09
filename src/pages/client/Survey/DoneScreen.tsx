@@ -633,7 +633,8 @@ export function DoneScreen() {
       <style>{STYLE}</style>
       <Confetti active={confetti}/>
       <Hero/>
-      <GiftBox jobs={jobs} loading={loading}/>
+      {/* Không có job đang tuyển thì ẩn hẳn hộp quà, chỉ giữ lời cảm ơn */}
+      {!loading && jobs.length > 0 && <GiftBox jobs={jobs} loading={loading}/>}
     </div>
   )
 }

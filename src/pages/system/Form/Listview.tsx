@@ -131,12 +131,12 @@ export default function ListView({
             <Tooltip
               title={
                 record.isSystem ? 'Form hệ thống, không thể sửa'
-                : record.usedInBatch ? 'Form đang gắn với đợt khảo sát, không thể sửa'
+                : record.lockedByBatch ? 'Đợt khảo sát dùng form này đã kích hoạt, không thể sửa'
                 : 'Chỉnh sửa'
               }
               mouseEnterDelay={0.4}
             >
-              <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.usedInBatch}
+              <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.lockedByBatch}
                 onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
             </Tooltip>
           )}

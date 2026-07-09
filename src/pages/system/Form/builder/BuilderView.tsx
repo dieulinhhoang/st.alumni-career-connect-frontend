@@ -42,10 +42,18 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
     addSectionAfter, deleteSection,
     addOption, updateOption, removeOption,
     groupQuestions, ungroupQuestion,
-    saving, saved, handleSave,
-    publishing, formStatus, handlePublish, handleUnpublish,
+    saving, saved, saveError, handleSave,
+    publishing, publishError, formStatus, handlePublish, handleUnpublish,
     loading,
   } = useFormBuilder(mode, form?.id ?? undefined, form?.name)
+
+  // FIX: hiện lỗi lưu/xuất bản từ server — trước đây lỗi bị nuốt, user không biết vì sao không lưu được
+  useEffect(() => {
+    if (saveError) message.error({ content: saveError, key: 'form-save-error', duration: 5 })
+  }, [saveError])
+  useEffect(() => {
+    if (publishError) message.error({ content: publishError, key: 'form-publish-error', duration: 5 })
+  }, [publishError])
 
   const [header,  setHeader]  = useState<SurveyHeader>((form as any)?.header  ?? DEFAULT_HEADER)
   const [footer,  setFooter]  = useState<SurveyFooter>((form as any)?.footer  ?? DEFAULT_FOOTER)
@@ -192,6 +200,14 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
             <CheckOutlined style={{ fontSize: 13 }} />
             {!isMobile && 'Đã lưu'}
           </span>
+        )}
+        {!saving && !saved && saveError && (
+          <Tooltip title={saveError}>
+            <span style={{ fontSize: 14, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4, cursor: 'help' }}>
+              <StopOutlined style={{ fontSize: 13 }} />
+              {!isMobile && 'Lưu thất bại'}
+            </span>
+          </Tooltip>
         )}
 
         {formStatus === 'published' ? (
