@@ -4,6 +4,8 @@ import dayjs from 'dayjs'
 import type { CccdValue } from '../../../feature/form/types'
 import type { Form, Question, Section } from '../../../feature/form/types'
 import { groupByRow } from '../../../feature/form/hooks/Useformutils'
+import { GoogleAddressInput } from './builder/shared/GoogleAddressInput'
+import { PROVINCES_2025 } from '../../../feature/form/constants'
 
 
 //  Utility 
@@ -228,19 +230,40 @@ function AddressField({ value, onChange, hasError, readOnly }: FieldProps & {
   value?: AddressValue
   onChange?: (v: AddressValue) => void
 }) {
+  return (
+    <GoogleAddressInput
+      value={value}
+      onChange={onChange}
+      readOnly={readOnly}
+      hasError={hasError}
+      baseStyle={baseInput}
+      errorStyle={errorBorder}
+    />
+  )
+}
+
+
+function AddressProvinceField({ value, onChange, hasError, readOnly }: FieldProps & {
+  value?: AddressValue
+  onChange?: (v: AddressValue) => void
+}) {
   const v: AddressValue = value ?? {}
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <input type="text" readOnly={readOnly} placeholder="Địa chỉ"
+      <input type="text" readOnly={readOnly} placeholder="Địa chỉ (số nhà, đường, phường/xã...)"
         value={v.address ?? ''} onChange={e => onChange?.({ ...v, address: e.target.value })}
         style={{ ...baseInput, ...(hasError ? errorBorder : {}) }}
         onFocus={applyFocus} onBlur={removeFocus}
       />
-      <input type="text" readOnly={readOnly} placeholder="Tỉnh / Thành phố"
-        value={v.city ?? ''} onChange={e => onChange?.({ ...v, city: e.target.value })}
-        style={{ ...baseInput }}
-        onFocus={applyFocus} onBlur={removeFocus}
-      />
+      <select
+        disabled={readOnly}
+        value={v.city ?? ''}
+        onChange={e => onChange?.({ ...v, city: e.target.value })}
+        style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer', ...(hasError ? errorBorder : {}) }}
+      >
+        <option value="">-- Chọn Tỉnh / Thành phố --</option>
+        {PROVINCES_2025.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
     </div>
   )
 }
@@ -423,6 +446,7 @@ function QuestionItem({ q, num, value, onChange, hasError, readOnly }: {
       case 'tel':      return <TelField      {...fp} value={value} onChange={onChange} />
       case 'date':     return <DateField     {...fp} value={value} onChange={onChange} />
       case 'address':  return <AddressField  {...fp} value={value} onChange={onChange} />
+      case 'address-province': return <AddressProvinceField {...fp} value={value} onChange={onChange} />
       case 'cccd':     return <CccdField     {...fp} value={value} onChange={onChange} />
       case 'gender':
       case 'radio':    return <RadioField    {...fp} options={opts} qId={q.id} value={value} onChange={onChange} allowOther={q.allowOther} />
@@ -472,7 +496,7 @@ function mapForm(form: Form) {
   const typeMap: Record<string, Question['type']> = {
     text: 'text', long: 'long', radio: 'radio', checkbox: 'checkbox',
     dropdown: 'select', select: 'select', date: 'date',
-    address: 'address', email: 'email', tel: 'tel', cccd: 'cccd',
+    address: 'address', 'address-province': 'address-province', email: 'email', tel: 'tel', cccd: 'cccd',
   }
 
   let order = 0

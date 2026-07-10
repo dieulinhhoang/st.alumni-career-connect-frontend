@@ -16,6 +16,7 @@ export type QuestionType =
   | 'multiple-choice'
   | 'checkbox'
   | 'address'
+  | 'address-province'
   | 'date'
   | 'select'
   | 'long'

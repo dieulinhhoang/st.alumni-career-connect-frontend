@@ -340,6 +340,7 @@ interface ServiceConfigItem {
 
 const SERVICE_KEYS: { key: string; label: string; placeholder: string; description: string }[] = [
   { key: 'geoapify_api_key', label: 'Geoapify API Key (Địa chỉ)', placeholder: 'Nhập API key từ myprojects.geoapify.com', description: 'API key cho Geoapify Geocoder (tự động gợi ý địa chỉ)' },
+  { key: 'google_maps_api_key', label: 'Google Maps API Key (Địa chỉ)', placeholder: 'Nhập API key từ Google Cloud Console (Maps JavaScript + Places API)', description: 'Gợi ý địa chỉ cho câu hỏi địa chỉ & tự tách tỉnh/thành cho báo cáo. Nhớ giới hạn key theo HTTP referrer.' },
 ]
 
 function ServiceConfigTab() {

@@ -337,6 +337,7 @@ const QUESTION_TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'email',    label: 'Email' },
   { value: 'tel',      label: 'Số điện thoại' },
   { value: 'address',  label: 'Địa chỉ' },
+  { value: 'address-province', label: 'Địa chỉ + Tỉnh/TP (chọn)' },
   { value: 'cccd',     label: 'Số CCCD (Số/Ngày cấp/Nơi cấp)' },
   { value: 'dob',      label: 'Ngày sinh' },
   { value: 'number',   label: 'Số nguyên' },
@@ -491,6 +492,16 @@ export function EditableQuestionCard({
             {qType === 'address' && (
               <div style={{ padding: '12px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#64748b', fontSize: 14, background: '#f8fafc' }}>
                 Trường địa chỉ sẽ hiển thị ở chế độ điền biểu mẫu
+              </div>
+            )}
+            {qType === 'address-province' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, fontStyle: 'italic', background: '#f8fafc' }}>
+                  Địa chỉ (người dùng tự nhập)...
+                </div>
+                <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, background: '#f8fafc' }}>
+                  -- Chọn Tỉnh / Thành phố (34 tỉnh) --
+                </div>
               </div>
             )}
             {qType === 'cccd' && (

@@ -15,6 +15,13 @@ export function AnswerPreview({ question }: { question: Question }) {
       return <div style={base}>Câu trả lời...</div>
     case 'address':
       return <div style={base}>Địa chỉ...</div>
+    case 'address-province':
+      return (
+        <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={base}>Địa chỉ...</div>
+          <div style={{ ...base, marginTop: 0, fontStyle: 'normal' }}>Chọn Tỉnh / Thành phố ▾</div>
+        </div>
+      )
     case 'cccd':
       return (
         <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>

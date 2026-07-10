@@ -454,7 +454,7 @@ export const BatchResults: React.FC = () => {
 
                 const formatAnswer = (raw: any, q: any): string => {
                   if (raw == null || raw === '') return '';
-                  if (q.type === 'address' && typeof raw === 'object') {
+                  if ((q.type === 'address' || q.type === 'address-province') && typeof raw === 'object') {
                     return Object.values(raw).filter(Boolean).join(', ');
                   }
                   if (q.type === 'cccd' && typeof raw === 'object') {
