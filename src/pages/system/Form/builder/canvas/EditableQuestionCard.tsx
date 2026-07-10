@@ -500,7 +500,7 @@ export function EditableQuestionCard({
                   Địa chỉ (người dùng tự nhập)...
                 </div>
                 <div style={{ padding: '10px 14px', border: '1px dashed #cbd5e1', borderRadius: 10, color: '#9ca3af', fontSize: 14, background: '#f8fafc' }}>
-                  -- Chọn Tỉnh / Thành phố (34 tỉnh) --
+                  -- Chọn Tỉnh / Thành phố (34 tỉnh + Nước ngoài) --
                 </div>
               </div>
             )}

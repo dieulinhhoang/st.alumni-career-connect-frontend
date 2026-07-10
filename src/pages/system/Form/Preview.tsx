@@ -262,6 +262,8 @@ function AddressProvinceField({ value, onChange, hasError, readOnly }: FieldProp
         style={{ ...baseInput, cursor: readOnly ? 'default' : 'pointer', ...(hasError ? errorBorder : {}) }}
       >
         <option value="">-- Chọn Tỉnh / Thành phố --</option>
+        <option value="Nước ngoài">Nước ngoài (làm việc ở nước ngoài)</option>
+        <option disabled>──────────</option>
         {PROVINCES_2025.map((p) => <option key={p} value={p}>{p}</option>)}
       </select>
     </div>

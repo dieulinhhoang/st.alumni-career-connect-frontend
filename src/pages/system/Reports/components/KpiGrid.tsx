@@ -16,7 +16,7 @@ interface Props {
 export const KpiGrid: React.FC<Props> = ({ items }) => (
   <div className="rp-kpi-grid">
     {items.map((kpi, i) => (
-      <div className="rp-kpi-card" key={i}>
+      <div className="rp-kpi-card" key={i} style={{ color: kpi.color }}>
         <div className="rp-kpi-icon" style={{ background: kpi.bg, color: kpi.color }}>
           {kpi.icon}
         </div>

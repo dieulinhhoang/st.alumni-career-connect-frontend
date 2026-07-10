@@ -196,55 +196,97 @@
   font-weight: 500;
 }
 
-/*  KPI grid – neutral grey cards (chỉ hiện số + label) */
+/*  KPI grid – card trắng, icon chip màu + số + label + sub */
 .rp-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
 .rp-kpi-card {
-  background: #f3f4f6;
-  border-radius: 10px;
-  border: none;
-  padding: 16px 18px;
+  position: relative;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #eef0f3;
+  padding: 18px 20px;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: box-shadow 0.15s ease;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+/* thanh accent mảnh bên trái, màu theo icon color */
+.rp-kpi-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.18s ease;
 }
 
 .rp-kpi-card:hover {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
+  border-color: #e3e6eb;
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+}
+
+.rp-kpi-card:hover::before {
+  opacity: 0.9;
 }
 
 .rp-kpi-icon {
-  display: none; /* ẩn icon, chỉ hiện số + label */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 20px;
+  /* background + color được truyền inline từ useKpiItems */
 }
 
 .rp-kpi-body {
   flex: 1;
   min-width: 0;
-}
-
-.rp-kpi-value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.15;
-  /* color được truyền inline từ useKpiItems */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .rp-kpi-label {
   font-size: 13px;
+  font-weight: 500;
   color: #6b7280;
-  margin-top: 4px;
-  margin-bottom: 0;
-  opacity: 1;
+  line-height: 1.3;
+  order: 1;
+}
+
+.rp-kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  order: 2;
+  /* color được truyền inline từ useKpiItems */
 }
 
 .rp-kpi-sub {
-  display: none; /* không dùng sub text */
+  display: block;
+  font-size: 12px;
+  color: #9aa1ac;
+  line-height: 1.3;
+  order: 3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /*  Table card & toolbar  */

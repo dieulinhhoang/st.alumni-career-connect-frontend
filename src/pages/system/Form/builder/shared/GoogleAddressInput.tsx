@@ -69,8 +69,14 @@ function loadGoogleMaps(key: string): Promise<boolean> {
   return scriptPromise
 }
 
-/** Lấy tỉnh/thành (administrative_area_level_1) từ danh sách address_components */
+/**
+ * Lấy tỉnh/thành từ address_components.
+ * Nếu địa điểm KHÔNG thuộc Việt Nam → trả về "Nước ngoài" (không cần ghi rõ tỉnh),
+ * để báo cáo gom nhóm chung như câu hỏi chọn tỉnh.
+ */
 function extractProvince(components: any[]): string {
+  const country = components?.find((c) => c.types?.includes('country'))
+  if (country && country.short_name !== 'VN') return 'Nước ngoài'
   const comp = components?.find((c) =>
     c.types?.includes('administrative_area_level_1'),
   )
@@ -115,7 +121,7 @@ export const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
 
     ensurePacStyle()
     const ac = new g.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: 'vn' },
+      // Không giới hạn quốc gia: cho phép chọn địa chỉ ở nước ngoài (→ city = "Nước ngoài")
       fields: ['address_components', 'formatted_address'],
       types: ['geocode'],
     })
