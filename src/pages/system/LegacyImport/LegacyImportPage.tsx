@@ -150,7 +150,7 @@ export default function LegacyImportPage() {
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="formId" label="Form khảo sát">
-                <Text>{systemForm ? `#${systemForm.id} - ${systemForm.name}` : 'Đang tải...'}</Text>
+                <Text>{systemForm ? systemForm.name : 'Đang tải...'}</Text>
               </Form.Item>
             </Col>
             <Col span={8}>
