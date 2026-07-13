@@ -354,7 +354,7 @@ interface ServiceKeyDef {
 const SERVICE_KEYS: ServiceKeyDef[] = [
   {
     key: 'goong_api_key',
-    label: 'Goong API Key (Địa chỉ – Việt Nam)',
+    label: 'Goong · Việt Nam',
     placeholder: 'Nhập API key từ goong.io',
     description: 'Gợi ý địa chỉ Việt Nam (chi tiết tới phường/xã) & tự tách tỉnh/thành. Miễn phí, KHÔNG cần thẻ quốc tế.',
     provider: 'goong',
@@ -373,7 +373,7 @@ const SERVICE_KEYS: ServiceKeyDef[] = [
   },
   {
     key: 'google_maps_api_key',
-    label: 'Google Maps API Key (Địa chỉ)',
+    label: 'Google Maps',
     placeholder: 'Nhập API key từ Google Cloud Console (Maps JavaScript + Places API)',
     description: 'Gợi ý địa chỉ chất lượng cao & tự tách tỉnh/thành. Cần bật billing (thẻ Visa/Mastercard).',
     provider: 'google',
@@ -392,7 +392,7 @@ const SERVICE_KEYS: ServiceKeyDef[] = [
   },
   {
     key: 'geoapify_api_key',
-    label: 'Geoapify API Key (Địa chỉ)',
+    label: 'Geoapify',
     placeholder: 'Nhập API key từ myprojects.geoapify.com',
     description: 'Gợi ý địa chỉ (dữ liệu VN trung bình). Miễn phí, không cần thẻ.',
     provider: 'geoapify',
@@ -416,10 +416,10 @@ const PROVIDER_OPTIONS = [
   { value: 'geoapify', label: 'Geoapify' },
 ]
 
-const PROVIDER_META: Record<string, { emoji: string; accent: string; soft: string }> = {
-  goong:    { emoji: '🇻🇳', accent: '#16a34a', soft: '#f0fdf4' },
-  google:   { emoji: '🌐', accent: '#2563eb', soft: '#eff6ff' },
-  geoapify: { emoji: '📍', accent: '#ea580c', soft: '#fff7ed' },
+const PROVIDER_META: Record<string, { Icon: React.FC<any>; accent: string; soft: string }> = {
+  goong:    { Icon: EnvironmentOutlined, accent: '#16a34a', soft: '#f0fdf4' },
+  google:   { Icon: GlobalOutlined, accent: '#2563eb', soft: '#eff6ff' },
+  geoapify: { Icon: PushpinOutlined, accent: '#ea580c', soft: '#fff7ed' },
 }
 
 function ServiceConfigTab() {
@@ -477,40 +477,47 @@ function ServiceConfigTab() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}><Spin /></div>
       ) : (
-        <div style={{ maxWidth: 980 }}>
-          {/* ─ Card chọn nhà cung cấp ─ */}
+        <div style={{ maxWidth: 1040 }}>
+          <style>{`
+            .svc-card { transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease; }
+            .svc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+          `}</style>
+
+          {/* ─ Thanh chọn nhà cung cấp ─ */}
           <div style={{
-            background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)',
-            border: '1px solid #d1fae5', borderRadius: 16,
-            padding: '20px 24px', marginBottom: 24,
-            display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap',
+            background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
+            padding: '16px 20px', marginBottom: 20,
+            display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
           }}>
             <div style={{
-              width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-              background: '#fff', border: '1px solid #e2e8f0',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-            }}>📍</div>
-            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
-              <Text strong style={{ fontSize: 15, display: 'block' }}>Gợi ý địa chỉ trong form khảo sát</Text>
+              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+              background: '#f0fdf4', color: '#16a34a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+            }}>
+              <EnvironmentOutlined />
+            </div>
+            <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+              <Text strong style={{ fontSize: 15, display: 'block', color: '#0f172a' }}>
+                Gợi ý địa chỉ trong form khảo sát
+              </Text>
               <Text type="secondary" style={{ fontSize: 12.5 }}>
-                Đang dùng: <b style={{ color: '#0f172a' }}>{currentLabel}</b>. Chọn nhà cung cấp rồi nhập key tương ứng bên dưới.
+                Đang dùng <b style={{ color: '#0f172a' }}>{currentLabel}</b> — chọn nhà cung cấp rồi nhập key tương ứng bên dưới.
               </Text>
             </div>
-            <Space.Compact style={{ minWidth: 300, flex: '0 1 380px' }}>
+            <Space.Compact style={{ flex: '0 1 360px', minWidth: 260 }}>
               <Select
                 style={{ flex: 1 }}
-                size="large"
                 value={editValues['address_provider'] || 'none'}
                 onChange={(val) => setEditValues(prev => ({ ...prev, address_provider: val }))}
                 options={PROVIDER_OPTIONS}
               />
               <Button
-                type="primary" size="large"
+                type="primary"
                 icon={<SaveOutlined />}
                 onClick={() => handleSave('address_provider')}
                 loading={saving['address_provider']}
                 disabled={!isDirty('address_provider')}
-                style={{ background: isDirty('address_provider') ? '#16a34a' : undefined, borderColor: isDirty('address_provider') ? '#16a34a' : undefined }}
+                style={isDirty('address_provider') ? { background: '#16a34a', borderColor: '#16a34a' } : undefined}
               >
                 Lưu
               </Button>
@@ -520,51 +527,54 @@ function ServiceConfigTab() {
           {/* ─ Lưới các key ─ */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(304px, 1fr))',
             gap: 16,
           }}>
             {SERVICE_KEYS.map(svc => {
               const active = currentProvider === svc.provider
               const configured = !!serverValues[svc.key]
-              const meta = PROVIDER_META[svc.provider] ?? { emoji: '🔑', accent: '#64748b', soft: '#f8fafc' }
+              const meta = PROVIDER_META[svc.provider] ?? { Icon: QuestionCircleOutlined, accent: '#64748b', soft: '#f8fafc' }
               return (
-                <div key={svc.key} style={{
+                <div key={svc.key} className="svc-card" style={{
                   background: '#fff',
                   border: active ? `1.5px solid ${meta.accent}` : '1px solid #e5e7eb',
-                  boxShadow: active ? `0 0 0 3px ${meta.accent}18` : '0 1px 2px rgba(0,0,0,0.03)',
+                  boxShadow: active ? `0 0 0 3px ${meta.accent}18` : '0 1px 2px rgba(15,23,42,0.04)',
                   borderRadius: 14, padding: 18,
-                  display: 'flex', flexDirection: 'column', gap: 10,
+                  display: 'flex', flexDirection: 'column',
                 }}>
-                  {/* Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  {/* Header: icon + tên + ? */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                      background: meta.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-                    }}>{meta.emoji}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <Text strong style={{ fontSize: 14 }}>{svc.label}</Text>
-                        {active && (
-                          <span style={{
-                            fontSize: 11, fontWeight: 600, color: meta.accent,
-                            background: meta.soft, border: `1px solid ${meta.accent}44`,
-                            borderRadius: 20, padding: '1px 8px',
-                          }}>Đang dùng</span>
-                        )}
-                      </div>
-                      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 2, lineHeight: 1.5 }}>
-                        {svc.description}
-                      </Text>
+                      background: meta.soft, color: meta.accent,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19,
+                    }}>
+                      <meta.Icon />
                     </div>
+                    <Text strong style={{ fontSize: 15, flex: 1, minWidth: 0, color: '#0f172a' }}>
+                      {svc.label}
+                    </Text>
+                    {active && (
+                      <span style={{
+                        fontSize: 11, fontWeight: 600, color: meta.accent,
+                        background: meta.soft, border: `1px solid ${meta.accent}44`,
+                        borderRadius: 20, padding: '2px 9px', whiteSpace: 'nowrap',
+                      }}>Đang dùng</span>
+                    )}
                     <Popover content={svc.guide} trigger="click" placement="bottomRight">
                       <Tooltip title="Cách lấy key">
-                        <Button type="text" size="small" icon={<QuestionCircleOutlined />} style={{ color: '#2563eb', flexShrink: 0 }} />
+                        <Button type="text" size="small" shape="circle" icon={<QuestionCircleOutlined />} style={{ color: '#64748b', flexShrink: 0 }} />
                       </Tooltip>
                     </Popover>
                   </div>
 
+                  {/* Mô tả — cố định chiều cao để các card canh đều */}
+                  <Text type="secondary" style={{ fontSize: 12.5, lineHeight: 1.55, minHeight: 58, display: 'block' }}>
+                    {svc.description}
+                  </Text>
+
                   {/* Input + save */}
-                  <Space.Compact style={{ width: '100%', marginTop: 'auto' }}>
+                  <Space.Compact style={{ width: '100%', marginTop: 12 }}>
                     <Input.Password
                       value={editValues[svc.key] ?? ''}
                       onChange={e => setEditValues(prev => ({ ...prev, [svc.key]: e.target.value }))}
@@ -583,7 +593,7 @@ function ServiceConfigTab() {
                   </Space.Compact>
 
                   {/* Trạng thái */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
                     <span style={{
                       width: 7, height: 7, borderRadius: '50%',
                       background: configured ? '#16a34a' : '#f59e0b', display: 'inline-block',
