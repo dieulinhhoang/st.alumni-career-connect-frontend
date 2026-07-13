@@ -18,8 +18,11 @@ import {
 } from 'antd'
 import {
   DeleteOutlined,
+  EnvironmentOutlined,
   EyeOutlined,
+  GlobalOutlined,
   PlusOutlined,
+  PushpinOutlined,
   QuestionCircleOutlined,
   SaveOutlined,
   StopOutlined,
