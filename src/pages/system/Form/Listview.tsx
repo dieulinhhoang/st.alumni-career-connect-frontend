@@ -104,14 +104,14 @@ export default function ListView({
       ),
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      width: 120,
+      title: 'Cập nhật gần nhất',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+      width: 150,
       align: 'center' as const,
-      render: (date: string) => (
+      render: (_: string, record: Form) => (
         <Text type="secondary" style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
-          {fmt(date)}
+          {fmt(record.updated_at || record.created_at)}
         </Text>
       ),
     },

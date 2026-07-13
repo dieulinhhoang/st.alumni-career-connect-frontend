@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Spin, Empty, Typography, Tag, Row, Col, message, Timeline } from 'antd';
+import { Button, Spin, Empty, Typography, Tag, Row, Col, message, Timeline, Modal } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, MailOutlined,
   IdcardOutlined, BankOutlined, CalendarOutlined,
@@ -58,6 +58,7 @@ export const ResponseDetail: React.FC = () => {
   const [loading,     setLoading]     = useState(true);
   const [saving,      setSaving]      = useState(false);
   const [history,     setHistory]     = useState<ResponseHistoryEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
   useEffect(() => { loadHistory(); }, [id, responseId]);
@@ -257,6 +258,23 @@ export const ResponseDetail: React.FC = () => {
         } />
         {/* Ẩn Năm tốt nghiệp (batch.year) */}
         <InfoRow icon={<BankOutlined />} label="Đợt tốt nghiệp" value={batch.graduationPeriod} />
+        {!isPending && (
+          <InfoRow
+            icon={<HistoryOutlined />}
+            label="Lịch sử thay đổi"
+            value={
+              <Button
+                type="link"
+                size="small"
+                icon={<HistoryOutlined />}
+                style={{ padding: 0, height: 'auto', fontSize: 13, fontWeight: 500 }}
+                onClick={() => setHistoryOpen(true)}
+              >
+                Xem lịch sử{history.length > 0 ? ` (${history.length})` : ''}
+              </Button>
+            }
+          />
+        )}
       </div>
     </div>
   );
@@ -338,12 +356,19 @@ export const ResponseDetail: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Lịch sử thao tác: ai, làm gì, sửa cái gì */}
-        {!isEdit && !isPending && (
-          <div style={{ marginTop: 20, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
-            <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Lịch sử thao tác: ai, làm gì, sửa cái gì — hiển thị trong modal */}
+        <Modal
+          open={historyOpen}
+          onCancel={() => setHistoryOpen(false)}
+          footer={null}
+          width={640}
+          title={
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <HistoryOutlined style={{ color: '#2563eb' }} /> Lịch sử thay đổi
-            </div>
+            </span>
+          }
+        >
+          <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingTop: 8 }}>
             {history.length === 0 ? (
               <Text type="secondary" style={{ fontSize: 13 }}>Chưa có lịch sử thao tác nào.</Text>
             ) : (
@@ -394,7 +419,7 @@ export const ResponseDetail: React.FC = () => {
               />
             )}
           </div>
-        )}
+        </Modal>
       </div>
     </AdminLayout>
   );
