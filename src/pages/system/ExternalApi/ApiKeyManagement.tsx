@@ -18,11 +18,8 @@ import {
 } from 'antd'
 import {
   DeleteOutlined,
-  EnvironmentOutlined,
   EyeOutlined,
-  GlobalOutlined,
   PlusOutlined,
-  PushpinOutlined,
   QuestionCircleOutlined,
   SaveOutlined,
   StopOutlined,
@@ -416,10 +413,10 @@ const PROVIDER_OPTIONS = [
   { value: 'geoapify', label: 'Geoapify' },
 ]
 
-const PROVIDER_META: Record<string, { Icon: React.FC<any>; accent: string; soft: string }> = {
-  goong:    { Icon: EnvironmentOutlined, accent: '#16a34a', soft: '#f0fdf4' },
-  google:   { Icon: GlobalOutlined, accent: '#2563eb', soft: '#eff6ff' },
-  geoapify: { Icon: PushpinOutlined, accent: '#ea580c', soft: '#fff7ed' },
+const PROVIDER_META: Record<string, { accent: string; soft: string }> = {
+  goong:    { accent: '#16a34a', soft: '#f0fdf4' },
+  google:   { accent: '#2563eb', soft: '#eff6ff' },
+  geoapify: { accent: '#ea580c', soft: '#fff7ed' },
 }
 
 function ServiceConfigTab() {
@@ -489,13 +486,6 @@ function ServiceConfigTab() {
             padding: '16px 20px', marginBottom: 20,
             display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
           }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-              background: '#f0fdf4', color: '#16a34a',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-            }}>
-              <EnvironmentOutlined />
-            </div>
             <div style={{ flex: '1 1 220px', minWidth: 0 }}>
               <Text strong style={{ fontSize: 15, display: 'block', color: '#0f172a' }}>
                 Gợi ý địa chỉ trong form khảo sát
@@ -542,15 +532,12 @@ function ServiceConfigTab() {
                   borderRadius: 14, padding: 18,
                   display: 'flex', flexDirection: 'column',
                 }}>
-                  {/* Header: icon + tên + ? */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                      background: meta.soft, color: meta.accent,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19,
-                    }}>
-                      <meta.Icon />
-                    </div>
+                  {/* Header: chấm màu + tên + ? */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <span style={{
+                      width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
+                      background: meta.accent,
+                    }} />
                     <Text strong style={{ fontSize: 15, flex: 1, minWidth: 0, color: '#0f172a' }}>
                       {svc.label}
                     </Text>
