@@ -263,7 +263,6 @@ function AddressProvinceField({ value, onChange, hasError, readOnly }: FieldProp
       >
         <option value="">-- Chọn Tỉnh / Thành phố --</option>
         <option value="Nước ngoài">Nước ngoài (làm việc ở nước ngoài)</option>
-        <option disabled>──────────</option>
         {PROVINCES_2025.map((p) => <option key={p} value={p}>{p}</option>)}
       </select>
     </div>
@@ -755,6 +754,10 @@ export function SurveyPreview({
               const alignItems = isCentered ? 'center' : layout === 'right' ? 'flex-start' : 'flex-end'
               return (
                 <div style={{ marginTop: 64, marginBottom: 24, paddingBottom: 20 }}>
+                  {/* Ngày — luôn cố định căn phải, không chạy theo layout */}
+                  <div style={{ textAlign: 'right', fontStyle: 'italic', fontSize: 13, color: '#374151', marginBottom: 16 }}>
+                    {(() => { const d = new Date(); return `Ngày ${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}` })()}
+                  </div>
                   <div style={{
                     display: 'flex', alignItems: 'center',
                     flexDirection: isCentered ? 'column' : layout === 'right' ? 'row-reverse' : 'row',
@@ -770,9 +773,6 @@ export function SurveyPreview({
                     </div>
                     {/* Cột nội dung */}
                     <div style={{ width: isCentered ? '100%' : '58.333%', textAlign: align }}>
-                      <div style={{ fontStyle: 'italic', fontSize: 13, color: '#374151', marginBottom: 16 }}>
-                        {(() => { const d = new Date(); return `Ngày ${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()}` })()}
-                      </div>
                       <p style={{ fontSize: 15, fontWeight: 600, textTransform: 'uppercase', margin: '0 0 4px', color: '#0f172a' }}>
                         {header.ministry}
                       </p>
