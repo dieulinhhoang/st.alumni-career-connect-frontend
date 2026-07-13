@@ -61,6 +61,32 @@ export async function updateResponse(
   return res.data;
 }
 
+export interface ResponseFieldChange {
+  questionId: string;
+  questionTitle: string;
+  before: any;
+  after: any;
+}
+
+export interface ResponseHistoryEntry {
+  id: number;
+  responseId: number;
+  batchId: number;
+  action: 'submit' | 'create' | 'update';
+  actorId: number | null;
+  actorName: string | null;
+  changes: ResponseFieldChange[] | null;
+  createdAt: string;
+}
+
+export async function getResponseHistory(
+  batchId: number,
+  responseId: number,
+): Promise<ResponseHistoryEntry[]> {
+  const res = await api.get(`/alumni/batches/${batchId}/responses/${responseId}/history`);
+  return res.data;
+}
+
 export async function createResponseByAdmin(
   batchId: number,
   payload: {

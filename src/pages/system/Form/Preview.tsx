@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import type { CccdValue } from '../../../feature/form/types'
 import type { Form, Question, Section } from '../../../feature/form/types'
 import { groupByRow } from '../../../feature/form/hooks/Useformutils'
-import { GoogleAddressInput } from './builder/shared/GoogleAddressInput'
+import { AddressAutocomplete } from './builder/shared/AddressAutocomplete'
 import { PROVINCES_2025 } from '../../../feature/form/constants'
 
 
@@ -231,7 +231,7 @@ function AddressField({ value, onChange, hasError, readOnly }: FieldProps & {
   onChange?: (v: AddressValue) => void
 }) {
   return (
-    <GoogleAddressInput
+    <AddressAutocomplete
       value={value}
       onChange={onChange}
       readOnly={readOnly}

@@ -32,6 +32,8 @@ interface BuilderViewProps {
 
 export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   const mode = form?.id ? 'edit' : 'create'
+  // Form đang gắn đợt khảo sát: không cho hủy xuất bản (kể cả tự động khi sửa)
+  const usedInBatch = (form as any)?.usedInBatch ?? false
 
   const {
     name, setName,
@@ -118,11 +120,12 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
 
   const handleSaveOnly = useCallback(async () => {
     const result = await handleSave(extrasRef.current)
-    if (result && formStatus === 'published') {
+    // Form gắn đợt khảo sát phải giữ nguyên trạng thái đã xuất bản — bỏ qua auto-unpublish
+    if (result && formStatus === 'published' && !usedInBatch) {
       await handleUnpublish()
       message.info('Form đã được tự động hủy xuất bản do có thay đổi.')
     }
-  }, [handleSave, formStatus, handleUnpublish])
+  }, [handleSave, formStatus, handleUnpublish, usedInBatch])
 
   const handlePublishClick = useCallback(async () => {
     if (!name.trim()) {
@@ -142,9 +145,13 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
   }, [name, handleSave, handlePublish, onSave])
 
   const handleUnpublishClick = useCallback(async () => {
+    if (usedInBatch) {
+      message.warning('Không thể hủy xuất bản form vì đang được gắn với một hoặc nhiều đợt khảo sát.')
+      return
+    }
     const result = await handleUnpublish()
     if (result) message.info('Đã hủy xuất bản.')
-  }, [handleUnpublish])
+  }, [handleUnpublish, usedInBatch])
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const skipCountRef = useRef(mode === 'edit' ? 2 : 1)
@@ -211,13 +218,15 @@ export function BuilderView({ form, onSave, onBack }: BuilderViewProps) {
         )}
 
         {formStatus === 'published' ? (
-          <Button
-            loading={publishing}
-            onClick={handleUnpublishClick}
-            style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a', fontWeight: 600 }}
-          >
-            {!isMobile && 'Đã xuất bản'}
-          </Button>
+          <Tooltip title={usedInBatch ? 'Form đang gắn với đợt khảo sát, không thể hủy xuất bản' : 'Bấm để hủy xuất bản'}>
+            <Button
+              loading={publishing}
+              onClick={handleUnpublishClick}
+              style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#16a34a', fontWeight: 600, cursor: usedInBatch ? 'not-allowed' : 'pointer' }}
+            >
+              {!isMobile && 'Đã xuất bản'}
+            </Button>
+          </Tooltip>
         ) : (
           <Button
             type="primary"

@@ -9,12 +9,12 @@ import {
   Popconfirm,
   Tooltip,
   Form,
-  Table,
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { IResource, IResourceQuery } from '../../../feature/resources/type'
 import FilterContainer from '../../../components/common/FilterContainer'
+import CustomTable from '../../../components/common/customTable'
 import { havePermission } from '../../../feature/auth/permission'
 import { PermissionEnum } from '../../../feature/auth/type'
 
@@ -265,12 +265,12 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
         }}
       > */}
-        <Table<ResourceRow>
+        <CustomTable<ResourceRow>
           columns={columns}
-          dataSource={[...filteredRows]}
+          data={[...filteredRows]}
           loading={loading}
           rowKey={(record) => String(record._id || record.id || record.code)}
-          onChange={onTableChange}
+          handleTableChange={onTableChange}
           pagination={{
             current: (query.page || 0) + 1,
             pageSize: query.size || 10,
@@ -279,11 +279,8 @@ const ResourceListView: React.FC<ResourceListViewProps> = ({
               listData?.total ??
               filteredRows.length,
             showSizeChanger: false,
-            showTotal: (total: number, range: [number, number]) =>
-              `${range[0]}–${range[1]} / ${total} bản ghi`,
           }}
           scroll={{ x: 900 }}
-          locale={{ emptyText: 'Không có dữ liệu' }}
         />
       {/* </Card> */}
     </>

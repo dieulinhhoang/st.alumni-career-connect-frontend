@@ -18,10 +18,12 @@ import {
   FileExcelOutlined, DragOutlined, InfoCircleOutlined,
   SearchOutlined, DownloadOutlined, UploadOutlined,
 } from '@ant-design/icons'
-import { Input, Select, Switch, Tooltip, Tag, Empty } from 'antd'
+import { Input, Select, Switch, Tooltip, Empty } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import AdminLayout from '../../../../components/layout/AdminLayout'
+import CustomTable from '../../../../components/common/customTable'
 
-//  Types 
+//  Types
 
 export type ChartType = 'pie' | 'column'
 
@@ -36,7 +38,7 @@ export interface StatIndicator {
   order: number
 }
 
-//  Mock data 
+//  Mock data
 
 const INITIAL_INDICATORS: StatIndicator[] = [
   { id: '1', key: 'employmentstatus',  label: 'Tình trạng việc làm',           chartType: 'pie',    excelColumn: 'Tình trạng việc làm',         active: true,  order: 1 },
@@ -48,7 +50,7 @@ const INITIAL_INDICATORS: StatIndicator[] = [
   { id: '7', key: 'softskills',        label: 'Kỹ năng mềm cần thiết',          chartType: 'column', excelColumn: 'Kỹ năng mềm',                 active: false, order: 7 },
 ]
 
-//  Helpers 
+//  Helpers
 
 const genId = () => Math.random().toString(36).slice(2, 8)
 
@@ -56,7 +58,12 @@ const EMPTY_INDICATOR = (): Omit<StatIndicator, 'id' | 'order'> => ({
   key: '', label: '', chartType: 'pie', excelColumn: '', description: '', active: true,
 })
 
-//  Sub-components 
+const CHART_OPTIONS = [
+  { value: 'pie',    label: <span><PieChartOutlined /> Tròn</span> },
+  { value: 'column', label: <span><BarChartOutlined /> Cột</span> },
+]
+
+//  Sub-components
 
 function KeyBadge({ value }: { value: string }) {
   if (!value) return <span style={{ color: '#94a3b8', fontSize: 12, fontStyle: 'italic' }}>chưa có key</span>
@@ -84,120 +91,25 @@ function ChartTypeBadge({ type }: { type: ChartType }) {
   )
 }
 
-//  Inline edit row 
-
-interface EditRowProps {
-  indicator: StatIndicator
-  accent: string
-  onSave: (patch: Partial<StatIndicator>) => void
-  onCancel: () => void
-}
-
-function EditRow({ indicator: ind, accent, onSave, onCancel }: EditRowProps) {
-  const [form, setForm] = useState({
-    label: ind.label,
-    key: ind.key,
-    chartType: ind.chartType,
-    excelColumn: ind.excelColumn,
-    description: ind.description ?? '',
-  })
-  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }))
-
-  const valid = form.label.trim() && form.key.trim() && form.excelColumn.trim()
-
-  return (
-    <tr style={{ background: `${accent}06` }}>
-      <td style={TD}></td>
-      <td style={TD}>
-        <Input
-          size="small" value={form.label}
-          onChange={(e) => set({ label: e.target.value })}
-          placeholder="Tên chỉ tiêu..."
-          style={{ fontSize: 13, fontWeight: 500 }}
-        />
-      </td>
-      <td style={TD}>
-        <Input
-          size="small" value={form.key}
-          onChange={(e) => set({ key: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-          placeholder="vd: employmentstatus"
-          style={{ fontSize: 12, fontFamily: 'monospace' }}
-        />
-      </td>
-      <td style={TD}>
-        <Select
-          size="small" value={form.chartType}
-          onChange={(v) => set({ chartType: v as ChartType })}
-          style={{ width: 120 }}
-          options={[
-            { value: 'pie',    label: <span><PieChartOutlined /> Tròn</span> },
-            { value: 'column', label: <span><BarChartOutlined /> Cột</span> },
-          ]}
-        />
-      </td>
-      <td style={TD}>
-        <Input
-          size="small" value={form.excelColumn}
-          onChange={(e) => set({ excelColumn: e.target.value })}
-          placeholder="Tên cột Excel..."
-          style={{ fontSize: 13 }}
-        />
-      </td>
-      <td style={{ ...TD, textAlign: 'center' }}></td>
-      <td style={{ ...TD }}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            disabled={!valid}
-            onClick={() => onSave(form)}
-            style={{
-              height: 28, padding: '0 12px', border: 'none', borderRadius: 6,
-              background: valid ? accent : '#e2e8f0', color: valid ? '#fff' : '#94a3b8',
-              cursor: valid ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 4,
-            }}
-          >
-            <CheckOutlined style={{ fontSize: 11 }} /> Lưu
-          </button>
-          <button
-            onClick={onCancel}
-            style={{
-              height: 28, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 6,
-              background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
-            }}
-          >
-            <CloseOutlined style={{ fontSize: 10 }} />
-          </button>
-        </div>
-      </td>
-    </tr>
-  )
-}
-
-//  Main component 
+//  Main component
 
 const ACCENT = '#0d7a7f'
 
-const TH: React.CSSProperties = {
-  padding: '10px 14px', fontSize: 11, fontWeight: 700, color: '#64748b',
-  textTransform: 'uppercase', letterSpacing: '.06em',
-  background: '#f8fafc', borderBottom: '1px solid #e2e8f0',
-  whiteSpace: 'nowrap',
-}
-const TD: React.CSSProperties = {
-  padding: '11px 14px', fontSize: 13, color: '#1e293b',
-  borderBottom: '1px solid #f1f5f9', verticalAlign: 'middle',
-}
+type EditForm = Pick<StatIndicator, 'label' | 'key' | 'chartType' | 'excelColumn'> & { description: string }
+
+const BLANK_EDIT: EditForm = { label: '', key: '', chartType: 'pie', excelColumn: '', description: '' }
 
 export default function StatIndicatorConfigPage() {
   const [indicators, setIndicators] = useState<StatIndicator[]>(INITIAL_INDICATORS)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<EditForm>(BLANK_EDIT)
   const [addingNew, setAddingNew] = useState(false)
   const [newForm, setNewForm] = useState(EMPTY_INDICATOR())
   const [search, setSearch] = useState('')
   const [filterActive, setFilterActive] = useState<'all' | 'on' | 'off'>('all')
   const dragId = useRef<string | null>(null)
 
-  //  Derived 
+  //  Derived
   const filtered = indicators
     .filter((ind) => {
       const matchSearch = !search ||
@@ -211,7 +123,7 @@ export default function StatIndicatorConfigPage() {
 
   const activeCount = indicators.filter((i) => i.active).length
 
-  //  Handlers 
+  //  Handlers
   const update = (id: string, patch: Partial<StatIndicator>) =>
     setIndicators((prev) => prev.map((i) => i.id === id ? { ...i, ...patch } : i))
 
@@ -230,7 +142,25 @@ export default function StatIndicatorConfigPage() {
   const setNew = (patch: Partial<typeof newForm>) =>
     setNewForm((f) => ({ ...f, ...patch }))
 
-  const newValid = newForm.label.trim() && newForm.key.trim() && newForm.excelColumn.trim()
+  const newValid = !!(newForm.label.trim() && newForm.key.trim() && newForm.excelColumn.trim())
+
+  //  Inline edit
+  const setEdit = (patch: Partial<EditForm>) => setEditForm((f) => ({ ...f, ...patch }))
+  const editValid = !!(editForm.label.trim() && editForm.key.trim() && editForm.excelColumn.trim())
+
+  const startEdit = (ind: StatIndicator) => {
+    setEditingId(ind.id)
+    setAddingNew(false)
+    setEditForm({
+      label: ind.label, key: ind.key, chartType: ind.chartType,
+      excelColumn: ind.excelColumn, description: ind.description ?? '',
+    })
+  }
+  const saveEdit = () => {
+    if (!editingId || !editValid) return
+    update(editingId, editForm)
+    setEditingId(null)
+  }
 
   // drag-reorder (simple swap)
   const handleDragStart = (id: string) => { dragId.current = id }
@@ -248,6 +178,135 @@ export default function StatIndicatorConfigPage() {
     })
     dragId.current = targetId
   }
+
+  //  Columns
+  const columns: ColumnsType<StatIndicator> = [
+    {
+      key: 'sort', width: 36, align: 'center',
+      render: (_v, rec) =>
+        editingId === rec.id
+          ? null
+          : <DragOutlined style={{ fontSize: 13, color: '#cbd5e1' }} />,
+    },
+    {
+      title: 'Tên chỉ tiêu', dataIndex: 'label',
+      render: (_v, rec) =>
+        editingId === rec.id ? (
+          <Input
+            size="small" value={editForm.label}
+            onChange={(e) => setEdit({ label: e.target.value })}
+            placeholder="Tên chỉ tiêu..."
+            style={{ fontSize: 13, fontWeight: 500 }}
+          />
+        ) : (
+          <>
+            <div style={{ fontWeight: 600, color: '#0f172a' }}>{rec.label}</div>
+            {rec.description && (
+              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{rec.description}</div>
+            )}
+          </>
+        ),
+    },
+    {
+      title: (
+        <>
+          Key định danh
+          <Tooltip title="Phải khớp với reportFieldKey trong câu hỏi form">
+            <InfoCircleOutlined style={{ marginLeft: 5, fontSize: 11, color: '#94a3b8' }} />
+          </Tooltip>
+        </>
+      ),
+      dataIndex: 'key',
+      render: (_v, rec) =>
+        editingId === rec.id ? (
+          <Input
+            size="small" value={editForm.key}
+            onChange={(e) => setEdit({ key: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+            placeholder="vd: employmentstatus"
+            style={{ fontSize: 12, fontFamily: 'monospace' }}
+          />
+        ) : (
+          <KeyBadge value={rec.key} />
+        ),
+    },
+    {
+      title: 'Biểu đồ', dataIndex: 'chartType',
+      render: (_v, rec) =>
+        editingId === rec.id ? (
+          <Select
+            size="small" value={editForm.chartType}
+            onChange={(v) => setEdit({ chartType: v as ChartType })}
+            style={{ width: 120 }}
+            options={CHART_OPTIONS}
+          />
+        ) : (
+          <ChartTypeBadge type={rec.chartType} />
+        ),
+    },
+    {
+      title: (
+        <>
+          Cột Excel
+          <Tooltip title="Tên cột xuất hiện trong file Excel báo cáo">
+            <FileExcelOutlined style={{ marginLeft: 5, fontSize: 11, color: '#22c55e' }} />
+          </Tooltip>
+        </>
+      ),
+      dataIndex: 'excelColumn',
+      render: (_v, rec) =>
+        editingId === rec.id ? (
+          <Input
+            size="small" value={editForm.excelColumn}
+            onChange={(e) => setEdit({ excelColumn: e.target.value })}
+            placeholder="Tên cột Excel..."
+            style={{ fontSize: 13 }}
+          />
+        ) : (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <FileExcelOutlined style={{ color: '#22c55e', fontSize: 13 }} />
+            <span style={{ fontSize: 13, color: '#374151' }}>{rec.excelColumn || '—'}</span>
+          </span>
+        ),
+    },
+    {
+      title: 'Bật/Tắt', align: 'center', width: 90,
+      render: (_v, rec) =>
+        editingId === rec.id ? null : (
+          <Switch
+            size="small" checked={rec.active}
+            onChange={(v) => update(rec.id, { active: v })}
+            style={{ background: rec.active ? ACCENT : undefined }}
+          />
+        ),
+    },
+    {
+      title: 'Thao tác', width: 100,
+      render: (_v, rec) =>
+        editingId === rec.id ? (
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button disabled={!editValid} onClick={saveEdit} style={saveBtn(editValid)}>
+              <CheckOutlined style={{ fontSize: 11 }} /> Lưu
+            </button>
+            <button onClick={() => setEditingId(null)} style={cancelBtn}>
+              <CloseOutlined style={{ fontSize: 10 }} />
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 4 }}>
+            <Tooltip title="Chỉnh sửa">
+              <button onClick={() => startEdit(rec)} style={iconBtn('#3b82f6')}>
+                <EditOutlined style={{ fontSize: 12 }} />
+              </button>
+            </Tooltip>
+            <Tooltip title="Xoá chỉ tiêu">
+              <button onClick={() => remove(rec.id)} style={iconBtn('#ef4444')}>
+                <DeleteOutlined style={{ fontSize: 12 }} />
+              </button>
+            </Tooltip>
+          </div>
+        ),
+    },
+  ]
 
   return (
     <AdminLayout>
@@ -361,182 +420,86 @@ export default function StatIndicatorConfigPage() {
           background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0',
           boxShadow: '0 1px 3px rgba(30,41,59,.06)', overflow: 'hidden',
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ ...TH, width: 36 }}></th>
-                <th style={TH}>Tên chỉ tiêu</th>
-                <th style={TH}>
-                  Key định danh
-                  <Tooltip title="Phải khớp với reportFieldKey trong câu hỏi form">
-                    <InfoCircleOutlined style={{ marginLeft: 5, fontSize: 11, color: '#94a3b8' }} />
-                  </Tooltip>
-                </th>
-                <th style={TH}>Biểu đồ</th>
-                <th style={TH}>
-                  Cột Excel
-                  <Tooltip title="Tên cột xuất hiện trong file Excel báo cáo">
-                    <FileExcelOutlined style={{ marginLeft: 5, fontSize: 11, color: '#22c55e' }} />
-                  </Tooltip>
-                </th>
-                <th style={{ ...TH, textAlign: 'center' }}>Bật/Tắt</th>
-                <th style={{ ...TH, width: 100 }}>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && !addingNew && (
-                <tr>
-                  <td colSpan={7} style={{ padding: '48px 24px', textAlign: 'center' }}>
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={
-                      <span style={{ color: '#94a3b8', fontSize: 13 }}>Không có chỉ tiêu nào</span>
-                    } />
-                  </td>
-                </tr>
-              )}
-
-              {filtered.map((ind) => {
-                if (editingId === ind.id) {
-                  return (
-                    <EditRow key={ind.id} indicator={ind} accent={ACCENT}
-                      onSave={(patch) => { update(ind.id, patch); setEditingId(null) }}
-                      onCancel={() => setEditingId(null)}
-                    />
-                  )
-                }
-                return (
-                  <tr key={ind.id}
-                    draggable
-                    onDragStart={() => handleDragStart(ind.id)}
-                    onDragOver={(e) => handleDragOver(e, ind.id)}
-                    style={{ opacity: ind.active ? 1 : 0.5, transition: 'opacity .15s' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    {/* drag handle */}
-                    <td style={{ ...TD, color: '#cbd5e1', cursor: 'grab', textAlign: 'center' }}>
-                      <DragOutlined style={{ fontSize: 13 }} />
-                    </td>
-
-                    {/* label */}
-                    <td style={TD}>
-                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{ind.label}</div>
-                      {ind.description && (
-                        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{ind.description}</div>
-                      )}
-                    </td>
-
-                    {/* key */}
-                    <td style={TD}><KeyBadge value={ind.key} /></td>
-
-                    {/* chart type */}
-                    <td style={TD}><ChartTypeBadge type={ind.chartType} /></td>
-
-                    {/* excel column */}
-                    <td style={TD}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <FileExcelOutlined style={{ color: '#22c55e', fontSize: 13 }} />
-                        <span style={{ fontSize: 13, color: '#374151' }}>{ind.excelColumn || '—'}</span>
-                      </span>
-                    </td>
-
-                    {/* toggle */}
-                    <td style={{ ...TD, textAlign: 'center' }}>
-                      <Switch
-                        size="small" checked={ind.active}
-                        onChange={(v) => update(ind.id, { active: v })}
-                        style={{ background: ind.active ? ACCENT : undefined }}
-                      />
-                    </td>
-
-                    {/* actions */}
-                    <td style={TD}>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <Tooltip title="Chỉnh sửa">
-                          <button onClick={() => { setEditingId(ind.id); setAddingNew(false) }}
-                            style={iconBtn('#3b82f6')}>
-                            <EditOutlined style={{ fontSize: 12 }} />
-                          </button>
-                        </Tooltip>
-                        <Tooltip title="Xoá chỉ tiêu">
-                          <button onClick={() => remove(ind.id)} style={iconBtn('#ef4444')}>
-                            <DeleteOutlined style={{ fontSize: 12 }} />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-
-              {/*  Add new row  */}
-              {addingNew && (
-                <tr style={{ background: `${ACCENT}06` }}>
-                  <td style={TD}></td>
-                  <td style={TD}>
-                    <Input size="small" value={newForm.label}
-                      onChange={(e) => setNew({ label: e.target.value })}
-                      placeholder="Tên chỉ tiêu..."
-                      style={{ fontSize: 13, fontWeight: 500 }}
-                      autoFocus
-                    />
-                  </td>
-                  <td style={TD}>
-                    <Input size="small" value={newForm.key}
-                      onChange={(e) => setNew({ key: e.target.value.toLowerCase().replace(/\s+/g, '') })}
-                      placeholder="vd: employmentstatus"
-                      style={{ fontSize: 12, fontFamily: 'monospace' }}
-                    />
-                  </td>
-                  <td style={TD}>
-                    <Select size="small" value={newForm.chartType}
-                      onChange={(v) => setNew({ chartType: v as ChartType })}
-                      style={{ width: 120 }}
-                      options={[
-                        { value: 'pie',    label: <span><PieChartOutlined /> Tròn</span> },
-                        { value: 'column', label: <span><BarChartOutlined /> Cột</span> },
-                      ]}
-                    />
-                  </td>
-                  <td style={TD}>
-                    <Input size="small" value={newForm.excelColumn}
-                      onChange={(e) => setNew({ excelColumn: e.target.value })}
-                      placeholder="Tên cột Excel..."
-                      style={{ fontSize: 13 }}
-                    />
-                  </td>
-                  <td style={{ ...TD, textAlign: 'center' }}>
-                    <Switch size="small" checked={newForm.active}
-                      onChange={(v) => setNew({ active: v })}
-                      style={{ background: newForm.active ? ACCENT : undefined }}
-                    />
-                  </td>
-                  <td style={TD}>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button disabled={!newValid} onClick={addNew}
-                        style={{
-                          height: 28, padding: '0 12px', border: 'none', borderRadius: 6,
-                          background: newValid ? ACCENT : '#e2e8f0',
-                          color: newValid ? '#fff' : '#94a3b8',
-                          cursor: newValid ? 'pointer' : 'not-allowed',
-                          fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
-                          display: 'flex', alignItems: 'center', gap: 4,
-                        }}>
-                        <CheckOutlined style={{ fontSize: 11 }} /> Lưu
-                      </button>
-                      <button onClick={() => { setAddingNew(false); setNewForm(EMPTY_INDICATOR()) }}
-                        style={{
-                          height: 28, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 6,
-                          background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
-                        }}>
-                        <CloseOutlined style={{ fontSize: 10 }} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <CustomTable<StatIndicator>
+            rowKey="id"
+            size="small"
+            striped={false}
+            pagination={false}
+            columns={columns}
+            data={filtered}
+            minHeight={0}
+            scroll={{ x: 'max-content' }}
+            onRow={(rec) => ({
+              draggable: editingId !== rec.id && !addingNew,
+              onDragStart: () => handleDragStart(rec.id),
+              onDragOver: (e: React.DragEvent) => handleDragOver(e, rec.id),
+              style: {
+                opacity: rec.active ? 1 : 0.5,
+                transition: 'opacity .15s',
+                cursor: editingId === rec.id ? 'default' : 'grab',
+              },
+            })}
+            locale={{
+              emptyText: (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={<span style={{ color: '#94a3b8', fontSize: 13 }}>Không có chỉ tiêu nào</span>}
+                />
+              ),
+            }}
+          />
         </div>
+
+        {/*  Add new row  */}
+        {addingNew && (
+          <div style={{
+            marginTop: 12, padding: '14px 16px', borderRadius: 10,
+            background: `${ACCENT}0a`, border: `1px solid ${ACCENT}33`,
+            display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center',
+          }}>
+            <Input
+              size="small" value={newForm.label}
+              onChange={(e) => setNew({ label: e.target.value })}
+              placeholder="Tên chỉ tiêu..."
+              style={{ width: 200, fontSize: 13, fontWeight: 500 }}
+              autoFocus
+            />
+            <Input
+              size="small" value={newForm.key}
+              onChange={(e) => setNew({ key: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+              placeholder="vd: employmentstatus"
+              style={{ width: 180, fontSize: 12, fontFamily: 'monospace' }}
+            />
+            <Select
+              size="small" value={newForm.chartType}
+              onChange={(v) => setNew({ chartType: v as ChartType })}
+              style={{ width: 120 }}
+              options={CHART_OPTIONS}
+            />
+            <Input
+              size="small" value={newForm.excelColumn}
+              onChange={(e) => setNew({ excelColumn: e.target.value })}
+              placeholder="Tên cột Excel..."
+              style={{ width: 180, fontSize: 13 }}
+            />
+            <Switch
+              size="small" checked={newForm.active}
+              onChange={(v) => setNew({ active: v })}
+              style={{ background: newForm.active ? ACCENT : undefined }}
+            />
+            <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+              <button disabled={!newValid} onClick={addNew} style={saveBtn(newValid)}>
+                <CheckOutlined style={{ fontSize: 11 }} /> Lưu
+              </button>
+              <button
+                onClick={() => { setAddingNew(false); setNewForm(EMPTY_INDICATOR()) }}
+                style={cancelBtn}
+              >
+                <CloseOutlined style={{ fontSize: 10 }} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/*  Hướng dẫn  */}
         <div style={{
@@ -554,13 +517,27 @@ export default function StatIndicatorConfigPage() {
   )
 }
 
-//  Style helpers 
+//  Style helpers
 
 const ghostBtn: React.CSSProperties = {
   height: 36, padding: '0 14px', border: '1px solid #e2e8f0', borderRadius: 8,
   background: '#fff', color: '#475569', cursor: 'pointer',
   fontSize: 13, fontWeight: 500, fontFamily: 'inherit',
   display: 'inline-flex', alignItems: 'center', gap: 6,
+}
+
+const cancelBtn: React.CSSProperties = {
+  height: 28, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 6,
+  background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
+}
+
+function saveBtn(valid: boolean): React.CSSProperties {
+  return {
+    height: 28, padding: '0 12px', border: 'none', borderRadius: 6,
+    background: valid ? ACCENT : '#e2e8f0', color: valid ? '#fff' : '#94a3b8',
+    cursor: valid ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+    display: 'flex', alignItems: 'center', gap: 4,
+  }
 }
 
 function iconBtn(color: string): React.CSSProperties {

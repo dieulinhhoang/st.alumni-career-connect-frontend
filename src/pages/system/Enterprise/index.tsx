@@ -323,9 +323,6 @@ export default function EnterprisePage() {
               pageSize: query.size,
               total: filtered.length,
               showSizeChanger: false,
-              showTotal: (total, range) =>
-                `Hiển thị ${range[0]} đến ${range[1]} trong số ${total} bản ghi`,
-              position: ["bottomRight"],
             }}
             handleTableChange={(pagination) => {
               const newPage = pagination.current || 1;

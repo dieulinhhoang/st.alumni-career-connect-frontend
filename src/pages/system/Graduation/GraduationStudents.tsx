@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Alert, Input, Table } from "antd";
+import { Alert, Input } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { ArrowLeftOutlined, SearchOutlined } from "@ant-design/icons";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
+import CustomTable from "../../../components/common/customTable";
 import { useGraduationStudents } from "../../../feature/graduation/hooks/useGraduation";
 import type { GraduationStudent } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
@@ -270,9 +271,9 @@ export default function GraduationStudentsPage() {
             </span>
           </div>
 
-          <Table<GraduationStudent>
+          <CustomTable<GraduationStudent>
             columns={columns}
-            dataSource={filtered}
+            data={filtered}
             rowKey="id"
             loading={loading}
             pagination={pagination}

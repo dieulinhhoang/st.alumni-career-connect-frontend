@@ -9,9 +9,9 @@ import {
   Modal,
   Popconfirm,
   Popover,
+  Select,
   Space,
   Spin,
-  Table,
   Tabs,
   Tooltip,
   Typography,
@@ -26,6 +26,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import AdminLayout from '../../../components/layout/AdminLayout'
+import CustomTable from '../../../components/common/customTable'
 import {
   useCreateApiKey,
   useDeleteApiKey,
@@ -208,9 +209,9 @@ function ApiKeysTab() {
         </Space>
       </div>
 
-      <Table
+      <CustomTable<IApiKey>
         rowKey="id"
-        dataSource={keys}
+        data={keys}
         columns={columns}
         loading={isLoading}
         pagination={{ pageSize: 10, showSizeChanger: false }}
@@ -338,10 +339,85 @@ interface ServiceConfigItem {
   description: string | null
 }
 
-const SERVICE_KEYS: { key: string; label: string; placeholder: string; description: string }[] = [
-  { key: 'geoapify_api_key', label: 'Geoapify API Key (Địa chỉ)', placeholder: 'Nhập API key từ myprojects.geoapify.com', description: 'API key cho Geoapify Geocoder (tự động gợi ý địa chỉ)' },
-  { key: 'google_maps_api_key', label: 'Google Maps API Key (Địa chỉ)', placeholder: 'Nhập API key từ Google Cloud Console (Maps JavaScript + Places API)', description: 'Gợi ý địa chỉ cho câu hỏi địa chỉ & tự tách tỉnh/thành cho báo cáo. Nhớ giới hạn key theo HTTP referrer.' },
+interface ServiceKeyDef {
+  key: string
+  label: string
+  placeholder: string
+  description: string
+  provider: string // giá trị address_provider tương ứng
+  guide: React.ReactNode // hướng dẫn lấy key (hiện trong Popover dấu "?")
+}
+
+const SERVICE_KEYS: ServiceKeyDef[] = [
+  {
+    key: 'goong_api_key',
+    label: 'Goong API Key (Địa chỉ – Việt Nam)',
+    placeholder: 'Nhập API key từ goong.io',
+    description: 'Gợi ý địa chỉ Việt Nam (chi tiết tới phường/xã) & tự tách tỉnh/thành. Miễn phí, KHÔNG cần thẻ quốc tế.',
+    provider: 'goong',
+    guide: (
+      <div style={{ maxWidth: 320, fontSize: 13, lineHeight: 1.6 }}>
+        <b>Lấy Goong API Key (khuyến nghị cho VN):</b>
+        <ol style={{ paddingLeft: 18, margin: '6px 0' }}>
+          <li>Vào <a href="https://goong.io" target="_blank" rel="noreferrer">goong.io</a> → Đăng ký (chỉ cần email, không cần thẻ).</li>
+          <li>Vào <b>API Keys</b> → tạo key mới → copy.</li>
+          <li>Dán vào ô bên dưới → Lưu.</li>
+          <li>Chọn "Goong" ở mục <b>Nhà cung cấp đang dùng</b> phía trên.</li>
+        </ol>
+        Key dùng cho REST <i>Place/AutoComplete</i> + <i>Place/Detail</i>. Gói free đủ cho khảo sát trường.
+      </div>
+    ),
+  },
+  {
+    key: 'google_maps_api_key',
+    label: 'Google Maps API Key (Địa chỉ)',
+    placeholder: 'Nhập API key từ Google Cloud Console (Maps JavaScript + Places API)',
+    description: 'Gợi ý địa chỉ chất lượng cao & tự tách tỉnh/thành. Cần bật billing (thẻ Visa/Mastercard).',
+    provider: 'google',
+    guide: (
+      <div style={{ maxWidth: 320, fontSize: 13, lineHeight: 1.6 }}>
+        <b>Lấy Google Maps API Key:</b>
+        <ol style={{ paddingLeft: 18, margin: '6px 0' }}>
+          <li>Vào <a href="https://console.cloud.google.com" target="_blank" rel="noreferrer">Google Cloud Console</a> → tạo Project.</li>
+          <li>Bật <b>Billing</b> (bắt buộc, cần thẻ Visa/Mastercard; có ~200$/tháng miễn phí).</li>
+          <li>APIs &amp; Services → Library → Enable <b>Maps JavaScript API</b> + <b>Places API (New)</b>.</li>
+          <li>Credentials → Create API key → copy.</li>
+          <li>Giới hạn key: <b>HTTP referrers</b> (domain của bạn) + chỉ 2 API trên.</li>
+        </ol>
+      </div>
+    ),
+  },
+  {
+    key: 'geoapify_api_key',
+    label: 'Geoapify API Key (Địa chỉ)',
+    placeholder: 'Nhập API key từ myprojects.geoapify.com',
+    description: 'Gợi ý địa chỉ (dữ liệu VN trung bình). Miễn phí, không cần thẻ.',
+    provider: 'geoapify',
+    guide: (
+      <div style={{ maxWidth: 320, fontSize: 13, lineHeight: 1.6 }}>
+        <b>Lấy Geoapify API Key:</b>
+        <ol style={{ paddingLeft: 18, margin: '6px 0' }}>
+          <li>Vào <a href="https://myprojects.geoapify.com" target="_blank" rel="noreferrer">myprojects.geoapify.com</a> → Đăng ký (email, không cần thẻ).</li>
+          <li>Tạo Project → copy <b>API key</b>.</li>
+          <li>Dán vào ô bên dưới → Lưu.</li>
+        </ol>
+      </div>
+    ),
+  },
 ]
+
+const PROVIDER_OPTIONS = [
+  { value: 'none', label: 'Không dùng (người dùng tự nhập tay)' },
+  { value: 'goong', label: 'Goong (Việt Nam – khuyến nghị)' },
+  { value: 'google', label: 'Google Maps' },
+  { value: 'geoapify', label: 'Geoapify' },
+]
+
+const PROVIDER_META: Record<string, { emoji: string; accent: string; soft: string }> = {
+  goong:    { emoji: '🇻🇳', accent: '#16a34a', soft: '#f0fdf4' },
+  google:   { emoji: '🌐', accent: '#2563eb', soft: '#eff6ff' },
+  geoapify: { emoji: '📍', accent: '#ea580c', soft: '#fff7ed' },
+}
 
 function ServiceConfigTab() {
   const [messageApi, ctx] = message.useMessage()
@@ -388,53 +464,135 @@ function ServiceConfigTab() {
 
   const isDirty = (key: string) => (editValues[key] ?? '') !== (serverValues[key] ?? '')
 
+  const currentProvider = serverValues['address_provider'] || 'none'
+  const currentLabel = PROVIDER_OPTIONS.find(o => o.value === currentProvider)?.label ?? 'Không dùng'
+
   return (
     <>
       {ctx}
-      <div style={{ marginBottom: 20 }}>
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          Cấu hình API key cho các dịch vụ bên thứ 3 (địa chỉ, bản đồ, ...)
-        </Text>
-      </div>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}><Spin /></div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
-          {SERVICE_KEYS.map(svc => (
-            <div key={svc.key} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '16px 20px' }}>
-              <div style={{ marginBottom: 8 }}>
-                <Text strong style={{ fontSize: 14 }}>{svc.label}</Text>
-                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 2 }}>{svc.description}</Text>
-              </div>
-              <Space.Compact style={{ width: '100%' }}>
-                <Input.Password
-                  value={editValues[svc.key] ?? ''}
-                  onChange={e => setEditValues(prev => ({ ...prev, [svc.key]: e.target.value }))}
-                  placeholder={svc.placeholder}
-                  style={{ fontFamily: 'monospace', fontSize: 13 }}
-                />
-                <Button
-                  type="primary"
-                  icon={<SaveOutlined />}
-                    onClick={() => handleSave(svc.key)}
-                    loading={saving[svc.key]}
-                    disabled={!isDirty(svc.key)}
-                  >
-                    Lưu
-                  </Button>
-                </Space.Compact>
-                {serverValues[svc.key] ? (
-                  <Text type="success" style={{ fontSize: 12, marginTop: 6, display: 'block' }}>
-                    Đã cấu hình
-                  </Text>
-                ) : (
-                  <Text type="warning" style={{ fontSize: 12, marginTop: 6, display: 'block' }}>
-                    Chưa cấu hình
-                  </Text>
-                )}
-              </div>
-            ))}
+        <div style={{ maxWidth: 980 }}>
+          {/* ─ Card chọn nhà cung cấp ─ */}
+          <div style={{
+            background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)',
+            border: '1px solid #d1fae5', borderRadius: 16,
+            padding: '20px 24px', marginBottom: 24,
+            display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap',
+          }}>
+            <div style={{
+              width: 46, height: 46, borderRadius: 12, flexShrink: 0,
+              background: '#fff', border: '1px solid #e2e8f0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+            }}>📍</div>
+            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
+              <Text strong style={{ fontSize: 15, display: 'block' }}>Gợi ý địa chỉ trong form khảo sát</Text>
+              <Text type="secondary" style={{ fontSize: 12.5 }}>
+                Đang dùng: <b style={{ color: '#0f172a' }}>{currentLabel}</b>. Chọn nhà cung cấp rồi nhập key tương ứng bên dưới.
+              </Text>
+            </div>
+            <Space.Compact style={{ minWidth: 300, flex: '0 1 380px' }}>
+              <Select
+                style={{ flex: 1 }}
+                size="large"
+                value={editValues['address_provider'] || 'none'}
+                onChange={(val) => setEditValues(prev => ({ ...prev, address_provider: val }))}
+                options={PROVIDER_OPTIONS}
+              />
+              <Button
+                type="primary" size="large"
+                icon={<SaveOutlined />}
+                onClick={() => handleSave('address_provider')}
+                loading={saving['address_provider']}
+                disabled={!isDirty('address_provider')}
+                style={{ background: isDirty('address_provider') ? '#16a34a' : undefined, borderColor: isDirty('address_provider') ? '#16a34a' : undefined }}
+              >
+                Lưu
+              </Button>
+            </Space.Compact>
+          </div>
+
+          {/* ─ Lưới các key ─ */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 16,
+          }}>
+            {SERVICE_KEYS.map(svc => {
+              const active = currentProvider === svc.provider
+              const configured = !!serverValues[svc.key]
+              const meta = PROVIDER_META[svc.provider] ?? { emoji: '🔑', accent: '#64748b', soft: '#f8fafc' }
+              return (
+                <div key={svc.key} style={{
+                  background: '#fff',
+                  border: active ? `1.5px solid ${meta.accent}` : '1px solid #e5e7eb',
+                  boxShadow: active ? `0 0 0 3px ${meta.accent}18` : '0 1px 2px rgba(0,0,0,0.03)',
+                  borderRadius: 14, padding: 18,
+                  display: 'flex', flexDirection: 'column', gap: 10,
+                }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                      background: meta.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+                    }}>{meta.emoji}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <Text strong style={{ fontSize: 14 }}>{svc.label}</Text>
+                        {active && (
+                          <span style={{
+                            fontSize: 11, fontWeight: 600, color: meta.accent,
+                            background: meta.soft, border: `1px solid ${meta.accent}44`,
+                            borderRadius: 20, padding: '1px 8px',
+                          }}>Đang dùng</span>
+                        )}
+                      </div>
+                      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 2, lineHeight: 1.5 }}>
+                        {svc.description}
+                      </Text>
+                    </div>
+                    <Popover content={svc.guide} trigger="click" placement="bottomRight">
+                      <Tooltip title="Cách lấy key">
+                        <Button type="text" size="small" icon={<QuestionCircleOutlined />} style={{ color: '#2563eb', flexShrink: 0 }} />
+                      </Tooltip>
+                    </Popover>
+                  </div>
+
+                  {/* Input + save */}
+                  <Space.Compact style={{ width: '100%', marginTop: 'auto' }}>
+                    <Input.Password
+                      value={editValues[svc.key] ?? ''}
+                      onChange={e => setEditValues(prev => ({ ...prev, [svc.key]: e.target.value }))}
+                      placeholder={svc.placeholder}
+                      style={{ fontFamily: 'monospace', fontSize: 13 }}
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SaveOutlined />}
+                      onClick={() => handleSave(svc.key)}
+                      loading={saving[svc.key]}
+                      disabled={!isDirty(svc.key)}
+                    >
+                      Lưu
+                    </Button>
+                  </Space.Compact>
+
+                  {/* Trạng thái */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                    <span style={{
+                      width: 7, height: 7, borderRadius: '50%',
+                      background: configured ? '#16a34a' : '#f59e0b', display: 'inline-block',
+                    }} />
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {configured ? 'Đã cấu hình' : 'Chưa cấu hình'}
+                    </Text>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </>
@@ -446,7 +604,14 @@ function ServiceConfigTab() {
 const ApiKeyManagement: React.FC = () => {
   return (
     <AdminLayout>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Quản lý API Key</h2>
+      <div style={{ marginBottom: 8 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: '-0.3px', color: '#0f172a' }}>
+          Quản lý API Key
+        </h2>
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          Cấp key cho hệ thống bên ngoài truy cập dữ liệu &amp; cấu hình dịch vụ bên thứ ba (gợi ý địa chỉ, bản đồ…).
+        </Text>
+      </div>
       <Tabs
         defaultActiveKey="keys"
         items={[

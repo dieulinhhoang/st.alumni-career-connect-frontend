@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Row, Input, Typography, Alert, Table, Button, Modal, Form, InputNumber, DatePicker, Popconfirm, message } from "antd";
+import { Col, Row, Input, Typography, Alert, Button, Modal, Form, InputNumber, DatePicker, Popconfirm, message } from "antd";
+import CustomTable from "../../../components/common/customTable";
 import type { TablePaginationConfig, ColumnsType } from "antd/es/table";
 import { SearchOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -252,7 +253,6 @@ export default function GraduationList() {
     pageSize,
     total: search.trim() ? filtered.length : meta.total,
     showSizeChanger: false,
-    showTotal: (total, range) => `${range[0]}-${range[1]} / ${total} đợt`,
     onChange: (nextPage) => {
       setPage(nextPage);
     },
@@ -326,9 +326,9 @@ export default function GraduationList() {
               </span>
             </div>
             
-            <Table<Graduation>
+            <CustomTable<Graduation>
               columns={columns}
-              dataSource={filtered}
+              data={filtered}
               rowKey="id"
               loading={loading}
               pagination={pagination}

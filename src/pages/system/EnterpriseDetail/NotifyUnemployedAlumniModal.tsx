@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Modal, Select, Table, message, Empty, Button } from "antd";
+import { Modal, Select, message, Empty, Button } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import CustomTable from "../../../components/common/customTable";
 import {
   fetchUnemployedAlumniPreview,
   fetchNotifyEmailPreview,
@@ -120,12 +121,12 @@ export function NotifyUnemployedAlumniModal({ open, jobId, jobTitle, onClose }: 
         </Button>
       </div>
 
-      <Table<UnemployedAlumnus>
+      <CustomTable<UnemployedAlumnus>
         size="small"
         rowKey="email"
         loading={loadingList}
         columns={columns}
-        dataSource={alumni}
+        data={alumni}
         pagination={{ pageSize: 8 }}
         rowSelection={{
           selectedRowKeys: selectedEmails,

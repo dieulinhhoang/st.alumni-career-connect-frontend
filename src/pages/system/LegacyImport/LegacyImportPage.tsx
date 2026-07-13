@@ -11,11 +11,11 @@ import {
   Row,
   Select,
   Space,
-  Table,
   Typography,
   Upload,
 } from 'antd';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
+import CustomTable from '../../../components/common/customTable';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllForms } from '../../../feature/form/api';
@@ -206,9 +206,9 @@ export default function LegacyImportPage() {
       {preview && (
         <>
           <Card title="3. Mã ngành cần đối chiếu" style={{ marginBottom: 16 }}>
-            <Table
+            <CustomTable
               rowKey="oldCode"
-              dataSource={preview.majorGroups}
+              data={preview.majorGroups}
               pagination={false}
               columns={[
                 { title: 'Mã ngành (cũ)', dataIndex: 'oldCode' },
@@ -289,9 +289,9 @@ export default function LegacyImportPage() {
           </Card>
 
           <Card title="4. Số liệu tổng hợp dự kiến (so sánh với 'Mẫu báo cáo 1' của file gốc)" style={{ marginBottom: 16 }}>
-            <Table
+            <CustomTable
               rowKey="oldCode"
-              dataSource={preview.previewStats}
+              data={preview.previewStats}
               pagination={false}
               scroll={{ x: 'max-content' }}
               columns={[

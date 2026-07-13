@@ -1,7 +1,8 @@
 import React from 'react';
-import { Badge, Button, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Badge, Button, Space, Tag, Tooltip, Typography } from 'antd';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import CustomTable from '../../../components/common/customTable';
 import type { EmailTemplate } from '../../../feature/mail-settings/types';
 import { useGetAllTemplates } from '../../../feature/mail-settings/hooks/query';
 import dayjs from 'dayjs';
@@ -14,7 +15,7 @@ const EmailTemplateList: React.FC = () => {
 
   const columns = [
     {
-      title: '#',
+      title: 'STT',
       width: 48,
       render: (_: any, __: any, idx: number) => idx + 1,
     },
@@ -84,13 +85,12 @@ const EmailTemplateList: React.FC = () => {
         </Text>
       </div>
 
-      <Table
+      <CustomTable<EmailTemplate>
         rowKey="id"
-        dataSource={templates}
+        data={templates}
         columns={columns}
         loading={isLoading}
         pagination={false}
-        size="middle"
         bordered={false}
       />
     </div>

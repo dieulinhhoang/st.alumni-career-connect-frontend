@@ -120,7 +120,12 @@ export default function ListView({
       key: 'actions',
       width: 160,
       align: 'center' as const,
-      render: (_: any, record: Form) => (
+      render: (_: any, record: Form) => {
+        // Khóa sửa như form hệ thống khi: form hệ thống, đợt đã kích hoạt/kết thúc,
+        // hoặc form đã xuất bản và đang gắn đợt khảo sát.
+        const publishedInBatch = record.status === 'published' && !!record.usedInBatch
+        const editLocked = record.isSystem || record.lockedByBatch || publishedInBatch
+        return (
         <Space size={2}>
           <Tooltip title="Xem trước" mouseEnterDelay={0.4}>
             <Button type="text" size="small" icon={<EyeOutlined />}
@@ -132,11 +137,12 @@ export default function ListView({
               title={
                 record.isSystem ? 'Form hệ thống, không thể sửa'
                 : record.lockedByBatch ? 'Đợt khảo sát dùng form này đã kích hoạt, không thể sửa'
+                : publishedInBatch ? 'Form đã xuất bản và đang gắn đợt khảo sát, không thể sửa'
                 : 'Chỉnh sửa'
               }
               mouseEnterDelay={0.4}
             >
-              <Button type="text" size="small" icon={<EditOutlined />} disabled={record.isSystem || record.lockedByBatch}
+              <Button type="text" size="small" icon={<EditOutlined />} disabled={editLocked}
                 onClick={(e) => { e.stopPropagation(); onEdit(record) }} />
             </Tooltip>
           )}
@@ -153,7 +159,8 @@ export default function ListView({
             </Tooltip>
           )}
         </Space>
-      ),
+        )
+      },
     },
   ]
 
@@ -219,9 +226,6 @@ export default function ListView({
           pagination={{
             pageSize: 10,
             total: filtered.length,
-            showTotal: (total: number, range: [number, number]) =>
-              `Hiển thị ${range[0]}–${range[1]} trong ${total} form`,
-            position: ['bottomCenter'],
           }}
           onRow={(record: Form) => ({
             onClick: () => onPreview(record),

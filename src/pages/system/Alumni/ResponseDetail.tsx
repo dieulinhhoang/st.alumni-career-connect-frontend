@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Spin, Empty, Typography, Tag, Row, Col, message } from 'antd';
+import { Button, Spin, Empty, Typography, Tag, Row, Col, message, Timeline } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, MailOutlined,
   IdcardOutlined, BankOutlined, CalendarOutlined,
   CheckCircleOutlined, ClockCircleOutlined,
   BookOutlined, EditOutlined, CloseOutlined,
+  HistoryOutlined, PlusCircleOutlined, FormOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getBatchById, getBatchResponses, updateResponse, createResponseByAdmin } from '../../../feature/alumni/api';
+import { getBatchById, getBatchResponses, updateResponse, createResponseByAdmin, getResponseHistory } from '../../../feature/alumni/api';
+import type { ResponseHistoryEntry } from '../../../feature/alumni/api';
 import { fetchGraduationStudents } from '../../../feature/graduation/api';
 import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types';
 import type { GraduationStudent } from '../../../feature/graduation/type';
@@ -26,6 +28,24 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: React.Re
   </div>
 );
 
+/** Chuyển giá trị đáp án (string | array | object) về chuỗi dễ đọc cho lịch sử */
+const formatAnswerValue = (v: any): string => {
+  if (v === null || v === undefined || v === '') return '(trống)';
+  if (Array.isArray(v)) return v.length ? v.map(formatAnswerValue).join(', ') : '(trống)';
+  if (typeof v === 'object') {
+    // Các dạng phổ biến: địa chỉ {address, city}, cccd {number}
+    const parts = Object.values(v).filter(x => x !== null && x !== undefined && x !== '');
+    return parts.length ? parts.map(formatAnswerValue).join(' — ') : '(trống)';
+  }
+  return String(v);
+};
+
+const ACTION_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  submit: { label: 'Sinh viên nộp phiếu', color: '#2563eb', icon: <CheckCircleOutlined /> },
+  create: { label: 'Thêm phản hồi',        color: '#1D9E75', icon: <PlusCircleOutlined /> },
+  update: { label: 'Chỉnh sửa phản hồi',   color: '#d97706', icon: <FormOutlined /> },
+};
+
 export const ResponseDetail: React.FC = () => {
   const { id, responseId } = useParams<{ id: string; responseId: string }>();
   const navigate = useNavigate();
@@ -37,8 +57,18 @@ export const ResponseDetail: React.FC = () => {
   const [gradStudent, setGradStudent] = useState<GraduationStudent | null>(null);
   const [loading,     setLoading]     = useState(true);
   const [saving,      setSaving]      = useState(false);
+  const [history,     setHistory]     = useState<ResponseHistoryEntry[]>([]);
 
   useEffect(() => { if (id) load(); }, [id, responseId]);
+  useEffect(() => { loadHistory(); }, [id, responseId]);
+
+  const loadHistory = async () => {
+    // Phản hồi chưa nộp (id âm) chưa tồn tại trong DB → không có lịch sử
+    if (!id || !responseId || Number(responseId) < 0) { setHistory([]); return; }
+    try {
+      setHistory(await getResponseHistory(Number(id), Number(responseId)));
+    } catch { setHistory([]); }
+  };
 
   const load = async () => {
     try {
@@ -156,6 +186,7 @@ export const ResponseDetail: React.FC = () => {
       } else {
         await updateResponse(Number(id), Number(responseId), answers);
         message.success('Đã lưu chỉnh sửa!');
+        await Promise.all([load(), loadHistory()]);
         navigate(`/admin/alumni/batches/${id}/responses/${responseId}`);
       }
     } catch {
@@ -306,6 +337,64 @@ export const ResponseDetail: React.FC = () => {
             </div>
           </Col>
         </Row>
+
+        {/* Lịch sử thao tác: ai, làm gì, sửa cái gì */}
+        {!isEdit && !isPending && (
+          <div style={{ marginTop: 20, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 20 }}>
+            <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <HistoryOutlined style={{ color: '#2563eb' }} /> Lịch sử thay đổi
+            </div>
+            {history.length === 0 ? (
+              <Text type="secondary" style={{ fontSize: 13 }}>Chưa có lịch sử thao tác nào.</Text>
+            ) : (
+              <Timeline
+                items={history.map((h) => {
+                  const meta = ACTION_META[h.action] ?? ACTION_META.update;
+                  return {
+                    color: meta.color,
+                    dot: <span style={{ color: meta.color }}>{meta.icon}</span>,
+                    children: (
+                      <div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontWeight: 600, color: meta.color, fontSize: 13 }}>{meta.label}</span>
+                          <span style={{ fontSize: 13, color: '#1e293b' }}>
+                            bởi <b>{h.actorName || 'Không rõ'}</b>
+                          </span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                            {new Date(h.createdAt).toLocaleString('vi-VN', {
+                              day: '2-digit', month: '2-digit', year: 'numeric',
+                              hour: '2-digit', minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                        {h.changes && h.changes.length > 0 && (
+                          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {h.changes.map((c, i) => (
+                              <div key={i} style={{ fontSize: 13, background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 6, padding: '6px 10px' }}>
+                                <span style={{ fontWeight: 500, color: '#334155' }}>{c.questionTitle}</span>
+                                <div style={{ marginTop: 2, wordBreak: 'break-word' }}>
+                                  {h.action === 'update' ? (
+                                    <>
+                                      <span style={{ color: '#b91c1c', textDecoration: 'line-through' }}>{formatAnswerValue(c.before)}</span>
+                                      <span style={{ color: '#94a3b8', margin: '0 6px' }}>→</span>
+                                      <span style={{ color: '#15803d' }}>{formatAnswerValue(c.after)}</span>
+                                    </>
+                                  ) : (
+                                    <span style={{ color: '#15803d' }}>{formatAnswerValue(c.after)}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  };
+                })}
+              />
+            )}
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

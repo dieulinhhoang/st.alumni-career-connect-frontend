@@ -36,7 +36,7 @@ const DEFAULT_PAGINATION: TablePaginationConfig = {
   showSizeChanger: false,
   showTotal: (total: number, range: [number, number]) =>
     `Hiển thị ${range[0]}–${range[1]} / ${total} bản ghi`,
-  position: ['bottomCenter'],
+  position: ['bottomRight'],
 }
 
 function mergePagination(
@@ -87,13 +87,7 @@ function resolvePagination<T extends object>(
     )
   }
 
-  return mergePagination(
-    {
-      showSizeChanger: false,
-      position: ['bottomCenter'],
-    },
-    overridePagination,
-  )
+  return mergePagination(DEFAULT_PAGINATION, overridePagination)
 }
 
 // Props
@@ -143,8 +137,8 @@ function CustomTable<T extends object>({
                 index % 2 === 1 ? 'custom-table-row-even' : ''
             : undefined
         }
-        locale={{ emptyText: 'Không có dữ liệu' }}
-        size="middle"
+        locale={{ emptyText: 'Không có dữ liệu', ...rest.locale }}
+        size={rest.size ?? 'middle'}
         style={{ minHeight, ...rest.style }}
       />
 

@@ -7,7 +7,6 @@ import {
   Select,
   Space,
   Switch,
-  Table,
   Tooltip,
 } from 'antd'
 import {
@@ -261,22 +260,19 @@ const UserListView: React.FC<UserListViewProps> = ({
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         }}
       > */}
-        <Table<IUser>
+        <CustomTable<IUser>
           columns={columns}
-          dataSource={listData?.items ?? []}
+          data={listData?.items ?? []}
           loading={loading}
           rowKey="id"
-          onChange={onTableChange}
+          handleTableChange={onTableChange}
           pagination={{
             current: query.page + 1,
             pageSize: query.size,
             total: listData?.total ?? 0,
             showSizeChanger: false,
-            showTotal: (total: number, range: [number, number]) =>
-              `${range[0]}–${range[1]} / ${total} bản ghi`,
           }}
-            scroll={{ x: 900 }}
-          locale={{ emptyText: 'Không có dữ liệu' }}
+          scroll={{ x: 900 }}
         />
       {/* </Card> */}
     </>
