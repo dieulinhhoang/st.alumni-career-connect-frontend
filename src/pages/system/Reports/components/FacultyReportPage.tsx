@@ -11,7 +11,7 @@ import { useSubmissionStatus } from '../../../../feature/reports/hooks/useSubmis
 import { fetchFacultyOptions, exportReportExcel } from '../../../../feature/reports/api';
 import type { FacultyOption } from '../../../../feature/reports/types';
 import { ORG_NAME } from '../../../../feature/reports/constants';
-import { getCurrentUser } from '../../../../feature/auth/permission';
+import { getCurrentUser, getEffectiveFacultyId, isFacultyMode } from '../../../../feature/auth/permission';
 import { KpiGrid } from '../components/KpiGrid';
 import { ReportTabs } from '../components/ReportTabs';
 import { SubmissionPill } from '../components/SubmissionPill';
@@ -27,10 +27,17 @@ function formatDeadline(raw: string | null | undefined): string {
 }
 
 export default function FacultyReportPage() {
-  const { facultyId } = useParams<{ facultyId: string }>();
+  const { facultyId: urlFacultyId } = useParams<{ facultyId: string }>();
   const navigate = useNavigate();
   const currentAccount = getCurrentUser();
-  const isOwnFaculty = !!facultyId && currentAccount.facultyId === facultyId;
+  // Chế độ khoa: cán bộ khoa, hoặc admin đóng vai khoa → ẩn điều hướng "toàn trường"
+  const facultyMode = isFacultyMode();
+  const effId = getEffectiveFacultyId();
+  // Chế độ khoa: LUÔN khóa theo khoa hiệu lực (bỏ qua id trên URL nếu lệch) để không
+  // xem nhầm báo cáo khoa khác. Admin toàn trường: theo id URL (xem báo cáo từng khoa).
+  const facultyId = facultyMode ? (effId ?? urlFacultyId) : urlFacultyId;
+  // "Khoa của mình" theo phạm vi hiệu lực (officer = khoa mình; admin đóng vai = khoa đang chọn)
+  const isOwnFaculty = !!facultyId && String(effId) === String(facultyId);
 
   const [filters, setFilters] = useState<FilterState>({
     surveyId: '',
@@ -66,8 +73,9 @@ export default function FacultyReportPage() {
     useSubmissionStatus(filters.surveyId, facultyId);
 
   const facultyName =
-    facultyOptions.find((f) => f.value === facultyId)?.label ??
-    currentUser.facultyName ??
+    facultyOptions.find((f) => String(f.value) === String(facultyId))?.label ??
+    // Chỉ dùng tên khoa của user khi đúng là khoa mình — tránh hiện nhầm khoa khi xem khoa khác
+    (isOwnFaculty ? currentUser.facultyName : undefined) ??
     `Khoa ${facultyId}`;
 
   const selectedDeadline = surveyOptions.find((o) => o.value === filters.surveyId)?.deadline ?? deadline;
@@ -85,8 +93,8 @@ export default function FacultyReportPage() {
       <Spin spinning={surveyLoading}>
         <div style={{ padding: '0 0 32px' }}>
 
-          {/* ── Breadcrumb (chỉ trường mới có nút quay lại tổng hợp) ── */}
-          {currentAccount.isAdmin && (
+          {/* ── Breadcrumb (chỉ admin toàn trường; ẩn khi đang ở vai trò khoa) ── */}
+          {currentAccount.isAdmin && !facultyMode && (
             <Breadcrumb
               style={{ marginBottom: 16, fontSize: 13 }}
               items={[
@@ -105,7 +113,7 @@ export default function FacultyReportPage() {
           <div className="rp-page-header">
             <div className="rp-page-header__left">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                {currentAccount.isAdmin && (
+                {currentAccount.isAdmin && !facultyMode && (
                   <Button
                     type="text"
                     icon={<ArrowLeftOutlined />}
@@ -189,7 +197,7 @@ export default function FacultyReportPage() {
               signLabel="TRƯỞNG KHOA"
               onDownload={handleDownload}
               batchId={filters.surveyId}
-              showProgress={currentAccount.isAdmin}
+              showProgress={currentAccount.isAdmin && !facultyMode}
             />
           </Spin>
 

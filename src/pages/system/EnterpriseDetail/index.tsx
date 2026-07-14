@@ -146,8 +146,14 @@ export default function EnterpriseDetailPage() {
   const handleSendInvite = async () => {
     if (!entId) return
     try {
-      await api.post(`/auth/enterprise/invite/${entId}`)
-      Modal.success({ title: 'Đã gửi lời mời!', content: `Email kích hoạt đã được gửi đến ${ent?.email}` })
+      const res = await api.post(`/auth/enterprise/invite/${entId}`)
+      // Backend tự chọn: DN chưa có tài khoản → gửi lời mời kích hoạt;
+      // DN đã có tài khoản → gửi liên kết đặt lại mật khẩu.
+      const mode = res.data?.mode
+      Modal.success({
+        title: mode === 'reset' ? 'Đã gửi liên kết đặt lại mật khẩu!' : 'Đã gửi lời mời!',
+        content: res.data?.message ?? `Email đã được gửi đến ${ent?.email}`,
+      })
     } catch (err: any) {
       Modal.error({ title: 'Không thể gửi', content: err.response?.data?.message ?? 'Có lỗi xảy ra' })
     }
@@ -261,10 +267,11 @@ export default function EnterpriseDetailPage() {
                 icon={<SendOutlined />}
                 onClick={handleSendInvite}
                 style={{ borderRadius: 8 }}
-                title="Gửi lời mời kích hoạt tài khoản DN"
+                title="Chưa có tài khoản: gửi lời mời kích hoạt.
+                Đã có tài khoản: gửi liên kết đặt lại mật khẩu."
               >
-                Gửi lời mời
-              </Button>
+               {/* Gửi liên kết */}
+               </Button>
 
               <Button
                 icon={<EditOutlined />}

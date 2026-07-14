@@ -124,10 +124,11 @@ export async function deleteGraduation(id: number): Promise<void> {
  */
 export async function fetchGraduations(
   page = 1,
-  perPage = 10
+  perPage = 10,
+  facultyId?: number | string | null
 ): Promise<PaginatedResponse<Graduation>> {
   const res = await api.get("/graduation", {
-    params: { page, per_page: perPage },
+    params: { page, per_page: perPage, ...(facultyId ? { faculty_id: facultyId } : {}) },
   });
   return buildPaginated<Graduation>(res.data, page, perPage);
 }

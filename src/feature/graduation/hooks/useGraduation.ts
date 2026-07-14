@@ -10,7 +10,7 @@ interface GraduationsState {
   error: string | null;
 }
 
-export function useGraduations(page = 1, pageSize = 10) {
+export function useGraduations(page = 1, pageSize = 10, facultyId?: number | string | null) {
   const [state, setState] = useState<GraduationsState>({
     data: [],
     meta: { total: 0, per_page: pageSize, current_page: 1, last_page: 1 },
@@ -22,7 +22,7 @@ export function useGraduations(page = 1, pageSize = 10) {
     let cancelled = false;
     setState(s => ({ ...s, loading: true, error: null }));
 
-    fetchGraduations(page, pageSize)
+    fetchGraduations(page, pageSize, facultyId)
       .then(res => {
         if (!cancelled) setState({ data: res.data, meta: res.meta, loading: false, error: null });
       })
@@ -31,7 +31,7 @@ export function useGraduations(page = 1, pageSize = 10) {
       });
 
     return () => { cancelled = true; };
-  }, [page, pageSize]);
+  }, [page, pageSize, facultyId]);
 
   useEffect(() => {
     const cancel = load();

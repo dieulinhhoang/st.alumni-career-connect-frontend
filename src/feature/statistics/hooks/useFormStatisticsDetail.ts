@@ -10,7 +10,7 @@ import type {
   StatisticalQuestion,
   FormStatisticsDetail,
 } from '../types'
-import { getCurrentUser } from '../../auth/permission'
+import { getEffectiveFacultyId } from '../../auth/permission'
 
 /**
  * Hook quản lý toàn bộ state cho trang thống kê:
@@ -36,10 +36,9 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingBatches(true)
 
-    // Cán bộ khoa chỉ thấy các đợt có dữ liệu của khoa mình — tránh mặc định
-    // chọn 1 đợt rỗng đối với khoa họ rồi tưởng chart bị mất.
-    const currentUser = getCurrentUser()
-    const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined
+    // Chế độ khoa (cán bộ khoa / admin đóng vai): chỉ thấy đợt có dữ liệu khoa đó —
+    // tránh mặc định chọn 1 đợt rỗng rồi tưởng chart bị mất.
+    const facultyScope = getEffectiveFacultyId() ?? undefined
 
     getEndedBatches(facultyScope)
       .then((res) => {
@@ -99,9 +98,8 @@ export function useFormStatisticsDetail(initialBatchId?: number) {
     let mounted = true
     setLoadingDetail(true)
 
-    // Cán bộ khoa chỉ xem thống kê của khoa mình — admin xem toàn trường
-    const currentUser = getCurrentUser()
-    const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined
+    // Chế độ khoa: chỉ xem thống kê khoa hiệu lực — admin toàn trường xem tất cả
+    const facultyScope = getEffectiveFacultyId() ?? undefined
 
     getFormStatisticsDetail(formId, questionId, facultyScope)
       .then((res) => {

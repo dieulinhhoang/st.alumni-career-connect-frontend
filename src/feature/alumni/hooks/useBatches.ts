@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getBatches, deleteBatch, updateBatch, getBatchResponses } from '../api';
 import { fetchGraduationStudents } from '../../graduation/api';
+import { getEffectiveFacultyId } from '../../auth/permission';
 import type { SurveyBatch } from '../types';
 
 export interface SurveyBatchWithStats extends SurveyBatch {
@@ -35,6 +36,9 @@ export function useBatches() {
 
       if (cancelled.v) return;
 
+      // Phạm vi khoa hiệu lực: cán bộ khoa / admin đóng vai khoa → chỉ tính SV khoa đó
+      const facultyScope = getEffectiveFacultyId();
+
       const merged: SurveyBatchWithStats[] = list.map((b, i) => {
         const responses = responsesResults[i].status === 'fulfilled'
           ? (responsesResults[i] as PromiseFulfilledResult<any>).value ?? []
@@ -44,18 +48,34 @@ export function useBatches() {
           ? (gradResults[i] as PromiseFulfilledResult<any>).value
           : null;
 
-        // Đếm submitted y hệt BatchResults
-        const submittedCount = responses.filter((r: any) => r.status === 'submitted').length;
+        // SV của đợt; nếu đang ở chế độ khoa → chỉ giữ SV thuộc khoa đó
+        const gradAll: any[] = grad?.data ?? [];
+        const gradStudents = facultyScope
+          ? gradAll.filter((s) => String(s.faculty_id) === String(facultyScope))
+          : gradAll;
 
-        // Total từ gradStudents thực tế y hệt BatchResults
-        const total = grad?.data?.length || grad?.meta?.total || b.totalStudents || 0;
+        // Total: chế độ khoa dựa trên SV khoa; toàn trường dựa trên tổng thực tế
+        const total = facultyScope
+          ? gradStudents.length
+          : (grad?.data?.length || grad?.meta?.total || b.totalStudents || 0);
+
+        // Đếm submitted; chế độ khoa chỉ đếm phản hồi của SV thuộc khoa
+        const codes = new Set(gradStudents.map((s) => s.code));
+        const submittedCount = responses.filter(
+          (r: any) => r.status === 'submitted' && (!facultyScope || codes.has(r.studentId)),
+        ).length;
 
         const responseRate = total > 0 ? Math.round((submittedCount / total) * 100) : 0;
 
         return { ...b, totalStudents: total, submittedCount, responseRate };
       });
 
-      setBatches(merged);
+      // Chế độ khoa: ẩn đợt khảo sát không có SV thuộc khoa
+      const visible = facultyScope
+        ? merged.filter((b) => (b.totalStudents ?? 0) > 0)
+        : merged;
+
+      setBatches(visible);
     } catch (err) {
       if (!cancelled.v) setError(err instanceof Error ? err.message : 'Failed to load batches');
     } finally {

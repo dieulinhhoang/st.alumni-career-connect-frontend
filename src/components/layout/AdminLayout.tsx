@@ -22,13 +22,16 @@ import {
   MailOutlined,
   SettingOutlined,
   ApiOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGetAdminProfile } from '../../feature/adminProfile/hook/query';
-import { getCurrentUser, havePermission } from '../../feature/auth/permission';
+import { getCurrentUser, havePermission, getEffectiveFacultyId, isFacultyMode } from '../../feature/auth/permission';
 import { PermissionEnum } from '../../feature/auth/type';
 import { fetchFacultyById } from '../../feature/faculty/api';
+import { clearActingFaculty } from '../../feature/auth/actingFaculty';
+import FacultyScopeSwitcher from './FacultyScopeSwitcher';
 
 const { Header, Sider, Content } = Layout;
 
@@ -38,6 +41,7 @@ const ROUTE_TITLE_VI: Record<string, string> = {
   '/khoa/dashboard': 'Bảng điều khiển',
   '/admin/faculties': 'Khoa',
   '/admin/enterprises': 'Doanh nghiệp đối tác',
+  '/admin/enterprises/pending': 'Đối tác chờ duyệt',
   '/admin/graduation': 'Đợt tốt nghiệp',
   '/admin/forms': 'Cấu hình form',
   '/admin/alumni/batches': 'Khảo sát việc làm',
@@ -67,6 +71,7 @@ const MENU_ITEMS = [
   { type: 'divider' as const },
 
   { key: '/admin/enterprises', icon: <BankOutlined />, label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>, permission: PermissionEnum.ENTERPRISES_READ },
+  { key: '/admin/enterprises/pending', icon: <AuditOutlined />, label: <Link to="/admin/enterprises/pending">Đối tác chờ duyệt</Link>, permission: PermissionEnum.ENTERPRISES_READ },
   { key: '/admin/graduation', icon: <SolutionOutlined />, label: <Link to="/admin/graduation">Đợt tốt nghiệp</Link>, permission: PermissionEnum.GRADUATION_READ },
 
   { type: 'divider' as const },
@@ -99,18 +104,18 @@ const MENU_ITEMS = [
  * đồng thời gọn các divider thừa (đầu/cuối/liên tiếp) sau khi lọc.
  */
 const getDashboardPath = () => {
-  const currentUser = getCurrentUser();
-  return !currentUser.isAdmin && currentUser.facultyId ? '/khoa/dashboard' : '/admin/dashboard';
+  // Chế độ khoa (cán bộ khoa, hoặc admin đang đóng vai khoa) → dashboard khoa
+  return isFacultyMode() ? '/khoa/dashboard' : '/admin/dashboard';
 };
 
 const getVisibleMenuItems = (facultySlug?: string | null) => {
   const dashboardPath = getDashboardPath();
   const currentUser = getCurrentUser();
 
-  // Cán bộ khoa: bấm vào thẳng trang khoa của mình (danh sách ngành), không qua trang chọn khoa
-  const isFacultyOfficer = !currentUser.isAdmin && !!currentUser.facultyId;
-  const facultiesPath = isFacultyOfficer && facultySlug ? `/admin/faculties/${facultySlug}` : '/admin/faculties';
-  const facultiesLabel = isFacultyOfficer ? 'Ngành' : 'Khoa';
+  // Chế độ khoa: bấm vào thẳng trang khoa của mình (danh sách ngành), không qua trang chọn khoa
+  const facultyMode = isFacultyMode();
+  const facultiesPath = facultyMode && facultySlug ? `/admin/faculties/${facultySlug}` : '/admin/faculties';
+  const facultiesLabel = facultyMode ? 'Ngành' : 'Khoa';
 
   const items = MENU_ITEMS.map((item) => {
     if (item.key === '/admin/dashboard') {
@@ -120,7 +125,9 @@ const getVisibleMenuItems = (facultySlug?: string | null) => {
       return { ...item, key: facultiesPath, label: <Link to={facultiesPath}>{facultiesLabel}</Link> };
     }
     return item;
-  }).filter((item) => item.key !== SYSTEM_CONFIG_KEY || currentUser.isAdmin);
+    // Cấu hình hệ thống: chỉ admin ở chế độ toàn trường. Khi admin đóng vai khoa
+    // (hoặc cán bộ khoa) đang ở "vai trò khoa" → ẩn đi.
+  }).filter((item) => item.key !== SYSTEM_CONFIG_KEY || (currentUser.isAdmin && !facultyMode));
 
   const withFilteredChildren = items.map((item) =>
     'children' in item && Array.isArray(item.children)
@@ -250,12 +257,12 @@ const AdminLayout: React.FC<{ children?: React.ReactNode; onCollapse?: (v: boole
   const displayEmail = profile?.email || '';
   const avatarLetter = displayName.trim().charAt(0).toUpperCase();
 
-  // Cán bộ khoa: lấy slug khoa của mình để menu "Khoa" trỏ thẳng vào trang khoa
+  // Chế độ khoa: lấy slug khoa hiệu lực để menu "Ngành" trỏ thẳng vào trang khoa
   const [facultySlug, setFacultySlug] = useState<string | null>(null);
   useEffect(() => {
-    const cu = getCurrentUser();
-    if (cu.isAdmin || !cu.facultyId) return;
-    fetchFacultyById(Number(cu.facultyId))
+    const fid = getEffectiveFacultyId();
+    if (!fid) return;
+    fetchFacultyById(Number(fid))
       .then((f) => setFacultySlug((f as any)?.slug ?? null))
       .catch(() => setFacultySlug(null));
   }, []);
@@ -302,6 +309,7 @@ const handleLogout = () => {
   localStorage.removeItem('permissions');
   localStorage.removeItem('isAdmin');
   localStorage.removeItem('currentUser');
+  clearActingFaculty();
   // Đăng xuất khỏi app, không bắn thẳng sang SSO (gây tự động đăng nhập lại = vòng lặp)
   navigate('/login', { replace: true });
 };
@@ -446,6 +454,8 @@ const handleLogout = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Admin: đóng vai khoa để xem/quản lý theo phạm vi khoa */}
+            {!isMobile && <FacultyScopeSwitcher />}
             {/* <Badge count={3} size="small" offset={[-4, 4]}>
               <Button
                 type="text"

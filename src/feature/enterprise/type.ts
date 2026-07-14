@@ -1,5 +1,6 @@
 export type PartnerStatus = "active" | "inactive";
 export type JobStatus = "pending" | "active" | "closed" | "rejected";
+export type EnterpriseApprovalStatus = "pending" | "approved" | "rejected";
 
 export interface Faculty {
   id: string;
@@ -26,6 +27,11 @@ export interface Enterprise {
   size: string;
   address: string;
   description: string;
+  // Trạng thái duyệt hồ sơ đối tác
+  status?: EnterpriseApprovalStatus;
+  rejectionReason?: string | null;
+  contactPerson?: string | null;
+  createdAt?: string;
 }
 
 export interface Job {

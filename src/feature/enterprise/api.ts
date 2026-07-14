@@ -88,6 +88,37 @@ export async function setPartnerStatus(
   return normalizeEnterprise(res.data);
 }
 
+// ─── Đăng ký đối tác + duyệt hồ sơ ──────────────────────────────────────────
+
+/** DN đối tác tự gửi hồ sơ đăng ký (API công khai) → vào hàng đợi chờ duyệt. */
+export async function registerEnterprise(
+  payload: Partial<EnterpriseFormValues> & { name: string; contactPerson?: string },
+): Promise<{ id: string; status: string; message: string }> {
+  const res = await api.post("/enterprises/register", payload);
+  return res.data?.data ?? res.data;
+}
+
+/** Danh sách hồ sơ đối tác đang chờ duyệt. */
+export async function fetchPendingEnterprises(params?: {
+  page?: number;
+  size?: number;
+}): Promise<Enterprise[]> {
+  const res = await api.get("/enterprises/pending", { params });
+  return normalizeList<Enterprise>(res.data);
+}
+
+/** Duyệt hồ sơ đối tác. */
+export async function approveEnterprise(id: string): Promise<Enterprise> {
+  const res = await api.post(`/enterprises/${id}/approve`);
+  return normalizeEnterprise(res.data);
+}
+
+/** Từ chối hồ sơ đối tác kèm lý do. */
+export async function rejectEnterprise(id: string, reason?: string): Promise<Enterprise> {
+  const res = await api.post(`/enterprises/${id}/reject`, { reason });
+  return normalizeEnterprise(res.data);
+}
+
 // Job API — dùng enterpriseId (camelCase) để khớp với BE query param
 export async function fetchJobsByEnterprise(enterpriseId: string): Promise<Job[]> {
   const res = await api.get("/jobs", { params: { enterpriseId } });

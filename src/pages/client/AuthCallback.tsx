@@ -15,8 +15,10 @@ function getSafeReturnUrl(returnUrl: string | null): string {
  */
 function decodeJwtPayload(token: string): Record<string, any> | null {
   try {
-    const base64 = token.split('.')[1];
-    const json = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    // Giải mã UTF-8 để tiếng Việt có dấu không bị mojibake (atob chỉ trả byte thô)
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const json = new TextDecoder('utf-8').decode(bytes);
     return JSON.parse(json);
   } catch {
     return null;

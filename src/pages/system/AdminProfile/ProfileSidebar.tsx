@@ -45,7 +45,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, avatarUrl, displayName }) =>
         {displayName}
       </Text>
       <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-        @{profile.userName}
+          {profile.userName}
       </Text>
 
       <div
@@ -62,7 +62,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, avatarUrl, displayName }) =>
           type="secondary"
           style={{ display: 'block', marginBottom: 12, fontWeight: 500 }}
         >
-          Nhóm quyền
+        
         </Text>
 
         <Space direction="vertical" size={8} style={{ width: '100%' }}>

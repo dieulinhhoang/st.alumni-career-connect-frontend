@@ -15,7 +15,7 @@ import type { SurveyBatch, AlumniResponse } from '../../../feature/alumni/types'
 import type { GraduationStudent } from '../../../feature/graduation/type';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { SurveyPreview } from '../Form/Preview';
-import { havePermission } from '../../../feature/auth/permission';
+import { havePermission, getCurrentUser } from '../../../feature/auth/permission';
 import { PermissionEnum } from '../../../feature/auth/type';
 
 const { Text, Title } = Typography;
@@ -132,6 +132,15 @@ export const ResponseDetail: React.FC = () => {
   };
 
   const isPending = Number(responseId) < 0;
+  // Đợt đã kết thúc → không cho thêm/sửa phản hồi (tính hết ngày cuối, khớp backend dayEnd)
+  const isEnded = React.useMemo(() => {
+    if (!batch?.endDate) return false;
+    const end = new Date(batch.endDate);
+    end.setHours(23, 59, 59, 999);
+    return new Date() > end;
+  }, [batch?.endDate]);
+  // Admin toàn quyền → vẫn sửa/thêm được sau hết hạn; vai trò khác bị khóa
+  const lockEdit = isEnded && !getCurrentUser().isAdmin;
 
   // Build initial values từ data sinh viên, giống SurveyFillPage.buildInitialValues
   const adminInitialValues = React.useMemo(() => {
@@ -172,6 +181,10 @@ export const ResponseDetail: React.FC = () => {
 
   const handleSubmit = async (answers: Record<string, any>) => {
     if (!response) return;
+    if (lockEdit) {
+      message.warning('Đợt khảo sát đã kết thúc, không thể thêm/chỉnh sửa phản hồi.');
+      return;
+    }
     setSaving(true);
     try {
       if (isPending) {
@@ -305,7 +318,9 @@ export const ResponseDetail: React.FC = () => {
           </Title>
           <div style={{ display: 'flex', gap: 8 }}>
             {!isEdit ? (
-              havePermission(PermissionEnum.SURVEYS_UPDATE) && (
+              lockEdit ? (
+                <Tag color="red" style={{ borderRadius: 6 }}>Đợt khảo sát đã kết thúc</Tag>
+              ) : havePermission(PermissionEnum.SURVEYS_UPDATE) && (
                 <Button
                   icon={<EditOutlined />}
                   style={{ borderRadius: 6, borderColor: isPending ? '#1D9E75' : '#d97706', color: isPending ? '#1D9E75' : '#d97706' }}
@@ -338,12 +353,12 @@ export const ResponseDetail: React.FC = () => {
               background: '#fff',
             }}>
               {formSnapshot ? (
-                <div style={!isEdit ? { pointerEvents: 'none', userSelect: 'none', opacity: 0.92 } : undefined}>
+                <div style={(!isEdit || lockEdit) ? { pointerEvents: 'none', userSelect: 'none', opacity: 0.92 } : undefined}>
                   <SurveyPreview
                     form={formSnapshot}
                     compact={true}
-                    initialValues={isPending && isEdit ? adminInitialValues : answers}
-                    onSubmit={isEdit ? handleSubmit : undefined}
+                    initialValues={isPending && isEdit && !lockEdit ? adminInitialValues : answers}
+                    onSubmit={isEdit && !lockEdit ? handleSubmit : undefined}
                     submitLabel={isPending ? 'Thêm phản hồi' : 'Lưu'}
                   />
                 </div>

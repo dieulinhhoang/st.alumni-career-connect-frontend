@@ -23,9 +23,9 @@ import { SurveyLinkModal } from './components/SurveyLinkModal';
 import { useExportAllPDF, domToPdfBlob } from '../../../feature/alumni/hooks/useExportAllPDF';
 import type { ExportItem } from '../../../feature/alumni/hooks/useExportAllPDF';
 import SurveyPreview from '../Form/Preview';
-import { havePermission, getCurrentUser } from '../../../feature/auth/permission';
+import { havePermission, getEffectiveFacultyId, getCurrentUser } from '../../../feature/auth/permission';
 import { PermissionEnum } from '../../../feature/auth/type';
-import * as XLSX from 'xlsx';
+import { exportBatchExcel } from '../../../feature/alumni/exportBatchExcel';
 
 const { Text, Title } = Typography;
 
@@ -54,9 +54,8 @@ export const BatchResults: React.FC = () => {
   // Hook lấy toàn bộ sinh viên của đợt tốt nghiệp (không phân trang, load hết)
   const { data: gradStudents } = useGraduationStudents(batch?.graduationId ?? 0, 1, 9999);
 
-  // Cán bộ khoa chỉ được xem sinh viên của khoa mình — admin xem toàn bộ
-  const currentUser = getCurrentUser();
-  const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined;
+  // Cán bộ khoa chỉ xem SV khoa mình. Admin xem toàn bộ, hoặc phạm vi khoa đang "đóng vai".
+  const facultyScope = getEffectiveFacultyId() ?? undefined;
 
   const scopedGradStudents = React.useMemo(() => {
     if (!facultyScope) return gradStudents;
@@ -232,8 +231,10 @@ export const BatchResults: React.FC = () => {
     </AdminLayout>
   );
 
-  const submitted  = (batch.responses ?? []).filter(r => r.status === 'submitted');
-  const n          = submitted.length;
+  // Đếm phản hồi theo đúng cohort đang hiển thị (mergedRows), KHÔNG đếm cả
+  // batch.responses thô — vì response của SV không thuộc đợt tốt nghiệp (VD dữ liệu
+  // test SV00099) sẽ không hiện trong bảng nhưng vẫn bị cộng vào tiến độ → lệch số.
+  const n          = mergedRows.filter(r => r.status === 'submitted').length;
 
   // FIX: Ưu tiên gradStudents.length (thực tế đã load),
   // fallback về batch.totalStudents nếu gradStudents chưa load xong
@@ -245,6 +246,8 @@ export const BatchResults: React.FC = () => {
   const now        = new Date();
   const endDate    = new Date(batch.endDate);
   const isEnded    = now > endDate;
+  // Admin toàn quyền → vẫn sửa/thêm được sau khi hết hạn; các vai trò khác thì bị khóa
+  const lockEdit   = isEnded && !getCurrentUser().isAdmin;
   const diffDays   = Math.round(Math.abs(now.getTime() - endDate.getTime()) / 86400000);
 
   // Filter client-side
@@ -357,18 +360,20 @@ export const BatchResults: React.FC = () => {
           </Tooltip>
           {havePermission(PermissionEnum.SURVEYS_UPDATE) && (
             r.status === 'pending' ? (
-              <Tooltip title="Thêm phản hồi">
+              <Tooltip title={lockEdit ? 'Đợt khảo sát đã kết thúc' : 'Thêm phản hồi'}>
                 <Button
                   size="small" type="text"
-                  icon={<PlusCircleOutlined style={{ color: '#1D9E75', fontSize: 16 }} />}
+                  disabled={lockEdit}
+                  icon={<PlusCircleOutlined style={{ color: lockEdit ? '#cbd5e1' : '#1D9E75', fontSize: 16 }} />}
                   onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
                 />
               </Tooltip>
             ) : (
-              <Tooltip title="Sửa phản hồi">
+              <Tooltip title={lockEdit ? 'Đợt khảo sát đã kết thúc' : 'Sửa phản hồi'}>
                 <Button
                   size="small" type="text"
-                  icon={<EditOutlined style={{ color: '#d97706', fontSize: 16 }} />}
+                  disabled={lockEdit}
+                  icon={<EditOutlined style={{ color: lockEdit ? '#cbd5e1' : '#d97706', fontSize: 16 }} />}
                   onClick={() => navigate(`/admin/alumni/batches/${id}/responses/${r.id}/edit`)}
                 />
               </Tooltip>
@@ -449,7 +454,7 @@ export const BatchResults: React.FC = () => {
             <Button
               icon={<FileExcelOutlined style={{ color: '#16a34a' }} />}
               loading={exporting === 'excel'}
-              onClick={() => {
+              onClick={async () => {
                 const questions = (batch as any).formSnapshot?.questions ?? [];
 
                 const formatAnswer = (raw: any, q: any): string => {
@@ -465,11 +470,6 @@ export const BatchResults: React.FC = () => {
                   return String(raw);
                 };
 
-                const headers = [
-                  'STT', 'Mã SV', 'Họ và tên', 'Khoa', 'Ngành', 'Trạng thái', 'Ngày phản hồi',
-                  ...questions.map((q: any) => q.title ?? ''),
-                ];
-
                 const dataRows = filtered.map((r, i) => [
                   i + 1,
                   r.studentId ?? '',
@@ -481,13 +481,23 @@ export const BatchResults: React.FC = () => {
                   ...questions.map((q: any) => formatAnswer(r.answers?.[q.id], q)),
                 ]);
 
-                const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
-                // Cột STT và các cột số không tự đổi sang number format
-                ws['!cols'] = headers.map((_, ci) => ({ wch: ci === 0 ? 6 : ci <= 2 ? 20 : 18 }));
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Danh sách SV');
-                const safeName = (batch.title ?? 'danh-sach-sv').replace(/[^\wÀ-ɏḀ-ỿ ]/g, '').trim().replace(/\s+/g, '_');
-                XLSX.writeFile(wb, `${safeName}.xlsx`);
+                setExporting('excel');
+                try {
+                  await exportBatchExcel({
+                    batchTitle: batch.title,
+                    graduationPeriod: batch.graduationPeriod,
+                    progressText: `${n} / ${total} (${pct}%)`,
+                    startDate: new Date(batch.startDate).toLocaleDateString('vi-VN'),
+                    endDate: new Date(batch.endDate).toLocaleDateString('vi-VN'),
+                    questionTitles: questions.map((q: any) => q.title ?? ''),
+                    rows: dataRows,
+                  });
+                } catch (e) {
+                  console.error('[exportBatchExcel]', e);
+                  message.error('Xuất Excel thất bại.');
+                } finally {
+                  setExporting(null);
+                }
               }}
             >
               Xuất Excel

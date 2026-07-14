@@ -6,6 +6,8 @@ import type { Form, Question, Section } from '../../../feature/form/types'
 import { groupByRow } from '../../../feature/form/hooks/Useformutils'
 import { AddressAutocomplete } from './builder/shared/AddressAutocomplete'
 import { PROVINCES_2025 } from '../../../feature/form/constants'
+// Logo bundle local (same-origin) — CDN ngoài không có CORS nên html2canvas không xuất được ảnh vào PDF
+import logoVnua from '../../../assets/logoVnua.jpg'
 
 
 //  Utility 
@@ -521,7 +523,7 @@ function mapForm(form: Form) {
   })
 
   const header = {
-    logoUrl:  (form as any).logoUrl   ?? 'https://cdn.haitrieu.com/wp-content/uploads/2021/10/Logo-Hoc-Vien-Nong-Nghiep-Viet-Nam-VNUA-300x300.png',
+    logoUrl:  (form as any).logoUrl   ?? logoVnua,
     ministry: (form as any).header?.ministry ?? 'BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG',
     academy:  (form as any).header?.academy  ?? 'HỌC VIỆN NÔNG NGHIỆP VIỆT NAM',
     address:  (form as any).header?.address  ?? 'Xã Gia Lâm, Thành phố Hà Nội',

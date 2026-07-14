@@ -9,7 +9,7 @@ import AdminLayout from "../../../components/layout/AdminLayout";
 import { FacultyCard } from "../../system/DashBoard/FacultyCard";
 import { EnterpriseList } from "../../system/DashBoard/Enterpriselist";
 import { StatCard } from "../../system/DashBoard/Statcard";
-import { getCurrentUser } from "../../../feature/auth/permission";
+import { getCurrentUser, getEffectiveFacultyId } from "../../../feature/auth/permission";
 import api from "../../../libs/api";
 import { COLOR, RADIUS, SHADOW } from "../../system/DashBoard/theme";
 import { useChartFilter } from "../../../feature/dashboard/hooks/useChartFilter";
@@ -32,7 +32,8 @@ type ReportStatus = {
 export function KhoaDashBoard() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
-  const facultyId = currentUser.facultyId;
+  // Faculty hiệu lực: cán bộ khoa → khoa mình; admin đóng vai → khoa đang chọn
+  const facultyId = getEffectiveFacultyId();
 
   const { state: chartState, setField: setChartField, setKhoa: setChartKhoa, nganhOptions } = useChartFilter();
   const [reloadKey] = useState(0);
@@ -213,7 +214,7 @@ export function KhoaDashBoard() {
           <Col xs={24} lg={12}>
             <EnterpriseList
               key={reloadKey}
-              facultyId={currentUser.facultyId}
+              facultyId={facultyId}
             />
           </Col>
         </Row>

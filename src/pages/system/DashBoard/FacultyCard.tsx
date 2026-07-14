@@ -4,7 +4,7 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { fetchKhoaList } from "../../../feature/dashboard/api";
 import type { KhoaFilter, KhoaItem } from "../../../feature/dashboard/type";
-import { getCurrentUser } from "../../../feature/auth/permission";
+import { getEffectiveFacultyId, isFacultyMode } from "../../../feature/auth/permission";
 import { COLOR, RADIUS, SHADOW } from "./theme";
 
 type FacultyApiItem = KhoaItem & {
@@ -159,8 +159,9 @@ function OwnFacultySummary({ item, onClick }: { item?: NormalizedFaculty; onClic
 
 export function FacultyCard() {
   const navigate = useNavigate();
-  const currentUser = useMemo(() => getCurrentUser(), []);
-  const isOwnFacultyView = !currentUser.isAdmin && !!currentUser.facultyId;
+  // Chế độ khoa: cán bộ khoa, hoặc admin đóng vai khoa → xem như "khoa của mình"
+  const effFacultyId = getEffectiveFacultyId();
+  const isOwnFacultyView = isFacultyMode();
 
   const [filter, setFilter] = useState<KhoaFilter>("all");
   const [hovered, setHovered] = useState<number | null>(null);
@@ -191,7 +192,7 @@ export function FacultyCard() {
   const normalizedItems = useMemo(() => {
     // Cán bộ khoa: chỉ xem tình trạng của khoa mình, không xem được khoa khác
     const visibleItems = isOwnFacultyView
-      ? items.filter((item) => String(item.facultyId ?? "") === currentUser.facultyId)
+      ? items.filter((item) => String(item.facultyId ?? "") === String(effFacultyId ?? ""))
       : items;
 
     return visibleItems.map((item): NormalizedFaculty => {
@@ -209,7 +210,7 @@ export function FacultyCard() {
         name, code, responded, total, color, submitted,
       };
     });
-  }, [items, isOwnFacultyView, currentUser.facultyId]);
+  }, [items, isOwnFacultyView, effFacultyId]);
 
   const filtered = useMemo(() => {
     return normalizedItems.filter((k) =>
@@ -278,7 +279,7 @@ export function FacultyCard() {
       ) : isOwnFacultyView ? (
         <OwnFacultySummary
           item={normalizedItems[0]}
-          onClick={() => navigate(`/admin/reports/faculty/${currentUser.facultyId}`)}
+          onClick={() => navigate(`/admin/reports/faculty/${effFacultyId}`)}
         />
       ) : (
         <>

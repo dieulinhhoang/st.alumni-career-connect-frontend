@@ -60,6 +60,7 @@ const EmailTemplateEditor    = lazy(() => import('../pages/system/MailSettings/E
 
 // Admin — enterprises
 const Enterprise       = lazy(() => import('../pages/system/Enterprise/index'));
+const EnterprisePending = lazy(() => import('../pages/system/Enterprise/PendingApproval'));
 const EnterpriseDetail = lazy(() => import('../pages/system/EnterpriseDetail/index'));
 
 // Admin — faculties
@@ -316,6 +317,10 @@ const routes = [
               {
                 path: '/admin/enterprises',
                 element: <Suspense fallback={<Loader />}><Enterprise /></Suspense>
+              },
+              {
+                path: '/admin/enterprises/pending',
+                element: <Suspense fallback={<Loader />}><EnterprisePending /></Suspense>
               },
               {
                 path: '/admin/enterprises/:slug',

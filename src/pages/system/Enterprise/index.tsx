@@ -23,7 +23,7 @@ import {
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { KpiCard } from "../../../components/common/KpiCard";
-import { havePermission, getCurrentUser } from "../../../feature/auth/permission";
+import { havePermission, getEffectiveFacultyId } from "../../../feature/auth/permission";
 import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Text } = Typography;
@@ -97,9 +97,8 @@ export default function EnterprisePage() {
     enterprise: null,
   });
 
-  // Cán bộ khoa chỉ được xem doanh nghiệp liên kết với khoa mình — admin xem toàn bộ
-  const currentUser = getCurrentUser();
-  const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined;
+  // Chỉ hiện DN liên kết khoa hiệu lực (cán bộ khoa, hoặc admin đóng vai khoa). Admin toàn trường: tất cả.
+  const facultyScope = getEffectiveFacultyId() ?? undefined;
 
   const {
     enterprises,

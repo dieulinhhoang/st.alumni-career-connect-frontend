@@ -8,7 +8,7 @@ import { useFacultyDetailBySlug } from "../../../../feature/faculty/hooks/useFac
 import { createMajor, updateMajor, deleteMajor } from "../../../../feature/major/api";
 import { toSlug } from "../../../../components/common/utils";
 import CustomTable from "../../../../components/common/customTable";
-import { havePermission, getCurrentUser } from "../../../../feature/auth/permission";
+import { havePermission, getEffectiveFacultyId, isFacultyMode } from "../../../../feature/auth/permission";
 import { PermissionEnum } from "../../../../feature/auth/type";
 
 const { Title, Text } = Typography;
@@ -36,15 +36,15 @@ export default function FacultyDetailPage() {
 
   const { data: faculty, loading, error, reload } = useFacultyDetailBySlug(facultySlug);
 
-  // Cán bộ khoa chỉ được xem khoa của chính mình — gõ URL khoa khác sẽ bị đẩy về khoa mình
-  const currentUser = getCurrentUser();
-  const isFacultyOfficer = !currentUser.isAdmin && !!currentUser.facultyId;
+  // Chế độ khoa (cán bộ khoa / admin đóng vai): chỉ xem khoa hiệu lực — URL khoa khác bị đẩy về
+  const effectiveFacultyId = getEffectiveFacultyId();
+  const isFacultyOfficer = isFacultyMode();
   useEffect(() => {
     if (!isFacultyOfficer || !faculty) return;
-    if (String((faculty as any).id) !== String(currentUser.facultyId)) {
-      navigate("/admin/dashboard", { replace: true });
+    if (String((faculty as any).id) !== String(effectiveFacultyId)) {
+      navigate("/khoa/dashboard", { replace: true });
     }
-  }, [isFacultyOfficer, faculty, currentUser.facultyId, navigate]);
+  }, [isFacultyOfficer, faculty, effectiveFacultyId, navigate]);
 
   const [form] = Form.useForm<MajorFormValues>();
   const [modalOpen, setModalOpen] = useState(false);
@@ -222,7 +222,7 @@ export default function FacultyDetailPage() {
   }
 
   // Đang điều hướng cán bộ khoa về đúng khoa của họ — không render nội dung khoa khác
-  if (isFacultyOfficer && String((faculty as any).id) !== String(currentUser.facultyId)) {
+  if (isFacultyOfficer && String((faculty as any).id) !== String(effectiveFacultyId)) {
     return (
       <AdminLayout>
         <div style={{ textAlign: "center", padding: 60, color: "#9ca3af" }}>

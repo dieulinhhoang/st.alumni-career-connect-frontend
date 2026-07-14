@@ -11,7 +11,7 @@ import { updateGraduation, deleteGraduation } from "../../../feature/graduation/
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
 import { PermissionEnum } from "../../../feature/auth/type";
-import { havePermission } from "../../../feature/auth/permission";
+import { havePermission, getEffectiveFacultyId } from "../../../feature/auth/permission";
 
 const { Text } = Typography;
 
@@ -70,7 +70,9 @@ export default function GraduationList() {
   const [search, setSearch] = useState("");
   const [pageSize] = useState(10);
 
-  const { data: graduations, meta, loading, error, reload } = useGraduations(page, pageSize);
+  // Chế độ khoa (cán bộ khoa / admin đóng vai): chỉ hiện đợt có SV thuộc khoa đó
+  const facultyScope = getEffectiveFacultyId() ?? undefined;
+  const { data: graduations, meta, loading, error, reload } = useGraduations(page, pageSize, facultyScope);
 
   const [form] = Form.useForm<EditFormValues>();
   const [modalOpen, setModalOpen] = useState(false);

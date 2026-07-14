@@ -5,6 +5,12 @@ import axios from 'axios'
 export default function AcceptInvitePage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') ?? ''
+  const isReset = searchParams.get('mode') === 'reset'
+
+  // Nhãn hiển thị theo chế độ: đặt lại mật khẩu (đã có tài khoản) vs kích hoạt (lần đầu)
+  const txt = isReset
+    ? { heading: 'Đặt lại mật khẩu', sub: 'Tạo mật khẩu mới cho tài khoản của bạn', submit: 'Đặt lại mật khẩu', submitting: 'Đang lưu...', doneTitle: 'Đặt lại mật khẩu thành công!' }
+    : { heading: 'Kích hoạt tài khoản', sub: 'Đặt mật khẩu để bắt đầu sử dụng hệ thống', submit: 'Kích hoạt tài khoản', submitting: 'Đang kích hoạt...', doneTitle: 'Tài khoản đã kích hoạt!' }
 
   const [form, setForm] = useState({ password: '', confirm: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -59,10 +65,10 @@ export default function AcceptInvitePage() {
             </svg>
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
-            Kích hoạt tài khoản
+            {txt.heading}
           </h1>
           <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
-            Đặt mật khẩu để bắt đầu sử dụng hệ thống
+            {txt.sub}
           </p>
         </div>
 
@@ -81,7 +87,7 @@ export default function AcceptInvitePage() {
                 </svg>
               </div>
               <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>
-                Tài khoản đã kích hoạt!
+                {txt.doneTitle}
               </div>
               <p style={{ fontSize: 13, color: '#64748b', marginBottom: 24 }}>
                 Bạn có thể đăng nhập ngay bây giờ.
@@ -121,7 +127,7 @@ export default function AcceptInvitePage() {
                 fontSize: 14, cursor: (status === 'loading' || !token) ? 'not-allowed' : 'pointer',
                 transition: 'background 0.2s', marginTop: 4,
               }}>
-                {status === 'loading' ? 'Đang kích hoạt...' : 'Kích hoạt tài khoản'}
+                {status === 'loading' ? txt.submitting : txt.submit}
               </button>
             </form>
           )}
