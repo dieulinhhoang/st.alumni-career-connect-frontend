@@ -79,6 +79,28 @@ export async function importGraduationStudents(
   return res.data;
 }
 
+export interface SyncGraduationResult {
+  graduationsUpserted: number;
+  totalStudentsCreated: number;
+  totalLinksCreated: number;
+  perGraduation: {
+    graduationId: number;
+    studentsCreated: number;
+    studentsUpdated: number;
+    linksCreated: number;
+    alreadyLinked: number;
+  }[];
+}
+
+/**
+ * Đồng bộ đợt tốt nghiệp + sinh viên từng đợt từ hệ thống ST Student.
+ * Path: POST /graduation/sync-all
+ */
+export async function syncGraduationsFromStudentSystem(): Promise<SyncGraduationResult> {
+  const res = await api.post("/graduation/sync-all");
+  return res.data;
+}
+
 export interface CreateGraduationPayload {
   name: string;
   certification?: string;

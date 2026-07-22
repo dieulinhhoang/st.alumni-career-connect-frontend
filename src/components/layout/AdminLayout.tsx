@@ -22,7 +22,6 @@ import {
   MailOutlined,
   SettingOutlined,
   ApiOutlined,
-  AuditOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Layout, Menu, Avatar, Drawer, Badge, Tooltip } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -71,7 +70,6 @@ const MENU_ITEMS = [
   { type: 'divider' as const },
 
   { key: '/admin/enterprises', icon: <BankOutlined />, label: <Link to="/admin/enterprises">Doanh nghiệp đối tác</Link>, permission: PermissionEnum.ENTERPRISES_READ },
-  { key: '/admin/enterprises/pending', icon: <AuditOutlined />, label: <Link to="/admin/enterprises/pending">Đối tác chờ duyệt</Link>, permission: PermissionEnum.ENTERPRISES_READ },
   { key: '/admin/graduation', icon: <SolutionOutlined />, label: <Link to="/admin/graduation">Đợt tốt nghiệp</Link>, permission: PermissionEnum.GRADUATION_READ },
 
   { type: 'divider' as const },

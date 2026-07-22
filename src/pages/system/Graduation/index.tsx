@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Col, Row, Input, Typography, Alert, Button, Modal, Form, InputNumber, DatePicker, Popconfirm, message } from "antd";
 import CustomTable from "../../../components/common/customTable";
 import type { TablePaginationConfig, ColumnsType } from "antd/es/table";
-import { SearchOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { SearchOutlined, UploadOutlined, EditOutlined, DeleteOutlined, SyncOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { useGraduations } from "../../../feature/graduation/hooks/useGraduation";
-import { updateGraduation, deleteGraduation } from "../../../feature/graduation/api";
+import { updateGraduation, deleteGraduation, syncGraduationsFromStudentSystem } from "../../../feature/graduation/api";
 import type { Graduation } from "../../../feature/graduation/type";
 import { toSlug } from "../../../components/common/utils";
 import { PermissionEnum } from "../../../feature/auth/type";
@@ -78,6 +78,25 @@ export default function GraduationList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGraduation, setEditingGraduation] = useState<Graduation | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  // Đồng bộ đợt tốt nghiệp + sinh viên từ hệ thống ST Student
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await syncGraduationsFromStudentSystem();
+      message.success(
+        `Đồng bộ xong: ${res.graduationsUpserted} đợt tốt nghiệp, ` +
+        `${res.totalStudentsCreated} sinh viên mới, ${res.totalLinksCreated} liên kết mới`
+      );
+      setPage(1);
+      reload();
+    } catch (err: any) {
+      message.error(err?.response?.data?.message ?? "Đồng bộ từ hệ thống ST Student thất bại");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const openEditModal = (graduation: Graduation) => {
     setEditingGraduation(graduation);
@@ -322,6 +341,19 @@ export default function GraduationList() {
                 <Button type="primary" icon={<UploadOutlined />} onClick={() => navigate('/admin/graduation-import')}>
                   Tải lên đợt tốt nghiệp
                 </Button>
+              )}
+              {havePermission(PermissionEnum.GRADUATION_CREATE) && (
+                <Popconfirm
+                  title="Đồng bộ từ hệ thống ST Student?"
+                  description="Sẽ tải về danh sách đợt tốt nghiệp và sinh viên từng đợt. Có thể mất vài phút."
+                  okText="Đồng bộ"
+                  cancelText="Huỷ"
+                  onConfirm={handleSync}
+                >
+                  <Button icon={<SyncOutlined spin={syncing} />} loading={syncing}>
+                    Đồng bộ ST Student
+                  </Button>
+                </Popconfirm>
               )}
               <span style={{ marginLeft: "auto", fontSize: 12, color: T.muted }}>
                 {search.trim() ? filtered.length : meta.total} đợt

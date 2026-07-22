@@ -69,7 +69,9 @@ export interface ConfirmImportPayload {
     year: number;
     startDate: string;
     endDate: string;
-    graduationName: string;
+    // Chọn đợt tốt nghiệp có sẵn (graduationId) HOẶC nhập tên đợt mới (graduationName).
+    graduationId?: number;
+    graduationName?: string;
   };
   majorGroups: MajorGroupDecision[];
   roster: FlatRow[];

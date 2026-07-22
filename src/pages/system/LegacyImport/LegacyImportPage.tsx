@@ -32,6 +32,8 @@ import type {
   MajorGroupDecision,
   PreviewImportResult,
 } from '../../../feature/legacyImport/types';
+import { fetchGraduations } from '../../../feature/graduation/api';
+import type { Graduation } from '../../../feature/graduation/type';
 import AdminLayout from "../../../components/layout/AdminLayout";
 
 const { Title, Text } = Typography;
@@ -43,6 +45,8 @@ export default function LegacyImportPage() {
   const [systemForm, setSystemForm] = useState<{ id: number; name: string } | null>(null);
   const [majors, setMajors] = useState<MajorOption[]>([]);
   const [faculties, setFaculties] = useState<FacultyOption[]>([]);
+  const [graduations, setGraduations] = useState<Graduation[]>([]);
+  const graduationChoice = Form.useWatch('graduationChoice', form);
   const [file, setFile] = useState<File | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -62,6 +66,7 @@ export default function LegacyImportPage() {
     });
     fetchMajors().then(setMajors);
     fetchFaculties().then(setFaculties);
+    fetchGraduations(1, 200).then((res) => setGraduations(res.data)).catch(() => {});
   }, []);
 
   const handlePreview = async () => {
@@ -116,6 +121,10 @@ export default function LegacyImportPage() {
       const values = await form.validateFields();
       setConfirmLoading(true);
       const [startDate, endDate] = values.dateRange ?? [];
+      const isNewGrad = values.graduationChoice === '__new__';
+      const selectedGrad = !isNewGrad
+        ? graduations.find((g) => g.id === values.graduationChoice)
+        : undefined;
       const payload: ConfirmImportPayload = {
         formId: values.formId,
         batch: {
@@ -123,7 +132,8 @@ export default function LegacyImportPage() {
           year: values.year,
           startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '',
           endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : '',
-          graduationName: values.graduationName,
+          graduationId: isNewGrad ? undefined : (values.graduationChoice as number),
+          graduationName: isNewGrad ? values.graduationName : selectedGrad?.name,
         },
         majorGroups: preview.majorGroups.map((mg) => decisions[mg.oldCode]),
         roster: preview.roster,
@@ -174,10 +184,28 @@ export default function LegacyImportPage() {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="graduationName" label="Tên đợt tốt nghiệp mới" rules={[{ required: true, message: 'Nhập tên đợt tốt nghiệp' }]}>
-                <Input placeholder="Tốt nghiệp - 2024 (Khoa CNTT)" />
+              <Form.Item name="graduationChoice" label="Đợt tốt nghiệp" rules={[{ required: true, message: 'Chọn đợt tốt nghiệp' }]}>
+                <Select
+                  placeholder="Chọn đợt có sẵn hoặc tạo mới"
+                  showSearch
+                  optionFilterProp="label"
+                  options={[
+                    { value: '__new__', label: '+ Tạo đợt tốt nghiệp mới' },
+                    ...graduations.map((g) => ({
+                      value: g.id,
+                      label: `${g.name}${g.school_year ? ` (${g.school_year})` : ''}`,
+                    })),
+                  ]}
+                />
               </Form.Item>
             </Col>
+            {graduationChoice === '__new__' && (
+              <Col span={8}>
+                <Form.Item name="graduationName" label="Tên đợt tốt nghiệp mới" rules={[{ required: true, message: 'Nhập tên đợt tốt nghiệp' }]}>
+                  <Input placeholder="Tốt nghiệp - 2024 (Khoa CNTT)" />
+                </Form.Item>
+              </Col>
+            )}
           </Row>
         </Form>
       </Card>
@@ -234,7 +262,7 @@ export default function LegacyImportPage() {
                                 newMajor: { code: '', name: mg.industryName },
                               });
                             } else {
-                              updateDecision(mg.oldCode, { matchedMajorId: val, newMajor: undefined });
+                              updateDecision(mg.oldCode, { matchedMajorId: val as number, newMajor: undefined });
                             }
                           }}
                           options={[

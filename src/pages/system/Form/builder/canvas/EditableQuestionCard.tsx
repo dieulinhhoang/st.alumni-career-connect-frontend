@@ -30,6 +30,9 @@ export const MAU01_COLUMNS: { value: string; label: string }[] = [
   { value: 'kvTuTao',      label: 'Tự tạo việc làm' },
   { value: 'kvYNuocNgoai', label: 'Có yếu tố nước ngoài' },
   { value: 'workLocation', label: 'Nơi làm việc (Tỉnh/TP)' },
+  // Hồ sơ cựu SV (đổ vào profile + API cho đối tác), không phải cột báo cáo
+  { value: 'currentCompany',  label: 'Hồ sơ · Tên đơn vị/công ty' },
+  { value: 'currentPosition', label: 'Hồ sơ · Chức vụ / vị trí việc làm' },
 ]
 
 export const MAU03_COLUMNS: { value: string; label: string }[] = [
@@ -74,6 +77,9 @@ export const MAU03_COLUMNS: { value: string; label: string }[] = [
   { value: 'knKhac',               label: 'Kỹ năng khác' },
   { value: 'postGradCourse',       label: 'Khóa học sau tốt nghiệp' },
   { value: 'giaiPhap',             label: 'Đề xuất / Giải pháp' },
+  // Hồ sơ cựu SV (đổ vào profile + API cho đối tác), không phải cột báo cáo
+  { value: 'currentCompany',       label: 'Hồ sơ · Tên đơn vị/công ty' },
+  { value: 'currentPosition',      label: 'Hồ sơ · Chức vụ / vị trí việc làm' },
 ]
 
 //  Helpers 

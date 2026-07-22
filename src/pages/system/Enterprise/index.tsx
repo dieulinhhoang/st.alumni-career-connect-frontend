@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Col,
@@ -8,14 +8,23 @@ import {
   Button,
   Tooltip,
   Typography,
+  Tabs,
+  Badge,
+  message,
 } from "antd";
-import { PlusOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  SearchOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
 import AdminLayout from "../../../components/layout/AdminLayout";
 import CustomTable from "../../../components/common/customTable";
 import { toSlug } from "../../../components/common/utils";
 import { useEnterprises } from "../../../feature/enterprise/hooks/useEnterprises";
+import { fetchPendingEnterprises } from "../../../feature/enterprise/api";
 import {
   INDUSTRIES,
   type EnterpriseFormValues,
@@ -23,7 +32,8 @@ import {
 } from "../../../feature/enterprise/type";
 import { EnterpriseFormModal } from "../EnterpriseDetail/EditEnterpriseModal";
 import { KpiCard } from "../../../components/common/KpiCard";
-import { havePermission, getEffectiveFacultyId } from "../../../feature/auth/permission";
+import PendingApprovalContent from "./PendingApprovalContent";
+import { havePermission, getCurrentUser } from "../../../feature/auth/permission";
 import { PermissionEnum } from "../../../feature/auth/type";
 
 const { Text } = Typography;
@@ -97,8 +107,9 @@ export default function EnterprisePage() {
     enterprise: null,
   });
 
-  // Chỉ hiện DN liên kết khoa hiệu lực (cán bộ khoa, hoặc admin đóng vai khoa). Admin toàn trường: tất cả.
-  const facultyScope = getEffectiveFacultyId() ?? undefined;
+  // Cán bộ khoa chỉ được xem doanh nghiệp liên kết với khoa mình — admin xem toàn bộ
+  const currentUser = getCurrentUser();
+  const facultyScope = !currentUser.isAdmin && currentUser.facultyId ? currentUser.facultyId : undefined;
 
   const {
     enterprises,
@@ -107,10 +118,24 @@ export default function EnterprisePage() {
     setPage,
     addEnterprise,
     editEnterprise,
+    verify,
   } = useEnterprises({ page: query.page - 1, size: query.size, facultyId: facultyScope });
 
+  // FIX: gộp "Doanh nghiệp đối tác" (đã xác minh) và "Doanh nghiệp chờ duyệt"
+  // (chưa xác minh) vào chung 1 danh sách, lọc bằng tab thay vì tách 2 trang riêng
+  const [tab, setTab] = useState<"all" | "partner" | "pending">("all");
+  // Số DN chờ duyệt (status='pending', tự đăng ký qua API) — hiển thị badge trên tab
+  const [pendingCount, setPendingCount] = useState(0);
+  useEffect(() => {
+    fetchPendingEnterprises({ page: 0, size: 100 })
+      .then((list) => setPendingCount(list.length))
+      .catch(() => { /* im lặng, badge = 0 */ });
+  }, []);
+  const partnerEnterprises = useMemo(() => enterprises.filter((e) => e.verified), [enterprises]);
+
   const filtered = useMemo(() => {
-    return enterprises.filter((e) => {
+    const source = tab === "partner" ? partnerEnterprises : enterprises;
+    return source.filter((e) => {
       const keyword = search.trim().toLowerCase();
       const matchSearch =
         !keyword ||
@@ -119,7 +144,16 @@ export default function EnterprisePage() {
       const matchIndustry = industry === "Tất cả ngành" || e.industry === industry;
       return matchSearch && matchIndustry;
     });
-  }, [enterprises, search, industry]);
+  }, [enterprises, partnerEnterprises, tab, search, industry]);
+
+  const handleVerify = async (e: Enterprise) => {
+    try {
+      await verify(e.id);
+      message.success(`Đã xác minh "${e.name}"`);
+    } catch {
+      message.error("Xác minh thất bại, thử lại nhé");
+    }
+  };
 
   const handleSave = async (values: EnterpriseFormValues) => {
     if (modal.enterprise) {
@@ -184,26 +218,47 @@ export default function EnterprisePage() {
       ? [{
           title: "",
           key: "action",
-          width: 60,
+          width: 110,
           align: "center" as const,
           render: (_v: unknown, record: Enterprise) => (
-            <Tooltip title="Chỉnh sửa">
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setModal({ open: true, enterprise: record });
-                }}
-                style={{
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 8,
-                  width: 34,
-                  height: 34,
-                  color: "#94a3b8",
-                }}
-              />
-            </Tooltip>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+              {!record.verified && (
+                <Tooltip title="Xác minh doanh nghiệp">
+                  <Button
+                    type="text"
+                    icon={<CheckCircleOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVerify(record);
+                    }}
+                    style={{
+                      border: "1px solid #bbf7d0",
+                      borderRadius: 8,
+                      width: 34,
+                      height: 34,
+                      color: "#16a34a",
+                    }}
+                  />
+                </Tooltip>
+              )}
+              <Tooltip title="Chỉnh sửa">
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModal({ open: true, enterprise: record });
+                  }}
+                  style={{
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 8,
+                    width: 34,
+                    height: 34,
+                    color: "#94a3b8",
+                  }}
+                />
+              </Tooltip>
+            </div>
           ),
         }]
       : []),
@@ -261,6 +316,33 @@ export default function EnterprisePage() {
             overflow: "hidden",
           }}
         >
+          {/* Tabs: Tất cả / Đối tác (đã xác minh) / Chờ duyệt (chưa xác minh) */}
+          <Tabs
+            activeKey={tab}
+            onChange={(key) => {
+              setTab(key as "all" | "partner" | "pending");
+              setQuery((prev) => ({ ...prev, page: 1 }));
+            }}
+            style={{ padding: "0 20px" }}
+            items={[
+              { key: "all", label: `Tất cả (${enterprises.length})` },
+              { key: "partner", label: `Đối tác (${partnerEnterprises.length})` },
+              {
+                key: "pending",
+                label: (
+                  <span>
+                    Chờ duyệt{" "}
+                    <Badge count={pendingCount} style={{ backgroundColor: "#f59e0b" }} />
+                  </span>
+                ),
+              },
+            ]}
+          />
+
+          {tab === "pending" ? (
+            <PendingApprovalContent onCount={setPendingCount} />
+          ) : (
+          <>
           {/* Toolbar */}
           <div
             style={{
@@ -335,6 +417,8 @@ export default function EnterprisePage() {
               style: { cursor: "pointer" },
             })}
           />
+          </>
+          )}
         </div>
 
         <EnterpriseFormModal
