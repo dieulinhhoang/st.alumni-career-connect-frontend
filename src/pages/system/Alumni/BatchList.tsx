@@ -7,8 +7,9 @@ import type { MenuProps } from 'antd';
 import {
   PlusOutlined, LinkOutlined, BarChartOutlined,
   DeleteOutlined, EditOutlined, MoreOutlined, MailOutlined,
-  EyeOutlined, CheckCircleOutlined,
+  EyeOutlined, CheckCircleOutlined, DownloadOutlined,
 } from '@ant-design/icons';
+import { exportBatchLegacy } from '../../../feature/alumni/api';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,17 @@ const useMenuItems = (
     {
       key: 'view', icon: <EyeOutlined />, label: 'Xem form khảo sát',
       onClick: () => navigate(`/admin/forms/${r.formId}/preview`),
+    },
+    {
+      key: 'export', icon: <DownloadOutlined style={{ color: '#1677ff' }} />,
+      label: 'Xuất Excel (backup)',
+      onClick: () => {
+        const hide = message.loading('Đang xuất file...', 0);
+        exportBatchLegacy(r.id)
+          .then(() => message.success('Đã xuất file Excel'))
+          .catch(() => message.error('Xuất file thất bại'))
+          .finally(() => hide());
+      },
     },
     // {
     //   key: 'pdf-zip', icon: <FilePdfOutlined style={{ color: '#2563eb' }} />,

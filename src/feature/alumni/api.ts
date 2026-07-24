@@ -1,3 +1,4 @@
+import { saveAs } from 'file-saver';
 import api from '../../libs/api';
 import type {
   SurveyBatch,
@@ -6,6 +7,21 @@ import type {
   BatchStats,
   AlumniResponse,
 } from './types';
+
+/**
+ * Xuất phản hồi của 1 đợt ra file Excel định dạng "Báo cáo tổng hợp" (legacy).
+ * File này import lại được bằng chức năng Import dữ liệu cũ → dùng để backup/chuyển server.
+ */
+export async function exportBatchLegacy(batchId: number): Promise<void> {
+  const res = await api.get('/alumni/legacy-import/export', {
+    params: { batchId },
+    responseType: 'blob',
+  });
+  const cd: string = res.headers['content-disposition'] || '';
+  const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  const filename = m ? decodeURIComponent(m[1]) : `dot-${batchId}.xlsx`;
+  saveAs(new Blob([res.data]), filename);
+}
 
 export async function getBatches(): Promise<(SurveyBatch & { submittedCount: number })[]> {
   const res = await api.get('/alumni/batches');
